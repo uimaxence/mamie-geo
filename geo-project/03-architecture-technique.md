@@ -403,7 +403,7 @@ CREATE TABLE usage_counters (
 
 | LLM | Modèle | Endpoint | Web search ? | Coût input | Coût output |
 |---|---|---|---|---|---|
-| ChatGPT | gpt-4o-mini avec browse_with_bing | OpenAI API | ✅ | $0.15/M | $0.60/M |
+| ChatGPT | gpt-4o-mini + `web_search` tool | OpenAI API | ✅ | $0.15/M | $0.60/M |
 | Claude | claude-haiku-4-5 + web_search | Anthropic API | ✅ | $0.25/M | $1.25/M |
 | Perplexity | sonar | Perplexity API | ✅ natif | $1/M | $1/M |
 | Gemini | gemini-2.5-flash + grounding | Google AI Studio | ✅ | $0.075/M | $0.30/M |
@@ -500,11 +500,11 @@ Retourne UNIQUEMENT un JSON valide de la forme :
 
 ## Sécurité et conformité RGPD
 
-### Hébergement
-- Postgres : **Neon EU (Frankfurt)** ou **Supabase EU**
-- App : **Vercel EU** ou **Render EU**
-- Stockage fichiers : **Cloudflare R2** ou **Supabase Storage EU**
-- Workers : **Inngest** (a une option EU à confirmer) ou self-hosted EU
+### Hébergement (choix verrouillés cf. doc 09)
+- Postgres : **Neon EU (Frankfurt)**
+- App : **Vercel EU** (région `cdg1` Paris pour les fonctions runtime)
+- Stockage fichiers : **Cloudflare R2** (EU jurisdiction)
+- Workers : **Postgres-based queue + Vercel Cron** (EU edge), migration Inngest EU à $20/mo prévue > 100K runs/mois
 
 ### Données personnelles
 - Email + nom seulement (pas plus)
@@ -535,10 +535,10 @@ Retourne UNIQUEMENT un JSON valide de la forme :
 ## DevOps et déploiement
 
 ### Environnements
-- **Local** : Docker Compose (Postgres + Redis) ou directement contre Neon dev branch
+- **Local** : branche Neon dédiée par dev (`dev-{username}`), gratuite et instantanée. Pas de Docker Compose.
 - **Preview** : auto sur chaque PR via Vercel + branche Neon dédiée par PR (gratuit)
-- **Staging** : branche `staging` déployée sur staging.mamie-geo.fr (seed avec données fixtures)
-- **Production** : branche `main` déployée sur app.mamie-geo.fr
+- **Staging** : branche `staging` déployée sur `staging.mamie-geo.fr` (seed avec données fixtures)
+- **Production** : branche `main` déployée sur `mamie-geo.fr` (path-based, pas de subdomain `app.`)
 
 ### CI/CD
 - **GitHub Actions** : lint, type-check, tests unit, tests E2E, déploiement preview

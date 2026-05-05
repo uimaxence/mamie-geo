@@ -28,6 +28,7 @@ Chaque risque est noté sur 3 axes :
 | R13 | Concurrent FR sort en parallèle | Faible | Moyen | Court-moyen |
 | R14 | Churn > 10% mensuel | Moyenne | Critique | Court |
 | R15 | Procès / problème juridique | Faible | Élevé | Continu |
+| R16 | Dépassement plafond micro-entrepreneur (~77 700 €/an BIC services) | Élevée | Critique si non anticipé | Court-moyen |
 
 ---
 
@@ -303,6 +304,35 @@ Chaque risque est noté sur 3 axes :
 - **Assurance responsabilité civile pro** (~500-800€/an)
 - **Ne pas utiliser de noms de marques concurrentes en marketing négatif**
 - **Privacy by design** dès J0
+
+---
+
+### R16 — Dépassement plafond micro-entrepreneur
+
+**Description** : le statut EI / micro-entrepreneur en BIC services (catégorie
+applicable au SaaS) a un plafond de chiffre d'affaires annuel de
+**~77 700 €** (seuil 2026, à confirmer chaque année). Au-delà, sortie automatique
+du régime, application de la TVA (même rétroactive si pas anticipée), et
+fiscalité réelle simplifiée.
+
+**Pourquoi probable** : trajectoire conservateur du doc 04 prévoit ~70 K€ de
+revenus cumulés sur l'année 1, ce qui frôle le plafond. Trajectoire base ou
+optimiste = dépassement certain entre M6 et M9.
+
+**Mitigations**
+- **Comptable expert dès J0** (forfait ~150 €/mois, déjà budgété doc 04)
+- **Suivi CA cumulé mensuel** dans les KPI (doc 09 — ajouter ligne dédiée)
+- **Bascule SAS/EURL planifiée** entre M6 et M9, en tout état de cause **avant**
+  d'atteindre le seuil
+- **Anticipation TVA** : Stripe Tax actif dès J0 → la collecte est déjà en place
+  côté client, reste à activer la déclaration côté entreprise au passage SAS
+- **Provisionner le coût de bascule** : ~1500-3000 € de frais (notaire, statuts,
+  comptable de transition)
+
+**Plan B si concrétisation imprévue** :
+- Si on dépasse le plafond avant d'avoir basculé : régularisation TVA rétroactive
+  via comptable, bascule en urgence (2-3 semaines de paperasse)
+- Communication transparente clients si nécessité de re-facturer TVA
 
 ---
 

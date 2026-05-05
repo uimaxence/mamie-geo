@@ -36,11 +36,11 @@ Module **Tracker** uniquement. Rien d'autre. Pas d'optimization, pas de content,
 
 | Feature | Priorité | Notes |
 |---|---|---|
-| Inscription / login (email + magic link) | P0 | Clerk ou Supabase Auth |
+| Inscription / login (email + magic link) | P0 | Better Auth (cf. doc 03) |
 | Onboarding wizard (domaine → infos marque → prompts suggérés) | P0 | Génération prompts via Claude API |
 | Configuration des marques et concurrents | P0 | Max 5 concurrents trackés en V0 |
 | Lancement / pause du tracking | P0 | |
-| Exécution périodique des prompts (1×/jour ou 1×/sem selon plan) | P0 | Worker via Inngest ou BullMQ |
+| Exécution périodique des prompts (1×/jour ou 1×/sem selon plan) | P0 | Postgres-based queue + Vercel Cron (cf. doc 03) |
 | Stockage des réponses LLM brutes | P0 | Pour traçabilité + audit |
 | Détection de mention de marque + concurrents | P0 | Regex + LLM scoring (Claude Haiku) |
 | Détection des sources citées (URLs) | P0 | Parser des réponses |

@@ -34,7 +34,7 @@ Tout valider et préparer pour pouvoir commencer à coder le 1er jour du sprint 
 #### Semaine -2
 - [ ] Stack technique figée (03)
 - [ ] Schéma BDD validé
-- [ ] Choix outils : Vercel, Neon, Inngest, Clerk, Brevo, Stripe
+- [ ] Choix outils : Vercel, Neon, Better Auth, Postgres-queue, Brevo, Stripe (cf. doc 03 et 09)
 - [ ] Comptes API créés et premiers tests : OpenAI, Anthropic, Mistral, Perplexity, Google AI
 - [ ] Test de coût réel : 100 prompts × 5 LLMs → coût mesuré
 - [ ] Setup repo Git, CI/CD basique
@@ -70,13 +70,13 @@ Setup infra + auth + onboarding + premier worker fonctionnel.
 
 #### Sprint 1.1 (semaines 1-2)
 - [ ] Setup Next.js + Tailwind + shadcn/ui
-- [ ] Auth Clerk (signup, login, magic link)
-- [ ] Database Postgres + Prisma + premières migrations
+- [ ] Auth Better Auth (signup, login, magic link via SMTP Brevo)
+- [ ] Database Postgres + Drizzle + premières migrations versionnées
 - [ ] Stripe intégré (Customer Portal + premiers plans)
 - [ ] Page landing publique mamie-geo.fr (5 sections)
 - [ ] Page pricing
 - [ ] Page login / signup
-- [ ] Première brique de workflow Inngest
+- [ ] Skeleton de la queue Postgres (table `queue_jobs` + helpers `enqueue/claim/complete/fail`) + endpoint `/api/cron/dispatch`
 - [ ] Test API : appel ChatGPT, Claude, Mistral, Perplexity, Gemini avec un prompt simple, vérification des réponses
 
 #### Sprint 1.2 (semaines 3-4)
@@ -269,6 +269,7 @@ Setup infra + auth + onboarding + premier worker fonctionnel.
 - [ ] Bilan exhaustif : MRR, churn, NPS, NRR, sources
 - [ ] Interview qualitative de 10 clients : NPS détaillé
 - [ ] Analyse cohort retention
+- [ ] **Audit CA cumulé vs plafond micro-entrepreneur** (~77 700 €/an BIC services) : projection M9-M12 et décision de bascule SAS/EURL si trajectoire dépassement (cf. doc 07 R16). Provisionner ~1500-3000 € de frais de bascule.
 
 #### Semaine 22
 - [ ] Décision GATE 1 (cf. critères ci-dessous)
@@ -536,7 +537,7 @@ Setup infra + auth + onboarding + premier worker fonctionnel.
 4. [ ] Naming définitif tranché
 5. [ ] Domaine acheté
 6. [ ] Comptes API testés (chacun fait un appel test)
-7. [ ] Stack figée (Vercel, Neon, Inngest, Clerk, Brevo, Stripe, Sentry)
+7. [ ] Stack figée (Vercel, Neon, Better Auth, Postgres-queue, Brevo, Stripe, Sentry — cf. doc 03 et 09)
 8. [ ] Schéma BDD validé sur papier
 9. [ ] Repo créé, CI setup
 10. [ ] Premier outil gratuit conceptualisé

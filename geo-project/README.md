@@ -1,4 +1,4 @@
-# Projet GEO France — Documentation maîtresse
+# Mamie GEO — Documentation maîtresse
 
 > **SaaS de Generative Engine Optimization pour le marché francophone.**
 > Mesurer et optimiser la visibilité d'une marque dans les réponses des LLM (ChatGPT, Claude, Perplexity, Gemini, Mistral Le Chat).

@@ -152,11 +152,23 @@ Source : `geo-project/03-architecture-technique.md` § Structure du repo.
 - **Vitest** : `foo.ts` à côté de `foo.test.ts` (colocation), pas de dossier `__tests__/`
 - **Playwright** : seulement sur les **7 flows business-critiques** listés dans `geo-project/03` § Stratégie de test
 - **LLMs jamais appelés en test** — règle dure. Trois patterns autorisés :
-  1. MSW + cassettes JSON dans `tests/fixtures/llm/`
+  1. MSW + cassettes JSON dans `tests/fixtures/llm/{provider}/{prompt-id}.json` (script `pnpm test:record:llm` à créer en Sprint 1)
   2. `FakeLLMClient` injecté via DI (interface `LLMClient` dans `src/lib/llm/types.ts`)
   3. Snapshots de scoring sur réponses fixes
 - Tests intégration Drizzle : branche Neon dédiée par PR, rollback transactionnel entre tests
 - CI bloquante : pas de merge si rouge
+
+### Dev local
+
+- **Pas de Docker Compose.** Chaque dev pointe sur une branche Neon dédiée `dev-{username}`, gratuite et instantanée.
+- `.env.local` contient la `DATABASE_URL` de la branche perso ; jamais commité.
+- Migrations appliquées via `pnpm db:migrate` (Drizzle), `db push` interdit en dehors d'un test ponctuel sur sa propre branche.
+
+### Queue Postgres — règle d'idempotence
+
+- Toute insertion dans `queue_jobs` doit fournir une `idempotency_key TEXT UNIQUE NOT NULL`
+- Format pour les jobs LLM : `{prompt_id}:{llm}:{scheduled_date_iso}` (ex: `8fa1...:claude:2026-05-06`)
+- `INSERT ... ON CONFLICT (idempotency_key) DO NOTHING` côté `enqueue` — un dispatch redémarré ou un cron qui se déclenche deux fois ne crée pas de doublon
 
 ### Commits & PR
 
@@ -248,10 +260,19 @@ la doc devient un cimetière.
 
 ## 9. État du projet (snapshot)
 
-- **Phase** : pré-code, doc + setup
+- **Phase** : Sprint 0 — setup repo
 - **Date snapshot** : 2026-05-05
-- **Prochaine étape** : Sprint 0 — setup repo, structure, config, auth de base, schéma BDD initial, page placeholder
-- **Premier commit attendu** : `chore: bootstrap repo with project documentation and CLAUDE.md`
-- **Décisions encore à figer** : direction artistique A/B/C, polices, naming définitif, prix exact Starter, durée trial, statut juridique (cf. liste § « Décisions à figer en Sprint 0 » dans `geo-project/09-decisions-journal.md`)
+- **Prochaine étape** : Phase 3 du plan session 2 — tâches 1 à 18 du plan Sprint 0
+- **Décisions Sprint 0 verrouillées** (session 2) :
+  - Direction artistique : A — éditorial chaud
+  - Polices V0 : Newsreader (titres) + Geist (corps) + Geist Mono (data)
+  - Template marketing : from scratch
+  - Naming + domaine : Mamie GEO sur `mamie-geo.fr`
+  - Magic-link Better Auth : SMTP Brevo (transport nodemailer)
+  - Le Chat dès Starter : oui sans condition
+  - Trial 14j sans carte + Stripe Tax : oui aux deux dès J0
+  - Statut juridique : EI continue, bascule SAS/EURL planifiée mois 6-9 (plafond micro ~77 700 €/an)
+  - Hard-cap LLM : 200% du quota théorique → block + email + alerte interne
+  - Redirect mamie-seo.fr : DNS-level Vercel Domains + ligne défensive `next.config.ts`
 
 À mettre à jour à chaque évolution majeure (changement de phase, sprint terminé, gate franchie).

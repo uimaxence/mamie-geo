@@ -117,7 +117,7 @@ Objectif : devenir LA source FR sur le GEO. Métaphysiquement, ces articles sero
 ## Lead magnets (outils gratuits)
 
 ### Lead magnet n°1 — "Test ma visibilité IA"
-URL : audit-geo.fr ou intégré sur mamie-seo.fr/test-ia
+URL : `mamie-geo.fr/outils/test-visibilite-ia` (route `(marketing)` du mono-repo, cf. doc 03)
 
 #### Comment ça marche (UX)
 1. L'utilisateur entre son nom de marque + son domaine
@@ -127,7 +127,7 @@ URL : audit-geo.fr ou intégré sur mamie-seo.fr/test-ia
 5. CTA : "Voulez-vous le faire sur les 5 LLMs et le suivre dans le temps ?" → trial Mamie GEO
 
 #### Coût unitaire
-- 5 prompts × 1 LLM × ~$0.003 = **$0.015 par audit gratuit**
+- 5 prompts × 1 LLM × ~$0.003 = **$0.015 par audit gratuit** (cohérent avec doc 04)
 - Cap à 100 audits gratuits/jour pour budget contrôlé
 - Limite 1 par email pour éviter abuse
 

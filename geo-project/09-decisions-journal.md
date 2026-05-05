@@ -79,43 +79,62 @@ Suite à la discussion stratégique sur les contraintes "moins cher possible + s
 
 ---
 
-## Décisions à figer en Sprint 0
+## Décisions tranchées en Sprint 0 (session 2 — 2026-05-05)
 
-À trancher avant le 1er commit, à compléter ci-dessous puis verrouiller :
+Toutes les décisions stack technique, pricing, produit et marque sont
+verrouillées ci-dessous. Voir aussi la section "Décisions Sprint 0" plus
+haut et l'entrée "2026-05-05 — Réponses aux 10 questions de bootstrap".
 
-### Stack technique
-- [ ] **Auth** : ☐ Clerk ☐ Supabase Auth ☐ Better Auth → choix : ___
-- [ ] **ORM** : ☐ Prisma ☐ Drizzle → choix : ___
-- [ ] **Job queue** : ☐ Inngest ☐ BullMQ self-hosted → choix : ___
-- [ ] **Hébergement app** : ☐ Vercel ☐ Render → choix : ___
-- [ ] **Postgres** : ☐ Neon EU ☐ Supabase EU → choix : ___
-- [ ] **Storage fichiers** : ☐ Cloudflare R2 ☐ Supabase Storage → choix : ___
-- [ ] **Analytics** : ☐ PostHog cloud ☐ PostHog self-host ☐ autre : ___
-- [ ] **Email transactionnel** : Brevo (par défaut) — confirmer ✅/❌
+### Stack technique (verrouillée)
 
-### Pricing
-- [ ] **Prix Starter** : ☐ 39€ ☐ 49€ ☐ 59€ → choix : ___
-- [ ] **Discount annuel** : ☐ 15% ☐ 20% ☐ 25% → choix : ___
-- [ ] **Trial** : ☐ 7 jours ☐ 14 jours → choix : ___
-- [ ] **Carte requise au trial** : ☐ Oui ☐ Non → choix : ___
-- [ ] **Plan freemium permanent** : ☐ Oui (1 audit/mois) ☐ Non → choix : ___
+- ✅ **Auth** : Better Auth (free, Postgres, magic-link via SMTP Brevo)
+- ✅ **ORM** : Drizzle (migrations versionnées, jamais `db push` en prod)
+- ✅ **Job queue V0** : Postgres-based custom + Vercel Cron
+- ✅ **Job queue scale** : migration Inngest > 100K runs/mois
+- ✅ **Hébergement app** : Vercel Pro (région `cdg1`)
+- ✅ **Postgres** : Neon EU Frankfurt
+- ✅ **Storage fichiers** : Cloudflare R2
+- ✅ **Analytics** : PostHog Cloud EU
+- ✅ **Email transactionnel** : Brevo
 
-### Produit
-- [ ] **5 LLMs en V0** : confirmer ChatGPT, Claude, Perplexity, Gemini, Le Chat ✅/❌
-- [ ] **Fréquence par défaut Starter** : ☐ Hebdo ☐ Bi-mensuel → choix : ___
-- [ ] **Inclusion Le Chat dès Starter** : ☐ Oui ☐ Non (premium uniquement) → choix : ___
+### Pricing (verrouillé)
 
-### Marque
-- [ ] **Naming définitif** : ☐ Mamie GEO ☐ autre : ___
-- [ ] **Domaine principal** : ☐ mamie-geo.fr ☐ autre : ___
-- [ ] **Sous-domaine app** : ☐ app.mamie-geo.fr ☐ autre : ___
+- ✅ **Prix Starter** : 49 €/mois (39 €/mois en annuel)
+- ✅ **Discount annuel** : 20%
+- ✅ **Trial** : 14 jours
+- ✅ **Carte requise au trial** : Non
+- ✅ **Plan freemium permanent dans le SaaS** : Non (lead magnet `/outils/test-visibilite-ia` à la place)
+- ✅ **Stripe Tax dès J0** : Oui
 
-### Légal
-- [ ] **Statut juridique projet** : ☐ Reste en EI (continuité actuelle) ☐ SAS → choix : ___
-- [ ] **Avocat CGV/CGU** : nom + date contact : ___
-- [ ] **Cyber-assurance** : à activer mois ___
+### Produit (verrouillé)
 
-### Personnel
+- ✅ **5 LLMs en V0** : ChatGPT, Claude, Perplexity, Gemini, Le Chat
+- ✅ **Fréquence par défaut Starter** : Hebdo
+- ✅ **Inclusion Le Chat dès Starter** : Oui (sans condition — différenciateur n°1)
+- ✅ **Hard-cap LLM par client** : 200% du quota théorique → block automatique + email + alerte interne
+
+### Marque (verrouillée)
+
+- ✅ **Naming définitif** : Mamie GEO
+- ✅ **Domaine principal** : `mamie-geo.fr`
+- ✅ **Sous-domaine app** : pas de subdomain — path-based `mamie-geo.fr/app/*`
+- ✅ **Redirect mamie-seo.fr** : DNS-level via Vercel Domains + ligne défensive dans `next.config.ts`
+
+### Design (verrouillé)
+
+- ✅ **Direction artistique** : A — éditorial chaud (cf. doc 10)
+- ✅ **Polices V0 (gratuites)** : Newsreader (titres) + Geist (corps) + Geist Mono (data/numbers)
+- ✅ **Template marketing** : from scratch
+- ✅ **Mascotte mamie** : à trancher plus tard (mois 3+) — non bloquant V0
+
+### Légal (à compléter en exécution)
+
+- ✅ **Statut juridique V0** : EI (micro-entreprise BIC services) — bascule SAS/EURL planifiée mois 6-9 avant plafond ~77 700 €/an de CA (cf. doc 07 et 08)
+- [ ] **Avocat CGV/CGU** : nom + date contact à renseigner
+- [ ] **Cyber-assurance** : à activer mois 6
+
+### Personnel (à compléter au lancement)
+
 - [ ] **% temps freelance maintenu mois 1-3** : ___ %
 - [ ] **Cash réserve perso** vérifiée ≥ 6 mois : ☐ Oui ☐ Non
 - [ ] **Vacances trimestrielles** programmées dans le calendrier : ☐ Oui ☐ Non
@@ -188,6 +207,67 @@ Suite à la discussion stratégique sur les contraintes "moins cher possible + s
 - Domaine `mamie-seo.fr` gardé loué 1-2 ans en sécurité, puis abandonné
 
 **À revisiter** : mois 12+ si recrutement ou si besoin de stack séparée pour le marketing.
+
+---
+
+#### 2026-05-05 — Réponses aux 10 questions de bootstrap (session 2)
+
+**Contexte** : fin de session 1, 10 décisions en suspens identifiées (direction
+artistique, polices, naming, mécanique trial, magic-link, etc.). Max a tranché
+en début de session 2.
+
+**Choix actés** :
+1. Direction artistique : A — éditorial chaud
+2. Polices : gratuites V0 — Newsreader + Geist + Geist Mono (pas Inter ni Source Serif Pro)
+3. Template marketing : from scratch
+4. Naming et domaine : Mamie GEO sur `mamie-geo.fr`
+5. Magic-link Better Auth : SMTP Brevo (transport nodemailer)
+6. Le Chat dès Starter : oui sans condition
+7. Trial 14j sans carte + Stripe Tax dès J0 : oui aux deux
+8. Statut juridique : EI continue en V0, bascule SAS/EURL mois 6-9 avant plafond ~77 700 €/an BIC services
+9. Hard-cap LLM 200% du quota théorique → block + email + alerte interne
+10. Redirect `mamie-seo.fr` : DNS-level via Vercel Domains + ligne défensive dans `next.config.ts`
+
+**Conséquences attendues** : déblocage du Sprint 0. Toutes les briques de la
+stack peuvent être configurées sans nouvelle question. Les sections "Décisions
+Sprint 0 — verrouillées" et "Décisions tranchées en Sprint 0" sont à jour.
+
+**À revisiter** :
+- Polices premium quand MRR > 5K€
+- Statut juridique au mois 6 (audit CA cumulé vs plafond 77 700 €)
+- Mascotte mamie au mois 3+ (non bloquant)
+
+---
+
+#### 2026-05-05 — Cohérences purgées (Phase 1 session 2)
+
+**Contexte** : audit des 12 docs en fin de session 1 a remonté 11 incohérences
+entre les décisions actées dans `03`/`09` et le contenu résiduel des autres
+docs (Clerk, Prisma, Inngest, subdomain `app.`, etc.).
+
+**Corrections appliquées** :
+- `02` § "Fonctionnalités V0" : auth `Clerk ou Supabase Auth` → `Better Auth`
+- `02` § "Fonctionnalités V0" : worker `Inngest ou BullMQ` → `Postgres-based queue + Vercel Cron`
+- `03` § "APIs ciblées" : `gpt-4o-mini avec browse_with_bing` → `gpt-4o-mini + web_search tool`
+- `03` § "Hébergement" : options multiples (Neon ou Supabase, Vercel ou Render, Inngest ou self-hosted) → choix figés
+- `03` § "Environnements" : prod sur `app.mamie-geo.fr` → `mamie-geo.fr` (path-based)
+- `03` § "Environnements" : dev local Docker Compose → branche Neon `dev-{username}`
+- `04` § "Coûts fixes mensuels" : Inngest $20-100 listé en V0 → 0 (Postgres-queue), Inngest planifié à scale
+- `04` § "Lead magnet" : `~0,015 €` → `~$0.015` (devise harmonisée)
+- `06` § "Lead magnet n°1" : `mamie-seo.fr/test-ia` → `mamie-geo.fr/outils/test-visibilite-ia`
+- `08` § "Sprint 1.1" et § "Sprint 0 checklist" : Clerk / Prisma / Inngest → Better Auth / Drizzle / Postgres-queue
+- `09` § "Décisions à figer en Sprint 0" : checkboxes obsolètes → décisions verrouillées
+- `README.md` : "Projet GEO France" → "Mamie GEO"
+
+**Justification** : éviter qu'un futur lecteur (humain ou Claude) suive une
+décision obsolète parce que le doc n'a pas été synchronisé. Règle dorénavant
+appliquée : toute modif qui invalide une info dans un doc met à jour le doc
+dans le **même PR**.
+
+**Conséquences attendues** : tous les docs cohérents avec `03` et `09`. Sprint 0
+peut démarrer sans ambiguïté résiduelle.
+
+**À revisiter** : N/A (tâche de remise à plat ponctuelle).
 
 ---
 

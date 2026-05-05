@@ -35,7 +35,7 @@ Sur le site marketing, un outil web public :
 - Rapport délivré en 60 secondes : score, position, concurrents cités, sources
 - CTA fin : "Voulez-vous le suivi quotidien sur 5 LLMs ? → Essayer Mamie GEO 14 jours"
 
-**Économique** : ~0,015 € par audit. Cap à 100/jour = ~45 €/mois maximum.
+**Économique** : ~$0.015 par audit. Cap à 100/jour = ~$45/mois maximum.
 
 **Conversion attendue** : 5-10% des audits → trial → 15-25% en payant. Soit ~0,5-2,5% de l'audit gratuit en client final, ce qui est excellent.
 
@@ -267,8 +267,8 @@ Multiplier par 2 :
 | Poste | Coût mensuel |
 |---|---|
 | Vercel Pro | $20 |
-| Neon Postgres | $20-50 |
-| Inngest | $20-100 selon volume |
+| Neon Postgres | 0 (free tier V0) puis $19 Pro |
+| Queue (Postgres-based + Vercel Cron) | 0 en V0 ; migration Inngest $20 quand > 100K runs/mois |
 | Sentry | Free → $26 |
 | PostHog cloud | Free tier puis $0-50 |
 | BetterStack | $10 |
