@@ -261,9 +261,16 @@ la doc devient un cimetière.
 
 ## 9. État du projet (snapshot)
 
-- **Phase** : Sprint 0 — setup repo
-- **Date snapshot** : 2026-05-05
-- **Prochaine étape** : Phase 3 du plan session 2 — tâches 1 à 18 du plan Sprint 0
+- **Phase** : Sprint 0 — scaffold applicatif terminé (2026-05-06)
+- **Prochaine étape** : Sprint 1 — tracking LLM (workers execute_prompt × 5 LLMs, scoring Claude Haiku, dashboard data, email hebdo). cf. `geo-project/08-roadmap-execution.md`.
+- **Build status** : `pnpm format:check`, `pnpm lint`, `pnpm type-check`, `pnpm test`, `pnpm next build` tous verts en local.
+- **Tâches Sprint 0 humaines restantes** (hors code, à faire par Max) :
+  1. Achat / vérification domaine `mamie-geo.fr` + reconduction `mamie-seo.fr`
+  2. Comptes API LLM : OpenAI, Anthropic, Mistral, Perplexity, Google AI
+  3. Smoke-test coût LLM (10 prompts × 5 LLMs avec web search)
+  4. Comptes infra : Vercel Pro (région `cdg1`), Neon EU Frankfurt, Upstash, R2, Sentry, PostHog EU, BetterStack, Brevo SMTP
+  5. Connecter le repo à Vercel + activer preview deployments + branche Neon dédiée par PR
+  6. Renseigner `.env.local` à partir de `.env.example`
 - **Décisions Sprint 0 verrouillées** (session 2) :
   - Direction artistique : A — éditorial chaud
   - Polices V0 : Newsreader (titres) + Geist (corps) + Geist Mono (data)
