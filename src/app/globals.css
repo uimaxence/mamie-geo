@@ -1,0 +1,43 @@
+@import "tailwindcss";
+
+/* ─────────────────────────────────────────────────────────────────────
+ * Design tokens — Direction artistique A (éditorial chaud)
+ * cf. geo-project/10-design-direction.md
+ * Polices : Newsreader (titres) + Geist (corps) + Geist Mono (data)
+ * ──────────────────────────────────────────────────────────────────── */
+@theme {
+  /* Couleurs */
+  --color-cream: #faf7f2;
+  --color-ink: #1a1a1a;
+  --color-terracotta: #c5532e;
+  --color-mustard: #d4a53a;
+  --color-warm-gray: #8c8579;
+
+  /* Polices — exposées par next/font puis bind via variables CSS */
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-newsreader), Georgia, "Times New Roman", serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "JetBrains Mono", monospace;
+}
+
+html,
+body {
+  background-color: var(--color-cream);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-serif);
+  letter-spacing: -0.01em;
+}
+
+code,
+kbd,
+samp,
+pre {
+  font-family: var(--font-mono);
+}
