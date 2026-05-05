@@ -272,125 +272,360 @@ mamie-geo/
 
 ## Schéma de base de données (V0)
 
-### Tables principales
+### Vue d'ensemble
+
+3 groupes de tables :
+
+1. **Auth** (générées par Better Auth CLI) : `user`, `session`, `account`, `verification`
+2. **Métier** : `workspaces`, `workspace_members`, `brands`, `competitors`, `prompts`, `runs`, `citation_metrics_daily`
+3. **Plomberie** : `queue_jobs`, `events`, `subscription_events`, `usage_counters`, `prompt_cache`
+
+### Tables Better Auth
+
+Générées via `npx @better-auth/cli generate` puis importées dans
+`src/db/schema.ts` (ne pas réécrire à la main, suivre la version officielle
+Better Auth pour rester compatible avec les évolutions du package).
+
+Tables attendues (V0, configuration magic-link uniquement) :
+
+- **`user`** : `id`, `email UNIQUE`, `email_verified BOOLEAN`, `name`, `image`, `created_at`, `updated_at`
+- **`session`** : `id`, `user_id FK→user`, `expires_at`, `token UNIQUE`, `ip_address`, `user_agent`, `created_at`, `updated_at`
+- **`account`** : `id`, `user_id FK→user`, `provider_id`, `account_id`, `password` (non utilisé en magic-link), `created_at`, `updated_at`
+- **`verification`** : `id`, `identifier`, `value`, `expires_at`, `created_at`, `updated_at`
+
+> Note : on n'ajoute **pas** notre propre table `users` parallèle. Toutes les
+> références applicatives (workspace_members, etc.) pointent sur `user.id`
+> de Better Auth.
+
+### Tables métier
 
 ```sql
--- Users et organisations
-CREATE TABLE users (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  email TEXT UNIQUE NOT NULL,
-  name TEXT,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
+-- ──────────────────────────────────────────────────────────────────────
+-- Workspaces et membres
+-- ──────────────────────────────────────────────────────────────────────
 
+-- États possibles de workspaces.plan :
+--   'trialing'   = trial 14j actif (pas de carte requise)
+--   'starter'    = abonnement Starter actif
+--   'pro'        = abonnement Pro actif
+--   'agency'     = abonnement Agence actif
+--   'enterprise' = abonnement Enterprise actif
+--   'past_due'   = paiement échoué, accès complet pendant 7j de relance Stripe
+--   'expired'    = trial fini sans CB OU past_due > 7j → lecture seule, suppression à J+30
+--   'canceled'   = annulé par l'utilisateur, accès jusqu'à fin de période payée
 CREATE TABLE workspaces (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
   slug TEXT UNIQUE NOT NULL,
-  plan TEXT NOT NULL DEFAULT 'free', -- 'free', 'starter', 'pro', 'agency', 'enterprise'
-  stripe_customer_id TEXT,
-  stripe_subscription_id TEXT,
+  plan TEXT NOT NULL DEFAULT 'trialing'
+    CHECK (plan IN ('trialing','starter','pro','agency','enterprise','past_due','expired','canceled')),
+  stripe_customer_id TEXT UNIQUE,
+  stripe_subscription_id TEXT UNIQUE,
   trial_ends_at TIMESTAMPTZ,
-  created_at TIMESTAMPTZ DEFAULT NOW()
+  current_period_start TIMESTAMPTZ,  -- aligné sur la facturation Stripe
+  current_period_end   TIMESTAMPTZ,  -- idem
+  hard_cap_hit_at TIMESTAMPTZ,       -- timestamp si quota 200% LLM atteint (block actif)
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE workspace_members (
-  workspace_id UUID REFERENCES workspaces(id) ON DELETE CASCADE,
-  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-  role TEXT NOT NULL DEFAULT 'member', -- 'owner', 'admin', 'member', 'viewer'
+  workspace_id UUID NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
+  user_id      TEXT NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,  -- FK vers Better Auth user.id
+  role TEXT NOT NULL DEFAULT 'member'
+    CHECK (role IN ('owner','admin','member','viewer')),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   PRIMARY KEY (workspace_id, user_id)
 );
 
+-- ──────────────────────────────────────────────────────────────────────
 -- Marques trackées
+-- ──────────────────────────────────────────────────────────────────────
+
 CREATE TABLE brands (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  workspace_id UUID REFERENCES workspaces(id) ON DELETE CASCADE,
+  workspace_id UUID NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   domain TEXT NOT NULL,
-  description TEXT, -- description courte pour aider à la détection
-  aliases TEXT[], -- variantes de nom à détecter
-  created_at TIMESTAMPTZ DEFAULT NOW()
+  description TEXT,
+  aliases TEXT[] NOT NULL DEFAULT '{}',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+CREATE INDEX idx_brands_workspace ON brands(workspace_id);
 
 CREATE TABLE competitors (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  brand_id UUID REFERENCES brands(id) ON DELETE CASCADE,
+  brand_id UUID NOT NULL REFERENCES brands(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   domain TEXT,
-  aliases TEXT[]
+  aliases TEXT[] NOT NULL DEFAULT '{}',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+CREATE INDEX idx_competitors_brand ON competitors(brand_id);
 
--- Prompts trackés
+-- ──────────────────────────────────────────────────────────────────────
+-- Prompts et runs
+-- ──────────────────────────────────────────────────────────────────────
+
 CREATE TABLE prompts (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  brand_id UUID REFERENCES brands(id) ON DELETE CASCADE,
+  brand_id UUID NOT NULL REFERENCES brands(id) ON DELETE CASCADE,
   text TEXT NOT NULL,
-  category TEXT, -- 'commercial', 'informational', 'comparison', etc.
+  category TEXT,  -- 'commercial', 'informational', 'comparison', ...
   language TEXT NOT NULL DEFAULT 'fr',
-  is_active BOOLEAN DEFAULT TRUE,
-  created_at TIMESTAMPTZ DEFAULT NOW()
+  is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+CREATE INDEX idx_prompts_brand_active ON prompts(brand_id) WHERE is_active = TRUE;
 
--- Runs (un run = une exécution d'un prompt sur un LLM à un moment donné)
+-- 1 run = 1 prompt × 1 LLM × 1 date planifiée
 CREATE TABLE runs (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  prompt_id UUID REFERENCES prompts(id) ON DELETE CASCADE,
-  llm TEXT NOT NULL, -- 'chatgpt', 'claude', 'perplexity', 'gemini', 'lechat'
-  status TEXT NOT NULL, -- 'pending', 'running', 'success', 'failed'
-  raw_response TEXT, -- réponse complète brute
-  parsed_citations JSONB, -- liste des URL citées
-  parsed_brands JSONB, -- marques détectées (own + competitors)
-  cost_usd DECIMAL(10, 6), -- coût LLM en USD
+  prompt_id UUID NOT NULL REFERENCES prompts(id) ON DELETE CASCADE,
+  llm TEXT NOT NULL
+    CHECK (llm IN ('chatgpt','claude','perplexity','gemini','lechat')),
+  status TEXT NOT NULL DEFAULT 'pending'
+    CHECK (status IN ('pending','running','success','failed','skipped')),
+  raw_response TEXT,
+  parsed_citations JSONB,        -- [{ url, title, domain }]
+  parsed_brands JSONB,           -- { target: {...}, competitors: [...] } cf. § "Algo détection"
+  cost_usd DECIMAL(10, 6),
   duration_ms INTEGER,
   error TEXT,
+  cache_hit BOOLEAN NOT NULL DEFAULT FALSE,  -- TRUE si servi depuis prompt_cache
   scheduled_at TIMESTAMPTZ NOT NULL,
   executed_at TIMESTAMPTZ,
-  created_at TIMESTAMPTZ DEFAULT NOW()
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
-
 CREATE INDEX idx_runs_prompt_executed ON runs(prompt_id, executed_at DESC);
-CREATE INDEX idx_runs_scheduled ON runs(scheduled_at) WHERE status = 'pending';
+CREATE INDEX idx_runs_scheduled_pending ON runs(scheduled_at) WHERE status = 'pending';
 
--- Citations agrégées (vue matérialisée pour les dashboards)
+-- Vue matérialisée des dashboards (recalculée par worker journalier)
 CREATE TABLE citation_metrics_daily (
-  brand_id UUID REFERENCES brands(id) ON DELETE CASCADE,
+  brand_id UUID NOT NULL REFERENCES brands(id) ON DELETE CASCADE,
   llm TEXT NOT NULL,
   date DATE NOT NULL,
   total_runs INTEGER NOT NULL,
   brand_cited_count INTEGER NOT NULL,
-  visibility_score DECIMAL(5, 2), -- 0-100
-  competitors_data JSONB, -- {competitor_id: {citations: int, position_avg: float}}
+  visibility_score DECIMAL(5, 2),  -- 0-100
+  competitors_data JSONB,          -- { competitor_id: { citations, position_avg } }
   PRIMARY KEY (brand_id, llm, date)
 );
 
--- Subscriptions et facturation
+-- ──────────────────────────────────────────────────────────────────────
+-- Caching cross-clients (V0 optionnel, prévu mais peut-être désactivé)
+-- ──────────────────────────────────────────────────────────────────────
+
+-- Si deux workspaces trackent le même prompt textuellement identique sur
+-- le même LLM, on ne paie qu'un seul appel par fenêtre de fraîcheur 24 h.
+-- Économie estimée 20-40% sur Starter (cf. doc 03 § "Stratégies de réduction
+-- des coûts"). Tableau ré-utilisé en lecture par le worker execute-prompt
+-- avant tout nouvel appel LLM.
+CREATE TABLE prompt_cache (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  prompt_text_hash TEXT NOT NULL,   -- sha256(normalize(text))
+  llm TEXT NOT NULL,
+  language TEXT NOT NULL DEFAULT 'fr',
+  raw_response TEXT NOT NULL,
+  parsed_citations JSONB,
+  cost_usd DECIMAL(10, 6),
+  fetched_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  expires_at TIMESTAMPTZ NOT NULL,  -- = fetched_at + 24 h en V0
+  UNIQUE (prompt_text_hash, llm, language)
+);
+CREATE INDEX idx_prompt_cache_lookup ON prompt_cache(prompt_text_hash, llm, language)
+  WHERE expires_at > NOW();
+```
+
+### Tables plomberie
+
+```sql
+-- ──────────────────────────────────────────────────────────────────────
+-- Queue Postgres-based (V0, ~150 lignes de code helpers)
+-- ──────────────────────────────────────────────────────────────────────
+
+CREATE TABLE queue_jobs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  kind TEXT NOT NULL                        -- ex : 'execute_prompt', 'score_response', 'send_weekly_email'
+    CHECK (kind IN ('execute_prompt','score_response','send_weekly_email','recompute_metrics')),
+  payload JSONB NOT NULL,                   -- ex : { prompt_id, llm, run_id }
+  idempotency_key TEXT NOT NULL UNIQUE,     -- ex : 'execute_prompt:{run_id}' ou 'execute_prompt:{prompt_id}:{llm}:{date}'
+  status TEXT NOT NULL DEFAULT 'pending'
+    CHECK (status IN ('pending','claimed','done','failed','dead')),
+  scheduled_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  claimed_at TIMESTAMPTZ,
+  finished_at TIMESTAMPTZ,
+  attempts INTEGER NOT NULL DEFAULT 0,
+  max_attempts INTEGER NOT NULL DEFAULT 3,
+  last_error TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX idx_queue_jobs_claim
+  ON queue_jobs(scheduled_at)
+  WHERE status = 'pending';
+CREATE INDEX idx_queue_jobs_dead
+  ON queue_jobs(finished_at)
+  WHERE status = 'dead';
+
+-- ──────────────────────────────────────────────────────────────────────
+-- Audit log applicatif (centralisation des événements métier en BDD)
+-- ──────────────────────────────────────────────────────────────────────
+
+-- Volontairement permissif sur le schéma (JSONB) : on logge tout ce qui a
+-- une importance forensic ou produit. Purge à 90 jours (cron mensuel).
+CREATE TABLE events (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  workspace_id UUID REFERENCES workspaces(id) ON DELETE SET NULL,
+  user_id TEXT REFERENCES "user"(id) ON DELETE SET NULL,
+  kind TEXT NOT NULL,                       -- ex : 'workspace.created', 'brand.added', 'run.completed', 'quota.warning_60', 'quota.hardcap_hit', 'plan.upgraded'
+  payload JSONB NOT NULL DEFAULT '{}',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX idx_events_workspace_kind_created
+  ON events(workspace_id, kind, created_at DESC);
+
+-- ──────────────────────────────────────────────────────────────────────
+-- Subscriptions
+-- ──────────────────────────────────────────────────────────────────────
+
 CREATE TABLE subscription_events (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  workspace_id UUID REFERENCES workspaces(id) ON DELETE CASCADE,
-  event_type TEXT NOT NULL, -- 'created', 'upgraded', 'downgraded', 'canceled', 'reactivated'
+  workspace_id UUID NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
+  event_type TEXT NOT NULL
+    CHECK (event_type IN ('trial_started','trial_extended','created','upgraded','downgraded','canceled','reactivated','past_due','expired')),
   from_plan TEXT,
   to_plan TEXT,
-  metadata JSONB,
-  created_at TIMESTAMPTZ DEFAULT NOW()
+  stripe_event_id TEXT UNIQUE,              -- idempotence des webhooks Stripe
+  metadata JSONB NOT NULL DEFAULT '{}',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+CREATE INDEX idx_subscription_events_workspace ON subscription_events(workspace_id, created_at DESC);
 
--- Usage tracking pour limiter les plans
+-- ──────────────────────────────────────────────────────────────────────
+-- Usage counters — fenêtre = mois de facturation Stripe
+-- ──────────────────────────────────────────────────────────────────────
+
+-- period_start est l'UTC date de début de la période courante de facturation
+-- Stripe (= workspaces.current_period_start::DATE). Un nouveau cycle Stripe
+-- (renouvellement, upgrade) crée une nouvelle ligne. Pas de période glissante.
+-- Reset = INSERT sur webhook 'invoice.created' au début de chaque cycle.
 CREATE TABLE usage_counters (
-  workspace_id UUID REFERENCES workspaces(id) ON DELETE CASCADE,
+  workspace_id UUID NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
   period_start DATE NOT NULL,
-  prompts_count INTEGER DEFAULT 0,
-  runs_count INTEGER DEFAULT 0,
-  llm_cost_usd DECIMAL(10, 4) DEFAULT 0,
+  prompts_count INTEGER NOT NULL DEFAULT 0,
+  runs_count INTEGER NOT NULL DEFAULT 0,
+  llm_cost_usd DECIMAL(10, 4) NOT NULL DEFAULT 0,
+  warned_at_60pct TIMESTAMPTZ,              -- alerte interne envoyée
+  warned_at_100pct TIMESTAMPTZ,             -- email client envoyé
+  hardcap_hit_at TIMESTAMPTZ,               -- block déclenché à 200%
   PRIMARY KEY (workspace_id, period_start)
 );
 ```
+
+### Idempotence des jobs LLM (formalisée)
+
+Règle : **un job ne peut pas être enqueue deux fois pour la même clé logique**.
+La colonne `idempotency_key TEXT UNIQUE NOT NULL` de `queue_jobs` matérialise
+cette propriété. Format imposé par `kind` :
+
+| `kind` | format `idempotency_key` |
+|---|---|
+| `execute_prompt` | `execute_prompt:{prompt_id}:{llm}:{scheduled_date_iso}` (ex : `execute_prompt:8fa1...:claude:2026-05-06`) |
+| `score_response` | `score_response:{run_id}` |
+| `send_weekly_email` | `send_weekly_email:{workspace_id}:{iso_week}` (ex : `:2026-W18`) |
+| `recompute_metrics` | `recompute_metrics:{brand_id}:{date_iso}` |
+
+Algorithme `enqueue` :
+
+```sql
+INSERT INTO queue_jobs (kind, payload, idempotency_key, scheduled_at, max_attempts)
+VALUES ($1, $2, $3, $4, $5)
+ON CONFLICT (idempotency_key) DO NOTHING
+RETURNING id;
+```
+
+Si `RETURNING id` est vide, le job était déjà en BDD : pas d'erreur, juste un
+no-op silencieux. Cron peut donc se redéclencher sans risque, et un dispatch
+redémarré ne crée pas de doublon.
+
+Algorithme `claim` (worker pull-based, `FOR UPDATE SKIP LOCKED` pour
+parallélisme sûr) :
+
+```sql
+UPDATE queue_jobs
+SET status = 'claimed', claimed_at = NOW(), attempts = attempts + 1
+WHERE id IN (
+  SELECT id FROM queue_jobs
+  WHERE status = 'pending' AND scheduled_at <= NOW()
+  ORDER BY scheduled_at
+  LIMIT $batch_size
+  FOR UPDATE SKIP LOCKED
+)
+RETURNING *;
+```
+
+Algorithme `complete` / `fail` :
+
+- `complete` : `UPDATE ... SET status='done', finished_at=NOW()`
+- `fail` (transient) : `UPDATE ... SET status='pending', last_error=$err, scheduled_at=NOW() + interval '1 hour'` si `attempts < max_attempts`, sinon `status='dead'`. Re-tentative h+1 puis h+6 (cf. doc 03 § "Fallback strategy").
+
+### Algorithme du hard-cap LLM 200%
+
+Implémenté dans `src/lib/llm/quota-guard.ts`, appelé **avant chaque appel LLM**
+réel par le worker `execute-prompt`. Le hard-cap est 200% du quota théorique
+mensuel calculé à partir du plan + nombre de prompts × LLMs × fréquence.
+
+```ts
+// pseudo-code, à implémenter Sprint 1
+async function checkQuotaOrBlock(workspaceId: string): Promise<'ok' | 'blocked'> {
+  const ws = await db.workspaces.findById(workspaceId);
+  if (ws.plan === 'expired' || ws.plan === 'canceled') return 'blocked';
+  if (ws.hard_cap_hit_at) return 'blocked';
+
+  const counter = await db.usageCounters.findCurrent(workspaceId);
+  const theoreticalMaxRuns = computeTheoreticalRuns(ws.plan); // prompts × llms × jours du cycle
+  const ratio = counter.runs_count / theoreticalMaxRuns;
+
+  // Alerte interne à 60% (Slack/email Max), pas d'action client
+  if (ratio >= 0.6 && !counter.warned_at_60pct) {
+    await events.log({ workspaceId, kind: 'quota.warning_60', payload: { ratio } });
+    await db.usageCounters.update(workspaceId, { warned_at_60pct: now() });
+    await alertInternal(`Workspace ${workspaceId} à ${(ratio*100).toFixed(0)}%`);
+  }
+
+  // Alerte client à 100% du théorique, encore autorisé
+  if (ratio >= 1.0 && !counter.warned_at_100pct) {
+    await events.log({ workspaceId, kind: 'quota.warning_100', payload: { ratio } });
+    await db.usageCounters.update(workspaceId, { warned_at_100pct: now() });
+    await sendEmail(ws, 'quota_100pct');
+  }
+
+  // Hard-cap à 200% : block + email + alerte interne
+  if (ratio >= 2.0) {
+    await db.transaction(async tx => {
+      await tx.usageCounters.update(workspaceId, { hardcap_hit_at: now() });
+      await tx.workspaces.update(workspaceId, { hard_cap_hit_at: now() });
+    });
+    await events.log({ workspaceId, kind: 'quota.hardcap_hit', payload: { ratio } });
+    await sendEmail(ws, 'quota_hardcap_blocked');
+    await alertInternal(`HARD-CAP atteint sur ${workspaceId}, accès bloqué.`);
+    return 'blocked';
+  }
+
+  return 'ok';
+}
+```
+
+Le hard-cap est levé manuellement (admin UI ou requête SQL) après dialogue
+client : pas de levée automatique. Reset du compteur uniquement au prochain
+cycle de facturation Stripe (webhook `invoice.created`).
 
 ### Quotas par plan
 
 | Plan | Brands | Concurrents | Prompts | LLMs | Fréquence | Historique |
 |---|---|---|---|---|---|---|
-| Starter (49€) | 1 | 5 | 25 | 5 | Hebdo | 90j |
+| Trial 14j (= Pro) | 3 | 10 | 100 | 5 | Quotidien | 90j |
+| Starter (49€) | 1 | 5 | 25 | 5 dont Le Chat | Hebdo | 90j |
 | Pro (149€) | 3 | 10 | 100 | 5 | Quotidien | 1 an |
 | Agence (399€) | 10 | 10/marque | 300 | 5 | Quotidien | 1 an |
 | Enterprise | illimité | illimité | sur devis | 5+ | sur devis | illimité |

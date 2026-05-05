@@ -271,6 +271,58 @@ peut démarrer sans ambiguïté résiduelle.
 
 ---
 
+#### 2026-05-05 — Schéma BDD complet (Phase 2 session 2)
+
+**Contexte** : 9 manques techniques avaient été identifiés en session 1 dans
+le schéma BDD du doc 03 (Better Auth, queue_jobs, events, états plan,
+prompt_cache, usage_counters, hard-cap, idempotence). Le schéma a été
+complété avant toute écriture de code.
+
+**Décisions techniques actées** :
+
+- **Better Auth** : tables générées via `npx @better-auth/cli generate`,
+  documentées en V0 pour magic-link uniquement (`user`, `session`, `account`,
+  `verification`). **Pas de table `users` parallèle** — toutes les FK
+  applicatives pointent sur Better Auth `user.id` (TEXT, pas UUID).
+- **`workspaces.plan`** : énumération `CHECK` étendue à `trialing`, `starter`,
+  `pro`, `agency`, `enterprise`, `past_due`, `expired`, `canceled`. Plus de
+  valeur `'free'` (on n'a pas de freemium permanent).
+- **`workspaces.current_period_start/end`** : aligné sur le cycle de
+  facturation Stripe. Webhook `invoice.created` = reset du `usage_counters`.
+- **`workspaces.hard_cap_hit_at`** : timestamp dénormalisé pour fast-path du
+  guard quota (évite un join sur `usage_counters` à chaque appel LLM).
+- **`queue_jobs.idempotency_key TEXT UNIQUE NOT NULL`** : format imposé par
+  `kind` (cf. table dans doc 03). `INSERT ... ON CONFLICT DO NOTHING`.
+- **`queue_jobs.status`** : `pending → claimed → done | failed | dead`. Retry
+  transient = remise en `pending` avec `scheduled_at += 1h` puis `+ 6h`
+  (formalisation de la "fallback strategy" du doc 03).
+- **`runs.cache_hit BOOLEAN`** : flag de réutilisation depuis `prompt_cache`
+  pour distinguer les runs facturés des runs gratuits.
+- **`prompt_cache`** : caching cross-clients sur hash sha256 du texte
+  normalisé + `(llm, language)`, fenêtre de fraîcheur 24 h. Gain estimé
+  20-40% sur Starter. Documenté V0, à activer dès que mesurable.
+- **`events`** : audit log applicatif générique avec `kind` libre + `payload
+  JSONB`, purge à 90 jours. Centralise les événements forensic (quota
+  warnings, plan changes, run completed, etc.).
+- **`subscription_events.stripe_event_id UNIQUE`** : idempotence des
+  webhooks Stripe (un même `evt_xxx` ne crée qu'une ligne).
+- **Algorithme hard-cap LLM** : 60% → alerte interne, 100% → email client,
+  200% → block + email + alerte interne, levée manuelle uniquement, reset
+  au prochain cycle Stripe.
+
+**Conséquences attendues** : `src/db/schema.ts` peut être écrit sans
+ambiguïté, première migration `0001_init.sql` peut être versionnée et
+appliquée.
+
+**À revisiter** :
+- `prompt_cache` : mesurer le hit-rate réel après 1 mois de prod et décider
+  si la fenêtre 24h est la bonne (peut-être 12h pour Pro/Agency, 7j pour
+  Starter ?)
+- `queue_jobs` : si > 100K runs/mois, migrer vers Inngest (la table reste
+  utile en mode "outbox pattern" même avec Inngest)
+
+---
+
 #### YYYY-MM-DD — [titre]
 
 (à compléter)
