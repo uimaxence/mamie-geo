@@ -68,12 +68,14 @@
 ## Vision 18 mois
 
 ### Mois 6 — Validation PMF
+
 - 30-50 clients payants
 - 8 K€ MRR
 - 3-5 agences en marque blanche
 - mamie-seo.fr basculé sur thématique GEO, 3K visiteurs/mois
 
 ### Mois 12 — Référence francophone
+
 - 100-150 clients payants
 - 25 K€ MRR
 - 10+ agences en marque blanche
@@ -81,6 +83,7 @@
 - Module Optimizer (V2) lancé
 
 ### Mois 18 — Expansion EU francophone + souveraineté
+
 - 200-300 clients payants
 - 50 K€ MRR
 - Premier client grand-compte FR sur enterprise plan
@@ -117,19 +120,23 @@ Anti-vision claire pour éviter la dispersion :
 ## Le naming et la marque
 
 ### Option A — "Mamie GEO" (continuité Mamie SEO)
+
 - ✅ Capitalise sur l'audience existante de mamie-seo.fr
 - ✅ Différenciant, mémorable, ton décalé
 - ✅ SEO ready (faible concurrence)
 - ⚠️ Peut paraître peu sérieux pour des grands comptes — à réserver à V2
 
 ### Option B — Nom plus institutionnel (ex: "Citée", "Visia", "Citably")
+
 - ✅ Plus crédible pour cibler enterprise plus tard
 - ⚠️ Coût d'acquisition à zéro à reconstruire
 
 ### Recommandation
+
 Lancer en double-marque : **"Mamie GEO by [Sa marque pro]"** ou **"Mamie GEO"** seul mais avec une charte plus pro que mamie-seo.fr. À trancher avec un test A/B sur landing.
 
 ### Identité visuelle (à briefer)
+
 - Esprit pas-trop-startup-clichée, références plutôt SaaS européens (Linear, Notion, Tally) que SaaS US
 - Couleur dominante : à définir, mais sortir du bleu canonique tech
 - Typo : sans-serif moderne (Inter, Geist)

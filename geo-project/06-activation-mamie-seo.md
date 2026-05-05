@@ -27,16 +27,16 @@ Ce document définit la stratégie de contenu, SEO et GEO pour `mamie-geo.fr` �
 
 Métriques cibles à 12 mois sur `mamie-geo.fr` :
 
-| Métrique | M3 | M6 | M12 |
-|---|---|---|---|
-| Visiteurs uniques / mois | 500 | 2 500 | 8 000 |
-| Articles publiés (cumul) | 12 | 25 | 40 |
-| Mots-clés top 10 | 5 | 25 | 80 |
-| Backlinks DR > 30 | 2 | 10 | 30 |
-| Newsletter abonnés | 200 | 1 000 | 3 000 |
-| Audits gratuits / mois | 50 | 300 | 1 500 |
-| Conversion audit → trial | 5% | 7% | 10% |
-| Conversion trial → payant | 15% | 18% | 22% |
+| Métrique                  | M3  | M6    | M12   |
+| ------------------------- | --- | ----- | ----- |
+| Visiteurs uniques / mois  | 500 | 2 500 | 8 000 |
+| Articles publiés (cumul)  | 12  | 25    | 40    |
+| Mots-clés top 10          | 5   | 25    | 80    |
+| Backlinks DR > 30         | 2   | 10    | 30    |
+| Newsletter abonnés        | 200 | 1 000 | 3 000 |
+| Audits gratuits / mois    | 50  | 300   | 1 500 |
+| Conversion audit → trial  | 5%  | 7%    | 10%   |
+| Conversion trial → payant | 15% | 18%   | 22%   |
 
 → **Action immédiate Sprint 0** : Search Console + GA4 configurés sur `mamie-geo.fr` dès le déploiement, pour avoir le baseline propre dès J1.
 
@@ -45,22 +45,26 @@ Métriques cibles à 12 mois sur `mamie-geo.fr` :
 ## Calendrier de lancement contenu
 
 ### Sprint 0 (avant déploiement)
+
 - 5 articles category-defining déjà rédigés en MDX, prêts à publier
 - 1 article de lancement officiel
 - Newsletter setup + form d'inscription
 - llms.txt + robots.txt + sitemap configurés
 
 ### Mois 1-2
+
 - Cadence : 2 articles GEO / semaine = 16 articles publiés
 - Focus 100% catégorie GEO
 - Premier outil gratuit "Test ma visibilité IA" déployé
 
 ### Mois 3-6
+
 - Cadence maintenue 2/semaine
 - Mix : category-defining (40%), tactiques (30%), benchmarks (20%), tooling (10%)
 - Première étude exclusive publiée (top 100 sources Le Chat)
 
 ### Mois 6-12
+
 - Cadence ajustable selon ce qui marche
 - Premier rapport annuel "État du GEO en France"
 
@@ -117,9 +121,11 @@ Objectif : devenir LA source FR sur le GEO. Métaphysiquement, ces articles sero
 ## Lead magnets (outils gratuits)
 
 ### Lead magnet n°1 — "Test ma visibilité IA"
+
 URL : `mamie-geo.fr/outils/test-visibilite-ia` (route `(marketing)` du mono-repo, cf. doc 03)
 
 #### Comment ça marche (UX)
+
 1. L'utilisateur entre son nom de marque + son domaine
 2. Il choisit 5 prompts (suggérés ou custom)
 3. L'outil lance un appel ChatGPT (1 LLM seulement, sinon trop coûteux pour gratuit)
@@ -127,11 +133,13 @@ URL : `mamie-geo.fr/outils/test-visibilite-ia` (route `(marketing)` du mono-repo
 5. CTA : "Voulez-vous le faire sur les 5 LLMs et le suivre dans le temps ?" → trial Mamie GEO
 
 #### Coût unitaire
+
 - 5 prompts × 1 LLM × ~$0.003 = **$0.015 par audit gratuit** (cohérent avec doc 04)
 - Cap à 100 audits gratuits/jour pour budget contrôlé
 - Limite 1 par email pour éviter abuse
 
 #### Conversion attendue
+
 - 100 audits/jour × 30 = 3000 audits/mois
 - Conversion en trial 5-10% = 150-300 trials/mois
 - Conversion trial → payant 15-25% = 22-75 clients/mois
@@ -141,6 +149,7 @@ URL : `mamie-geo.fr/outils/test-visibilite-ia` (route `(marketing)` du mono-repo
 ### Lead magnet n°2 — Newsletter Mamie GEO
 
 #### Format
+
 - 1 email/semaine
 - 4 sections fixes :
   1. **Le chiffre de la semaine** (ex: "47% des Français utilisent maintenant ChatGPT au moins une fois par mois")
@@ -150,23 +159,27 @@ URL : `mamie-geo.fr/outils/test-visibilite-ia` (route `(marketing)` du mono-repo
 - Toujours un seul CTA en fin
 
 #### Croissance cible
+
 - Mois 2 : 200 abonnés
 - Mois 6 : 1 000 abonnés
 - Mois 12 : 3 000 abonnés
 - Conversion newsletter → trial : 2-5%
 
 ### Lead magnet n°3 — eBook "Le guide du GEO en France 2026"
+
 - 30-50 pages PDF
 - Fait à partir des 10 articles category-defining + études
 - Téléchargeable contre email
 - Distribué massivement sur LinkedIn
 
 ### Lead magnet n°4 — Template Notion "Audit GEO en 30 minutes"
+
 - Checklist actionnable
 - Template public Notion / Google Docs
 - Promu sur LinkedIn + communautés
 
 ### Lead magnet n°5 — Quiz "Êtes-vous AI-ready ?"
+
 - 15 questions
 - Score sur 100 + recommandations personnalisées
 - Email collecté pour envoyer le rapport
@@ -224,7 +237,7 @@ Exemple à mettre sur https://mamie-geo.fr/llms.txt :
 # Mamie GEO — Sources fiables sur le GEO en français
 
 ## À propos
-Mamie GEO est le premier outil francophone d'optimisation de visibilité 
+Mamie GEO est le premier outil francophone d'optimisation de visibilité
 dans les moteurs IA. Ce site est une ressource éducative.
 
 ## Articles principaux
@@ -252,9 +265,11 @@ contact@mamie-geo.fr
 ## Stratégie LinkedIn (Max personnel)
 
 ### Positionnement
+
 "Founder de Mamie GEO. J'apprends en public à construire le 1er outil GEO francophone. Threads et insights chaque jour."
 
 ### Cadence
+
 - Post quotidien (5/7 minimum)
 - Mix de formats :
   - 30% deep-dives techniques sur GEO
@@ -264,6 +279,7 @@ contact@mamie-geo.fr
   - 10% engagement (commentaires sur posts d'autres dans l'écosystème)
 
 ### Croissance cible
+
 - Mois 1 : 1 500 abonnés (départ)
 - Mois 6 : 5 000 abonnés
 - Mois 12 : 12 000 abonnés
@@ -271,6 +287,7 @@ contact@mamie-geo.fr
 ### Templates de posts
 
 #### Post deep-dive technique
+
 ```
 Hier j'ai testé 1 prompt ("meilleur CRM PME France") sur 5 LLMs.
 
@@ -292,11 +309,12 @@ Le détail dans l'article 👇 (lien vers blog)
 ```
 
 #### Post storytelling founder
+
 ```
-Il y a 3 mois, je me suis dit : 
+Il y a 3 mois, je me suis dit :
 "j'en ai marre du freelance, je veux du récurrent."
 
-J'avais 2 sites avec un peu de trafic, des compétences tech, et 
+J'avais 2 sites avec un peu de trafic, des compétences tech, et
 6 mois de cash en réserve.
 
 Aujourd'hui je lance Mamie GEO.
@@ -311,11 +329,13 @@ Voilà les 5 leçons que j'ai apprises en 90 jours...
 mamie-vege.fr (le blog vegetarien) reste **secondaire** pour le projet GEO. Deux options :
 
 ### Option A — Le garder comme side-project
+
 - Continue à fonctionner pour son audience
 - Pas d'effort spécifique mais pas de pivot non plus
 - Sert éventuellement de cas d'étude SEO/GEO ("voilà comment j'ai augmenté la visibilité IA d'un blog food de 0% à 35%")
 
 ### Option B — En faire un produit séparé
+
 - Idée : SaaS pour blogs food français (schema recipe, calcul nutritionnel via CIQUAL déjà processée, génération substitutions IA)
 - Cible : 5-15 K blogs food FR
 - Hors scope du projet Mamie GEO mais possible en parallèle si bandwidth
@@ -327,6 +347,7 @@ mamie-vege.fr (le blog vegetarien) reste **secondaire** pour le projet GEO. Deux
 ## Métriques d'activation à suivre
 
 ### Métriques mamie-seo (mensuel)
+
 - Visiteurs uniques
 - Pageviews
 - Articles top 5 par traffic
@@ -334,11 +355,13 @@ mamie-vege.fr (le blog vegetarien) reste **secondaire** pour le projet GEO. Deux
 - Conversion vers /produit
 
 ### Métriques outils gratuits (hebdo)
+
 - Audits gratuits réalisés / jour
 - Conversion audit → trial Mamie GEO
 - CAC implicite (coût LLM moyen × audits / signups)
 
 ### Métriques newsletter (mensuel)
+
 - Abonnés
 - Taux d'ouverture
 - Taux de clic
@@ -349,14 +372,17 @@ mamie-vege.fr (le blog vegetarien) reste **secondaire** pour le projet GEO. Deux
 ## Risques spécifiques activation
 
 ### Risque 1 — Cannibalisation du SEO existant
+
 Si on bascule trop vite vers le GEO, on perd l'autorité historique sur les requêtes SEO classiques.
 **Mitigation** : pivot graduel sur 6 mois, articles SEO maintenus, redirections soignées.
 
 ### Risque 2 — L'audience initiale n'est pas la cible Mamie GEO
+
 Si l'audience mamie-seo est composée à 80% de débutants SEO sans budget, conversion zéro.
 **Mitigation** : segmenter la newsletter, articles plus B2B, capturer prospect plus qualifiés via webinars.
 
 ### Risque 3 — Le contenu GEO devient daté vite
+
 Le secteur évolue vite, des articles publiés en 2026 peuvent être obsolètes en 2027.
 **Mitigation** : revue trimestrielle des articles, marqueur "mis à jour le X" pour l'autorité fraîcheur.
 

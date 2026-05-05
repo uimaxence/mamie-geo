@@ -19,6 +19,7 @@ Module **Tracker** uniquement. Rien d'autre. Pas d'optimization, pas de content,
 ### Stories utilisateur core
 
 #### En tant que freelance SEO, je veux…
+
 - **S1** — Créer un compte et ajouter mon domaine en moins de 2 minutes
 - **S2** — Voir 10 prompts auto-suggérés à partir de mon domaine et de ma description (générés par LLM)
 - **S3** — Lancer le tracking sur ces prompts pour ChatGPT, Claude, Perplexity, Gemini et Le Chat
@@ -29,32 +30,34 @@ Module **Tracker** uniquement. Rien d'autre. Pas d'optimization, pas de content,
 - **S8** — Exporter mes données en CSV
 
 #### En tant que client, je veux…
+
 - **S9** — Mettre à niveau ou descendre de plan en libre-service
 - **S10** — Annuler mon abonnement sans avoir à parler à quelqu'un (mais avec une dernière chance d'expliquer pourquoi)
 
 ### Fonctionnalités V0
 
-| Feature | Priorité | Notes |
-|---|---|---|
-| Inscription / login (email + magic link) | P0 | Better Auth (cf. doc 03) |
-| Onboarding wizard (domaine → infos marque → prompts suggérés) | P0 | Génération prompts via Claude API |
-| Configuration des marques et concurrents | P0 | Max 5 concurrents trackés en V0 |
-| Lancement / pause du tracking | P0 | |
-| Exécution périodique des prompts (1×/jour ou 1×/sem selon plan) | P0 | Postgres-based queue + Vercel Cron (cf. doc 03) |
-| Stockage des réponses LLM brutes | P0 | Pour traçabilité + audit |
-| Détection de mention de marque + concurrents | P0 | Regex + LLM scoring (Claude Haiku) |
-| Détection des sources citées (URLs) | P0 | Parser des réponses |
-| Score de visibilité global + par LLM + par prompt | P0 | Pourcentage de citation pondéré |
-| Dashboard principal | P0 | Cards + graphes recharts |
-| Vue détaillée par prompt (réponses brutes consultables) | P0 | |
-| Vue concurrents (qui est cité, à quelle fréquence) | P0 | |
-| Évolution dans le temps (graph 30 jours) | P0 | |
-| Email hebdo automatique | P0 | Brevo |
-| Export CSV | P0 | |
-| Page facturation Stripe Customer Portal | P0 | |
-| Plans Starter / Pro avec limitations volumes | P0 | Pas Agence en V0 |
+| Feature                                                         | Priorité | Notes                                           |
+| --------------------------------------------------------------- | -------- | ----------------------------------------------- |
+| Inscription / login (email + magic link)                        | P0       | Better Auth (cf. doc 03)                        |
+| Onboarding wizard (domaine → infos marque → prompts suggérés)   | P0       | Génération prompts via Claude API               |
+| Configuration des marques et concurrents                        | P0       | Max 5 concurrents trackés en V0                 |
+| Lancement / pause du tracking                                   | P0       |                                                 |
+| Exécution périodique des prompts (1×/jour ou 1×/sem selon plan) | P0       | Postgres-based queue + Vercel Cron (cf. doc 03) |
+| Stockage des réponses LLM brutes                                | P0       | Pour traçabilité + audit                        |
+| Détection de mention de marque + concurrents                    | P0       | Regex + LLM scoring (Claude Haiku)              |
+| Détection des sources citées (URLs)                             | P0       | Parser des réponses                             |
+| Score de visibilité global + par LLM + par prompt               | P0       | Pourcentage de citation pondéré                 |
+| Dashboard principal                                             | P0       | Cards + graphes recharts                        |
+| Vue détaillée par prompt (réponses brutes consultables)         | P0       |                                                 |
+| Vue concurrents (qui est cité, à quelle fréquence)              | P0       |                                                 |
+| Évolution dans le temps (graph 30 jours)                        | P0       |                                                 |
+| Email hebdo automatique                                         | P0       | Brevo                                           |
+| Export CSV                                                      | P0       |                                                 |
+| Page facturation Stripe Customer Portal                         | P0       |                                                 |
+| Plans Starter / Pro avec limitations volumes                    | P0       | Pas Agence en V0                                |
 
 ### Hors périmètre V0 (explicite)
+
 - ❌ Recommandations d'optimisation
 - ❌ Audit du site (llms.txt, schema.org, etc.)
 - ❌ Marque blanche / multi-workspaces
@@ -98,14 +101,14 @@ Une fois que le Tracker tourne et que les clients comprennent leur position, ils
 
 ### Features V1
 
-| Feature | Description |
-|---|---|
-| **AI-readiness scan** | Crawl du site, analyse de la structure (H1-H6), schema.org, FAQ pages, llms.txt, robots.txt pour AI crawlers |
-| **Score AI-readiness** | 0-100 sur 5 axes : Structure, Données structurées, Crawlabilité IA, Q&A density, Autorité externe |
-| **Recommandations actionnables** | Liste priorisée de 10-30 actions concrètes (ex: "ajouter une FAQPage schema sur /pricing") |
-| **Audit concurrents** | Même scan sur les 3-5 concurrents trackés, comparaison côte à côte |
-| **Suivi des recommandations** | Checklist persistante : ce qui a été fait, ce qui reste |
-| **Recrawl hebdomadaire** | Re-mesure automatique du score |
+| Feature                          | Description                                                                                                  |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| **AI-readiness scan**            | Crawl du site, analyse de la structure (H1-H6), schema.org, FAQ pages, llms.txt, robots.txt pour AI crawlers |
+| **Score AI-readiness**           | 0-100 sur 5 axes : Structure, Données structurées, Crawlabilité IA, Q&A density, Autorité externe            |
+| **Recommandations actionnables** | Liste priorisée de 10-30 actions concrètes (ex: "ajouter une FAQPage schema sur /pricing")                   |
+| **Audit concurrents**            | Même scan sur les 3-5 concurrents trackés, comparaison côte à côte                                           |
+| **Suivi des recommandations**    | Checklist persistante : ce qui a été fait, ce qui reste                                                      |
+| **Recrawl hebdomadaire**         | Re-mesure automatique du score                                                                               |
 
 ### Stack additionnelle V1
 
@@ -131,17 +134,17 @@ Activer le canal agence à pleine puissance avec un module pensé pour eux.
 
 ### Features V2
 
-| Feature | Description |
-|---|---|
-| **Multi-workspaces** | Un par client agence, isolés |
-| **Marque blanche** | Logo client, couleurs, sous-domaine personnalisable (geo.agence-x.fr) |
-| **Rapports PDF auto** | Génération mensuelle automatique avec contenu personnalisable |
-| **Dashboard agence (méta)** | Vue agrégée des clients, alertes, score moyen |
-| **Facturation centralisée** | Une seule facture pour l'agence, pas par client |
-| **Permissions granulaires** | Lecture seule pour clients, admin pour l'agence |
-| **Intégration GA4** | Corrélation traffic IA + visibilité (V2.5) |
-| **Intégration Search Console** | Idem (V2.5) |
-| **Webhooks / API** | Pour intégrations custom (V2.5) |
+| Feature                        | Description                                                           |
+| ------------------------------ | --------------------------------------------------------------------- |
+| **Multi-workspaces**           | Un par client agence, isolés                                          |
+| **Marque blanche**             | Logo client, couleurs, sous-domaine personnalisable (geo.agence-x.fr) |
+| **Rapports PDF auto**          | Génération mensuelle automatique avec contenu personnalisable         |
+| **Dashboard agence (méta)**    | Vue agrégée des clients, alertes, score moyen                         |
+| **Facturation centralisée**    | Une seule facture pour l'agence, pas par client                       |
+| **Permissions granulaires**    | Lecture seule pour clients, admin pour l'agence                       |
+| **Intégration GA4**            | Corrélation traffic IA + visibilité (V2.5)                            |
+| **Intégration Search Console** | Idem (V2.5)                                                           |
+| **Webhooks / API**             | Pour intégrations custom (V2.5)                                       |
 
 ---
 
@@ -204,23 +207,27 @@ Activer le canal agence à pleine puissance avec un module pensé pour eux.
 ## Métriques produit à tracker
 
 ### Métriques d'acquisition
+
 - Visiteurs unique mamie-seo.fr / mois
 - Conversion landing → signup
 - Conversion signup → onboarding complet
 - Conversion freemium → payant
 
 ### Métriques d'usage
+
 - DAU / MAU ratio
 - Nombre de prompts trackés par utilisateur
 - Fréquence de connexion au dashboard
 - Taux d'ouverture email hebdo
 
 ### Métriques de rétention
+
 - Churn mensuel par tier
 - NRR (Net Revenue Retention)
 - Temps moyen entre signup et premier upgrade
 
 ### Métriques business
+
 - MRR
 - ARPU par tier
 - CAC blended et par canal
@@ -228,6 +235,7 @@ Activer le canal agence à pleine puissance avec un module pensé pour eux.
 - Gross margin (cible > 70% après coûts LLM)
 
 ### Métriques produit qualitatives
+
 - NPS trimestriel
 - Top 3 demandes feature dans le mois (revue manuelle)
 - Top 3 raisons de churn (exit survey obligatoire)

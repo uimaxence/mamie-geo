@@ -135,7 +135,7 @@ haut et l'entrée "2026-05-05 — Réponses aux 10 questions de bootstrap".
 
 ### Personnel (à compléter au lancement)
 
-- [ ] **% temps freelance maintenu mois 1-3** : ___ %
+- [ ] **% temps freelance maintenu mois 1-3** : \_\_\_ %
 - [ ] **Cash réserve perso** vérifiée ≥ 6 mois : ☐ Oui ☐ Non
 - [ ] **Vacances trimestrielles** programmées dans le calendrier : ☐ Oui ☐ Non
 
@@ -148,14 +148,14 @@ haut et l'entrée "2026-05-05 — Réponses aux 10 questions de bootstrap".
 ```
 ### YYYY-MM-DD — Titre de la décision
 
-**Contexte** : 
+**Contexte** :
 **Options considérées** :
 - A : ...
 - B : ...
 - C : ...
-**Choix** : 
-**Justification** : 
-**Conséquences attendues** : 
+**Choix** :
+**Justification** :
+**Conséquences attendues** :
 **À revisiter** : (date ou condition)
 ```
 
@@ -166,6 +166,7 @@ haut et l'entrée "2026-05-05 — Réponses aux 10 questions de bootstrap".
 **Contexte** : recherche de SaaS récurrent après fatigue du freelance pur. Analyse du marché GEO, identification du trou francophone.
 
 **Options considérées** :
+
 - A : SaaS audit SEO + UI (en cours, à compléter)
 - B : Boîtage tool mapping
 - C : SaaS Digital Product Passport SMB
@@ -186,6 +187,7 @@ haut et l'entrée "2026-05-05 — Réponses aux 10 questions de bootstrap".
 **Contexte** : Mamie-seo.fr n'a aucun trafic ni autorité SEO valorisable. La question s'est posée de garder un repo séparé pour le blog ou de tout rassembler.
 
 **Options considérées** :
+
 - A : 3 repos séparés (marketing Framer + app Next.js + blog standalone)
 - B : Monorepo Turborepo avec apps/marketing, apps/app, apps/blog
 - C : Mono-repo unique : une seule app Next.js qui contient marketing + blog + app SaaS
@@ -193,6 +195,7 @@ haut et l'entrée "2026-05-05 — Réponses aux 10 questions de bootstrap".
 **Choix** : C — Mono-repo unique Next.js
 
 **Justification** :
+
 - Solo founder, pas d'équipe à coordonner → un seul projet à maintenir
 - Aucun SEO existant à préserver sur mamie-seo.fr → pas d'argument pour le conserver
 - Cohérence visuelle native (marketing utilise les mêmes composants UI que l'app)
@@ -200,6 +203,7 @@ haut et l'entrée "2026-05-05 — Réponses aux 10 questions de bootstrap".
 - Splittable plus tard si besoin (mois 12+ ou si recrutement)
 
 **Conséquences attendues** :
+
 - `mamie-seo.fr` est redirigé en 301 vers `mamie-geo.fr` dès J1
 - Pas de subdomain `app.mamie-geo.fr` en V0 — l'app vit sur `mamie-geo.fr/app/*`
 - Pas de Framer pour le marketing (pages codées en TSX comme tout le reste)
@@ -217,6 +221,7 @@ artistique, polices, naming, mécanique trial, magic-link, etc.). Max a tranché
 en début de session 2.
 
 **Choix actés** :
+
 1. Direction artistique : A — éditorial chaud
 2. Polices : gratuites V0 — Newsreader + Geist + Geist Mono (pas Inter ni Source Serif Pro)
 3. Template marketing : from scratch
@@ -233,6 +238,7 @@ stack peuvent être configurées sans nouvelle question. Les sections "Décision
 Sprint 0 — verrouillées" et "Décisions tranchées en Sprint 0" sont à jour.
 
 **À revisiter** :
+
 - Polices premium quand MRR > 5K€
 - Statut juridique au mois 6 (audit CA cumulé vs plafond 77 700 €)
 - Mascotte mamie au mois 3+ (non bloquant)
@@ -246,6 +252,7 @@ entre les décisions actées dans `03`/`09` et le contenu résiduel des autres
 docs (Clerk, Prisma, Inngest, subdomain `app.`, etc.).
 
 **Corrections appliquées** :
+
 - `02` § "Fonctionnalités V0" : auth `Clerk ou Supabase Auth` → `Better Auth`
 - `02` § "Fonctionnalités V0" : worker `Inngest ou BullMQ` → `Postgres-based queue + Vercel Cron`
 - `03` § "APIs ciblées" : `gpt-4o-mini avec browse_with_bing` → `gpt-4o-mini + web_search tool`
@@ -302,7 +309,7 @@ complété avant toute écriture de code.
   normalisé + `(llm, language)`, fenêtre de fraîcheur 24 h. Gain estimé
   20-40% sur Starter. Documenté V0, à activer dès que mesurable.
 - **`events`** : audit log applicatif générique avec `kind` libre + `payload
-  JSONB`, purge à 90 jours. Centralise les événements forensic (quota
+JSONB`, purge à 90 jours. Centralise les événements forensic (quota
   warnings, plan changes, run completed, etc.).
 - **`subscription_events.stripe_event_id UNIQUE`** : idempotence des
   webhooks Stripe (un même `evt_xxx` ne crée qu'une ligne).
@@ -315,6 +322,7 @@ ambiguïté, première migration `0001_init.sql` peut être versionnée et
 appliquée.
 
 **À revisiter** :
+
 - `prompt_cache` : mesurer le hit-rate réel après 1 mois de prod et décider
   si la fenêtre 24h est la bonne (peut-être 12h pour Pro/Agency, 7j pour
   Starter ?)
@@ -339,44 +347,44 @@ appliquée.
 ## Mois : MMMM YYYY
 
 ### Acquisition
-- Visiteurs uniques mamie-seo : 
-- Trial signups : 
-- Conversion landing → trial : 
-- Sources principales (top 3) : 
+- Visiteurs uniques mamie-seo :
+- Trial signups :
+- Conversion landing → trial :
+- Sources principales (top 3) :
 
 ### Revenue
-- MRR : 
-- ARR : 
-- Net new MRR : 
-- ARPU :  
-- Total clients payants : 
+- MRR :
+- ARR :
+- Net new MRR :
+- ARPU :
+- Total clients payants :
 
 ### Mix client
-- Starter : 
-- Pro : 
-- Agence : 
-- Enterprise : 
+- Starter :
+- Pro :
+- Agence :
+- Enterprise :
 
 ### Rétention
-- Churn $ : 
-- Churn logo : 
-- NRR : 
+- Churn $ :
+- Churn logo :
+- NRR :
 
 ### Produit
-- DAU / MAU : 
-- Prompts actifs trackés : 
-- Runs / jour : 
-- Coûts LLM / jour : 
+- DAU / MAU :
+- Prompts actifs trackés :
+- Runs / jour :
+- Coûts LLM / jour :
 
 ### Coûts
-- Coûts variables totaux : 
-- Coûts fixes : 
-- Marge brute % : 
+- Coûts variables totaux :
+- Coûts fixes :
+- Marge brute % :
 
 ### NPS (trimestriel)
-- Score : 
-- Top 3 demandes feature : 
-- Top 3 raisons de churn : 
+- Score :
+- Top 3 demandes feature :
+- Top 3 raisons de churn :
 
 ### Notes du mois
 (événements clés, décisions, learnings)
@@ -385,16 +393,19 @@ appliquée.
 ### Mois : Mai 2026 (initialisation)
 
 #### Acquisition
+
 - Visiteurs uniques mamie-seo : à mesurer
 - Trial signups : 0 (pré-lancement)
 - Conversion : N/A
 - Sources : N/A
 
 #### Revenue
+
 - MRR : 0
 - Total clients payants : 0
 
 #### Notes du mois
+
 - Phase de pré-décision et préparation
 - Documentation projet créée
 - Choix Sprint 0 en cours
@@ -423,73 +434,81 @@ appliquée.
 ## Snapshot YYYY-MM
 
 ### Profound (US)
-- Prix entrée : 
-- Prix mid-tier : 
-- Nouveautés observées : 
-- Actu / annonces : 
+- Prix entrée :
+- Prix mid-tier :
+- Nouveautés observées :
+- Actu / annonces :
 
 ### Peec AI (DE)
-- Prix entrée : 
-- Prix mid-tier : 
-- Nouveautés observées : 
-- Actu / annonces : 
+- Prix entrée :
+- Prix mid-tier :
+- Nouveautés observées :
+- Actu / annonces :
 
 ### Goodie AI (US)
-- Prix : 
-- Nouveautés : 
+- Prix :
+- Nouveautés :
 
 ### Otterly
-- Prix : 
-- Nouveautés : 
+- Prix :
+- Nouveautés :
 
 ### Cairrot
-- Prix : 
-- Nouveautés : 
+- Prix :
+- Nouveautés :
 
 ### Semrush AI / Ahrefs Brand Radar
-- État du module GEO : 
-- Évolution depuis dernier snapshot : 
+- État du module GEO :
+- Évolution depuis dernier snapshot :
 
 ### Acteur FR émergent
 - Concurrent FR identifié ? : Oui / Non
-- Si oui, nom + URL + offre : 
+- Si oui, nom + URL + offre :
 
 ### Verdict du mois
 - Mouvement significatif sur la concurrence : Oui / Non
-- Action à prendre : 
+- Action à prendre :
 ```
 
 ### Snapshot Mai 2026 (référence initiale)
 
 #### Profound (US)
+
 - Prix entrée : $99 (ChatGPT only) → $399 Growth → $499+ Enterprise
 - Nouveautés : GPT-5.2 tracking, Profound Workflows, MCP integration, Personas, HIPAA, Shopping Analysis, 30+ langues, 400M+ Prompt Volumes dataset, Akamai integration, Agency Mode
 
 #### Peec AI (DE)
+
 - Prix entrée : €89 Starter
 - Nouveautés : levée Series A $21M nov. 2025 (total $29M), valo > $100M, €650K ARR en 4 mois
 - Couverture LLM : ChatGPT, Perplexity, Google AI Overviews, Claude (3-4 selon tier)
 
 #### Goodie AI (US)
+
 - Prix : à partir de $495/mois
 - Vision intégrée monitoring + optimization + attribution
 
 #### Otterly
+
 - Prix : $29 Lite, $189 Standard
 - Nouveauté : GEO Audit tool
 
 #### Cairrot
+
 - Prix : $99 Pro
 - Avantage : 5 LLMs (ChatGPT, Perplexity, Claude, Gemini, DeepSeek), free API
 
 #### Semrush AI / Ahrefs Brand Radar
+
 - État : modules GEO actifs mais surcouches, pas natif
 - AI Search Add-on SE Ranking : $71.20/mois en plus
 
 #### Acteur FR émergent
+
 - Aucun identifié en SaaS GEO-first FR à mai 2026 ✅
 
 #### Verdict du mois
+
 - Mouvement significatif : Peec AI continue d'accélérer mais pas encore localisé FR
 - Action : aucune urgence, fenêtre temporelle confirmée
 
@@ -505,34 +524,34 @@ appliquée.
 ### Bilan vs objectifs
 - Objectif MRR : ___ → Réel : ___
 - Objectif clients : ___ → Réel : ___
-- Objectif autres : 
+- Objectif autres :
 
 ### Ce qui a marché
-- 
-- 
-- 
+-
+-
+-
 
 ### Ce qui n'a pas marché
-- 
-- 
-- 
+-
+-
+-
 
 ### Ajustements pour Q suivant
-- 
-- 
-- 
+-
+-
+-
 
 ### Revue des risques (cf. doc 07)
-- Nouveaux risques identifiés : 
-- Risques aggravés : 
-- Risques réduits : 
+- Nouveaux risques identifiés :
+- Risques aggravés :
+- Risques réduits :
 
 ### Décision majeure pour Q suivant
-- 
+-
 
 ### Énergie / moral founder
-- État : 
-- Actions wellness : 
+- État :
+- Actions wellness :
 ```
 
 ### Q2 2026 (juin) — première revue
@@ -558,19 +577,20 @@ Si pendant l'année un pivot est décidé (changement de positionnement, de cibl
 
 Section pour stocker les idées qui émergent en cours de route mais qu'on ne traite pas tout de suite.
 
-| Date | Idée | Source | Priorité estimée | Status |
-|---|---|---|---|---|
-| 2026-05-05 | API publique ouverte aux dévs (en V2.5) | Réflexion stratégie | P2 | Parked |
-| 2026-05-05 | Plugin WordPress de check GEO | Inspiration ContentMonk | P2 | Parked |
-| 2026-05-05 | Étude annuelle "État du GEO en France" | Marketing | P1 | À faire mois 6 |
-| 2026-05-05 | Application mobile native | Réflexion produit | P3 | Parked long terme |
-| 2026-05-05 | Marketplace de prompts par secteur | Réflexion produit | P2 | À explorer mois 9 |
+| Date       | Idée                                    | Source                  | Priorité estimée | Status            |
+| ---------- | --------------------------------------- | ----------------------- | ---------------- | ----------------- |
+| 2026-05-05 | API publique ouverte aux dévs (en V2.5) | Réflexion stratégie     | P2               | Parked            |
+| 2026-05-05 | Plugin WordPress de check GEO           | Inspiration ContentMonk | P2               | Parked            |
+| 2026-05-05 | Étude annuelle "État du GEO en France"  | Marketing               | P1               | À faire mois 6    |
+| 2026-05-05 | Application mobile native               | Réflexion produit       | P3               | Parked long terme |
+| 2026-05-05 | Marketplace de prompts par secteur      | Réflexion produit       | P2               | À explorer mois 9 |
 
 ---
 
 ## Templates emails / messages clé (à réutiliser)
 
 ### Template "annonce nouveauté produit"
+
 ```
 Sujet : Nouvelle feature : [X] est arrivée 🎉
 
@@ -591,17 +611,18 @@ Belle journée,
 ```
 
 ### Template "sondage NPS trimestriel"
+
 ```
 Sujet : 30 secondes pour Mamie GEO ?
 
 Bonjour [prénom],
 
-J'ai une seule question : sur une échelle de 0 à 10, recommanderiez-vous 
+J'ai une seule question : sur une échelle de 0 à 10, recommanderiez-vous
 Mamie GEO à un autre freelance / PME / agence ?
 
 [Lien sondage 1 question]
 
-Si vous avez 30 secondes de plus, dites-moi pourquoi vous avez mis cette 
+Si vous avez 30 secondes de plus, dites-moi pourquoi vous avez mis cette
 note (en répondant à cet email).
 
 Merci,
@@ -609,6 +630,7 @@ Merci,
 ```
 
 ### Template "demande de témoignage"
+
 ```
 Sujet : 5 minutes pour aider Mamie GEO ?
 
@@ -616,7 +638,7 @@ Bonjour [prénom],
 
 J'ai vu que [résultat concret du client]. Bravo !
 
-Est-ce que vous accepteriez de partager une ligne ou deux à ce sujet, 
+Est-ce que vous accepteriez de partager une ligne ou deux à ce sujet,
 qu'on pourrait utiliser sur notre site avec votre nom et photo ?
 
 Si oui, voici ce qu'on cherche :

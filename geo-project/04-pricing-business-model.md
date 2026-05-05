@@ -29,6 +29,7 @@ Le blog (`/blog`), les articles, la newsletter, les guides téléchargeables, le
 ### Couche 2 — outil "Test ma visibilité IA" en one-shot gratuit
 
 Sur le site marketing, un outil web public :
+
 - Email requis (pas de compte SaaS complet)
 - L'utilisateur entre son domaine + 5 prompts
 - L'outil lance 1 LLM (ChatGPT) avec recherche web
@@ -44,6 +45,7 @@ C'est le **pont** entre le média gratuit et le SaaS payant. Il fait quasiment t
 ### Couche 3 — trial 14 jours sans carte sur l'app
 
 Le SaaS lui-même :
+
 - 14 jours d'accès complet au plan **Pro** (le tier mid)
 - Pas de carte bancaire requise à l'inscription
 - Email J+3 et J+10 pour engagement
@@ -59,6 +61,7 @@ Le SaaS lui-même :
 Question récurrente : "Pourquoi pas un free tier dans le SaaS, genre 1 marque + 5 prompts + 1 LLM gratuit pour toujours ?"
 
 **Réponses** :
+
 - Coûts LLM réels même bridés : ~50-100 € de coût par 100 freemium = perte sèche
 - Les freemium consomment du support comme des payants
 - Conversion freemium → payant en B2B SaaS = 1-3% (très faible)
@@ -147,14 +150,14 @@ Question récurrente : "Pourquoi pas un free tier dans le SaaS, genre 1 marque +
 
 ## Add-ons et options
 
-| Option | Prix |
-|---|---|
-| Marque supplémentaire (Pro) | +29 €/mois |
-| Pack 100 prompts supplémentaires | +49 €/mois |
-| Tracking d'un LLM spécifique custom (ex: DeepSeek, Grok) | +99 €/mois |
-| Onboarding accompagné (1h Visio) | 149 € one-shot |
-| Audit GEO complet sur mesure | 990 € one-shot |
-| Formation équipe (2h Visio) | 590 € |
+| Option                                                   | Prix           |
+| -------------------------------------------------------- | -------------- |
+| Marque supplémentaire (Pro)                              | +29 €/mois     |
+| Pack 100 prompts supplémentaires                         | +49 €/mois     |
+| Tracking d'un LLM spécifique custom (ex: DeepSeek, Grok) | +99 €/mois     |
+| Onboarding accompagné (1h Visio)                         | 149 € one-shot |
+| Audit GEO complet sur mesure                             | 990 € one-shot |
+| Formation équipe (2h Visio)                              | 590 €          |
 
 ---
 
@@ -171,42 +174,44 @@ Question récurrente : "Pourquoi pas un free tier dans le SaaS, genre 1 marque +
 
 ### Coût d'acquisition (CAC) cible
 
-| Canal | CAC cible | Note |
-|---|---|---|
-| Organique (mamie-seo + SEO) | 0-50 € | Coût du temps de création de contenu réparti |
-| LinkedIn outbound | 80-150 € | Quelques heures de prospection par signup |
-| Webinar / event | 100-200 € | Coût d'organisation rapporté |
-| Google Ads | 100-300 € | À tester ponctuellement |
-| Affiliation | 30-100 € | Selon commission |
+| Canal                       | CAC cible | Note                                         |
+| --------------------------- | --------- | -------------------------------------------- |
+| Organique (mamie-seo + SEO) | 0-50 €    | Coût du temps de création de contenu réparti |
+| LinkedIn outbound           | 80-150 €  | Quelques heures de prospection par signup    |
+| Webinar / event             | 100-200 € | Coût d'organisation rapporté                 |
+| Google Ads                  | 100-300 € | À tester ponctuellement                      |
+| Affiliation                 | 30-100 €  | Selon commission                             |
 
 ### LTV cible
 
 Calcul de référence pour le plan Pro (149 €/mois) :
+
 - Churn mensuel cible : 5% (industrie SaaS B2B = 3-7%)
 - LTV = ARPU / churn = 149 / 0.05 = **~2 980 €**
 
 ### Ratio LTV/CAC cible
+
 - **> 3** = sain
 - **5-10** = excellent
 - < 3 = on creuse
 
 ### Marge brute par plan (après coûts LLM uniquement)
 
-| Plan | Prix | Coût LLM/mois | Marge brute | % |
-|---|---|---|---|---|
-| Starter | 49 € | ~1.50 € | 47.50 € | **97%** |
-| Pro | 149 € | ~45 € | 104 € | **70%** |
-| Agence | 399 € | ~135 € | 264 € | **66%** |
+| Plan    | Prix  | Coût LLM/mois | Marge brute | %       |
+| ------- | ----- | ------------- | ----------- | ------- |
+| Starter | 49 €  | ~1.50 €       | 47.50 €     | **97%** |
+| Pro     | 149 € | ~45 €         | 104 €       | **70%** |
+| Agence  | 399 € | ~135 €        | 264 €       | **66%** |
 
 ### Marge brute après tous coûts variables
 
 Ajout : Stripe (1.5% + 0.25€), Brevo (forfait absorbé), hébergement (réparti) :
 
-| Plan | Marge nette ~ |
-|---|---|
-| Starter | ~93% |
-| Pro | ~65% |
-| Agence | ~62% |
+| Plan    | Marge nette ~ |
+| ------- | ------------- |
+| Starter | ~93%          |
+| Pro     | ~65%          |
+| Agence  | ~62%          |
 
 **Conclusion** : pricing tient si les hypothèses LLM sont vérifiées. Le Pro est le tier le plus risqué — à monitorer mensuellement.
 
@@ -217,6 +222,7 @@ Ajout : Stripe (1.5% + 0.25€), Brevo (forfait absorbé), hébergement (répart
 ### Hypothèses de mix client
 
 À l'équilibre (mois 12), répartition cible :
+
 - 50% Starter
 - 35% Pro
 - 13% Agence
@@ -226,22 +232,23 @@ ARPU blended cible : ~140 €/mois
 
 ### Scénario conservateur — mois par mois
 
-| Mois | Starter | Pro | Agence | Ent. | MRR | Coûts variables | Marge contrib. |
-|---|---|---|---|---|---|---|---|
-| M1 | 5 | 1 | 0 | 0 | 394 € | 50 € | 344 € |
-| M2 | 10 | 3 | 0 | 0 | 937 € | 150 € | 787 € |
-| M3 | 18 | 6 | 1 | 0 | 2 178 € | 350 € | 1 828 € |
-| M4 | 25 | 10 | 2 | 0 | 3 513 € | 600 € | 2 913 € |
-| M5 | 35 | 15 | 3 | 0 | 5 167 € | 900 € | 4 267 € |
-| M6 | 45 | 20 | 4 | 0 | 6 801 € | 1 250 € | 5 551 € |
-| M7 | 55 | 25 | 5 | 0 | 8 415 € | 1 600 € | 6 815 € |
-| M8 | 65 | 30 | 6 | 1 | 11 029 € | 2 000 € | 9 029 € |
-| M9 | 75 | 35 | 7 | 1 | 12 633 € | 2 350 € | 10 283 € |
-| M10 | 85 | 40 | 8 | 1 | 14 237 € | 2 700 € | 11 537 € |
-| M11 | 95 | 45 | 9 | 2 | 17 351 € | 3 100 € | 14 251 € |
-| M12 | 105 | 50 | 10 | 2 | 18 945 € | 3 450 € | 15 495 € |
+| Mois | Starter | Pro | Agence | Ent. | MRR      | Coûts variables | Marge contrib. |
+| ---- | ------- | --- | ------ | ---- | -------- | --------------- | -------------- |
+| M1   | 5       | 1   | 0      | 0    | 394 €    | 50 €            | 344 €          |
+| M2   | 10      | 3   | 0      | 0    | 937 €    | 150 €           | 787 €          |
+| M3   | 18      | 6   | 1      | 0    | 2 178 €  | 350 €           | 1 828 €        |
+| M4   | 25      | 10  | 2      | 0    | 3 513 €  | 600 €           | 2 913 €        |
+| M5   | 35      | 15  | 3      | 0    | 5 167 €  | 900 €           | 4 267 €        |
+| M6   | 45      | 20  | 4      | 0    | 6 801 €  | 1 250 €         | 5 551 €        |
+| M7   | 55      | 25  | 5      | 0    | 8 415 €  | 1 600 €         | 6 815 €        |
+| M8   | 65      | 30  | 6      | 1    | 11 029 € | 2 000 €         | 9 029 €        |
+| M9   | 75      | 35  | 7      | 1    | 12 633 € | 2 350 €         | 10 283 €       |
+| M10  | 85      | 40  | 8      | 1    | 14 237 € | 2 700 €         | 11 537 €       |
+| M11  | 95      | 45  | 9      | 2    | 17 351 € | 3 100 €         | 14 251 €       |
+| M12  | 105     | 50  | 10     | 2    | 18 945 € | 3 450 €         | 15 495 €       |
 
 **Résumé scénario conservateur** :
+
 - MRR fin M12 : ~19 K€
 - ARR fin M12 : ~227 K€
 - Marge contributive M12 : ~15.5 K€/mois
@@ -249,6 +256,7 @@ ARPU blended cible : ~140 €/mois
 ### Scénario base (le plus probable)
 
 Multiplier le scénario conservateur par 1.3 :
+
 - MRR fin M12 : ~25 K€
 - ARR fin M12 : ~300 K€
 - Marge contributive M12 : ~20 K€/mois
@@ -256,6 +264,7 @@ Multiplier le scénario conservateur par 1.3 :
 ### Scénario optimiste
 
 Multiplier par 2 :
+
 - MRR fin M12 : ~38 K€
 - ARR fin M12 : ~456 K€
 - Marge contributive M12 : ~30 K€/mois
@@ -264,22 +273,23 @@ Multiplier par 2 :
 
 ## Coûts fixes mensuels (estimation solo)
 
-| Poste | Coût mensuel |
-|---|---|
-| Vercel Pro | $20 |
-| Neon Postgres | 0 (free tier V0) puis $19 Pro |
+| Poste                                | Coût mensuel                                           |
+| ------------------------------------ | ------------------------------------------------------ |
+| Vercel Pro                           | $20                                                    |
+| Neon Postgres                        | 0 (free tier V0) puis $19 Pro                          |
 | Queue (Postgres-based + Vercel Cron) | 0 en V0 ; migration Inngest $20 quand > 100K runs/mois |
-| Sentry | Free → $26 |
-| PostHog cloud | Free tier puis $0-50 |
-| BetterStack | $10 |
-| Brevo | €19-69 selon volume |
-| Stripe | 0 (variable seulement) |
-| Domaine + emails Google Workspace | $30 |
-| Outils dev (Cursor, GitHub) | $50 |
-| Comptable expert (mensuel forfait) | €150 |
-| Total approximatif | **~€350-600** |
+| Sentry                               | Free → $26                                             |
+| PostHog cloud                        | Free tier puis $0-50                                   |
+| BetterStack                          | $10                                                    |
+| Brevo                                | €19-69 selon volume                                    |
+| Stripe                               | 0 (variable seulement)                                 |
+| Domaine + emails Google Workspace    | $30                                                    |
+| Outils dev (Cursor, GitHub)          | $50                                                    |
+| Comptable expert (mensuel forfait)   | €150                                                   |
+| Total approximatif                   | **~€350-600**                                          |
 
 À ajouter pour année 1 :
+
 - Outils marketing (Buffer, Notion, Figma, ConvertKit) : ~50€/mois
 - Eventuellement budget pub : variable
 - Frais juridiques setup CGV/CGU : 800-1500€ one-shot
@@ -288,14 +298,14 @@ Multiplier par 2 :
 
 ## P&L simplifié année 1 (scénario conservateur)
 
-| Poste | Année 1 |
-|---|---|
-| **Revenus (MRR cumulé annualisé)** | ~ 70 000 € |
-| Coûts variables (LLM, Stripe, Brevo) | ~ 14 000 € |
-| Coûts fixes (infra, outils, compta) | ~ 6 000 € |
-| Coûts setup (juridique, design, naming) | ~ 3 000 € |
-| **Marge avant rémunération** | **~ 47 000 €** |
-| Rémunération solo (à dégager) | 0-30 000 € (selon montée en charge) |
+| Poste                                   | Année 1                             |
+| --------------------------------------- | ----------------------------------- |
+| **Revenus (MRR cumulé annualisé)**      | ~ 70 000 €                          |
+| Coûts variables (LLM, Stripe, Brevo)    | ~ 14 000 €                          |
+| Coûts fixes (infra, outils, compta)     | ~ 6 000 €                           |
+| Coûts setup (juridique, design, naming) | ~ 3 000 €                           |
+| **Marge avant rémunération**            | **~ 47 000 €**                      |
+| Rémunération solo (à dégager)           | 0-30 000 € (selon montée en charge) |
 
 → Si Max s'octroie 30 K€ de rémunération sur l'année 1, il reste ~17 K€ de réserve pour réinvestir.
 → Si en parallèle il garde 30-50% de freelance, le cash personnel est sécurisé (60-90 K€ supplémentaires).
@@ -305,16 +315,19 @@ Multiplier par 2 :
 ## Stratégie d'upsell
 
 ### Du Starter vers Pro
+
 - Trigger : utilisateur atteint 80% de ses prompts ou consulte plusieurs marques
 - Email automatique : "Votre tracking semble décollé, passez à Pro pour 3 marques + tracking quotidien"
 - Conversion cible : 15-25% des Starter en 3 mois
 
 ### Du Pro vers Agence
+
 - Trigger : utilisateur ajoute plus de 2 marques externes (ses clients)
 - Email + appel : "Vous gérez plusieurs marques, le plan Agence vous donne accès à la marque blanche"
 - Conversion cible : 20% des Pro multi-marques
 
 ### Du Agence vers Enterprise
+
 - Trigger : agence atteint 8+ workspaces ou demande SSO / API
 - Touch commercial direct (Max au téléphone)
 - Cible : 1-2 conversions / an en année 1, croissant
@@ -325,11 +338,11 @@ Multiplier par 2 :
 
 ### Si le coût LLM moyen est 2x plus élevé que prévu
 
-| Plan | Coût LLM | Marge nette |
-|---|---|---|
-| Starter | 3 € | 94% (OK) |
-| Pro | 90 € | 40% (limite) |
-| Agence | 270 € | 32% (insuffisant) |
+| Plan    | Coût LLM | Marge nette       |
+| ------- | -------- | ----------------- |
+| Starter | 3 €      | 94% (OK)          |
+| Pro     | 90 €     | 40% (limite)      |
+| Agence  | 270 €    | 32% (insuffisant) |
 
 → **Action** : reprice Agence à 599€ ou cap usage à 200 prompts.
 

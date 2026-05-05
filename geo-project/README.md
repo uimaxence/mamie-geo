@@ -7,32 +7,32 @@
 
 ## Statut du projet
 
-| Champ | Valeur |
-|---|---|
-| Phase actuelle | Pré-décision (analyse) |
-| Date de création | Mai 2026 |
-| Décision GO / NO-GO prévue | Fin mai 2026 |
-| Lancement V0 (si GO) | Juin 2026 |
-| Cible MRR mois 6 | 8 000 € |
-| Cible MRR mois 12 | 25 000 € |
+| Champ                      | Valeur                 |
+| -------------------------- | ---------------------- |
+| Phase actuelle             | Pré-décision (analyse) |
+| Date de création           | Mai 2026               |
+| Décision GO / NO-GO prévue | Fin mai 2026           |
+| Lancement V0 (si GO)       | Juin 2026              |
+| Cible MRR mois 6           | 8 000 €                |
+| Cible MRR mois 12          | 25 000 €               |
 
 ---
 
 ## Index des documents
 
-| # | Document | Contenu |
-|---|---|---|
-| 00 | [Vision et stratégie](./00-vision-strategie.md) | Thèse, positionnement, manifesto, ce qu'on n'est PAS |
-| 01 | [Marché et concurrence](./01-marche-concurrence.md) | TAM/SAM/SOM, concurrents détaillés, gap analysis, timing |
-| 02 | [Produit et roadmap](./02-produit-roadmap.md) | Spec V0/V1/V2, user stories, métriques produit |
-| 03 | [Architecture technique](./03-architecture-technique.md) | Stack, BDD, APIs LLM, coûts variables, sécurité |
-| 04 | [Pricing et business model](./04-pricing-business-model.md) | Tiers, unit economics, projections financières |
-| 05 | [Go-to-market](./05-go-to-market.md) | Plan 90 jours, canaux, content, templates outreach |
-| 06 | [Activation mamie-seo.fr](./06-activation-mamie-seo.md) | Pivot du site existant, lead magnets, contenu |
-| 07 | [Risques et mitigations](./07-risques-mitigations.md) | Risques marché, techniques, perso ; contingences |
-| 08 | [Roadmap d'exécution](./08-roadmap-execution.md) | Timeline mois par mois, sprints, KPIs, gates |
-| 09 | [Décisions et journal](./09-decisions-journal.md) | Log des décisions importantes (à tenir à jour) |
-| 10 | [Direction artistique et design](./10-design-direction.md) | Direction visuelle, anti-IA look, patterns obligatoires |
+| #   | Document                                                    | Contenu                                                  |
+| --- | ----------------------------------------------------------- | -------------------------------------------------------- |
+| 00  | [Vision et stratégie](./00-vision-strategie.md)             | Thèse, positionnement, manifesto, ce qu'on n'est PAS     |
+| 01  | [Marché et concurrence](./01-marche-concurrence.md)         | TAM/SAM/SOM, concurrents détaillés, gap analysis, timing |
+| 02  | [Produit et roadmap](./02-produit-roadmap.md)               | Spec V0/V1/V2, user stories, métriques produit           |
+| 03  | [Architecture technique](./03-architecture-technique.md)    | Stack, BDD, APIs LLM, coûts variables, sécurité          |
+| 04  | [Pricing et business model](./04-pricing-business-model.md) | Tiers, unit economics, projections financières           |
+| 05  | [Go-to-market](./05-go-to-market.md)                        | Plan 90 jours, canaux, content, templates outreach       |
+| 06  | [Activation mamie-seo.fr](./06-activation-mamie-seo.md)     | Pivot du site existant, lead magnets, contenu            |
+| 07  | [Risques et mitigations](./07-risques-mitigations.md)       | Risques marché, techniques, perso ; contingences         |
+| 08  | [Roadmap d'exécution](./08-roadmap-execution.md)            | Timeline mois par mois, sprints, KPIs, gates             |
+| 09  | [Décisions et journal](./09-decisions-journal.md)           | Log des décisions importantes (à tenir à jour)           |
+| 10  | [Direction artistique et design](./10-design-direction.md)  | Direction visuelle, anti-IA look, patterns obligatoires  |
 
 ---
 
@@ -48,14 +48,14 @@ Le marché GEO mondial passe de **1,48 Md$ en 2026 à 17 Md$ en 2034** (CAGR 45,
 
 ### Le positionnement compétitif
 
-| | Profound (US) | Peec AI (DE) | **Mamie GEO** |
-|---|---|---|---|
-| Cible | Enterprise | Mid-market EU | **Freelance + PME + agences FR** |
-| Prix entrée | $99-499 | €89 | **€49** |
-| Couverture LLM | 8 | 4-5 | **5 dont Le Chat** |
-| UI / Support | EN | EN/multilingue | **FR-first** |
-| Hébergement | US | DE | **France** |
-| Marque blanche agence | Premium | Limité | **Cœur d'offre** |
+|                       | Profound (US) | Peec AI (DE)   | **Mamie GEO**                    |
+| --------------------- | ------------- | -------------- | -------------------------------- |
+| Cible                 | Enterprise    | Mid-market EU  | **Freelance + PME + agences FR** |
+| Prix entrée           | $99-499       | €89            | **€49**                          |
+| Couverture LLM        | 8             | 4-5            | **5 dont Le Chat**               |
+| UI / Support          | EN            | EN/multilingue | **FR-first**                     |
+| Hébergement           | US            | DE             | **France**                       |
+| Marque blanche agence | Premium       | Limité         | **Cœur d'offre**                 |
 
 ### La stratégie
 
@@ -80,19 +80,19 @@ Fenêtre temporelle courte (12-18 mois) avant que Semrush/Ahrefs/Peec ne sortent
 
 ## Glossaire rapide
 
-| Terme | Définition |
-|---|---|
-| **GEO** | Generative Engine Optimization — optimiser le contenu pour être cité par les LLM |
-| **AEO** | Answer Engine Optimization — synonyme largement utilisé de GEO |
-| **LLM** | Large Language Model — ChatGPT, Claude, Mistral, etc. |
-| **Citation** | Mention d'une marque ou source dans la réponse d'un LLM |
-| **Citation drift** | Variabilité des sources citées par un LLM dans le temps (40-60%/mois) |
-| **Prompt-monitoring** | Lancer périodiquement les mêmes prompts pour mesurer l'évolution des citations |
-| **Share of voice IA** | Part des réponses IA qui mentionnent ta marque vs concurrents |
-| **MRR** | Monthly Recurring Revenue |
-| **ARR** | Annual Recurring Revenue (MRR × 12) |
-| **CAC** | Customer Acquisition Cost |
-| **LTV** | Lifetime Value |
+| Terme                 | Définition                                                                       |
+| --------------------- | -------------------------------------------------------------------------------- |
+| **GEO**               | Generative Engine Optimization — optimiser le contenu pour être cité par les LLM |
+| **AEO**               | Answer Engine Optimization — synonyme largement utilisé de GEO                   |
+| **LLM**               | Large Language Model — ChatGPT, Claude, Mistral, etc.                            |
+| **Citation**          | Mention d'une marque ou source dans la réponse d'un LLM                          |
+| **Citation drift**    | Variabilité des sources citées par un LLM dans le temps (40-60%/mois)            |
+| **Prompt-monitoring** | Lancer périodiquement les mêmes prompts pour mesurer l'évolution des citations   |
+| **Share of voice IA** | Part des réponses IA qui mentionnent ta marque vs concurrents                    |
+| **MRR**               | Monthly Recurring Revenue                                                        |
+| **ARR**               | Annual Recurring Revenue (MRR × 12)                                              |
+| **CAC**               | Customer Acquisition Cost                                                        |
+| **LTV**               | Lifetime Value                                                                   |
 
 ---
 

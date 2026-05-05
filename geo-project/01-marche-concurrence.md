@@ -4,11 +4,11 @@
 
 ### Marché mondial GEO Services
 
-| Année | Taille marché | Source |
-|---|---|---|
-| 2026 | 1,48 Md$ | Intel Market Research, fév. 2026 |
-| 2028 | 3,09 Md$ (projection CAGR 45,5%) | Idem |
-| 2034 | 17,02 Md$ | Idem |
+| Année | Taille marché                    | Source                           |
+| ----- | -------------------------------- | -------------------------------- |
+| 2026  | 1,48 Md$                         | Intel Market Research, fév. 2026 |
+| 2028  | 3,09 Md$ (projection CAGR 45,5%) | Idem                             |
+| 2034  | 17,02 Md$                        | Idem                             |
 
 **CAGR 45,5%.** Hypercroissance comparable au SaaS de 2010-2015.
 
@@ -20,12 +20,12 @@ Méthode : France ≈ 4-5% du marché mondial logiciel B2B → 60-75 M€ en 202
 
 ### TAM / SAM / SOM cibles
 
-| Niveau | Définition | Volume FR |
-|---|---|---|
-| **TAM** | Toutes entreprises FR avec >1 employé marketing/communication | ~250 000 entreprises |
-| **SAM** | PME, agences, freelances avec budget marketing > 500€/mois | ~80 000 |
-| **SOM** réaliste an 1 | SMB et agences early adopters touchables via SEO + LinkedIn + bouche-à-oreille | 100-300 clients |
-| **SOM** réaliste an 3 | Idem + grands comptes FR + expansion francophone | 1000-2000 clients |
+| Niveau                | Définition                                                                     | Volume FR            |
+| --------------------- | ------------------------------------------------------------------------------ | -------------------- |
+| **TAM**               | Toutes entreprises FR avec >1 employé marketing/communication                  | ~250 000 entreprises |
+| **SAM**               | PME, agences, freelances avec budget marketing > 500€/mois                     | ~80 000              |
+| **SOM** réaliste an 1 | SMB et agences early adopters touchables via SEO + LinkedIn + bouche-à-oreille | 100-300 clients      |
+| **SOM** réaliste an 3 | Idem + grands comptes FR + expansion francophone                               | 1000-2000 clients    |
 
 ### Métriques clés du comportement utilisateur
 
@@ -42,6 +42,7 @@ Méthode : France ≈ 4-5% du marché mondial logiciel B2B → 60-75 M€ en 202
 ### Acteurs majeurs (international)
 
 #### Profound — leader enterprise US
+
 - **Origine** : New York, USA
 - **Pricing** : $99 (ChatGPT only) → $399 Growth → $499+ Enterprise
 - **Forces** : 8+ LLMs trackés, SOC 2 Type II, HIPAA, intégrations AWS/Cloudflare/Akamai, Prompt Volumes (400M+ conversations dataset), MCP integration, Personas
@@ -50,6 +51,7 @@ Méthode : France ≈ 4-5% du marché mondial logiciel B2B → 60-75 M€ en 202
 - **Levée** : VC-backed, croissance forte
 
 #### Peec AI — challenger mid-market EU
+
 - **Origine** : Berlin, Allemagne (lancé début 2025)
 - **Pricing** : €89 (Starter) → Pro → €499 Enterprise
 - **Forces** : UI clean, support direct (Slack), pricing accessible, croissance fulgurante (€650K ARR en 4 mois), levée de $29M en 8 mois
@@ -58,6 +60,7 @@ Méthode : France ≈ 4-5% du marché mondial logiciel B2B → 60-75 M€ en 202
 - **Le concurrent direct le plus dangereux pour nous**
 
 #### Goodie AI — premium positioning
+
 - **Origine** : NY, USA (2023)
 - **Pricing** : à partir de $495/mois
 - **Forces** : produit GEO-first dès le départ, vision intégrée monitoring + optimization + attribution + content intelligence
@@ -65,6 +68,7 @@ Méthode : France ≈ 4-5% du marché mondial logiciel B2B → 60-75 M€ en 202
 - **Cible** : enterprises sérieuses
 
 #### AthenaHQ — enterprise analytics
+
 - **Origine** : USA
 - **Pricing** : Enterprise (custom)
 - **Forces** : exec-level dashboards, competitive intelligence cross-modèles
@@ -73,16 +77,19 @@ Méthode : France ≈ 4-5% du marché mondial logiciel B2B → 60-75 M€ en 202
 ### Acteurs entry-level
 
 #### Otterly.ai
+
 - **Pricing** : $29/mois Lite, $189 Standard
 - **Forces** : pas cher, GEO Audit tool apprécié, simple
 - **Faiblesses** : peu de LLMs (pas Claude, DeepSeek, Grok, Meta AI), pas d'API export, intégrations limitées
 
 #### Rankscale.ai
+
 - **Pricing** : €20/mois entry, jusqu'à $780 Enterprise
 - **Forces** : pricing très bas
 - **Faiblesses** : peu connu, écosystème limité
 
 #### Promptmonitor
+
 - **Pricing** : $29/mois
 - **Forces** : couverture 8+ engines en entry tier
 - **Faiblesses** : pas de content/optimization, monitoring brut
@@ -90,17 +97,20 @@ Méthode : France ≈ 4-5% du marché mondial logiciel B2B → 60-75 M€ en 202
 ### Acteurs SEO traditionnels avec module GEO
 
 #### Semrush
+
 - **Pricing** : $139-499/mois, modules GEO inclus
 - **Forces** : déjà installé chez la plupart des SEO français, AI Content Generator + Content Audit GEO-friendly
 - **Faiblesses** : ergonomie ajoutée, pas natif GEO, lourd pour solo
 - **Le risque qu'ils intensifient leur module GEO en 2026-2027 est élevé**
 
 #### Ahrefs
+
 - **Pricing** : ~€129+/mois
 - **Forces** : Brand Radar + AI citations dans les rapports, base SEO solide
 - **Faiblesses** : module GEO encore jeune
 
 #### SE Ranking
+
 - **Pricing** : €129/mois, AI search add-on +$71
 - **Forces** : tout-en-un, francophone disponible
 - **Faiblesses** : mid-tier généraliste, pas focus GEO
@@ -122,6 +132,7 @@ Méthode : France ≈ 4-5% du marché mondial logiciel B2B → 60-75 M€ en 202
 ## Acteurs francophones (état 2026)
 
 ### Vrais concurrents directs en France
+
 **Aucun.**
 
 À ce jour, il n'existe pas d'outil SaaS francophone GEO-first conçu pour le marché FR. C'est le trou stratégique.
@@ -134,6 +145,7 @@ Méthode : France ≈ 4-5% du marché mondial logiciel B2B → 60-75 M€ en 202
 - **Mistral lui-même** : pourrait ajouter des analytics pour les marques mentionnées dans Le Chat (peu probable horizon 2 ans)
 
 ### Ce qui pourrait apparaître
+
 - Localisation française sérieuse de Peec AI (probabilité : haute, horizon 6-12 mois)
 - Module Semrush dédié FR (probabilité : moyenne, horizon 12-18 mois)
 - Spinoff d'une grosse agence SEO française (probabilité : moyenne)
@@ -142,16 +154,16 @@ Méthode : France ≈ 4-5% du marché mondial logiciel B2B → 60-75 M€ en 202
 
 ## Matrice comparative compacte
 
-| Outil | Prix entrée | LLMs trackés | Le Chat | UI FR | Marque blanche | Cible |
-|---|---|---|---|---|---|---|
-| Profound | $99-499 | 8+ | ❌ | ❌ | Premium tier | Enterprise |
-| Peec AI | €89 | 3-5 | ❌ | Partielle | Limitée | Mid-market |
-| Goodie AI | $495 | 6 | ❌ | ❌ | Premium | Enterprise |
-| Otterly | $29 | 5 | ❌ | ❌ | Standard tier | TPE |
-| Rankscale | €20 | 4 | ❌ | ❌ | Limitée | Solo |
-| Cairrot | $99 | 5 | ❌ | ❌ | Standard | Agences B2B |
-| Semrush AI | inclus | Plusieurs | ❌ | ✅ | Non | SEO teams |
-| **Mamie GEO** | **€49** | **5 dont Le Chat** | **✅** | **✅** | **Cœur de produit** | **SMB + agences FR** |
+| Outil         | Prix entrée | LLMs trackés       | Le Chat | UI FR     | Marque blanche      | Cible                |
+| ------------- | ----------- | ------------------ | ------- | --------- | ------------------- | -------------------- |
+| Profound      | $99-499     | 8+                 | ❌      | ❌        | Premium tier        | Enterprise           |
+| Peec AI       | €89         | 3-5                | ❌      | Partielle | Limitée             | Mid-market           |
+| Goodie AI     | $495        | 6                  | ❌      | ❌        | Premium             | Enterprise           |
+| Otterly       | $29         | 5                  | ❌      | ❌        | Standard tier       | TPE                  |
+| Rankscale     | €20         | 4                  | ❌      | ❌        | Limitée             | Solo                 |
+| Cairrot       | $99         | 5                  | ❌      | ❌        | Standard            | Agences B2B          |
+| Semrush AI    | inclus      | Plusieurs          | ❌      | ✅        | Non                 | SEO teams            |
+| **Mamie GEO** | **€49**     | **5 dont Le Chat** | **✅**  | **✅**    | **Cœur de produit** | **SMB + agences FR** |
 
 ---
 
@@ -182,17 +194,20 @@ Méthode : France ≈ 4-5% du marché mondial logiciel B2B → 60-75 M€ en 202
 ## Tendances marché à surveiller
 
 ### Tendances qui nous favorisent
+
 - AI Overviews Google déployés en France (annoncé pour 2026)
 - Mistral Le Chat continue son expansion B2B (annoncé revenus 1 Md€ pour fin 2026 par Mensch à Davos)
 - Loi européenne sur la souveraineté numérique pousse les comptes publics et grandes ETI vers des solutions EU
 - Saturation des outils SEO classiques (Semrush, Ahrefs) → recherche d'alternatives spécialisées
 
 ### Tendances neutres ou ambiguës
+
 - Consolidation à venir (Ignite Visibility a acquis AI Hack en 2025) — opportunité de sortie ?
 - ChatGPT introduit son propre moteur d'exploration → indexation native → moins dépendant des liens
 - Citations drift croissant → demande de monitoring continu
 
 ### Tendances contre nous
+
 - Semrush, Ahrefs, SE Ranking accélèrent leurs modules GEO
 - Peec AI lève fortement et probablement va se localiser FR
 - Convergence GEO + Content Generation (Scalenut, ContentMonk) — risque que les acheteurs préfèrent un combo
@@ -203,6 +218,7 @@ Méthode : France ≈ 4-5% du marché mondial logiciel B2B → 60-75 M€ en 202
 ## Sources et veille
 
 ### Sources de veille à mettre en place
+
 - **Newsletter** : Search Engine Land, Aleyda Solis, Lily Ray
 - **Communautés FR** : SEO Camp, WebRankInfo, French Tech, Slack/Discord SEO français
 - **Anglo** : r/SEO, r/SaaS, Indie Hackers, X (suivre fondateurs Profound, Peec, Otterly)
@@ -210,6 +226,7 @@ Méthode : France ≈ 4-5% du marché mondial logiciel B2B → 60-75 M€ en 202
 - **Mistral / IA française** : suivre les annonces officielles Mistral, Le Chat, Hugging Face FR
 
 ### Sources marché et études citées dans ce doc
+
 - Intel Market Research — GEO Services Market Outlook 2026-2034 (fév. 2026)
 - NoGood blog — Top GEO Tools 2026 (mars 2026)
 - Cairrot — Peec AI Review (mai 2026)
@@ -221,6 +238,7 @@ Méthode : France ≈ 4-5% du marché mondial logiciel B2B → 60-75 M€ en 202
 - Enrich Labs — GEO Complete 2026 Guide (fév. 2026)
 
 ### Veille à automatiser dès le mois 1
+
 - Alerte Google "Profound AI", "Peec AI", "GEO Mistral"
 - Suivi des prix concurrents tous les mois (snapshot dans 09-decisions-journal.md)
 - Veille Reddit r/SEO et r/SEMrush sur la perception des outils GEO

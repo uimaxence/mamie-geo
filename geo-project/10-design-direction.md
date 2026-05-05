@@ -13,27 +13,35 @@ Ce doc définit la direction artistique, les patterns obligatoires, les anti-pat
 Les 8 règles non-négociables pour ne pas avoir l'air "généré".
 
 ### 1. Pas de gradient violet/bleu en hero
+
 Le gradient `from-purple-600 to-blue-600` est devenu LE marqueur "AI startup". À bannir. Si gradient, alors couleurs chaudes (terracotta, ocre) ou monochrome subtil.
 
 ### 2. Voix personnelle, pas corporate
+
 Pas "Empower your brand with cutting-edge AI visibility solutions". Plutôt "Sache enfin si ChatGPT parle de toi". Tutoiement par défaut. Vocabulaire concret.
 
 ### 3. Founder visible
+
 Photo de Max, signature personnelle, histoire "pourquoi j'ai fait ça". Une page À propos qui se lit comme un post LinkedIn long, pas comme une notice d'entreprise. C'est l'arme imparable contre Profound et Peec.
 
 ### 4. Captures d'écran réelles, pas illustrations 3D
+
 Le dashboard doit être présent visuellement, avec données réalistes (anonymisées). Zéro illustration 3D abstraite. Si on a besoin de visuel, illustration à la main par un illustrateur (200-500€ pour 5 pièces) ou laisser les UI screenshots porter le récit.
 
 ### 5. Typographie avec du caractère
+
 Pas Inter par défaut. Mix serif/sans, ou un sans inhabituel (GT Walsheim, Söhne, Söhne Mono pour les nombres, Tiempos Headline pour les titres, Editorial New, ABC Diatype). C'est ce qui transforme un site "OK" en site "memorable".
 
 ### 6. Pattern "Sans nous / Avec nous"
+
 La section deux colonnes (frustrations à gauche, solutions à droite) est obligatoire. Difficile à générer en mode AI slop, hyper convertissante, et ancre le ton honnête.
 
 ### 7. Définir activement ce qu'on n'est PAS
+
 "Mamie GEO n'est pas Profound. Mamie GEO n'est pas Semrush." Une section dédiée, courte, claire. C'est exactement l'inverse de l'IA qui ne dit jamais ce qu'elle n'est pas. MeetSponsors le fait bien avec "MeetSponsors n'est pas une marketplace".
 
 ### 8. Imperfection volontaire
+
 Une rotation légère sur une carte, un texte manuscrit sur un screenshot, une faute orthographique en italique de second degré. Les détails imparfaits signent l'humain.
 
 ---
@@ -43,6 +51,7 @@ Une rotation légère sur une carte, un texte manuscrit sur un screenshot, une f
 ### MeetSponsors
 
 **Ce qu'on garde** :
+
 - Hero avec headline qui surprend ("Tu es éligible pour des sponsors que tu ne connais même pas")
 - Sous-titre qui explique la valeur de manière concrète, pas abstraite
 - Section "Sans / Avec" puissante (croix rouges vs check verts avec phrases concrètes)
@@ -54,12 +63,14 @@ Une rotation légère sur une carte, un texte manuscrit sur un screenshot, une f
 - Tutoiement français punchy ("Spoiler : ils viendront pas")
 
 **Ce qu'on n'imite pas** :
+
 - Le côté un peu YouTube/streamer dans le ton (notre cible est plus sérieuse : freelances SEO, CMO PME, agences)
 - Les emojis trop fréquents
 
 ### Taap Radar
 
 Le site est en JS-rendered, le contenu textuel n'est pas accessible directement. Mais d'expérience générale Taap a une esthétique :
+
 - Très claire, beaucoup de blanc
 - Charts et graphes mis en avant (pertinent pour analytics)
 - Typo distinctive (sans-serif géométrique custom)
@@ -77,6 +88,7 @@ Le site est en JS-rendered, le contenu textuel n'est pas accessible directement.
 **Mood**: New York Magazine, The Browser, Are.na, Mubi. Esprit "magazine intelligent" qui parle à un lecteur adulte.
 
 **Palette**:
+
 - Fond crème : `#FAF7F2` (pas blanc froid)
 - Texte principal : `#1A1A1A` (noir doux, pas pur)
 - Accent terracotta : `#C5532E` (boutons, liens, hover)
@@ -84,16 +96,19 @@ Le site est en JS-rendered, le contenu textuel n'est pas accessible directement.
 - Gris chaud secondaire : `#8C8579`
 
 **Typographie**:
+
 - Titres : **Tiempos Headline** (serif éditorial) — payant ~250$, ou alternative gratuite : **Source Serif Pro** ou **Newsreader**
 - Corps : **GT Walsheim** ou **Söhne** (payant) — alternative gratuite : **Inter** mais avec tracking serré et weights précis (300, 500, 700)
 - Numbers / data : **Söhne Mono** ou **JetBrains Mono**
 
 **Personnalité**:
+
 - Chaud, humain, rétro-moderne
 - Mamie GEO → mamie qui s'y connaît, pas mamie ringarde
 - Honneur la tradition éditoriale française (Libération, Le 1, Society)
 
 **Pourquoi recommandé** :
+
 - Cohérent avec naming Mamie GEO (chaleur, France, tradition)
 - Très différenciant : aucun concurrent SaaS GEO ne va dans cette direction
 - Évoque le sérieux éditorial qui rend crédible les chiffres et études qu'on publiera
@@ -103,6 +118,7 @@ Le site est en JS-rendered, le contenu textuel n'est pas accessible directement.
 **Mood** : DSFR (système de design État français), refonte récente Mistral AI, journal Le Monde digital. Esprit "fierté discrète française".
 
 **Palette**:
+
 - Fond blanc cassé : `#F8F8F8`
 - Bleu Marianne : `#000091`
 - Rouge Marianne (ponctuel) : `#E1000F`
@@ -110,15 +126,18 @@ Le site est en JS-rendered, le contenu textuel n'est pas accessible directement.
 - Gris : `#666666`
 
 **Typographie**:
+
 - Titres et corps : **Marianne** (libre, créée pour l'État FR) — gratuite
 - Mono : **JetBrains Mono**
 
 **Personnalité** :
+
 - Institutionnel mais frais
 - "Made in France" assumé sans cocorico
 - Crédibilité immédiate pour cibles publiques, banques, secteur souveraineté
 
 **Pourquoi en option B**:
+
 - Très bon pour cible Enterprise/souveraineté (Marc, persona 4)
 - Légèrement risqué : peut paraître froid pour cible freelance/PME
 - Économique (police gratuite officielle)
@@ -128,17 +147,20 @@ Le site est en JS-rendered, le contenu textuel n'est pas accessible directement.
 **Mood** : Linear, Cron, Tally, Rauno's site, Raycast. Esprit "indie SaaS qui maîtrise son art".
 
 **Palette**:
+
 - Fond crème : `#F5F4EE`
 - Graphite : `#222020`
 - Vert sapin : `#1B4332`
 - Accent sable : `#D4B996`
 
 **Typographie**:
+
 - Titres : **GT America** ou **Söhne**
 - Corps : idem ou **Geist**
 - Mono : **Geist Mono**
 
 **Personnalité**:
+
 - Minimal mais tiède, pas glacial
 - Soigné, "petit studio qui pense à tout"
 
@@ -149,6 +171,7 @@ Le site est en JS-rendered, le contenu textuel n'est pas accessible directement.
 ## Recommandation et choix
 
 **Direction A — Éditorial chaud** est la meilleure option pour :
+
 - Le naming "Mamie GEO" qui évoque la chaleur/transmission
 - Le différentiateur fort vs concurrents tech-froids US
 - L'angle éditorial qui sera porté par le blog mamie-seo et les études publiées
@@ -171,8 +194,8 @@ Structure :
 "Sache enfin si ChatGPT parle de toi (et tes concurrents)"
 
 [Sous-titre concret]
-"Mamie GEO mesure quotidiennement la visibilité de ta marque dans 
-ChatGPT, Claude, Perplexity, Gemini et Le Chat de Mistral. 
+"Mamie GEO mesure quotidiennement la visibilité de ta marque dans
+ChatGPT, Claude, Perplexity, Gemini et Le Chat de Mistral.
 Le tout en français, hébergé en France, à partir de 49€/mois."
 
 [CTA principal]
@@ -189,6 +212,7 @@ Le tout en français, hébergé en France, à partir de 49€/mois."
 Layout 2 colonnes. Croix rouges à gauche, check verts à droite.
 
 **Sans Mamie GEO**:
+
 - ❌ Tu écris du contenu sans savoir si l'IA le voit
 - ❌ Tes clients te demandent "et pour ChatGPT ?" et tu hausses les épaules
 - ❌ Tu paies Profound 500$/mois pour un outil 100% anglais qui ne tracke pas Le Chat
@@ -197,6 +221,7 @@ Layout 2 colonnes. Croix rouges à gauche, check verts à droite.
 - ❌ Tu n'as aucun rapport pro à montrer à ton client ou ton boss
 
 **Avec Mamie GEO**:
+
 - ✅ Score de visibilité IA quotidien sur 5 moteurs dont Le Chat
 - ✅ Comparaison directe avec tes 5 concurrents principaux
 - ✅ Rapports automatiques en marque blanche pour tes clients (plan Agence)
@@ -207,6 +232,7 @@ Layout 2 colonnes. Croix rouges à gauche, check verts à droite.
 ### Section "Comment ça marche" en 3 étapes
 
 Avec mockups réalistes ou screenshots :
+
 1. **Ajoute ta marque et tes concurrents** (30 secondes)
 2. **Mamie GEO génère 25 prompts pertinents** (auto, IA)
 3. **Reçois ton premier rapport en 10 minutes** (et ensuite chaque jour)
@@ -214,6 +240,7 @@ Avec mockups réalistes ou screenshots :
 ### Section "Pour qui c'est"
 
 Cards avec les 3 personas principaux :
+
 - Le freelance SEO (Sophie)
 - L'équipe marketing PME (Thomas)
 - L'agence en marque blanche (Aline)
@@ -236,6 +263,7 @@ Important pour éviter la confusion concurrentielle :
 ### Section "Hey, c'est Max 👋"
 
 Page À propos qui doit être :
+
 - Photo réelle de Max
 - Histoire personnelle (freelance qui en a marre, pourquoi le GEO, pourquoi en français)
 - Liens : LinkedIn, X, blog mamie-seo
@@ -253,6 +281,7 @@ Page À propos qui doit être :
 ### FAQ
 
 Au moins 12 questions, dont :
+
 - "Quels LLMs sont trackés ?"
 - "Le Chat de Mistral est inclus dans tous les plans ?"
 - "Vous trackez les AI Overviews de Google ?"
@@ -279,6 +308,7 @@ Au moins 12 questions, dont :
 ## Anti-patterns à bannir
 
 ### Visuels
+
 - ❌ Hero gradient violet/bleu
 - ❌ Illustrations 3D abstraites (style Stripe / Pitch.com)
 - ❌ Images stock business
@@ -288,6 +318,7 @@ Au moins 12 questions, dont :
 - ❌ Cards avec ombre douce identiques alignées en grille de 6
 
 ### Copy
+
 - ❌ "Empower your brand"
 - ❌ "Cutting-edge AI"
 - ❌ "Seamless integration"
@@ -299,6 +330,7 @@ Au moins 12 questions, dont :
 - ❌ "Boost your X with AI"
 
 ### Structure
+
 - ❌ Hero avec 3 colonnes "Fast / Reliable / Easy"
 - ❌ Section avec 4 icônes Lucide identiques
 - ❌ Trust banner "Comme vu dans" sans réelles mentions
@@ -315,12 +347,14 @@ Au moins 12 questions, dont :
 Le site marketing, le blog et l'app SaaS sont **dans la même app Next.js**, séparés par des route groups (`(marketing)`, `(blog)`, `(app)`).
 
 **Pourquoi pas Framer en V0** :
+
 - Solo founder = un seul projet à maintenir
 - Cohérence visuelle native entre marketing et app (mêmes composants UI)
 - Pas de double gestion de design system
 - Coût : 0 supplémentaire (Vercel Pro $20/mo pour tout)
 
 **Comment éviter le look "fait par un dev" malgré tout** :
+
 - Direction artistique forte (cf. plus haut, direction A recommandée)
 - Composants UI customisés en profondeur (pas shadcn par défaut)
 - Typographie premium ou choix non-évident
@@ -336,27 +370,27 @@ Le site marketing, le blog et l'app SaaS sont **dans la même app Next.js**, sé
 
 ### Sites à étudier en profondeur
 
-| Site | Pourquoi |
-|---|---|
-| MeetSponsors.com | Voix française punchy, structure "Sans/Avec", founder visible |
-| Linear.app | Typographie + animation détails |
-| Tally.so | Indie indie qui se voit, pas corporate |
-| Cron.com (avant Notion) | Editorial dans un produit tech |
-| Are.na | Pour la chaleur visuelle anti-tech |
-| Newsletter Stack (newsletter de Substack) | Editorial typo |
-| Frenchies.io | Tone français pour SaaS |
-| Lemonade insurance | Pour le ton humain en assurance (sortir de la grise) |
-| Hey.com | Pour les sections "Sans/Avec" très tranchées |
+| Site                                      | Pourquoi                                                      |
+| ----------------------------------------- | ------------------------------------------------------------- |
+| MeetSponsors.com                          | Voix française punchy, structure "Sans/Avec", founder visible |
+| Linear.app                                | Typographie + animation détails                               |
+| Tally.so                                  | Indie indie qui se voit, pas corporate                        |
+| Cron.com (avant Notion)                   | Editorial dans un produit tech                                |
+| Are.na                                    | Pour la chaleur visuelle anti-tech                            |
+| Newsletter Stack (newsletter de Substack) | Editorial typo                                                |
+| Frenchies.io                              | Tone français pour SaaS                                       |
+| Lemonade insurance                        | Pour le ton humain en assurance (sortir de la grise)          |
+| Hey.com                                   | Pour les sections "Sans/Avec" très tranchées                  |
 
 ### Marques à observer
 
-| Marque | Élément à voler |
-|---|---|
-| The Browser Company (Arc) | Typographie soignée + voix |
-| Pitch.com | Layout magazine, mais sans tomber dans 3D |
-| Vercel (avant tout récent) | Cleanness mais on en sort |
-| Claude (Anthropic) | Le serif headline + l'orange terracotta |
-| Mistral AI | Souveraineté française moderne |
+| Marque                     | Élément à voler                           |
+| -------------------------- | ----------------------------------------- |
+| The Browser Company (Arc)  | Typographie soignée + voix                |
+| Pitch.com                  | Layout magazine, mais sans tomber dans 3D |
+| Vercel (avant tout récent) | Cleanness mais on en sort                 |
+| Claude (Anthropic)         | Le serif headline + l'orange terracotta   |
+| Mistral AI                 | Souveraineté française moderne            |
 
 ### Magazines / éditorial papier
 
@@ -401,13 +435,13 @@ Le site marketing, le blog et l'app SaaS sont **dans la même app Next.js**, sé
 
 ## Budget design
 
-| Poste | Coût |
-|---|---|
-| Polices premium (Tiempos + GT Walsheim) | 0-500€ (selon choix gratuit ou payant) |
-| Template marketing Next.js premium (optionnel) | 79-200$ one-shot |
-| Illustrations à la main (5 pièces) | 200-500€ one-shot |
-| Photo Max pro (séance studio) | 150-300€ |
-| **Total an 1** | **~500-1500€** |
+| Poste                                          | Coût                                   |
+| ---------------------------------------------- | -------------------------------------- |
+| Polices premium (Tiempos + GT Walsheim)        | 0-500€ (selon choix gratuit ou payant) |
+| Template marketing Next.js premium (optionnel) | 79-200$ one-shot                       |
+| Illustrations à la main (5 pièces)             | 200-500€ one-shot                      |
+| Photo Max pro (séance studio)                  | 150-300€                               |
+| **Total an 1**                                 | **~500-1500€**                         |
 
 C'est un budget raisonnable qui change radicalement la perception du produit.
 
@@ -427,11 +461,11 @@ C'est un budget raisonnable qui change radicalement la perception du produit.
 
 À mettre dans 09-decisions-journal.md :
 
-- [ ] **Direction artistique** : ☐ A (éditorial chaud) ☐ B (souverain) ☐ C (studio indie) → choix : ___
-- [ ] **Polices premium ou gratuites** : ☐ Premium (~500€) ☐ Gratuites (Source Serif + Inter) → choix : ___
-- [ ] **Template Next.js premium** : ☐ Achat (79-200$) ☐ From scratch → choix : ___
-- [ ] **Illustrations** : ☐ Achat 5 pièces illustrateur ☐ Pas d'illustrations (UI screenshots only) → choix : ___
-- [ ] **Mascotte mamie** : ☐ Oui (visuelle) ☐ Non (juste le nom) → choix : ___
+- [ ] **Direction artistique** : ☐ A (éditorial chaud) ☐ B (souverain) ☐ C (studio indie) → choix : \_\_\_
+- [ ] **Polices premium ou gratuites** : ☐ Premium (~500€) ☐ Gratuites (Source Serif + Inter) → choix : \_\_\_
+- [ ] **Template Next.js premium** : ☐ Achat (79-200$) ☐ From scratch → choix : \_\_\_
+- [ ] **Illustrations** : ☐ Achat 5 pièces illustrateur ☐ Pas d'illustrations (UI screenshots only) → choix : \_\_\_
+- [ ] **Mascotte mamie** : ☐ Oui (visuelle) ☐ Non (juste le nom) → choix : \_\_\_
 
 → Voir [03-architecture-technique.md](./03-architecture-technique.md) pour les décisions techniques verrouillées.
 → Voir [09-decisions-journal.md](./09-decisions-journal.md) pour le suivi des choix.

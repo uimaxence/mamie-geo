@@ -25,16 +25,16 @@
 
 ### Domaine et routes
 
-| Zone | URL | Layout |
-|---|---|---|
-| Marketing | `mamie-geo.fr/` | `(marketing)` route group |
-| Pricing | `mamie-geo.fr/pricing` | `(marketing)` |
-| À propos | `mamie-geo.fr/about` | `(marketing)` |
-| Outil gratuit | `mamie-geo.fr/outils/test-visibilite-ia` | `(marketing)` |
-| Blog | `mamie-geo.fr/blog` et `/blog/[slug]` | `(blog)` route group |
-| Login | `mamie-geo.fr/login` | layout dédié |
-| App SaaS | `mamie-geo.fr/app/*` | `(app)` route group avec auth check |
-| API | `mamie-geo.fr/api/*` | API routes |
+| Zone          | URL                                      | Layout                              |
+| ------------- | ---------------------------------------- | ----------------------------------- |
+| Marketing     | `mamie-geo.fr/`                          | `(marketing)` route group           |
+| Pricing       | `mamie-geo.fr/pricing`                   | `(marketing)`                       |
+| À propos      | `mamie-geo.fr/about`                     | `(marketing)`                       |
+| Outil gratuit | `mamie-geo.fr/outils/test-visibilite-ia` | `(marketing)`                       |
+| Blog          | `mamie-geo.fr/blog` et `/blog/[slug]`    | `(blog)` route group                |
+| Login         | `mamie-geo.fr/login`                     | layout dédié                        |
+| App SaaS      | `mamie-geo.fr/app/*`                     | `(app)` route group avec auth check |
+| API           | `mamie-geo.fr/api/*`                     | API routes                          |
 
 Pas de subdomain `app.mamie-geo.fr` en V0 — un seul SSL, un seul cookie, simplicité maximale. Migration possible plus tard si besoin via middleware Next.js.
 
@@ -172,101 +172,108 @@ mamie-geo/
 **Critères de sélection** : (1) coût quasi-nul en V0 grâce aux free tiers, (2) chemin de mise à l'échelle clair sans réécrire, (3) testabilité native (pas de SDK lourd à mocker, pas d'API tierce inscrutable).
 
 ### Frontend
-| Composant | Choix | Coût V0 | Justification |
-|---|---|---|---|
-| Framework | **Next.js 15 (App Router)** | 0 | Connu, SSR, edge runtime EU, parfait pour Vercel |
-| Langage | **TypeScript strict** | 0 | Standard, type-safety pour tests |
-| Styling | **Tailwind CSS v4** | 0 | Rapide, peu de CSS custom |
-| UI components | **shadcn/ui** customisé avec design tokens du doc 10 | 0 | On part de shadcn et on le customise pour ne pas avoir le look par défaut |
-| Charts | **Recharts** | 0 | Suffit V0/V1, alternative Tremor si besoin de plus joli |
-| Forms | **React Hook Form + Zod** | 0 | Validation partagée front/back |
-| State serveur | **TanStack Query** | 0 | Standard |
+
+| Composant     | Choix                                                | Coût V0 | Justification                                                             |
+| ------------- | ---------------------------------------------------- | ------- | ------------------------------------------------------------------------- |
+| Framework     | **Next.js 15 (App Router)**                          | 0       | Connu, SSR, edge runtime EU, parfait pour Vercel                          |
+| Langage       | **TypeScript strict**                                | 0       | Standard, type-safety pour tests                                          |
+| Styling       | **Tailwind CSS v4**                                  | 0       | Rapide, peu de CSS custom                                                 |
+| UI components | **shadcn/ui** customisé avec design tokens du doc 10 | 0       | On part de shadcn et on le customise pour ne pas avoir le look par défaut |
+| Charts        | **Recharts**                                         | 0       | Suffit V0/V1, alternative Tremor si besoin de plus joli                   |
+| Forms         | **React Hook Form + Zod**                            | 0       | Validation partagée front/back                                            |
+| State serveur | **TanStack Query**                                   | 0       | Standard                                                                  |
 
 ### Backend
-| Composant | Choix | Coût V0 | Justification |
-|---|---|---|---|
-| Runtime | **Node.js 22 LTS** sur Vercel | inclus | Standard |
-| API | **Next.js API Routes + Server Actions** | 0 | Pas de serveur Express |
-| ORM | **Drizzle** | 0 | Plus léger que Prisma, edge-compatible, requêtes proches du SQL → tests plus simples, migrations versionnées en SQL pur |
-| Validation | **Zod** | 0 | Cohérent avec le front, schémas réutilisables |
-| Auth | **Better Auth** | 0 | Open-source, free forever, pas de lock-in (vs Clerk $25/mo après 10K MAU). Stocke en Postgres → testable avec une DB de test, magic-link natif via Brevo SMTP |
+
+| Composant  | Choix                                   | Coût V0 | Justification                                                                                                                                                 |
+| ---------- | --------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Runtime    | **Node.js 22 LTS** sur Vercel           | inclus  | Standard                                                                                                                                                      |
+| API        | **Next.js API Routes + Server Actions** | 0       | Pas de serveur Express                                                                                                                                        |
+| ORM        | **Drizzle**                             | 0       | Plus léger que Prisma, edge-compatible, requêtes proches du SQL → tests plus simples, migrations versionnées en SQL pur                                       |
+| Validation | **Zod**                                 | 0       | Cohérent avec le front, schémas réutilisables                                                                                                                 |
+| Auth       | **Better Auth**                         | 0       | Open-source, free forever, pas de lock-in (vs Clerk $25/mo après 10K MAU). Stocke en Postgres → testable avec une DB de test, magic-link natif via Brevo SMTP |
 
 ### Base de données et stockage
-| Composant | Choix | Coût V0 | Justification |
-|---|---|---|---|
-| Postgres | **Neon EU (Frankfurt)** free tier | 0 | 0,5 GB inclus, branching natif (= une branche par PR pour tests E2E isolés), scale-to-zero, conforme EU |
-| Cache / rate limit | **Upstash Redis** free tier | 0 | 10K commandes/jour gratuites, suffit V0 |
-| Storage fichiers | **Cloudflare R2** free tier | 0 | 10 GB/mois inclus, **zéro frais d'egress** (gros avantage vs S3), API S3-compatible |
+
+| Composant          | Choix                             | Coût V0 | Justification                                                                                           |
+| ------------------ | --------------------------------- | ------- | ------------------------------------------------------------------------------------------------------- |
+| Postgres           | **Neon EU (Frankfurt)** free tier | 0       | 0,5 GB inclus, branching natif (= une branche par PR pour tests E2E isolés), scale-to-zero, conforme EU |
+| Cache / rate limit | **Upstash Redis** free tier       | 0       | 10K commandes/jour gratuites, suffit V0                                                                 |
+| Storage fichiers   | **Cloudflare R2** free tier       | 0       | 10 GB/mois inclus, **zéro frais d'egress** (gros avantage vs S3), API S3-compatible                     |
 
 ### Workers et orchestration
-| Composant | Choix V0 | Coût V0 | Migration scale |
-|---|---|---|---|
-| Queue | **Postgres-based custom queue** + **Vercel Cron** | 0 | À migrer vers Inngest si > 100K runs/mois |
-| Cron | **Vercel Cron** (un endpoint `/api/cron/dispatch` toutes les 5 min) | 0 | Idem |
-| Long-running jobs | Découpés en petits jobs idempotents (1 prompt × 1 LLM = 1 job) | 0 | OK même sur Vercel Hobby (10s timeout) ou Pro (60s) |
+
+| Composant         | Choix V0                                                            | Coût V0 | Migration scale                                     |
+| ----------------- | ------------------------------------------------------------------- | ------- | --------------------------------------------------- |
+| Queue             | **Postgres-based custom queue** + **Vercel Cron**                   | 0       | À migrer vers Inngest si > 100K runs/mois           |
+| Cron              | **Vercel Cron** (un endpoint `/api/cron/dispatch` toutes les 5 min) | 0       | Idem                                                |
+| Long-running jobs | Découpés en petits jobs idempotents (1 prompt × 1 LLM = 1 job)      | 0       | OK même sur Vercel Hobby (10s timeout) ou Pro (60s) |
 
 > **Pourquoi Postgres-queue plutôt qu'Inngest en V0** : Inngest est super, mais son free tier est de 50K steps/mois et un Pro à 100 prompts × 5 LLMs × 30j = 15K runs ; à 10 clients on est déjà à 150K (+ retries) → on bascule vers le payant. Une queue Postgres custom (~150 lignes) est gratuite, parfaitement testable (on lit les rows directement dans les tests), et idempotente. Migration vers Inngest possible plus tard sans réécriture côté business logic.
 
 ### Observabilité et qualité
-| Composant | Choix | Coût V0 | Justification |
-|---|---|---|---|
-| Errors | **Sentry** free tier | 0 | 5K événements/mois inclus, suffit V0 |
-| Analytics produit | **PostHog Cloud EU** free tier | 0 | 1M événements/mois free, RGPD-friendly, EU |
-| Logs | Postgres `events` + Vercel logs | 0 | On centralise les logs métier en BDD jusqu'à scale |
-| Uptime | **BetterStack** free tier | 0 | 10 monitors gratuits |
+
+| Composant         | Choix                           | Coût V0 | Justification                                      |
+| ----------------- | ------------------------------- | ------- | -------------------------------------------------- |
+| Errors            | **Sentry** free tier            | 0       | 5K événements/mois inclus, suffit V0               |
+| Analytics produit | **PostHog Cloud EU** free tier  | 0       | 1M événements/mois free, RGPD-friendly, EU         |
+| Logs              | Postgres `events` + Vercel logs | 0       | On centralise les logs métier en BDD jusqu'à scale |
+| Uptime            | **BetterStack** free tier       | 0       | 10 monitors gratuits                               |
 
 ### Email, paiement, comm
-| Composant | Choix | Coût V0 | Justification |
-|---|---|---|---|
-| Email transactionnel | **Brevo** | 0 | Déjà maîtrisé, 300 emails/jour free |
-| Email marketing | **Brevo** | 0 | Mutualisation |
-| Paiement | **Stripe** | variable seulement | Standard FR/EU, déjà maîtrisé |
-| TVA UE | **Stripe Tax** | 0,5% du CA | Indispensable pour vendre en UE proprement |
+
+| Composant            | Choix          | Coût V0            | Justification                              |
+| -------------------- | -------------- | ------------------ | ------------------------------------------ |
+| Email transactionnel | **Brevo**      | 0                  | Déjà maîtrisé, 300 emails/jour free        |
+| Email marketing      | **Brevo**      | 0                  | Mutualisation                              |
+| Paiement             | **Stripe**     | variable seulement | Standard FR/EU, déjà maîtrisé              |
+| TVA UE               | **Stripe Tax** | 0,5% du CA         | Indispensable pour vendre en UE proprement |
 
 ### LLMs (cf. discussion : pas d'OpenRouter pour le tracking)
-| Usage | Choix | Coût V0 |
-|---|---|---|
-| Tracking ChatGPT (avec search) | **OpenAI API** native, modèle `gpt-4o-mini` + `web_search` tool | $0.15-0.60 / 1M tokens |
-| Tracking Claude (avec search) | **Anthropic API** native, modèle `claude-haiku-4-5` + `web_search` tool | $0.25-1.25 / 1M tokens |
-| Tracking Perplexity | **Perplexity API** native, modèle `sonar` (search natif) | $1 / 1M tokens |
-| Tracking Gemini | **Google AI Studio API** native, `gemini-2.5-flash` + grounding Google Search | $0.075-0.30 / 1M tokens |
-| Tracking Le Chat | **Mistral API** native, `mistral-large-latest` + tools web | €1.5-4.5 / 1M tokens |
-| Génération prompts onboarding | **Anthropic Claude Haiku 4.5** | inclus dans budget |
-| Scoring/parsing des réponses | **Anthropic Claude Haiku 4.5** | inclus dans budget |
+
+| Usage                          | Choix                                                                         | Coût V0                 |
+| ------------------------------ | ----------------------------------------------------------------------------- | ----------------------- |
+| Tracking ChatGPT (avec search) | **OpenAI API** native, modèle `gpt-4o-mini` + `web_search` tool               | $0.15-0.60 / 1M tokens  |
+| Tracking Claude (avec search)  | **Anthropic API** native, modèle `claude-haiku-4-5` + `web_search` tool       | $0.25-1.25 / 1M tokens  |
+| Tracking Perplexity            | **Perplexity API** native, modèle `sonar` (search natif)                      | $1 / 1M tokens          |
+| Tracking Gemini                | **Google AI Studio API** native, `gemini-2.5-flash` + grounding Google Search | $0.075-0.30 / 1M tokens |
+| Tracking Le Chat               | **Mistral API** native, `mistral-large-latest` + tools web                    | €1.5-4.5 / 1M tokens    |
+| Génération prompts onboarding  | **Anthropic Claude Haiku 4.5**                                                | inclus dans budget      |
+| Scoring/parsing des réponses   | **Anthropic Claude Haiku 4.5**                                                | inclus dans budget      |
 
 > **Pourquoi pas OpenRouter** : OpenRouter proxy les modèles mais n'expose pas fidèlement les capacités natives de recherche web (browse OpenAI, sonar Perplexity, grounding Google, tools Mistral). Or notre produit DOIT reproduire ce que l'utilisateur final voit dans l'app de chaque LLM. Fidélité = exigence non-négociable. En revanche, OpenRouter pourrait être utilisé plus tard pour le scoring si on veut multi-modèles à bas coût.
 
 ### Total coûts fixes infra V0
 
-| Poste | Coût mensuel |
-|---|---|
-| Vercel **Pro** (commercial use, edge, bandwidth) | $20 |
-| Neon free tier (passe en Pro à $19 quand on dépasse 0,5 GB) | 0 puis $19 |
-| Upstash Redis free | 0 |
-| Cloudflare R2 free | 0 |
-| Sentry free | 0 |
-| PostHog free | 0 |
-| BetterStack free | 0 |
-| Brevo Lite (300 emails/jour) | €0 ou €19 si volume |
-| Domaine + Google Workspace 1 user | $30 |
-| **Total V0** | **~$50/mois** |
+| Poste                                                       | Coût mensuel        |
+| ----------------------------------------------------------- | ------------------- |
+| Vercel **Pro** (commercial use, edge, bandwidth)            | $20                 |
+| Neon free tier (passe en Pro à $19 quand on dépasse 0,5 GB) | 0 puis $19          |
+| Upstash Redis free                                          | 0                   |
+| Cloudflare R2 free                                          | 0                   |
+| Sentry free                                                 | 0                   |
+| PostHog free                                                | 0                   |
+| BetterStack free                                            | 0                   |
+| Brevo Lite (300 emails/jour)                                | €0 ou €19 si volume |
+| Domaine + Google Workspace 1 user                           | $30                 |
+| **Total V0**                                                | **~$50/mois**       |
 
 À comparer aux $250-500/mois "estimés au doigt" du doc 04 d'origine. Le V0 réel est fortement free-tier.
 
 ### À l'échelle (mois 8-12, ~50 clients)
 
-| Poste | Coût |
-|---|---|
-| Vercel Pro | $20 |
-| Neon Pro | $19-69 |
-| Inngest Pro (si migration) | $20 |
-| Upstash Redis Pay-as-you-go | $5-15 |
-| R2 (croissance stockage) | $5 |
-| Sentry Team | $26 |
-| PostHog (au-delà du free) | $0-50 |
-| BetterStack Pro | $25 |
-| Brevo Business | €69 |
-| **Total scale** | **~$200-300/mois** + variables LLM
+| Poste                       | Coût                               |
+| --------------------------- | ---------------------------------- |
+| Vercel Pro                  | $20                                |
+| Neon Pro                    | $19-69                             |
+| Inngest Pro (si migration)  | $20                                |
+| Upstash Redis Pay-as-you-go | $5-15                              |
+| R2 (croissance stockage)    | $5                                 |
+| Sentry Team                 | $26                                |
+| PostHog (au-delà du free)   | $0-50                              |
+| BetterStack Pro             | $25                                |
+| Brevo Business              | €69                                |
+| **Total scale**             | **~$200-300/mois** + variables LLM |
 
 ---
 
@@ -528,12 +535,12 @@ Règle : **un job ne peut pas être enqueue deux fois pour la même clé logique
 La colonne `idempotency_key TEXT UNIQUE NOT NULL` de `queue_jobs` matérialise
 cette propriété. Format imposé par `kind` :
 
-| `kind` | format `idempotency_key` |
-|---|---|
-| `execute_prompt` | `execute_prompt:{prompt_id}:{llm}:{scheduled_date_iso}` (ex : `execute_prompt:8fa1...:claude:2026-05-06`) |
-| `score_response` | `score_response:{run_id}` |
-| `send_weekly_email` | `send_weekly_email:{workspace_id}:{iso_week}` (ex : `:2026-W18`) |
-| `recompute_metrics` | `recompute_metrics:{brand_id}:{date_iso}` |
+| `kind`              | format `idempotency_key`                                                                                  |
+| ------------------- | --------------------------------------------------------------------------------------------------------- |
+| `execute_prompt`    | `execute_prompt:{prompt_id}:{llm}:{scheduled_date_iso}` (ex : `execute_prompt:8fa1...:claude:2026-05-06`) |
+| `score_response`    | `score_response:{run_id}`                                                                                 |
+| `send_weekly_email` | `send_weekly_email:{workspace_id}:{iso_week}` (ex : `:2026-W18`)                                          |
+| `recompute_metrics` | `recompute_metrics:{brand_id}:{date_iso}`                                                                 |
 
 Algorithme `enqueue` :
 
@@ -577,10 +584,10 @@ mensuel calculé à partir du plan + nombre de prompts × LLMs × fréquence.
 
 ```ts
 // pseudo-code, à implémenter Sprint 1
-async function checkQuotaOrBlock(workspaceId: string): Promise<'ok' | 'blocked'> {
+async function checkQuotaOrBlock(workspaceId: string): Promise<"ok" | "blocked"> {
   const ws = await db.workspaces.findById(workspaceId);
-  if (ws.plan === 'expired' || ws.plan === 'canceled') return 'blocked';
-  if (ws.hard_cap_hit_at) return 'blocked';
+  if (ws.plan === "expired" || ws.plan === "canceled") return "blocked";
+  if (ws.hard_cap_hit_at) return "blocked";
 
   const counter = await db.usageCounters.findCurrent(workspaceId);
   const theoreticalMaxRuns = computeTheoreticalRuns(ws.plan); // prompts × llms × jours du cycle
@@ -588,31 +595,31 @@ async function checkQuotaOrBlock(workspaceId: string): Promise<'ok' | 'blocked'>
 
   // Alerte interne à 60% (Slack/email Max), pas d'action client
   if (ratio >= 0.6 && !counter.warned_at_60pct) {
-    await events.log({ workspaceId, kind: 'quota.warning_60', payload: { ratio } });
+    await events.log({ workspaceId, kind: "quota.warning_60", payload: { ratio } });
     await db.usageCounters.update(workspaceId, { warned_at_60pct: now() });
-    await alertInternal(`Workspace ${workspaceId} à ${(ratio*100).toFixed(0)}%`);
+    await alertInternal(`Workspace ${workspaceId} à ${(ratio * 100).toFixed(0)}%`);
   }
 
   // Alerte client à 100% du théorique, encore autorisé
   if (ratio >= 1.0 && !counter.warned_at_100pct) {
-    await events.log({ workspaceId, kind: 'quota.warning_100', payload: { ratio } });
+    await events.log({ workspaceId, kind: "quota.warning_100", payload: { ratio } });
     await db.usageCounters.update(workspaceId, { warned_at_100pct: now() });
-    await sendEmail(ws, 'quota_100pct');
+    await sendEmail(ws, "quota_100pct");
   }
 
   // Hard-cap à 200% : block + email + alerte interne
   if (ratio >= 2.0) {
-    await db.transaction(async tx => {
+    await db.transaction(async (tx) => {
       await tx.usageCounters.update(workspaceId, { hardcap_hit_at: now() });
       await tx.workspaces.update(workspaceId, { hard_cap_hit_at: now() });
     });
-    await events.log({ workspaceId, kind: 'quota.hardcap_hit', payload: { ratio } });
-    await sendEmail(ws, 'quota_hardcap_blocked');
+    await events.log({ workspaceId, kind: "quota.hardcap_hit", payload: { ratio } });
+    await sendEmail(ws, "quota_hardcap_blocked");
     await alertInternal(`HARD-CAP atteint sur ${workspaceId}, accès bloqué.`);
-    return 'blocked';
+    return "blocked";
   }
 
-  return 'ok';
+  return "ok";
 }
 ```
 
@@ -622,13 +629,13 @@ cycle de facturation Stripe (webhook `invoice.created`).
 
 ### Quotas par plan
 
-| Plan | Brands | Concurrents | Prompts | LLMs | Fréquence | Historique |
-|---|---|---|---|---|---|---|
-| Trial 14j (= Pro) | 3 | 10 | 100 | 5 | Quotidien | 90j |
-| Starter (49€) | 1 | 5 | 25 | 5 dont Le Chat | Hebdo | 90j |
-| Pro (149€) | 3 | 10 | 100 | 5 | Quotidien | 1 an |
-| Agence (399€) | 10 | 10/marque | 300 | 5 | Quotidien | 1 an |
-| Enterprise | illimité | illimité | sur devis | 5+ | sur devis | illimité |
+| Plan              | Brands   | Concurrents | Prompts   | LLMs           | Fréquence | Historique |
+| ----------------- | -------- | ----------- | --------- | -------------- | --------- | ---------- |
+| Trial 14j (= Pro) | 3        | 10          | 100       | 5              | Quotidien | 90j        |
+| Starter (49€)     | 1        | 5           | 25        | 5 dont Le Chat | Hebdo     | 90j        |
+| Pro (149€)        | 3        | 10          | 100       | 5              | Quotidien | 1 an       |
+| Agence (399€)     | 10       | 10/marque   | 300       | 5              | Quotidien | 1 an       |
+| Enterprise        | illimité | illimité    | sur devis | 5+             | sur devis | illimité   |
 
 ---
 
@@ -636,30 +643,31 @@ cycle de facturation Stripe (webhook `invoice.created`).
 
 ### APIs ciblées
 
-| LLM | Modèle | Endpoint | Web search ? | Coût input | Coût output |
-|---|---|---|---|---|---|
-| ChatGPT | gpt-4o-mini + `web_search` tool | OpenAI API | ✅ | $0.15/M | $0.60/M |
-| Claude | claude-haiku-4-5 + web_search | Anthropic API | ✅ | $0.25/M | $1.25/M |
-| Perplexity | sonar | Perplexity API | ✅ natif | $1/M | $1/M |
-| Gemini | gemini-2.5-flash + grounding | Google AI Studio | ✅ | $0.075/M | $0.30/M |
-| Le Chat (Mistral) | mistral-large-latest + web tools | Mistral API | ✅ | €1.5/M | €4.5/M |
+| LLM               | Modèle                           | Endpoint         | Web search ? | Coût input | Coût output |
+| ----------------- | -------------------------------- | ---------------- | ------------ | ---------- | ----------- |
+| ChatGPT           | gpt-4o-mini + `web_search` tool  | OpenAI API       | ✅           | $0.15/M    | $0.60/M     |
+| Claude            | claude-haiku-4-5 + web_search    | Anthropic API    | ✅           | $0.25/M    | $1.25/M     |
+| Perplexity        | sonar                            | Perplexity API   | ✅ natif     | $1/M       | $1/M        |
+| Gemini            | gemini-2.5-flash + grounding     | Google AI Studio | ✅           | $0.075/M   | $0.30/M     |
+| Le Chat (Mistral) | mistral-large-latest + web tools | Mistral API      | ✅           | €1.5/M     | €4.5/M      |
 
 > **Important** : pour reproduire fidèlement ce qu'un utilisateur voit dans ChatGPT.com, il faut activer le browsing/search. Sinon on teste le modèle sans contexte web et on rate les vraies citations. C'est ce que font Profound et Peec.
 
 ### Estimation de coût par run
 
 **Hypothèse** :
+
 - 1 prompt envoyé → ~500 tokens input
 - Réponse moyenne avec sources → ~1500 tokens output
 - Coût moyen pondéré : ~$0.003 par appel LLM (ordre de grandeur, à valider en bench réel)
 
 ### Coût par client
 
-| Plan | Prompts × LLMs × jours | Runs/mois | Coût LLM/mois | Marge brute après LLM |
-|---|---|---|---|---|
-| Starter (49€) | 25 × 5 × 4 (hebdo) | 500 | ~$1.50 | ~96% |
-| Pro (149€) | 100 × 5 × 30 | 15 000 | ~$45 | ~70% |
-| Agence (399€) | 300 × 5 × 30 | 45 000 | ~$135 | ~66% |
+| Plan          | Prompts × LLMs × jours | Runs/mois | Coût LLM/mois | Marge brute après LLM |
+| ------------- | ---------------------- | --------- | ------------- | --------------------- |
+| Starter (49€) | 25 × 5 × 4 (hebdo)     | 500       | ~$1.50        | ~96%                  |
+| Pro (149€)    | 100 × 5 × 30           | 15 000    | ~$45          | ~70%                  |
+| Agence (399€) | 300 × 5 × 30           | 45 000    | ~$135         | ~66%                  |
 
 ⚠️ **Le plan Pro est le moins margé.** À surveiller. Si les vrais coûts moyens sont 2x plus élevés (cas réels avec longues réponses), le Pro tombe à 40% de marge → renégocier le pricing ou réduire la fréquence par défaut.
 
@@ -684,12 +692,15 @@ Si un LLM est down ou hors quota, le run est marqué `failed` mais ne bloque pas
 ### Approche en deux étapes
 
 #### 1. Pre-screening regex (cheap)
+
 - Recherche de la marque + aliases dans la réponse brute
 - Recherche du domaine dans les URLs citées
 - Si **aucun match**, pas la peine de payer un LLM pour scorer → skip
 
 #### 2. LLM scoring (expensive mais précis)
+
 Pour les réponses qui matchent au screening :
+
 - Envoyer la réponse brute + nom de la marque + concurrents à Claude Haiku
 - Demander en JSON :
   - La marque cible est-elle citée ? (oui / non)
@@ -702,8 +713,8 @@ const SCORING_PROMPT = `
 Tu es un analyste d'IA. On t'envoie une réponse générée par un LLM à un prompt utilisateur.
 Détermine si certaines marques y sont citées, leur position et le sentiment.
 
-Marque cible : ${brand.name} (aliases : ${brand.aliases.join(', ')})
-Concurrents : ${competitors.map(c => c.name).join(', ')}
+Marque cible : ${brand.name} (aliases : ${brand.aliases.join(", ")})
+Concurrents : ${competitors.map((c) => c.name).join(", ")}
 
 Réponse à analyser :
 """
@@ -736,12 +747,14 @@ Retourne UNIQUEMENT un JSON valide de la forme :
 ## Sécurité et conformité RGPD
 
 ### Hébergement (choix verrouillés cf. doc 09)
+
 - Postgres : **Neon EU (Frankfurt)**
 - App : **Vercel EU** (région `cdg1` Paris pour les fonctions runtime)
 - Stockage fichiers : **Cloudflare R2** (EU jurisdiction)
 - Workers : **Postgres-based queue + Vercel Cron** (EU edge), migration Inngest EU à $20/mo prévue > 100K runs/mois
 
 ### Données personnelles
+
 - Email + nom seulement (pas plus)
 - Pas de données client final stockées (sauf si Agency)
 - DPA standard mis à dispo des clients
@@ -749,11 +762,13 @@ Retourne UNIQUEMENT un JSON valide de la forme :
 - Logs : 30 jours puis purge
 
 ### Authentification
+
 - Magic link par défaut (pas de mot de passe à stocker = simpler + safer)
 - 2FA optionnel via TOTP en V1
 - SSO SAML en Enterprise (V2)
 
 ### Sécurité applicative
+
 - Headers : CSP, HSTS, X-Frame-Options
 - Rate limiting via Upstash sur les endpoints publics
 - Secrets dans Vercel env vars ou Doppler
@@ -761,6 +776,7 @@ Retourne UNIQUEMENT un JSON valide de la forme :
 - Audit trail des actions admin
 
 ### Conformité légale
+
 - RGPD : registre des traitements, DPO si > 250 employés (pas le cas), DPIA si traitement à risque (pas le cas en V0)
 - TVA : à collecter selon règles UE (Stripe Tax automatise)
 - CGU + CGV + politique de confidentialité dès J0 (templates avocats SaaS FR)
@@ -770,23 +786,27 @@ Retourne UNIQUEMENT un JSON valide de la forme :
 ## DevOps et déploiement
 
 ### Environnements
+
 - **Local** : branche Neon dédiée par dev (`dev-{username}`), gratuite et instantanée. Pas de Docker Compose.
 - **Preview** : auto sur chaque PR via Vercel + branche Neon dédiée par PR (gratuit)
 - **Staging** : branche `staging` déployée sur `staging.mamie-geo.fr` (seed avec données fixtures)
 - **Production** : branche `main` déployée sur `mamie-geo.fr` (path-based, pas de subdomain `app.`)
 
 ### CI/CD
+
 - **GitHub Actions** : lint, type-check, tests unit, tests E2E, déploiement preview
 - **Lint** : ESLint + Prettier + TypeScript strict mode
 - **Tests bloquants** : aucun merge si tests rouges
 - **Trunk-based** : pas de feature branches longues, PRs < 400 lignes
 
 ### Backups
+
 - Postgres : point-in-time recovery natif Neon (7 jours sur free tier, plus sur Pro)
 - Export hebdo automatique vers R2 (cron Vercel) pour worst-case
 - Restore drill testé tous les 2 mois
 
 ### Monitoring
+
 - Uptime BetterStack sur landing + API + endpoints critiques
 - Sentry pour erreurs front + back
 - PostHog pour funnels d'usage
@@ -813,6 +833,7 @@ Critère explicite : **un solo founder ne peut pas tester à la main 5 LLMs × 1
 ```
 
 ### Outils
+
 - **Vitest** : unit + integration. Plus rapide que Jest, ESM natif, parfait avec TypeScript.
 - **Playwright** : E2E sur les 5-10 flows business-critiques uniquement.
 - **MSW (Mock Service Worker)** : intercepte les appels HTTP en test → on mock les LLMs.
@@ -838,6 +859,7 @@ Les appels LLM en test sont **interdits** (lents, chers, non-déterministes). Tr
 ### CI
 
 Sur chaque PR :
+
 1. Lint + type-check (~15 secondes)
 2. Unit tests Vitest (~30 secondes)
 3. Integration tests sur Postgres test (~1-2 minutes)
@@ -862,29 +884,29 @@ Tout le reste = tests unit/integration suffisent.
 
 Après analyse coût × scalabilité × testabilité, voici les choix actés pour V0. À reporter dans 09-decisions-journal.md.
 
-| Domaine | Choix | Pourquoi |
-|---|---|---|
-| **Framework** | Next.js 15 App Router | Connu, edge EU, ecosystem |
-| **Langage** | TypeScript strict | Type-safety pour tests |
-| **Styling** | Tailwind v4 + shadcn customisé | Cf. doc 10 design |
-| **Auth** | Better Auth | Open source, free, testable, pas de lock-in |
-| **ORM** | Drizzle | Léger, edge-compatible, SQL-first → tests simples |
-| **Postgres** | Neon EU free tier | Branching pour tests, scale-to-zero, EU |
-| **Cache/rate limit** | Upstash Redis free | 10K cmd/jour gratuites |
-| **Storage** | Cloudflare R2 free | 0 frais d'egress, 10 GB free |
-| **Queue V0** | Postgres-based custom + Vercel Cron | Gratuit, testable, idempotent |
-| **Queue scale** | Inngest (migration > 100K runs/mois) | DX premium quand on peut payer |
-| **Hébergement (mono-repo)** | Vercel Pro $20/mo | Une seule app Next.js pour marketing + blog + app SaaS, edge EU, preview deployments, intégration Neon |
-| **Errors** | Sentry free | Standard |
-| **Analytics produit** | PostHog Cloud EU free | RGPD, 1M events free |
-| **Uptime** | BetterStack free | 10 monitors gratuits |
-| **Email transactionnel** | Brevo | Déjà maîtrisé, EU |
-| **Paiement** | Stripe + Stripe Tax | Standard, TVA UE auto |
-| **LLMs tracking** | APIs natives (OpenAI / Anthropic / Mistral / Perplexity / Google) | Fidélité aux réponses utilisateur |
-| **LLM scoring** | Anthropic Claude Haiku 4.5 | Cheap + JSON mode fiable |
-| **Tests unit/integration** | Vitest + MSW + Drizzle | Rapide, déterministe |
-| **Tests E2E** | Playwright sur 7 flows critiques | Couverture business |
-| **CI** | GitHub Actions | Standard |
+| Domaine                     | Choix                                                             | Pourquoi                                                                                               |
+| --------------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| **Framework**               | Next.js 15 App Router                                             | Connu, edge EU, ecosystem                                                                              |
+| **Langage**                 | TypeScript strict                                                 | Type-safety pour tests                                                                                 |
+| **Styling**                 | Tailwind v4 + shadcn customisé                                    | Cf. doc 10 design                                                                                      |
+| **Auth**                    | Better Auth                                                       | Open source, free, testable, pas de lock-in                                                            |
+| **ORM**                     | Drizzle                                                           | Léger, edge-compatible, SQL-first → tests simples                                                      |
+| **Postgres**                | Neon EU free tier                                                 | Branching pour tests, scale-to-zero, EU                                                                |
+| **Cache/rate limit**        | Upstash Redis free                                                | 10K cmd/jour gratuites                                                                                 |
+| **Storage**                 | Cloudflare R2 free                                                | 0 frais d'egress, 10 GB free                                                                           |
+| **Queue V0**                | Postgres-based custom + Vercel Cron                               | Gratuit, testable, idempotent                                                                          |
+| **Queue scale**             | Inngest (migration > 100K runs/mois)                              | DX premium quand on peut payer                                                                         |
+| **Hébergement (mono-repo)** | Vercel Pro $20/mo                                                 | Une seule app Next.js pour marketing + blog + app SaaS, edge EU, preview deployments, intégration Neon |
+| **Errors**                  | Sentry free                                                       | Standard                                                                                               |
+| **Analytics produit**       | PostHog Cloud EU free                                             | RGPD, 1M events free                                                                                   |
+| **Uptime**                  | BetterStack free                                                  | 10 monitors gratuits                                                                                   |
+| **Email transactionnel**    | Brevo                                                             | Déjà maîtrisé, EU                                                                                      |
+| **Paiement**                | Stripe + Stripe Tax                                               | Standard, TVA UE auto                                                                                  |
+| **LLMs tracking**           | APIs natives (OpenAI / Anthropic / Mistral / Perplexity / Google) | Fidélité aux réponses utilisateur                                                                      |
+| **LLM scoring**             | Anthropic Claude Haiku 4.5                                        | Cheap + JSON mode fiable                                                                               |
+| **Tests unit/integration**  | Vitest + MSW + Drizzle                                            | Rapide, déterministe                                                                                   |
+| **Tests E2E**               | Playwright sur 7 flows critiques                                  | Couverture business                                                                                    |
+| **CI**                      | GitHub Actions                                                    | Standard                                                                                               |
 
 ### Décisions restantes (à trancher en Sprint 0)
 
@@ -898,6 +920,7 @@ Après analyse coût × scalabilité × testabilité, voici les choix actés pou
 ## Roadmap technique par version
 
 ### V0 (semaines 1-8)
+
 - Stack de base + Auth + Stripe
 - Onboarding wizard
 - Workers de tracking pour 5 LLMs
@@ -908,6 +931,7 @@ Après analyse coût × scalabilité × testabilité, voici les choix actés pou
 - Page paramètres + facturation
 
 ### V1 (mois 3-6)
+
 - Crawler AI-readiness
 - Score AI-readiness + recommandations
 - Recrawl périodique
@@ -916,6 +940,7 @@ Après analyse coût × scalabilité × testabilité, voici les choix actés pou
 - API basic (read-only)
 
 ### V2 (mois 6-12)
+
 - Multi-workspaces
 - Marque blanche
 - Rapports PDF auto
@@ -924,6 +949,7 @@ Après analyse coût × scalabilité × testabilité, voici les choix actés pou
 - Webhooks
 
 ### V3 (mois 12-18)
+
 - Prompt Library FR par secteur
 - Sentiment analysis avancé
 - AI Traffic Attribution

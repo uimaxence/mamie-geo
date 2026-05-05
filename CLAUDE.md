@@ -13,7 +13,8 @@ Optimization** : il mesure quotidiennement la visibilité d'une marque
 dans **ChatGPT, Claude, Perplexity, Gemini et Le Chat (Mistral)**, et
 livre des recommandations actionnables. Cible cœur : freelances SEO,
 PME marketing, agences SEO/marketing FR. Pricing : **49 / 149 / 399 €**
-+ Enterprise sur devis.
+
+- Enterprise sur devis.
 
 Détail : `geo-project/00-vision-strategie.md` et `01-marche-concurrence.md`.
 
@@ -24,26 +25,26 @@ Détail : `geo-project/00-vision-strategie.md` et `01-marche-concurrence.md`.
 Décisions actées le 2026-05-05 dans `geo-project/09-decisions-journal.md`.
 **Ne pas changer sans nouvelle entrée dans 09 + accord Max.**
 
-| Domaine | Choix | Pourquoi (résumé) |
-|---|---|---|
-| Framework | **Next.js 15 App Router** | Edge EU, SSR, écosystème |
-| Langage | **TypeScript strict** | Pas de `any` non justifié |
-| Styling | **Tailwind v4 + shadcn customisé** | Tokens du doc 10 |
-| Auth | **Better Auth** | Free, open source, Postgres, magic-link |
-| ORM | **Drizzle** | SQL-first, edge-compatible, migrations versionnées |
-| DB | **Neon EU Frankfurt** | Free tier + branching pour tests E2E |
-| Cache / rate-limit | **Upstash Redis free** | 10K cmd/jour |
-| Storage | **Cloudflare R2 free** | 0 frais d'egress |
-| Queue V0 | **Postgres-based custom + Vercel Cron** (~150 lignes) | Gratuit, idempotent, testable |
-| Queue scale | Inngest (migration > 100K runs/mois) | DX premium quand on peut payer |
-| Observabilité | **Sentry free + PostHog Cloud EU free + BetterStack free** | RGPD, tous EU |
-| Hébergement | **Vercel Pro $20/mo** (mono-app) | Edge EU, preview deployments |
-| Email | **Brevo** (transac + marketing) | Maîtrisé, EU |
-| Paiement | **Stripe + Stripe Tax** | TVA UE auto |
-| LLMs tracking | **APIs natives** OpenAI / Anthropic / Mistral / Perplexity / Google | Fidélité au browse/search natif (pas OpenRouter) |
-| LLM scoring | **Anthropic Claude Haiku 4.5** | JSON mode + cheap |
-| Tests | **Vitest** unit/integration + **Playwright** E2E (7 flows) + **MSW** + cassettes | Pas d'appel LLM réel en test |
-| CI | **GitHub Actions** | Standard |
+| Domaine            | Choix                                                                            | Pourquoi (résumé)                                  |
+| ------------------ | -------------------------------------------------------------------------------- | -------------------------------------------------- |
+| Framework          | **Next.js 15 App Router**                                                        | Edge EU, SSR, écosystème                           |
+| Langage            | **TypeScript strict**                                                            | Pas de `any` non justifié                          |
+| Styling            | **Tailwind v4 + shadcn customisé**                                               | Tokens du doc 10                                   |
+| Auth               | **Better Auth**                                                                  | Free, open source, Postgres, magic-link            |
+| ORM                | **Drizzle**                                                                      | SQL-first, edge-compatible, migrations versionnées |
+| DB                 | **Neon EU Frankfurt**                                                            | Free tier + branching pour tests E2E               |
+| Cache / rate-limit | **Upstash Redis free**                                                           | 10K cmd/jour                                       |
+| Storage            | **Cloudflare R2 free**                                                           | 0 frais d'egress                                   |
+| Queue V0           | **Postgres-based custom + Vercel Cron** (~150 lignes)                            | Gratuit, idempotent, testable                      |
+| Queue scale        | Inngest (migration > 100K runs/mois)                                             | DX premium quand on peut payer                     |
+| Observabilité      | **Sentry free + PostHog Cloud EU free + BetterStack free**                       | RGPD, tous EU                                      |
+| Hébergement        | **Vercel Pro $20/mo** (mono-app)                                                 | Edge EU, preview deployments                       |
+| Email              | **Brevo** (transac + marketing)                                                  | Maîtrisé, EU                                       |
+| Paiement           | **Stripe + Stripe Tax**                                                          | TVA UE auto                                        |
+| LLMs tracking      | **APIs natives** OpenAI / Anthropic / Mistral / Perplexity / Google              | Fidélité au browse/search natif (pas OpenRouter)   |
+| LLM scoring        | **Anthropic Claude Haiku 4.5**                                                   | JSON mode + cheap                                  |
+| Tests              | **Vitest** unit/integration + **Playwright** E2E (7 flows) + **MSW** + cassettes | Pas d'appel LLM réel en test                       |
+| CI                 | **GitHub Actions**                                                               | Standard                                           |
 
 Architecture détaillée : `geo-project/03-architecture-technique.md`.
 
@@ -188,19 +189,19 @@ Source : `geo-project/03-architecture-technique.md` § Structure du repo.
 
 ## 5. Où chercher quoi dans `geo-project/`
 
-| Question | Doc |
-|---|---|
-| « Pourquoi on fait ce projet ? Qui est la cible ? » | `00-vision-strategie.md` |
-| « Qui sont les concurrents ? Quels gaps ? » | `01-marche-concurrence.md` |
-| « Quelle feature pour quel V ? User stories ? » | `02-produit-roadmap.md` |
+| Question                                               | Doc                               |
+| ------------------------------------------------------ | --------------------------------- |
+| « Pourquoi on fait ce projet ? Qui est la cible ? »    | `00-vision-strategie.md`          |
+| « Qui sont les concurrents ? Quels gaps ? »            | `01-marche-concurrence.md`        |
+| « Quelle feature pour quel V ? User stories ? »        | `02-produit-roadmap.md`           |
 | « Quelle stack ? Quel schéma BDD ? Quels coûts LLM ? » | `03-architecture-technique.md` ⭐ |
-| « Quel pricing ? Quelles marges ? Projections ? » | `04-pricing-business-model.md` |
-| « Comment on acquiert ? Quels canaux ? Templates ? » | `05-go-to-market.md` |
-| « Quelle stratégie contenu / SEO / lead magnets ? » | `06-activation-mamie-seo.md` |
-| « Quels risques ? Quelles conditions d'arrêt ? » | `07-risques-mitigations.md` |
-| « Timeline mois par mois ? Sprint 0 checklist ? » | `08-roadmap-execution.md` |
-| « Pourquoi on a pris cette décision ? KPI mensuels ? » | `09-decisions-journal.md` ⭐ |
-| « Direction artistique ? Patterns obligatoires ? » | `10-design-direction.md` |
+| « Quel pricing ? Quelles marges ? Projections ? »      | `04-pricing-business-model.md`    |
+| « Comment on acquiert ? Quels canaux ? Templates ? »   | `05-go-to-market.md`              |
+| « Quelle stratégie contenu / SEO / lead magnets ? »    | `06-activation-mamie-seo.md`      |
+| « Quels risques ? Quelles conditions d'arrêt ? »       | `07-risques-mitigations.md`       |
+| « Timeline mois par mois ? Sprint 0 checklist ? »      | `08-roadmap-execution.md`         |
+| « Pourquoi on a pris cette décision ? KPI mensuels ? » | `09-decisions-journal.md` ⭐      |
+| « Direction artistique ? Patterns obligatoires ? »     | `10-design-direction.md`          |
 
 ---
 
@@ -210,17 +211,17 @@ Source : `geo-project/03-architecture-technique.md` § Structure du repo.
 dans un doc, on met à jour le doc dans le **même PR** que le code, sinon
 la doc devient un cimetière.
 
-| Modification | Doc à updater |
-|---|---|
-| Schéma BDD modifié | `03` (section schéma) + `09` si non trivial |
-| Nouvelle décision tech / nouvelle dépendance | `09` (entrée datée + justification) |
-| Feature ajoutée / déplacée d'un V à un autre | `02` (roadmap) |
-| Coût ou tarif modifié | `04` (et éventuellement `03` § coûts) |
-| URL / endpoint / route changé | `03` + `06` si SEO impactée |
-| Risque qui se concrétise / s'estompe | `07` |
-| Convention de code modifiée | **ce CLAUDE.md** |
-| Mise à jour KPI mensuel | `09` (section "Suivi KPI mensuel") |
-| Snapshot concurrence | `09` (section "Snapshots veille concurrentielle") |
+| Modification                                 | Doc à updater                                     |
+| -------------------------------------------- | ------------------------------------------------- |
+| Schéma BDD modifié                           | `03` (section schéma) + `09` si non trivial       |
+| Nouvelle décision tech / nouvelle dépendance | `09` (entrée datée + justification)               |
+| Feature ajoutée / déplacée d'un V à un autre | `02` (roadmap)                                    |
+| Coût ou tarif modifié                        | `04` (et éventuellement `03` § coûts)             |
+| URL / endpoint / route changé                | `03` + `06` si SEO impactée                       |
+| Risque qui se concrétise / s'estompe         | `07`                                              |
+| Convention de code modifiée                  | **ce CLAUDE.md**                                  |
+| Mise à jour KPI mensuel                      | `09` (section "Suivi KPI mensuel")                |
+| Snapshot concurrence                         | `09` (section "Snapshots veille concurrentielle") |
 
 **Format des entrées de décision** dans `09` (à respecter) :
 
