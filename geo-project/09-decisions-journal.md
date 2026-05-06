@@ -331,6 +331,69 @@ appliquée.
 
 ---
 
+#### 2026-05-06 — Première migration Drizzle appliquée sur Neon EU Frankfurt
+
+**Contexte** : Sprint 0 close, DATABASE_URL Neon en main, étape avant
+Sprint 1. Au premier `pnpm db:migrate`, deux blocages successifs :
+
+1. `drizzle-kit` ne charge pas `.env.local` (Next.js le fait, lui non).
+2. `drizzle.config.ts` importait `@/lib/env` qui valide tout le contrat
+   runtime (Better Auth, Brevo, CRON…) — bloque la migration alors
+   qu'aucun de ces secrets n'est nécessaire pour `drizzle-kit`.
+3. Drizzle-kit utilise en interne le pool WebSocket `@neondatabase/serverless`
+   pour ses transactions multi-statements. Sur le mauvais endpoint Neon
+   (URL avec username placeholder `user` au lieu du vrai `*_owner`), ça
+   produisait un échec d'auth silencieux avalé par le spinner.
+
+**Options considérées** :
+
+- A : Installer `ws` comme devDep et fournir `neonConfig.webSocketConstructor`
+  depuis `drizzle.config.ts` (recommandé par Neon en CLI Node).
+- B : Installer `pg` comme devDep et configurer drizzle-kit sur ce driver,
+  en gardant `@neondatabase/serverless` au runtime Edge.
+- C : Script de migration custom maison qui applique les `.sql` via le
+  driver Neon HTTP fetch et tient à jour `__drizzle_migrations`.
+
+**Choix** : A.
+
+**Justification** :
+
+- `ws` est strictement devDep — jamais embarqué dans le bundle runtime
+  Edge/Vercel ; pas d'impact sur la cohérence "HTTP fetch en runtime".
+- Drizzle-kit bundle en réalité `ws@8.18.2` en interne, donc la dépendance
+  publique sert uniquement à fournir `webSocketConstructor` à `neonConfig`
+  côté `drizzle.config.ts` (B et C demandent plus de code à maintenir
+  pour le même résultat).
+- B aurait dupliqué la logique de connexion DB (un client pour CLI, un
+  pour runtime) sans bénéfice tant qu'on reste sur Neon.
+- C aurait recréé maison ce que drizzle-kit fait correctement, et dérivé
+  par rapport au format officiel `drizzle.__drizzle_migrations`.
+
+**Conséquences appliquées** :
+
+- `package.json` : devDep `ws@^8.20.0` + `@types/ws@^8.18.1`.
+- `package.json` : scripts `db:generate`, `db:migrate`, `db:studio`
+  préfixés par `node --env-file-if-exists=.env.local ./node_modules/drizzle-kit/bin.cjs <cmd>`.
+  Charge `.env.local` en local, no-op sur Vercel/CI où les vars sont
+  déjà dans `process.env`.
+- `drizzle.config.ts` : ne dépend plus de `@/lib/env` (lecture directe
+  `process.env.DATABASE_URL` avec check minimal). Le validateur strict
+  reste actif au runtime app — drizzle-kit n'est juste plus son client.
+- `drizzle.config.ts` : `neonConfig.webSocketConstructor = ws` avant
+  l'export du config.
+- Migration `0000_many_human_torch.sql` appliquée : 16 tables, 13 FK,
+  34 indexes, 98 CHECK constraints, 1 entrée dans `drizzle.__drizzle_migrations`.
+
+**À revisiter** :
+
+- Si on ajoute un autre provider Postgres (improbable V0), réévaluer le
+  choix `ws` vs `pg`.
+- Quand on industrialise les branches Neon dev par PR (Sprint 1+),
+  vérifier que le même flow `pnpm db:migrate` tient avec une `DATABASE_URL`
+  pointant sur une branche éphémère.
+
+---
+
 #### YYYY-MM-DD — [titre]
 
 (à compléter)

@@ -261,9 +261,10 @@ la doc devient un cimetière.
 
 ## 9. État du projet (snapshot)
 
-- **Phase** : Sprint 0 — scaffold applicatif terminé (2026-05-06)
+- **Phase** : Sprint 0 — scaffold applicatif terminé + DB initialisée (2026-05-06)
 - **Prochaine étape** : Sprint 1 — tracking LLM (workers execute_prompt × 5 LLMs, scoring Claude Haiku, dashboard data, email hebdo). cf. `geo-project/08-roadmap-execution.md`.
 - **Build status** : `pnpm format:check`, `pnpm lint`, `pnpm type-check`, `pnpm test`, `pnpm next build` tous verts en local.
+- **Schéma DB** : migration `0000_many_human_torch.sql` appliquée sur Neon EU Frankfurt (16 tables, 13 FK, 34 indexes, 98 CHECK constraints). Cf. `09-decisions-journal.md` § 2026-05-06 pour le setup `ws` + `--env-file-if-exists` sur `pnpm db:*`.
 - **Tâches Sprint 0 humaines restantes** (hors code, à faire par Max) :
   1. Achat / vérification domaine `mamie-geo.fr` + reconduction `mamie-seo.fr`
   2. Comptes API LLM : OpenAI, Anthropic, Mistral, Perplexity, Google AI
