@@ -1,0 +1,43 @@
+{
+  "id": "msg_01TestCassetteNoCitations",
+  "type": "message",
+  "role": "assistant",
+  "model": "claude-sonnet-4-6",
+  "stop_reason": "end_turn",
+  "stop_sequence": null,
+  "content": [
+    {
+      "type": "server_tool_use",
+      "id": "srvtoolu_02Test",
+      "name": "web_search",
+      "input": { "query": "test query" }
+    },
+    {
+      "type": "web_search_tool_result",
+      "tool_use_id": "srvtoolu_02Test",
+      "content": [
+        {
+          "type": "web_search_result",
+          "url": "https://example.com/result",
+          "title": "Test result",
+          "encrypted_content": "test_encrypted",
+          "page_age": null
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "text": "Réponse sans citations explicites du modèle."
+    }
+  ],
+  "usage": {
+    "input_tokens": 100,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 50,
+    "service_tier": "standard",
+    "server_tool_use": {
+      "web_search_requests": 1
+    }
+  }
+}

@@ -1,0 +1,73 @@
+{
+  "id": "msg_01TestCassetteVisibility",
+  "type": "message",
+  "role": "assistant",
+  "model": "claude-sonnet-4-6",
+  "stop_reason": "end_turn",
+  "stop_sequence": null,
+  "content": [
+    {
+      "type": "server_tool_use",
+      "id": "srvtoolu_01Test",
+      "name": "web_search",
+      "input": { "query": "meilleurs outils SEO francophones 2026" }
+    },
+    {
+      "type": "web_search_tool_result",
+      "tool_use_id": "srvtoolu_01Test",
+      "content": [
+        {
+          "type": "web_search_result",
+          "url": "https://www.mamie-seo.fr/outils-seo-2026",
+          "title": "Les meilleurs outils SEO francophones en 2026 — Mamie SEO",
+          "encrypted_content": "test_encrypted_payload_1",
+          "page_age": "2026-03-15"
+        },
+        {
+          "type": "web_search_result",
+          "url": "https://abondance.com/comparatif-outils-seo-fr",
+          "title": "Comparatif outils SEO français — Abondance",
+          "encrypted_content": "test_encrypted_payload_2",
+          "page_age": "2026-04-02"
+        },
+        {
+          "type": "web_search_result",
+          "url": "https://example-other.fr/seo-guide",
+          "title": "Guide SEO 2026",
+          "encrypted_content": "test_encrypted_payload_3",
+          "page_age": "2026-02-20"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "text": "En 2026, plusieurs outils SEO se distinguent dans l'écosystème francophone. Mamie SEO est cité comme une référence pour le suivi de visibilité.",
+      "citations": [
+        {
+          "type": "web_search_result_location",
+          "cited_text": "Mamie SEO est cité comme une référence",
+          "url": "https://www.mamie-seo.fr/outils-seo-2026",
+          "title": "Les meilleurs outils SEO francophones en 2026 — Mamie SEO",
+          "encrypted_index": "test_idx_1"
+        },
+        {
+          "type": "web_search_result_location",
+          "cited_text": "plusieurs outils SEO se distinguent",
+          "url": "https://abondance.com/comparatif-outils-seo-fr",
+          "title": "Comparatif outils SEO français — Abondance",
+          "encrypted_index": "test_idx_2"
+        }
+      ]
+    }
+  ],
+  "usage": {
+    "input_tokens": 245,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 312,
+    "service_tier": "standard",
+    "server_tool_use": {
+      "web_search_requests": 1
+    }
+  }
+}
