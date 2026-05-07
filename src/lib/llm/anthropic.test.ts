@@ -39,7 +39,7 @@ describe("createAnthropicClient", () => {
     });
 
     expect(response.text).toContain("Mamie SEO");
-    expect(response.model).toBe("claude-sonnet-4-6");
+    expect(response.model).toBe("claude-haiku-4-5-20251001");
 
     // Sources prioritaires : celles citées dans le text block (2/3 résultats)
     expect(response.sources).toHaveLength(2);
@@ -52,12 +52,12 @@ describe("createAnthropicClient", () => {
       webSearchRequests: 1,
     });
 
-    // Coût attendu (Sonnet 4.6) :
-    // 245 × 3$/Mtok = 0.000735
-    // 312 × 15$/Mtok = 0.00468
+    // Coût attendu (Haiku 4.5, model du tracking Phase A) :
+    // 245 × 1$/Mtok = 0.000245
+    // 312 × 5$/Mtok = 0.00156
     // 1 search × 0.01$ = 0.01
-    // Total ≈ 0.015415
-    expect(response.costUsd).toBeCloseTo(0.015415, 6);
+    // Total ≈ 0.011805
+    expect(response.costUsd).toBeCloseTo(0.011805, 6);
     expect(response.durationMs).toBeGreaterThanOrEqual(0);
   });
 
@@ -89,9 +89,10 @@ describe("createAnthropicClient", () => {
     );
   });
 
-  // Cassette enregistrée le 2026-05-06 contre l'API réelle. Sert de garde-fou
-  // si l'API évolue ou si on touche au parser. À régénérer avec
-  // `pnpm llm:record real-fr-visibility "..."` quand le shape de réponse change.
+  // Cassette enregistrée le 2026-05-07 contre l'API réelle (Haiku 4.5,
+  // max_uses=2, max_tokens=4096). Sert de garde-fou si l'API évolue
+  // ou si on touche au parser. À régénérer via :
+  //   pnpm llm:record real-fr-visibility "..."
   it("parse une réponse réelle de l'API Anthropic (cassette enregistrée)", async () => {
     const cassette = await loadCassette("real-fr-visibility");
     const client = createAnthropicClient({
@@ -104,15 +105,16 @@ describe("createAnthropicClient", () => {
       language: "fr",
     });
 
-    expect(response.text.length).toBeGreaterThan(500);
+    expect(response.text.length).toBeGreaterThan(300);
     expect(response.sources.length).toBeGreaterThan(0);
-    // Tous les sources doivent avoir une URL valide
+    // Toutes les sources doivent avoir une URL et un titre
     for (const source of response.sources) {
       expect(source.url).toMatch(/^https?:\/\//);
       expect(source.title).toBeTruthy();
     }
-    // Cost réel à ~10¢ — utile pour tracker que la tarification est appliquée
-    expect(response.costUsd).toBeGreaterThan(0.05);
-    expect(response.costUsd).toBeLessThan(0.5);
+    // Coût Haiku 4.5 + web_search avec max_uses=2 : observé entre 1 et 5¢
+    // selon la longueur des résultats de recherche injectés en input.
+    expect(response.costUsd).toBeGreaterThan(0.005);
+    expect(response.costUsd).toBeLessThan(0.1);
   });
 });

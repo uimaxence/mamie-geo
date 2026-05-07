@@ -39,9 +39,12 @@ async function loadEnvLocal(): Promise<void> {
 //
 // Nécessite ANTHROPIC_API_KEY dans l'env (lu via .env.local en local).
 
-const MODEL = "claude-sonnet-4-6";
-const MAX_TOKENS = 2048;
-const MAX_WEB_SEARCHES = 5;
+// Mêmes defaults que createAnthropicClient (cf. src/lib/llm/anthropic.ts).
+// On garde la cassette d'enregistrement alignée avec ce que les workers
+// envoient en Phase A — sinon le test perd sa valeur de garde-fou.
+const MODEL = "claude-haiku-4-5-20251001";
+const MAX_TOKENS = 4096;
+const MAX_WEB_SEARCHES = 2;
 
 async function main() {
   await loadEnvLocal();

@@ -27,9 +27,14 @@ import {
 //   - costUsd    = computeCost à partir des prix pricing.ts
 //   - durationMs = mesuré côté client autour de l'appel API
 
-const DEFAULT_MODEL = "claude-sonnet-4-6";
-const DEFAULT_MAX_TOKENS = 2048;
-const DEFAULT_MAX_WEB_SEARCHES = 5;
+// Phase A : tracking sur Haiku 4.5 pour garder un coût dev raisonnable.
+// Bascule Sonnet 4.6 prévue en Phase C (cf. 09-decisions-journal § 2026-05-07).
+// max_uses=2 limite l'inflation des input tokens (chaque search injecte
+// ~5 ko de résultats en input). max_tokens=4096 évite les réponses
+// truncated qu'on voyait avec 2048.
+const DEFAULT_MODEL = "claude-haiku-4-5-20251001";
+const DEFAULT_MAX_TOKENS = 4096;
+const DEFAULT_MAX_WEB_SEARCHES = 2;
 
 export interface AnthropicClientOptions {
   apiKey: string;
