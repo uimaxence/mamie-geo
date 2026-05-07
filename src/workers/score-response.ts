@@ -2,12 +2,11 @@ import { eq, sql } from "drizzle-orm";
 import { db } from "@/db/client";
 import { brands, competitors, prompts, runs, usageCounters } from "@/db/schema";
 import { detectMentions, shouldScoreWithLLM, type MentionTarget } from "@/lib/citation/detect";
-import {
-  createAnthropicScoringClient,
-  type ScoringClient,
-  type ScoringResult,
-} from "@/lib/citation/score";
+import { createAnthropicScoringClient, type ScoringClient } from "@/lib/citation/score";
+import type { ParsedBrandsPayload } from "@/lib/citation/types";
 import { env } from "@/lib/env";
+import { recomputeMetricsForBrandLLMDate } from "@/lib/metrics/recompute";
+import type { LLMValue } from "@/lib/llm";
 import type { ScoreResponsePayload } from "./score-response-payload";
 
 export { parseScoreResponsePayload, type ScoreResponsePayload } from "./score-response-payload";
@@ -29,14 +28,6 @@ export { parseScoreResponsePayload, type ScoreResponsePayload } from "./score-re
 export interface ScoreResponseOptions {
   // Override pour tests : injecter un fake ScoringClient sans clé API
   scoringClient?: ScoringClient;
-}
-
-// Forme persistée dans runs.parsedBrands (jsonb). Inclut la détection
-// regex brute (audit) + le scoring LLM (qualitatif) + métadonnées.
-export interface ParsedBrandsPayload {
-  detection: ReturnType<typeof detectMentions>;
-  scoring: ScoringResult | { skipped: true; reason: string };
-  scoredAt: string;
 }
 
 export async function scoreResponse(
@@ -93,6 +84,13 @@ export async function scoreResponse(
       scoredAt: new Date().toISOString(),
     };
     await db.update(runs).set({ parsedBrands: payload }).where(eq(runs.id, runId));
+    // Recompute metrics inline — capture cette run dans l'agrégat même
+    // si pas de mention détectée (totalRuns inclut tous les runs).
+    await recomputeMetricsForBrandLLMDate({
+      brandId: brand.id,
+      llm: run.llm as LLMValue,
+      date: today(),
+    });
     return;
   }
 
@@ -139,6 +137,22 @@ export async function scoreResponse(
         llmCostUsd: sql`${usageCounters.llmCostUsd} + ${scoring.costUsd.toFixed(4)}`,
       },
     });
+
+  // 8. Recompute des metrics quotidiens. Inline car la queue ne peut pas
+  //    garantir l'ordre des messages : si on enqueuait recompute_metrics
+  //    après chaque score_response, l'idempotency_key bloquerait les
+  //    suivants alors qu'ils ont des données plus à jour. Inline = simple
+  //    et toujours frais. SQL-only, ~1ms.
+  await recomputeMetricsForBrandLLMDate({
+    brandId: brand.id,
+    llm: run.llm as LLMValue,
+    date: today(),
+  });
+}
+
+function today(): string {
+  const now = new Date();
+  return `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}-${String(now.getUTCDate()).padStart(2, "0")}`;
 }
 
 function startOfCurrentMonth(): string {

@@ -3,6 +3,10 @@ import { claim, complete, fail } from "@/lib/queue";
 import { env } from "@/lib/env";
 import { executePrompt, parseExecutePromptPayload } from "@/workers/execute-prompt";
 import { scoreResponse, parseScoreResponsePayload } from "@/workers/score-response";
+import {
+  parseRecomputeMetricsPayload,
+  recomputeMetricsForBrandLLMDate,
+} from "@/lib/metrics/recompute";
 
 // Endpoint déclenché par Vercel Cron toutes les 5 minutes (cf. vercel.json).
 // Il pull jusqu'à BATCH_SIZE jobs et les exécute. Phase A : seul le worker
@@ -67,11 +71,16 @@ async function runWorker(job: ClaimedJob): Promise<void> {
       await scoreResponse(payload);
       return;
     }
-    case "recompute_metrics":
+    case "recompute_metrics": {
+      // En Phase A le recompute est appelé inline depuis score_response,
+      // donc rien n'enqueue ce kind par défaut. La route de dispatch
+      // reste branchée pour les ré-agrégations manuelles ou un cron de
+      // safety à venir en Phase B.
+      const payload = parseRecomputeMetricsPayload(job.payload);
+      await recomputeMetricsForBrandLLMDate(payload);
+      return;
+    }
     case "send_weekly_email":
-      // Workers ajoutés en PR 4 et plus tard. En attendant on échoue
-      // explicitement pour qu'un job mal routé soit visible dans `failed`
-      // au lieu d'être consommé silencieusement.
       throw new Error(`Worker ${job.kind} pas encore implémenté (Phase A)`);
     default:
       throw new Error(`Job kind inconnu : ${job.kind}`);
