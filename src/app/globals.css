@@ -1,37 +1,146 @@
 @import "tailwindcss";
 
 /* ─────────────────────────────────────────────────────────────────────
- * Design tokens — Direction artistique A (éditorial chaud)
- * cf. geo-project/10-design-direction.md
+ * Design tokens — Direction A "éditorial chaud" (cf. doc 10)
+ * Inspirations : New York Magazine, The Browser, Are.na, Mubi
  * Polices : Newsreader (titres) + Geist (corps) + Geist Mono (data)
  * ──────────────────────────────────────────────────────────────────── */
 @theme {
-  /* Couleurs */
-  --color-cream: #faf7f2;
-  --color-ink: #1a1a1a;
-  --color-terracotta: #c5532e;
-  --color-mustard: #d4a53a;
-  --color-warm-gray: #8c8579;
+  /* ── Couleurs ── */
+  --color-cream: #faf7f2; /* fond principal, pas blanc froid */
+  --color-cream-dim: #f3efe6; /* fond secondaire (pills, sections) */
+  --color-ink: #1a1a1a; /* texte principal (noir doux) */
+  --color-ink-soft: #3d3d3d; /* texte secondaire */
+  --color-terracotta: #c5532e; /* accent CTA principal */
+  --color-terracotta-dim: #a64525; /* hover terracotta */
+  --color-mustard: #d4a53a; /* accent moutarde (badges) */
+  --color-warm-gray: #8c8579; /* texte tertiaire, captions */
+  --color-warm-gray-soft: #c8c2b6; /* bordures subtiles */
+  --color-success: #4f7a4d; /* status success (verts désaturés) */
+  --color-success-bg: #ecf2eb;
+  --color-warning: #b07b1a;
+  --color-warning-bg: #fbf3df;
+  --color-error: #a83030;
+  --color-error-bg: #fae9e9;
 
-  /* Polices — exposées par next/font puis bind via variables CSS */
+  /* ── Polices via next/font ── */
   --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
   --font-serif: var(--font-newsreader), Georgia, "Times New Roman", serif;
   --font-mono: var(--font-geist-mono), ui-monospace, "JetBrains Mono", monospace;
+
+  /* ── Radius (subtils, pas de gros rounded) ── */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+
+  /* ── Ombres douces, pas d'ombres bleues SaaS US ── */
+  --shadow-soft: 0 1px 2px rgba(26, 26, 26, 0.04), 0 1px 1px rgba(26, 26, 26, 0.03);
+  --shadow-elevated: 0 4px 12px rgba(26, 26, 26, 0.06), 0 2px 4px rgba(26, 26, 26, 0.04);
 }
 
+/* ─────────────────────────────────────────────────────────────────────
+ * Base
+ * ──────────────────────────────────────────────────────────────────── */
 html,
 body {
   background-color: var(--color-cream);
   color: var(--color-ink);
   font-family: var(--font-sans);
+  font-feature-settings:
+    "ss01" on,
+    "cv01" on; /* Geist : meilleurs glyphs */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
+::selection {
+  background-color: rgba(212, 165, 58, 0.35);
+  color: var(--color-ink);
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+ * Échelle typographique — classes "type-*" plutôt qu'inline classes
+ * Permet de re-tuner le style global sans toucher chaque page
+ * ──────────────────────────────────────────────────────────────────── */
+.type-display {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: clamp(2.5rem, 5vw, 3.75rem);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+
+.type-h1 {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: clamp(2rem, 3.5vw, 2.75rem);
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+}
+
+.type-h2 {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: 1.75rem;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.type-h3 {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: 1.25rem;
+  line-height: 1.3;
+}
+
+.type-eyebrow {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-warm-gray);
+}
+
+.type-body {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--color-ink-soft);
+}
+
+.type-body-lg {
+  font-size: 1.125rem;
+  line-height: 1.65;
+  color: var(--color-ink-soft);
+}
+
+.type-meta {
+  font-size: 0.8125rem;
+  color: var(--color-warm-gray);
+  line-height: 1.5;
+}
+
+.type-stat {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: 2.5rem;
+  line-height: 1;
+  letter-spacing: -0.015em;
+  font-feature-settings: "tnum" on;
+}
+
+.type-mono {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  letter-spacing: -0.005em;
+}
+
 h1,
 h2,
-h3 {
+h3,
+h4 {
   font-family: var(--font-serif);
+  font-weight: 500;
   letter-spacing: -0.01em;
 }
 
@@ -40,4 +149,31 @@ kbd,
 samp,
 pre {
   font-family: var(--font-mono);
+}
+
+a {
+  color: var(--color-terracotta);
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition: color 120ms ease;
+}
+
+a:hover {
+  color: var(--color-terracotta-dim);
+}
+
+/* Filets éditoriaux */
+.rule {
+  border: 0;
+  height: 1px;
+  background-color: var(--color-warm-gray-soft);
+  margin: 0;
+}
+
+.rule-thick {
+  border: 0;
+  height: 2px;
+  background-color: var(--color-ink);
+  margin: 0;
 }

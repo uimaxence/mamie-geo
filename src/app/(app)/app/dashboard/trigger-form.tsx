@@ -1,41 +1,52 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { Button } from "@/components/ui";
 import { triggerRunNow, type TriggerResult } from "./actions";
 
-// Composant client minimaliste pour le bouton "Lancer un run". Le polish
-// shadcn arrive en Phase B (PR 8). Ici on veut juste valider que la
-// chaîne UI → server action → enqueue → revalidatePath fonctionne.
+// Bouton "Lancer un run" — server action + feedback inline.
+// Polish design : utilise Button du design system, message stylé.
 
 export function TriggerRunForm() {
   const [pending, startTransition] = useTransition();
-  const [feedback, setFeedback] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<{ tone: "success" | "error"; message: string } | null>(
+    null,
+  );
 
   function handleClick() {
     setFeedback(null);
     startTransition(async () => {
       try {
         const result: TriggerResult = await triggerRunNow();
-        setFeedback(
-          `${result.jobsEnqueued} job(s) enqueué(s), ${result.runsCreated} run(s) créé(s), ${result.skipped} skip (idempotent).`,
-        );
+        setFeedback({
+          tone: "success",
+          message: `${result.jobsEnqueued} job(s) en attente · ${result.runsCreated} run(s) créé(s) · ${result.skipped} skip (idempotent).`,
+        });
       } catch (error) {
-        setFeedback(error instanceof Error ? error.message : "Erreur inconnue");
+        setFeedback({
+          tone: "error",
+          message: error instanceof Error ? error.message : "Erreur inconnue",
+        });
       }
     });
   }
 
   return (
-    <div>
-      <button
-        type="button"
-        onClick={handleClick}
-        disabled={pending}
-        className="rounded-md border border-[color:var(--color-warm-gray)] bg-white px-4 py-2 text-sm font-medium hover:bg-[color:var(--color-cream)] disabled:opacity-50"
-      >
+    <div className="flex flex-col items-end gap-2">
+      <Button type="button" variant="primary" onClick={handleClick} disabled={pending}>
         {pending ? "Enqueue en cours…" : "Lancer un run maintenant"}
-      </button>
-      {feedback && <p className="mt-2 text-sm text-[color:var(--color-warm-gray)]">{feedback}</p>}
+      </Button>
+      {feedback && (
+        <p
+          className={
+            feedback.tone === "success"
+              ? "type-meta text-[color:var(--color-success)]"
+              : "type-meta text-[color:var(--color-error)]"
+          }
+        >
+          {feedback.message}
+        </p>
+      )}
     </div>
   );
 }
