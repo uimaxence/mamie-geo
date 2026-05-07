@@ -394,6 +394,90 @@ Sprint 1. Au premier `pnpm db:migrate`, deux blocages successifs :
 
 ---
 
+#### 2026-05-07 — Phasage moteur Haiku → design system → multi-LLM, suite mesure coût Sonnet 4.6
+
+**Contexte** : PR 1 du Sprint 1 (LLMClient + provider Anthropic avec
+`web_search_20250305`) a permis de mesurer un coût réel par run de
+tracking. Cassette enregistrée contre l'API live :
+
+| Métrique         | Mesuré (Sonnet 4.6)           | Estimé doc 03 (initial) |
+| ---------------- | ----------------------------- | ----------------------- |
+| Input tokens     | 21 925                        | 500-2000                |
+| Output tokens    | 2 113 (capé par `max_tokens`) | 500-1500                |
+| Web search calls | 1                             | 1-5                     |
+| **Coût total**   | **~$0,107 / run**             | $0,005-0,02 / run       |
+
+Cause : le tool serveur `web_search_20250305` injecte les résultats de
+recherche (~5 ko / search, parfois plus) comme input tokens du modèle.
+Anthropic facture donc l'input gonflé + l'appel search ($0,01) + l'output
+final. Le ratio est largement défavorable sur Sonnet 4.6 ($3 / $15 par
+Mtok) à un point qui plombe la marge Starter (49 €) si on tracke 5 LLMs
+× 30 prompts × 30 jours.
+
+Le doc 03 § 232 mentionne déjà `claude-haiku-4-5` pour le tracking
+Anthropic ; c'est la cohérence qu'on doit conserver et respecter dans
+le code (PR 1 avait pris Sonnet 4.6 par défaut, à corriger).
+
+**Options considérées** :
+
+- A : Garder Sonnet 4.6 partout, accepter une marge négative en V0
+  pour avoir le LLM le plus représentatif de claude.ai
+- B : Phaser l'exécution. Phase A développement et tests sur Haiku 4.5
+  (cheap), Phase B UI / design system / SEO sur le même backend cheap,
+  Phase C bascule vers Sonnet 4.6 et ajout des 4 autres providers
+  quand l'expérience produit est figée
+- C : Couper le `web_search` en V0 (réponses sans grounding) → coût
+  quasi nul, mais "citations" hallucinées par le modèle, donc
+  produit non représentatif et invalide pour mesurer ce que voit
+  un utilisateur final
+
+**Choix** : B — Phasage A → B → C.
+
+**Justification** :
+
+- **Coût dev divisé par ~5** sur Phase A (Haiku 4.5 = $1 / $5 par Mtok
+  vs Sonnet $3 / $15). On va générer beaucoup de runs en debug et
+  itération pendant Phase A et B, autant qu'ils coûtent 2-4¢ pièce.
+- **L'interface `LLMClient` rend la bascule triviale** : un seul
+  fichier `anthropic.ts` à toucher en Phase C pour passer Sonnet 4.6
+  (ou feature-flag par plan : Starter sur Haiku, Pro/Agency sur Sonnet).
+- **A est tué** par les marges (-300 €/compte Starter dans le pire cas).
+- **C est tué** par la fidélité : sans `web_search`, le produit ne
+  reflète plus ce que voit un utilisateur de claude.ai, donc invalide
+  la promesse de valeur.
+- Cohérent avec la séquence "1 LLM cheap pour valider, design avant
+  de scaler" demandée par le founder (cf. CLAUDE.md § 9).
+
+**Conséquences appliquées** :
+
+- `src/lib/llm/anthropic.ts` : `DEFAULT_MODEL = "claude-haiku-4-5-20251001"`,
+  `DEFAULT_MAX_TOKENS = 4096`, `DEFAULT_MAX_WEB_SEARCHES = 2`. Configurables
+  via options du factory si on veut bumper ponctuellement.
+- Cassette de test `real-fr-visibility.json` réenregistrée sur Haiku 4.5
+  pour rester représentative de l'usage Phase A.
+- `geo-project/03-architecture-technique.md` § 656 : note de bas de
+  tableau ajoutant la mesure réelle Sonnet 4.6 + le cap pour la
+  bascule Phase C.
+- `geo-project/08-roadmap-execution.md` : note d'introduction sur le
+  phasage A/B/C qui s'intercale dans Sprint 1.x sans changer la
+  timeline mensuelle.
+- `CLAUDE.md` § 2 + § 9 : modèle tracking V0 = Haiku 4.5 explicité,
+  bascule Sonnet 4.6 pointée vers Phase C.
+
+**À revisiter** :
+
+- Fin Phase B (avant les premiers paying users) : refaire un smoke
+  test sur 5-10 prompts variés en Haiku 4.5 pour calibrer un coût
+  moyen réaliste, puis trancher la grille de bascule Phase C
+  (Starter/Pro/Agency par plan, ou par feature flag par workspace).
+- Si Anthropic introduit un mode `web_search` qui n'inclut pas tout
+  le contenu en input (style "résumé seul"), basculer dessus.
+- Si la marge Starter reste trop tendue malgré le bascule par plan,
+  considérer le cache cross-clients (`prompt_cache` table déjà prête)
+  pour les prompts génériques partagés entre workspaces.
+
+---
+
 #### YYYY-MM-DD — [titre]
 
 (à compléter)

@@ -42,6 +42,7 @@ Décisions actées le 2026-05-05 dans `geo-project/09-decisions-journal.md`.
 | Email              | **Brevo** (transac + marketing)                                                  | Maîtrisé, EU                                       |
 | Paiement           | **Stripe + Stripe Tax**                                                          | TVA UE auto                                        |
 | LLMs tracking      | **APIs natives** OpenAI / Anthropic / Mistral / Perplexity / Google              | Fidélité au browse/search natif (pas OpenRouter)   |
+| Modèle tracking V0 | **Anthropic Claude Haiku 4.5** (`claude-haiku-4-5-20251001`)                     | Phase A — cheap, bascule Sonnet 4.6 en Phase C     |
 | LLM scoring        | **Anthropic Claude Haiku 4.5**                                                   | JSON mode + cheap                                  |
 | Tests              | **Vitest** unit/integration + **Playwright** E2E (7 flows) + **MSW** + cassettes | Pas d'appel LLM réel en test                       |
 | CI                 | **GitHub Actions**                                                               | Standard                                           |
@@ -261,9 +262,12 @@ la doc devient un cimetière.
 
 ## 9. État du projet (snapshot)
 
-- **Phase** : Sprint 0 — scaffold applicatif terminé + DB initialisée (2026-05-06)
-- **Prochaine étape** : Sprint 1 — tracking LLM (workers execute_prompt × 5 LLMs, scoring Claude Haiku, dashboard data, email hebdo). cf. `geo-project/08-roadmap-execution.md`.
-- **Build status** : `pnpm format:check`, `pnpm lint`, `pnpm type-check`, `pnpm test`, `pnpm next build` tous verts en local.
+- **Phase** : Sprint 1 / Phase A — moteur de tracking sur 1 LLM cheap (Haiku 4.5) avant design system. Phasage A → B → C acté le 2026-05-07 (cf. `geo-project/09-decisions-journal.md` § 2026-05-07) :
+  - **Phase A** : moteur (workers, scoring, dashboard data) sur Haiku 4.5 uniquement
+  - **Phase B** : design system + UI propre + marketing + blog SEO, toujours sur Haiku 4.5 en backend
+  - **Phase C** : Stripe + 4 autres LLMs + bascule éventuelle Haiku → Sonnet 4.6 par plan
+- **Prochaine étape** : finir Phase A — Seed CLI + worker `execute_prompt` (PR 2) puis citation/scoring (PR 3) puis dashboard data (PR 5). cf. `geo-project/08-roadmap-execution.md`.
+- **Build status** : `pnpm format:check`, `pnpm lint`, `pnpm type-check`, `pnpm test`, `pnpm next build` tous verts en local. PR 1 (LLMClient + Anthropic provider, 5/5 tests) mergée dans la branche worktree.
 - **Schéma DB** : migration `0000_many_human_torch.sql` appliquée sur Neon EU Frankfurt (16 tables, 13 FK, 34 indexes, 98 CHECK constraints). Cf. `09-decisions-journal.md` § 2026-05-06 pour le setup `ws` + `--env-file-if-exists` sur `pnpm db:*`.
 - **Tâches Sprint 0 humaines restantes** (hors code, à faire par Max) :
   1. Achat / vérification domaine `mamie-geo.fr` + reconduction `mamie-seo.fr`

@@ -655,11 +655,29 @@ cycle de facturation Stripe (webhook `invoice.created`).
 
 ### Estimation de coût par run
 
-**Hypothèse** :
+**Hypothèse théorique initiale** :
 
 - 1 prompt envoyé → ~500 tokens input
 - Réponse moyenne avec sources → ~1500 tokens output
-- Coût moyen pondéré : ~$0.003 par appel LLM (ordre de grandeur, à valider en bench réel)
+- Coût moyen pondéré : ~$0.003 par appel LLM (ordre de grandeur)
+
+**Mesure réelle au 2026-05-07** (cf. `09-decisions-journal.md` § 2026-05-07) :
+
+| Modèle                         | Tokens in | Tokens out | Web search | Coût mesuré |
+| ------------------------------ | --------- | ---------- | ---------- | ----------- |
+| `claude-sonnet-4-6` + search 5 | 21 925    | 2 113      | 1          | ~$0,107     |
+
+L'écart vient du tool serveur `web_search_20250305` qui injecte les
+résultats de recherche (~5 ko/search) en input du modèle. L'estimation
+$0.003 ignorait cet effet. **Conséquence Phase A** : le tracking V0
+utilise `claude-haiku-4-5-20251001` ($1 in / $5 out) avec `max_uses=2`
+et `max_tokens=4096` → coût mesuré attendu ~$0.02-0.04/run, soit ~5×
+moins cher que Sonnet 4.6 et compatible avec la marge Starter.
+
+La bascule Sonnet 4.6 (ou autre modèle plus cher) est replanifiée pour
+Phase C (cf. `08-roadmap-execution.md`), avec arbitrage par plan
+(Starter sur Haiku, Pro/Agency sur Sonnet) ou par feature flag par
+workspace.
 
 ### Coût par client
 

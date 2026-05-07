@@ -1,5 +1,27 @@
 # 08 — Roadmap d'exécution
 
+## Phasage Sprint 1 — A → B → C (acté le 2026-05-07)
+
+À l'intérieur des Mois 1-2 (Build V0), l'exécution est phasée en 3
+étapes pour réduire le coût LLM pendant le développement et permettre
+au design system de mûrir avant d'élargir le multi-LLM. Le découpage
+mensuel ci-dessous reste valable, c'est juste l'ordre interne qui
+change. Détail dans `09-decisions-journal.md` § 2026-05-07.
+
+| Phase | Contenu                                                                                                                       | LLM backend            | Quand               |
+| ----- | ----------------------------------------------------------------------------------------------------------------------------- | ---------------------- | ------------------- |
+| **A** | Moteur tracking + scoring + recompute metrics + dashboard data dynamique + magic-link + onboarding minimal                    | Haiku 4.5 uniquement   | Sprint 1.1 + 1.2    |
+| **B** | Design tokens + shadcn customisé + dashboard polish + onboarding propre + home + pricing + about + blog MDX + outil gratuit   | Haiku 4.5 (inchangé)   | Sprint 2.1          |
+| **C** | Stripe checkout + customer portal + hard-cap + 4 autres providers (OpenAI, Mistral, Perplexity, Google) + bascule modèle prod | Haiku 4.5 + Sonnet 4.6 | Sprint 2.2 + Mois 3 |
+
+Pendant Phase A et B le code de tracking ne touche qu'un seul provider
+(Anthropic) → un seul fichier à débugger, un seul fixture set à
+maintenir. La bascule Phase C est triviale grâce à l'interface
+`LLMClient` (cf. `src/lib/llm/types.ts`) — les 4 autres providers slot
+derrière sans toucher aux workers ni au schéma BDD.
+
+---
+
 ## Vue d'ensemble timeline
 
 ```
