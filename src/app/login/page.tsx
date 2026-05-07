@@ -13,17 +13,28 @@ export default function LoginPage() {
     setStatus("sending");
     setErrorMessage(null);
 
-    const result = await authClient.signIn.magicLink({
-      email,
-      callbackURL: "/app/dashboard",
-    });
+    try {
+      const result = await authClient.signIn.magicLink({
+        email,
+        callbackURL: "/app/dashboard",
+      });
 
-    if (result.error) {
+      if (result.error) {
+        setStatus("error");
+        setErrorMessage(result.error.message ?? "Erreur d'envoi du lien.");
+        return;
+      }
+      setStatus("sent");
+    } catch (error) {
+      // Crash réseau / 500 server / SMTP throw : on ne reste plus bloqué
+      // sur "sending" indéfiniment. L'erreur vraie est dans les logs Vercel.
       setStatus("error");
-      setErrorMessage(result.error.message ?? "Erreur d'envoi du lien.");
-      return;
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : "Erreur inattendue. Voir les logs serveur (Vercel → Logs).",
+      );
     }
-    setStatus("sent");
   }
 
   return (
