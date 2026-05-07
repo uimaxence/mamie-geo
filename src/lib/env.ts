@@ -1,8 +1,20 @@
 import { z } from "zod";
 
 // Validation centralisée des variables d'environnement.
-// Toute clé manquante ou mal formée crash au démarrage avec un message
-// explicite — préférable à un undefined silencieux en runtime.
+//
+// Stratégie en 3 modes :
+//   - dev / prod runtime  → strict, crash si une var requise manque
+//   - tests (NODE_ENV=test) ou CI=true → tolérant, retourne {} pour
+//     que les jobs lint/type-check/tests unit n'aient pas besoin de
+//     toutes les clés
+//   - build Next.js (NEXT_PHASE=phase-production-build) → tolérant
+//     avec placeholders. Next.js charge tous les modules pendant
+//     "Collecting page data" pour extraire les métadonnées des routes
+//     dynamiques ; pas besoin de la vraie DATABASE_URL à ce moment.
+//     On fournit donc des valeurs factices qui font passer la build,
+//     puis le runtime Vercel re-validera avec les vraies vars
+//     d'environnement avant la première exécution d'un handler.
+
 const schema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   NEXT_PUBLIC_APP_URL: z.string().url(),
@@ -42,13 +54,40 @@ const cleanedEnv = Object.fromEntries(
 
 const parsed = schema.safeParse(cleanedEnv);
 
+const isTest = process.env.NODE_ENV === "test";
+const isCI = process.env.CI === "true";
+// Next.js 13+ pose NEXT_PHASE pendant la build. Cf.
+// https://nextjs.org/docs/app/api-reference/next-cli#build
+const isBuildPhase = process.env.NEXT_PHASE === "phase-production-build";
+
 if (!parsed.success) {
-  // En CI on tolère les valeurs manquantes (les jobs lint/type-check
-  // ne nécessitent pas toutes les clés). Crash en dev/prod uniquement.
-  if (process.env.NODE_ENV !== "test" && process.env.CI !== "true") {
+  if (!isTest && !isCI && !isBuildPhase) {
     console.error("❌ Variables d'environnement invalides :", parsed.error.flatten().fieldErrors);
     throw new Error("Variables d'environnement invalides — voir log ci-dessus");
   }
 }
 
-export const env = (parsed.success ? parsed.data : ({} as Env)) as Env;
+// Placeholders utilisés uniquement pendant la build Next.js : permettent
+// au module-load de réussir (neon(URL) accepte n'importe quelle URL
+// formée, ne se connecte qu'à la première requête runtime). À l'exécution
+// d'un handler en prod, la vraie env est lue par Node depuis Vercel.
+const buildPlaceholders: Env = {
+  NODE_ENV: "production",
+  NEXT_PUBLIC_APP_URL: "https://placeholder.invalid",
+  DATABASE_URL: "postgresql://placeholder:placeholder@placeholder.invalid/placeholder",
+  BETTER_AUTH_SECRET: "placeholder-build-secret-must-be-thirty-two-chars",
+  BETTER_AUTH_URL: "https://placeholder.invalid",
+  BREVO_SMTP_HOST: "placeholder.invalid",
+  BREVO_SMTP_PORT: 587,
+  BREVO_SMTP_USER: "placeholder",
+  BREVO_SMTP_PASSWORD: "placeholder",
+  BREVO_SMTP_FROM: "placeholder@placeholder.invalid",
+  CRON_SECRET: "placeholder-cron-secret-build-only",
+  ADMIN_ALERT_EMAIL: "placeholder@placeholder.invalid",
+};
+
+export const env = parsed.success
+  ? (parsed.data as Env)
+  : isBuildPhase
+    ? buildPlaceholders
+    : ({} as Env);
