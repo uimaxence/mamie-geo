@@ -1,10 +1,10 @@
 import { forwardRef, type InputHTMLAttributes, type LabelHTMLAttributes } from "react";
 
-// Input éditorial : bord chaud subtil, focus ring terracotta. Pas de
-// rounded prononcé, pas d'ombre, on reste dans la grammaire imprimée.
+// Input Airbnb-like : bordure gris-300, focus ring noir (pas de couleur
+// d'accent au focus pour rester sobre — l'accent est réservé aux CTAs).
 
 const inputClass =
-  "w-full rounded-[var(--radius-md)] border border-[color:var(--color-warm-gray-soft)] bg-white px-3 py-2 text-base text-[color:var(--color-ink)] placeholder:text-[color:var(--color-warm-gray)] outline-none transition focus:border-[color:var(--color-terracotta)] focus:ring-2 focus:ring-[color:var(--color-terracotta)]/20 disabled:opacity-60";
+  "w-full rounded-[var(--radius-md)] border border-[color:var(--color-border-strong)] bg-white px-3.5 py-2.5 text-base text-[color:var(--color-ink)] placeholder:text-[color:var(--color-faint)] outline-none transition focus:border-[color:var(--color-ink)] focus:ring-2 focus:ring-[color:var(--color-gray-200)] disabled:opacity-50";
 
 export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement>>(
   function Input({ className = "", ...props }, ref) {
@@ -18,11 +18,9 @@ export interface FieldProps extends LabelHTMLAttributes<HTMLLabelElement> {
   error?: string;
 }
 
-// Field = Label + slot pour Input + hint/error optionnels.
-// Usage : <Field label="Email" hint="On envoie un magic-link"><Input ... /></Field>
 export function Field({ label, hint, error, className = "", children, ...props }: FieldProps) {
   return (
-    <label className={`flex flex-col gap-2 ${className}`} {...props}>
+    <label className={`flex flex-col gap-1.5 ${className}`} {...props}>
       <span className="text-sm font-medium text-[color:var(--color-ink)]">{label}</span>
       {children}
       {hint && !error && <span className="type-meta">{hint}</span>}

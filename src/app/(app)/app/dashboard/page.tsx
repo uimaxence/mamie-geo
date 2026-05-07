@@ -6,10 +6,9 @@ import { getDashboardData, type RecentRun } from "@/lib/dashboard/queries";
 import { Badge, Card, CardBody, Stat } from "@/components/ui";
 import { TriggerRunForm } from "./trigger-form";
 
-// Dashboard data en lecture seule + bouton "Lancer un run" en server
-// action. Direction A — éditorial chaud (cf. doc 10) : grammaire serif
-// pour les chiffres clés, sans-serif Geist pour les data tables, badges
-// chauds. Pas de gradient, pas d'ombre violente.
+// Dashboard data dynamique. Direction Airbnb-like (pivot 2026-05-07,
+// cf. doc 09) : fond blanc partout, hiérarchie via taille + weight,
+// accent terracotta réservé au CTA. Pas de serif, pas d'italique.
 
 export const dynamic = "force-dynamic";
 
@@ -27,16 +26,15 @@ export default async function DashboardPage() {
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-12">
-      {/* Header éditorial : eyebrow workspace, titre brand, sous-titre domaine */}
+      {/* Header : eyebrow workspace + plan, titre brand, sous-titre domaine */}
       <header className="flex flex-wrap items-end justify-between gap-6">
         <div className="flex flex-col gap-2">
-          <span className="type-eyebrow">
-            {data.workspace.name}
-            <span aria-hidden> · </span>
-            <Badge tone={data.workspace.plan === "trialing" ? "mustard" : "neutral"}>
-              plan {data.workspace.plan}
+          <div className="flex items-center gap-2">
+            <span className="type-eyebrow">{data.workspace.name}</span>
+            <Badge tone={data.workspace.plan === "trialing" ? "accent" : "neutral"}>
+              {data.workspace.plan}
             </Badge>
-          </span>
+          </div>
           <h1 className="type-h1">{data.brand.name}</h1>
           <span className="type-meta">{data.brand.domain}</span>
         </div>
@@ -45,12 +43,12 @@ export default async function DashboardPage() {
 
       <hr className="rule mt-8" />
 
-      {/* Stats clés — grid 4 colonnes desktop, 2 tablette, 1 mobile */}
+      {/* Stats clés — grid 4 colonnes desktop */}
       <section className="mt-10 grid grid-cols-1 gap-x-10 gap-y-8 sm:grid-cols-2 lg:grid-cols-4">
         <Stat
           label="Score de visibilité"
           value={claudeMetrics ? visibilityScore.toFixed(1) : "—"}
-          hint={claudeMetrics ? `aujourd'hui · Claude (sur 100)` : "aucun run aujourd'hui"}
+          hint={claudeMetrics ? "aujourd'hui · Claude (sur 100)" : "aucun run aujourd'hui"}
           tone={visibilityScore >= 50 ? "success" : visibilityScore > 0 ? "warning" : "muted"}
         />
         <Stat
@@ -62,9 +60,7 @@ export default async function DashboardPage() {
         />
         <Stat
           label="Top concurrent cité"
-          value={
-            <span className="font-serif">{claudeMetrics?.topCompetitors[0]?.name ?? "—"}</span>
-          }
+          value={claudeMetrics?.topCompetitors[0]?.name ?? "—"}
           hint={
             claudeMetrics?.topCompetitors[0]
               ? `${claudeMetrics.topCompetitors[0].citationCount} mention(s)`
@@ -79,14 +75,14 @@ export default async function DashboardPage() {
         />
       </section>
 
-      {/* Configuration rapide */}
-      <section className="mt-12">
+      {/* Configuration */}
+      <section className="mt-14">
         <div className="flex items-baseline justify-between">
-          <h2 className="type-h3">Configuration</h2>
+          <h2 className="type-h2">Configuration</h2>
           <span className="type-meta">{data.brand.domain}</span>
         </div>
         <hr className="rule mt-3" />
-        <dl className="mt-4 grid grid-cols-2 gap-x-8 gap-y-3 sm:grid-cols-4">
+        <dl className="mt-5 grid grid-cols-2 gap-x-8 gap-y-4 sm:grid-cols-4">
           <ConfigItem label="Prompts actifs" value={String(data.promptsCount)} />
           <ConfigItem label="Concurrents trackés" value={String(data.competitorsCount)} />
           <ConfigItem label="LLMs trackés" value="Claude" hint="Phase A" />
@@ -98,24 +94,24 @@ export default async function DashboardPage() {
         </dl>
       </section>
 
-      {/* Concurrents top 3 si data dispo */}
+      {/* Concurrents top 3 */}
       {claudeMetrics && claudeMetrics.topCompetitors.length > 0 && (
-        <section className="mt-12">
+        <section className="mt-14">
           <div className="flex items-baseline justify-between">
-            <h2 className="type-h3">Top concurrents cités aujourd&apos;hui</h2>
+            <h2 className="type-h2">Top concurrents cités aujourd&apos;hui</h2>
             <span className="type-meta">via Claude</span>
           </div>
           <hr className="rule mt-3" />
-          <ol className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <ol className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
             {claudeMetrics.topCompetitors.map((c, i) => (
               <li key={c.name}>
                 <Card>
                   <CardBody>
                     <div className="flex items-baseline justify-between">
                       <span className="type-eyebrow">#{i + 1}</span>
-                      <Badge tone="accent">{c.citationCount} mention(s)</Badge>
+                      <Badge tone="neutral">{c.citationCount} mention(s)</Badge>
                     </div>
-                    <p className="type-h3 mt-2">{c.name}</p>
+                    <p className="type-h3 mt-3">{c.name}</p>
                   </CardBody>
                 </Card>
               </li>
@@ -124,10 +120,10 @@ export default async function DashboardPage() {
         </section>
       )}
 
-      {/* Runs récents — table */}
-      <section className="mt-12">
+      {/* Runs récents */}
+      <section className="mt-14">
         <div className="flex items-baseline justify-between">
-          <h2 className="type-h3">10 derniers runs</h2>
+          <h2 className="type-h2">10 derniers runs</h2>
           <span className="type-meta">tous statuts</span>
         </div>
         <hr className="rule mt-3" />
@@ -159,9 +155,7 @@ function ConfigItem({ label, value, hint }: { label: string; value: string; hint
       <dd className="mt-1 text-base font-medium text-[color:var(--color-ink)]">
         {value}
         {hint && (
-          <span className="ml-2 text-xs font-normal text-[color:var(--color-warm-gray)]">
-            ({hint})
-          </span>
+          <span className="ml-2 text-xs font-normal text-[color:var(--color-muted)]">({hint})</span>
         )}
       </dd>
     </div>
@@ -173,7 +167,7 @@ function RecentRunsTable({ rows }: { rows: RecentRun[] }) {
     <div className="mt-4 overflow-x-auto">
       <table className="w-full border-collapse text-left">
         <thead>
-          <tr className="border-b border-[color:var(--color-warm-gray-soft)]">
+          <tr className="border-b border-[color:var(--color-border)]">
             <Th>Prompt</Th>
             <Th>LLM</Th>
             <Th>Statut</Th>
@@ -187,7 +181,7 @@ function RecentRunsTable({ rows }: { rows: RecentRun[] }) {
           {rows.map((run) => (
             <tr
               key={run.id}
-              className="border-b border-[color:var(--color-warm-gray-soft)]/50 last:border-b-0 hover:bg-[color:var(--color-cream-dim)]/40"
+              className="border-b border-[color:var(--color-border)] last:border-b-0 hover:bg-[color:var(--color-gray-50)]"
             >
               <Td>
                 <span className="block max-w-md truncate" title={run.promptText}>
@@ -195,7 +189,7 @@ function RecentRunsTable({ rows }: { rows: RecentRun[] }) {
                 </span>
               </Td>
               <Td>
-                <span className="type-mono">{run.llm}</span>
+                <span className="text-sm">{run.llm}</span>
               </Td>
               <Td>
                 <StatusBadge status={run.status} />
@@ -204,12 +198,12 @@ function RecentRunsTable({ rows }: { rows: RecentRun[] }) {
                 <BrandSignal value={run.brandMentioned} />
               </Td>
               <Td align="right">
-                <span className="type-mono">
+                <span className="type-tabular text-sm">
                   {run.costUsd !== null ? `$${run.costUsd.toFixed(4)}` : "—"}
                 </span>
               </Td>
               <Td align="right">
-                <span className="type-mono">
+                <span className="type-tabular text-sm">
                   {run.durationMs !== null ? `${(run.durationMs / 1000).toFixed(1)}s` : "—"}
                 </span>
               </Td>
@@ -249,7 +243,6 @@ function StatusBadge({ status }: { status: string }) {
   if (status === "success") return <Badge tone="success">success</Badge>;
   if (status === "running") return <Badge tone="accent">running</Badge>;
   if (status === "failed") return <Badge tone="error">failed</Badge>;
-  if (status === "pending") return <Badge tone="neutral">pending</Badge>;
   return <Badge tone="neutral">{status}</Badge>;
 }
 
@@ -280,7 +273,7 @@ function NoWorkspaceState({ email }: { email: string }) {
       <p className="type-body-lg mt-8">
         Tu n&apos;as pas encore de workspace. L&apos;onboarding wizard arrive en PR 9 — en
         attendant, lance{" "}
-        <code className="rounded bg-[color:var(--color-cream-dim)] px-1.5 py-0.5 type-mono">
+        <code className="rounded bg-[color:var(--color-gray-100)] px-1.5 py-0.5 text-sm">
           pnpm seed:dev
         </code>{" "}
         en dev pour générer un workspace de test.
@@ -288,7 +281,7 @@ function NoWorkspaceState({ email }: { email: string }) {
       <p className="type-meta mt-10">
         <Link
           href="/login"
-          className="text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-terracotta)]"
+          className="text-[color:var(--color-muted)] hover:text-[color:var(--color-ink)]"
         >
           ← Se déconnecter
         </Link>

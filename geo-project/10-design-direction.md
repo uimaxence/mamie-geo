@@ -1,10 +1,48 @@
 # 10 — Direction artistique et design
 
+## ⚠️ Direction actée (mise à jour 2026-05-07) — Airbnb-like minimaliste
+
+> Cette section **supersede** les Directions A/B/C explorées plus bas, qui restent en archive.
+> Détail du pivot dans `09-decisions-journal.md` § 2026-05-07 (entrée pivot UI).
+
+**Mood** : airbnb.com, designme.agency, sites studio premium minimalistes.
+
+**Règles dures** :
+
+- Fond **toujours blanc** `#FFFFFF`, jamais teinté (pas de crème, pas de bleu, pas de gradient).
+- Couleurs principales : **nuances de gris uniquement** (gray-50 → gray-950, alignées Tailwind v4).
+- **Une seule police** : Geist Sans. Pas de serif, pas de mono, pas de seconde famille typographique.
+- **Pas d'italique** (ni en CSS, ni dans les balises `<em>` qui sont neutralisées en `font-style: normal`).
+- **Accent terracotta `#C5532E`** réservé aux CTAs (boutons "Recevoir le lien", "Lancer un run") et aux liens — jamais en fond, jamais en surface large.
+
+**Hiérarchie typographique** (cf. `src/app/globals.css` classes `.type-*`) : portée par taille + weight + letter-spacing, sans recourir à un serif. Display 600 / -0.03em, h1 600 / -0.025em, body 1rem leading 1.55.
+
+**Composants** :
+
+- Cards bordure 1px `gray-200`, radius `lg` (14px), pas d'ombre par défaut.
+- Boutons : variants `primary` (ink plein), `accent` (terracotta plein, pour CTA), `secondary` (blanc + bordure), `ghost`.
+- Badges : fond gris-100 ou variant léger pour status (success/warning/error). Pas de fond coloré sur le neutral.
+- Inputs : bordure gris-300, focus ring noir (sobre, l'accent reste réservé aux CTAs).
+
+**Pourquoi le pivot** :
+
+- La Direction A "éditorial chaud" donnait un look déjà-vu et chargé (crème + serif + italique = magazine), pas adapté à un produit data-driven.
+- Airbnb-like = standard moderne lisible, focus sur la donnée affichée (dashboard et tables sont l'essentiel produit), facile à itérer.
+- L'accent terracotta gardé conserve un fil avec le naming "Mamie GEO" (chaleur française) sans envahir l'interface.
+
+**Conservé du brief originel** :
+
+- Anti-patterns "look IA" toujours valables (cf. § Principes anti-IA + § Anti-patterns à bannir plus bas).
+- Voix personnelle / founder visible / captures réelles plutôt qu'illustrations 3D : inchangé.
+- Pattern "Sans nous / Avec nous" : inchangé pour la home (cf. § Composants et patterns obligatoires).
+
+---
+
 ## Pourquoi ce document
 
-L'enjeu : sortir du look "fait par une IA" qui caractérise 80% des SaaS lancés en 2025-2026 (gradient violet/bleu, illustrations 3D Stripe-like, "Trusted by 1000+", composants shadcn par défaut, ton corporate vide). Mamie GEO doit avoir une identité **éditoriale, française, humaine et honnête** — proche de ce que font des projets comme MeetSponsors ou Taap Radar.
+L'enjeu : sortir du look "fait par une IA" qui caractérise 80% des SaaS lancés en 2025-2026 (gradient violet/bleu, illustrations 3D Stripe-like, "Trusted by 1000+", composants shadcn par défaut, ton corporate vide). Mamie GEO doit avoir une identité **française, humaine et honnête** — sobre, focus sur la donnée.
 
-Ce doc définit la direction artistique, les patterns obligatoires, les anti-patterns, et donne 3 directions concrètes pour trancher.
+Ce doc définit la direction artistique, les patterns obligatoires, les anti-patterns, et conserve en archive les 3 directions concrètes initialement explorées (A éditorial chaud, B souverain, C studio indie) avant le pivot du 2026-05-07.
 
 ---
 

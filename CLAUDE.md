@@ -277,8 +277,8 @@ la doc devient un cimetière.
   5. Connecter le repo à Vercel + activer preview deployments + branche Neon dédiée par PR
   6. Renseigner `.env.local` à partir de `.env.example`
 - **Décisions Sprint 0 verrouillées** (session 2) :
-  - Direction artistique : A — éditorial chaud
-  - Polices V0 : Newsreader (titres) + Geist (corps) + Geist Mono (data)
+  - Direction artistique : **Pivot 2026-05-07 — Airbnb-like minimaliste** (cf. doc 09 § 2026-05-07 pivot UI). Blanc + nuances de gris, accent terracotta `#C5532E` réservé aux CTAs et liens, pas de fond coloré, pas d'italique, une seule police. La Direction A « éditorial chaud » du doc 10 (crème + serif + italique) est dépréciée — gardée comme alternative explorée.
+  - Police unique V0 : **Geist Sans** (déjà via package `geist`). Plus de Newsreader, plus de Geist Mono.
   - Template marketing : from scratch
   - Naming + domaine : Mamie GEO sur `mamie-geo.fr`
   - Magic-link Better Auth : SMTP Brevo (transport nodemailer)

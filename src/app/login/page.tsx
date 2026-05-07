@@ -41,14 +41,12 @@ export default function LoginPage() {
 
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6 py-16">
-      {/* Eyebrow + filet vintage : signature éditoriale en haut de chaque page secondaire */}
       <Link
         href="/"
-        className="type-eyebrow inline-block no-underline hover:text-[color:var(--color-ink)]"
+        className="mb-12 self-start text-sm font-medium text-[color:var(--color-muted)] no-underline hover:text-[color:var(--color-ink)]"
       >
         ← Mamie GEO
       </Link>
-      <hr className="rule mt-3 mb-10" />
 
       <h1 className="type-h1">On t&apos;envoie un lien magique.</h1>
       <p className="type-body-lg mt-4">
@@ -67,18 +65,18 @@ export default function LoginPage() {
             autoFocus
           />
         </Field>
-        <Button type="submit" size="lg" disabled={status === "sending" || !email}>
+        <Button type="submit" variant="accent" size="lg" disabled={status === "sending" || !email}>
           {status === "sending" ? "Envoi en cours…" : "Recevoir le lien"}
         </Button>
       </form>
 
       {status === "sent" && (
-        <div className="mt-6 rounded-[var(--radius-md)] border border-[color:var(--color-success)]/30 bg-[color:var(--color-success-bg)] px-4 py-3 text-sm text-[color:var(--color-success)]">
-          ✓ Lien envoyé à <strong>{email}</strong>. Vérifie ta boîte (et tes spams).
+        <div className="mt-6 rounded-[var(--radius-md)] border border-[color:var(--color-success)]/20 bg-[color:var(--color-success-bg)] px-4 py-3 text-sm text-[color:var(--color-success)]">
+          Lien envoyé à <strong>{email}</strong>. Vérifie ta boîte (et tes spams).
         </div>
       )}
       {status === "error" && errorMessage && (
-        <div className="mt-6 rounded-[var(--radius-md)] border border-[color:var(--color-error)]/30 bg-[color:var(--color-error-bg)] px-4 py-3 text-sm text-[color:var(--color-error)]">
+        <div className="mt-6 rounded-[var(--radius-md)] border border-[color:var(--color-error)]/20 bg-[color:var(--color-error-bg)] px-4 py-3 text-sm text-[color:var(--color-error)]">
           {errorMessage}
         </div>
       )}

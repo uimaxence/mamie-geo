@@ -33,7 +33,7 @@ export function TriggerRunForm() {
 
   return (
     <div className="flex flex-col items-end gap-2">
-      <Button type="button" variant="primary" onClick={handleClick} disabled={pending}>
+      <Button type="button" variant="accent" onClick={handleClick} disabled={pending}>
         {pending ? "Enqueue en cours…" : "Lancer un run maintenant"}
       </Button>
       {feedback && (

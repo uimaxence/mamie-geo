@@ -1,16 +1,15 @@
 import type { HTMLAttributes } from "react";
 
-// Card éditoriale : fond blanc cassé léger, bordure subtile chaude,
-// pas d'ombre violente — l'élévation vient du contraste cream/blanc.
-// Variant `outlined` (default) ou `flat` (juste bordure haute façon
-// section éditoriale, pas de cadre fermé).
+// Card minimaliste — fond blanc, bordure gris-200, radius lg.
+// Pas d'ombre par défaut (ajout possible via className `shadow-sm`).
+// Variant `flat` = pas de bordure, juste un séparateur haut, pour les
+// listes éditoriales sans cadre fermé.
 
 type Variant = "outlined" | "flat";
 
 const variantClass: Record<Variant, string> = {
-  outlined:
-    "bg-white border border-[color:var(--color-warm-gray-soft)] rounded-[var(--radius-lg)] shadow-[var(--shadow-soft)]",
-  flat: "border-t border-[color:var(--color-warm-gray-soft)] pt-6",
+  outlined: "bg-white border border-[color:var(--color-border)] rounded-[var(--radius-lg)]",
+  flat: "border-t border-[color:var(--color-border)] pt-6",
 };
 
 export interface CardProps extends HTMLAttributes<HTMLDivElement> {
@@ -32,7 +31,7 @@ export function CardBody({ className = "", ...props }: HTMLAttributes<HTMLDivEle
 export function CardFooter({ className = "", ...props }: HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={`px-5 py-3 border-t border-[color:var(--color-warm-gray-soft)] ${className}`}
+      className={`px-5 py-3 border-t border-[color:var(--color-border)] ${className}`}
       {...props}
     />
   );

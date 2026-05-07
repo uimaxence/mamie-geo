@@ -10,5 +10,6 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) redirect("/login");
 
-  return <div className="min-h-screen bg-[color:var(--color-cream)]">{children}</div>;
+  // Fond blanc pur — direction Airbnb-like (cf. doc 09 § 2026-05-07).
+  return <div className="min-h-screen bg-white">{children}</div>;
 }

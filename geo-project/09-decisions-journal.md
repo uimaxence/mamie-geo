@@ -478,6 +478,50 @@ le code (PR 1 avait pris Sonnet 4.6 par défaut, à corriger).
 
 ---
 
+#### 2026-05-07 — Pivot UI vers Airbnb-like minimaliste (supersede Direction A doc 10)
+
+**Contexte** : PR 7 (design system éditorial chaud — crème + Newsreader serif + italique) déployée sur Vercel. Retour Max après visite preview : « ça va pas du tout, faut vraiment qu'on revoit le design ». Réorientation explicite vers un look Airbnb (`airbnb.com`) + DesignMe Agency (`https://www.designme.agency/`) avec contraintes :
+
+- pas de fond coloré (donc adieu le crème `#FAF7F2`)
+- une seule police, pas plusieurs (donc adieu Newsreader + Geist Mono, on garde Geist Sans seul)
+- pas d'italique
+- nuances de gris + accent ponctuel pour les CTA
+
+**Options considérées** :
+
+- A : garder Direction A doc 10 et patcher cosmétiquement → ne répond pas à la demande
+- B : pivoter en blanc/gris + 1 police, accent terracotta gardé pour cohérence naming (Mamie = chaleur), zéro italique
+- C : full noir & blanc, accent neutre → trop austère, perd le fil narratif "Mamie"
+
+**Choix** : B.
+
+**Justification** :
+
+- Direction A "éditorial chaud" donnait un look magazine déjà-vu et chargé, peu adapté à un produit data-driven dont l'écran principal est un dashboard. Le serif Newsreader sur les chiffres impressionne 3 secondes mais alourdit la lecture quotidienne.
+- Airbnb-like = standard moderne, lisible, focus sur la donnée. Plus facile à itérer (less is more).
+- L'accent terracotta `#C5532E` est conservé pour les CTAs et liens. Ce fil rouge avec le naming "Mamie" reste sans envahir l'interface (jamais en fond, jamais en surface large).
+- Geist Sans (déjà installée via le package `geist`) couvre tous les usages : titres en weight 600, body en 400, chiffres tabulaires via `font-variant-numeric: tabular-nums`. Pas besoin d'ajouter une mono.
+
+**Conséquences appliquées** :
+
+- `src/app/globals.css` : reset complet des tokens. Palette `gray-50 → gray-950` alignée Tailwind v4, alias sémantiques `--color-ink`, `--color-muted`, `--color-border`, etc. Suppression des couleurs cream/cream-dim/warm-gray/warm-gray-soft. `em, i, cite, address { font-style: normal }` neutralise les italiques au niveau global. Classes `.type-*` repensées en sans-serif uniquement.
+- `src/app/layout.tsx` : retire `next/font/google` Newsreader et `geist/font/mono`. Seul `GeistSans` reste branché.
+- `src/components/ui/` : Button gagne un variant `accent` (terracotta plein) en plus de `primary` (ink plein) ; Card en bordure gris-200 / radius `lg` / pas d'ombre ; Stat full sans-serif weight 600 ; Badge en fond `gray-100` neutre + variants light bg pour success/warning/error ; Input en focus ring gris (sobre).
+- `src/app/login/page.tsx` : refait en typo unique, CTA `accent`, banners success/error avec fond très light.
+- `src/app/(app)/app/dashboard/page.tsx` : header sans serif, stat values en sans-serif épais, tableau avec eyebrow petites caps en thead, hover row gris-50.
+- `src/app/(marketing)/page.tsx` : home placeholder sans italique sur "ChatGPT", CTA `accent`.
+- `src/app/(app)/layout.tsx` : fond passe de `bg-[color:var(--color-cream)]` à `bg-white`.
+- `geo-project/10-design-direction.md` : nouveau § « Direction actée 2026-05-07 » en tête, qui supersede les Directions A/B/C explorées en archive plus bas.
+- `CLAUDE.md` § 9 : décision "Direction artistique : A — éditorial chaud" remplacée par pointeur vers cette entrée + précision sur la police unique.
+
+**À revisiter** :
+
+- Avant la livraison Phase B PR 8 (vraie home + pricing) : refaire un retour visuel sur Vercel preview pour valider que le ton Airbnb tient sur des sections marketing plus longues (hero + sans/avec + how-it-works).
+- Si on ressent un manque de chaleur dans le dashboard une fois 5 LLMs trackés : envisager un accent moutarde ponctuel sur les badges de meilleurs scores (sans inverser la règle "pas de fond coloré").
+- Direction artistique = chose qui vit. Cette entrée n'est pas finale, juste la base pour Phase B. Tout retour user remontant que le rendu final n'est pas Airbnb-like déclenchera une nouvelle entrée 09 sans culpabilité.
+
+---
+
 #### YYYY-MM-DD — [titre]
 
 (à compléter)
