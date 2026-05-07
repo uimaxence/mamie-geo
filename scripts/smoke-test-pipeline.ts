@@ -46,6 +46,8 @@ async function main() {
   const { scheduleRuns } = await import("@/app/api/cron/schedule-runs/route");
   const { executePrompt } = await import("@/workers/execute-prompt");
   const { parseExecutePromptPayload } = await import("@/workers/execute-prompt-payload");
+  const { scoreResponse } = await import("@/workers/score-response");
+  const { parseScoreResponsePayload } = await import("@/workers/score-response-payload");
   const queue = await import("@/lib/queue");
 
   console.log(`🚦 Smoke test pipeline (limit=${LIMIT}${DRY ? ", dry-run" : ""})…\n`);
@@ -87,6 +89,20 @@ async function main() {
         const run = await db.query.runs.findFirst({ where: eq(runs.id, payload.runId) });
         console.log(
           `    ✅ run ${payload.runId} status=${run?.status} cost=$${run?.costUsd} dur=${run?.durationMs}ms text=${run?.rawResponse?.slice(0, 80)}…`,
+        );
+      } else if (job.kind === "score_response") {
+        const payload = parseScoreResponsePayload(job.payload);
+        await scoreResponse(payload);
+        await queue.complete(job.id);
+        const run = await db.query.runs.findFirst({ where: eq(runs.id, payload.runId) });
+        const parsed = run?.parsedBrands as {
+          detection?: unknown[];
+          scoring?: { brandMentioned?: boolean };
+        } | null;
+        const detectionCount = Array.isArray(parsed?.detection) ? parsed.detection.length : 0;
+        const brandMentioned = parsed?.scoring?.brandMentioned ?? "skipped";
+        console.log(
+          `    ✅ scored ${payload.runId} detected=${detectionCount} brandMentioned=${brandMentioned}`,
         );
       } else {
         await queue.fail(job.id, `kind ${job.kind} pas géré en smoke test`);

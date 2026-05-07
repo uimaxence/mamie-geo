@@ -2,6 +2,7 @@ import { eq, sql } from "drizzle-orm";
 import { db } from "@/db/client";
 import { brands, prompts, runs, usageCounters } from "@/db/schema";
 import { getLLMClient, LLMError, type LLMClient, type LLMValue } from "@/lib/llm";
+import { enqueue } from "@/lib/queue";
 import type { ExecutePromptPayload } from "./execute-prompt-payload";
 
 export { parseExecutePromptPayload, type ExecutePromptPayload } from "./execute-prompt-payload";
@@ -117,6 +118,13 @@ export async function executePrompt(
         llmCostUsd: sql`${usageCounters.llmCostUsd} + ${response.costUsd.toFixed(4)}`,
       },
     });
+
+  // 6. Chaîner score_response. idempotency_key = score_response:{runId},
+  //    donc relancer le run ne re-score pas en double.
+  await enqueue({
+    kind: "score_response",
+    payload: { runId },
+  });
 }
 
 function startOfCurrentMonth(): string {
@@ -124,7 +132,3 @@ function startOfCurrentMonth(): string {
   // YYYY-MM-01
   return `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}-01`;
 }
-
-// Note pour la suite : Worker score_response sera ajouté en PR 3 et
-// auto-enqueué à la fin de cette fonction si status=success. Pour PR 2
-// on reste sur 1 worker → 1 row runs.success, sans chaînage.

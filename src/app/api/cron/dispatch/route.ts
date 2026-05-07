@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { claim, complete, fail } from "@/lib/queue";
 import { env } from "@/lib/env";
 import { executePrompt, parseExecutePromptPayload } from "@/workers/execute-prompt";
+import { scoreResponse, parseScoreResponsePayload } from "@/workers/score-response";
 
 // Endpoint déclenché par Vercel Cron toutes les 5 minutes (cf. vercel.json).
 // Il pull jusqu'à BATCH_SIZE jobs et les exécute. Phase A : seul le worker
@@ -61,10 +62,14 @@ async function runWorker(job: ClaimedJob): Promise<void> {
       await executePrompt(payload);
       return;
     }
-    case "score_response":
+    case "score_response": {
+      const payload = parseScoreResponsePayload(job.payload);
+      await scoreResponse(payload);
+      return;
+    }
     case "recompute_metrics":
     case "send_weekly_email":
-      // Workers ajoutés en PR 3, 4, et plus tard. En attendant on échoue
+      // Workers ajoutés en PR 4 et plus tard. En attendant on échoue
       // explicitement pour qu'un job mal routé soit visible dans `failed`
       // au lieu d'être consommé silencieusement.
       throw new Error(`Worker ${job.kind} pas encore implémenté (Phase A)`);

@@ -1,0 +1,32 @@
+{
+  "id": "msg_01TestScoringMamieCited",
+  "type": "message",
+  "role": "assistant",
+  "model": "claude-haiku-4-5-20251001",
+  "stop_reason": "tool_use",
+  "stop_sequence": null,
+  "content": [
+    {
+      "type": "tool_use",
+      "id": "toolu_01TestScoring",
+      "name": "report_scoring",
+      "input": {
+        "brandMentioned": true,
+        "brandSentiment": "positive",
+        "brandPosition": "first_paragraph",
+        "competitorsMentioned": [
+          { "name": "Profound", "sentiment": "neutral" },
+          { "name": "Peec AI", "sentiment": "positive" }
+        ]
+      }
+    }
+  ],
+  "usage": {
+    "input_tokens": 1240,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 156,
+    "service_tier": "standard",
+    "server_tool_use": null
+  }
+}
