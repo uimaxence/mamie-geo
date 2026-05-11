@@ -1,0 +1,32 @@
+{
+  "id": "msg_01TestPromptSuggestion",
+  "type": "message",
+  "role": "assistant",
+  "model": "claude-haiku-4-5-20251001",
+  "stop_reason": "tool_use",
+  "stop_sequence": null,
+  "content": [
+    {
+      "type": "tool_use",
+      "id": "toolu_01TestSuggest",
+      "name": "report_prompts",
+      "input": {
+        "prompts": [
+          "Quels sont les meilleurs outils de tracking SEO francophones en 2026 ?",
+          "Comment mesurer la visibilité de ma marque dans ChatGPT et Claude ?",
+          "Existe-t-il une alternative française à Profound pour le suivi GEO ?",
+          "Combien coûte un audit de visibilité IA pour une PME ?",
+          "Quels outils incluent Le Chat de Mistral dans leur tracking ?"
+        ]
+      }
+    }
+  ],
+  "usage": {
+    "input_tokens": 380,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 220,
+    "service_tier": "standard",
+    "server_tool_use": null
+  }
+}

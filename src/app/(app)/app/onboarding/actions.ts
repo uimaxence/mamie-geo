@@ -8,6 +8,8 @@ import { z } from "zod";
 import { db } from "@/db/client";
 import { brands, competitors, prompts, workspaceMembers, workspaces } from "@/db/schema";
 import { auth } from "@/lib/auth";
+import { env } from "@/lib/env";
+import { createAnthropicPromptGenerator } from "@/lib/llm/prompt-generator";
 
 // Server action : crée workspace + brand + concurrents + prompts en
 // une transaction logique (4 INSERTs séquentiels, idempotents par UUID).
@@ -130,4 +132,53 @@ export async function submitOnboarding(raw: OnboardingInput): Promise<Onboarding
   );
 
   return { ok: true, workspaceId };
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Server action séparée : suggestion de prompts via Claude Haiku 4.5
+// Pas de DB write, pas de side effect — juste un appel LLM.
+// ─────────────────────────────────────────────────────────────────────
+
+const suggestSchema = z.object({
+  brandName: z.string().min(1).max(80),
+  domain: z
+    .string()
+    .min(3)
+    .max(120)
+    .regex(/^[a-z0-9.-]+\.[a-z]{2,}$/i),
+  competitors: z.array(z.string().min(1).max(80)).max(10).default([]),
+});
+
+export type SuggestPromptsInput = z.infer<typeof suggestSchema>;
+
+export interface SuggestPromptsResult {
+  prompts: string[];
+  costUsd: number;
+}
+
+export async function suggestPrompts(raw: SuggestPromptsInput): Promise<SuggestPromptsResult> {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) throw new Error("Non authentifié");
+
+  const parsed = suggestSchema.safeParse(raw);
+  if (!parsed.success) {
+    const firstError = parsed.error.issues[0];
+    throw new Error(firstError?.message ?? "Données invalides");
+  }
+  const data = parsed.data;
+
+  if (!env.ANTHROPIC_API_KEY) {
+    throw new Error("ANTHROPIC_API_KEY manquant — suggestion indisponible");
+  }
+
+  const generator = createAnthropicPromptGenerator({ apiKey: env.ANTHROPIC_API_KEY });
+  const result = await generator.suggest({
+    brandName: data.brandName,
+    domain: data.domain,
+    language: "fr",
+    competitors: data.competitors.length > 0 ? data.competitors : undefined,
+    count: 5,
+  });
+
+  return { prompts: result.prompts, costUsd: result.costUsd };
 }

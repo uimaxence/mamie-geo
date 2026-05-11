@@ -2,14 +2,14 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, X } from "lucide-react";
+import { Plus, Sparkles, X } from "lucide-react";
 import { Badge, Button, Field, Input } from "@/components/ui";
-import { submitOnboarding, type OnboardingInput } from "./actions";
+import { submitOnboarding, suggestPrompts, type OnboardingInput } from "./actions";
 
 // Wizard onboarding 3 étapes — client component avec state local.
-// Pas de génération auto de prompts via IA dans cette PR (V0) — c'est
-// le path le plus simple pour valider le flow E2E. La feature
-// "suggère 5 prompts via Claude Haiku" arrivera en PR 9bis.
+// PR 13 : step 3 a maintenant un bouton "Suggérer 5 prompts via IA"
+// qui appelle Claude Haiku 4.5 avec brand + domain + competitors et
+// pré-remplit les prompts. Coût ~$0.003 par appel.
 
 type Step = 1 | 2 | 3;
 
@@ -240,6 +240,9 @@ function Step2({ state, setState }: { state: WizardState; setState: (s: WizardSt
 }
 
 function Step3({ state, setState }: { state: WizardState; setState: (s: WizardState) => void }) {
+  const [suggesting, startSuggesting] = useTransition();
+  const [suggestError, setSuggestError] = useState<string | null>(null);
+
   function updatePrompt(idx: number, value: string) {
     const next = [...state.prompts];
     next[idx] = value;
@@ -257,13 +260,58 @@ function Step3({ state, setState }: { state: WizardState; setState: (s: WizardSt
     });
   }
 
+  function handleSuggest() {
+    setSuggestError(null);
+    if (!state.brandName.trim() || !state.domain.trim()) {
+      setSuggestError(
+        "Renseigne d'abord la marque et le domaine (étape 1) pour suggérer des prompts.",
+      );
+      return;
+    }
+    startSuggesting(async () => {
+      try {
+        const result = await suggestPrompts({
+          brandName: state.brandName.trim(),
+          domain: state.domain.trim(),
+          competitors: state.competitors.map((c) => c.name.trim()).filter(Boolean),
+        });
+        // Pad à 5 minimum côté UI (l'utilisateur peut ajouter plus
+        // manuellement après). Remplace les prompts vides en priorité ;
+        // s'il y a du contenu existant, on l'écrase pour respecter
+        // l'intention "suggérer = je veux ces prompts".
+        const next = [...result.prompts];
+        while (next.length < 5) next.push("");
+        setState({ ...state, prompts: next });
+      } catch (err) {
+        setSuggestError(err instanceof Error ? err.message : "Erreur de suggestion");
+      }
+    });
+  }
+
   return (
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="type-h1">Les prompts à suivre.</h1>
         <p className="type-body-lg mt-3">
-          Questions réelles que tes prospects posent aux IA. 3 minimum, 25 maximum. Génération
-          automatique via IA en PR 9bis.
+          Questions réelles que tes prospects posent aux IA. 3 minimum, 25 maximum. Tu peux les
+          écrire à la main ou laisser Claude Haiku t&apos;en suggérer 5.
+        </p>
+      </div>
+
+      {/* CTA "Suggérer via IA" — variant secondary pour rester sobre */}
+      <div className="flex flex-col gap-2">
+        <button
+          type="button"
+          onClick={handleSuggest}
+          disabled={suggesting}
+          className="card-hover-warm inline-flex w-full items-center justify-center gap-2 rounded-[var(--radius-pill)] border border-[color:var(--color-border-strong)] bg-white px-5 py-3 text-sm font-medium text-[color:var(--color-ink)] transition hover:bg-[color:var(--color-gray-50)] disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <Sparkles size={16} strokeWidth={2} className="text-[color:var(--color-accent)]" />
+          {suggesting ? "Génération en cours…" : "Suggérer 5 prompts via Claude Haiku"}
+        </button>
+        {suggestError && <p className="text-xs text-[color:var(--color-error)]">{suggestError}</p>}
+        <p className="type-meta text-center">
+          Coût ~0,003 $. Tu pourras éditer chaque prompt après suggestion.
         </p>
       </div>
 
