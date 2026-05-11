@@ -1,6 +1,5 @@
 import { FAQ } from "./_sections/faq";
 import { Hero } from "./_sections/hero";
-import { HeyMax } from "./_sections/hey-max";
 import { HowItWorks } from "./_sections/how-it-works";
 import { LLMBadges } from "./_sections/llm-badges";
 import { MarketingFooter } from "./_sections/marketing-footer";
@@ -10,7 +9,9 @@ import { PourQui } from "./_sections/pour-qui";
 import { SansAvec } from "./_sections/sans-avec";
 
 // Home — orchestrateur. Chaque section vit dans _sections/.
-// Ordre travaillé en PR 8a + 8b selon doc 10 § Composants obligatoires.
+// PR 11a : section HeyMax retirée (« on s'en fou pour l'instant »).
+// Section founder pourra revenir en PR ultérieure si traction commerciale
+// le justifie (ex : « About » dédié).
 
 export default function HomePage() {
   return (
@@ -22,7 +23,6 @@ export default function HomePage() {
       <HowItWorks />
       <PourQui />
       <NEstPas />
-      <HeyMax />
       <FAQ />
       <MarketingFooter />
     </>

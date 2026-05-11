@@ -238,6 +238,44 @@
 }
 
 /* ─────────────────────────────────────────────────────────────────────
+ * Gradients warm — signature brand expressive (cf. doc 09 § 2026-05-13
+ * update, refs BrightNest + Tanj). À utiliser PONCTUELLEMENT :
+ *   - sur 1 card featured par section (la persona principale, le plan
+ *     Pro, le testimonial mis en avant…)
+ *   - sur 1 panel split par page (login, signup futur)
+ * Jamais sur tout un fond de section large — sinon on retombe dans
+ * l'extravagance.
+ *
+ * `gradient-warm-card` : radial soft pour une card 320-400px de large.
+ *   Le centre du dégradé est en bas-gauche, fade vers haut-droit
+ *   pour donner un sentiment de chaleur diffuse.
+ * `gradient-warm-panel` : radial intense pour un grand panel split
+ *   (côté gauche d'une page de login style BrightNest). Couleurs plus
+ *   saturées, transition plus dramatique.
+ * ──────────────────────────────────────────────────────────────────── */
+.gradient-warm-card {
+  background-image: radial-gradient(
+    ellipse 120% 120% at 25% 75%,
+    #c5532e 0%,
+    #ed7e4c 18%,
+    #fbc093 38%,
+    #fde8d6 60%,
+    #ffffff 95%
+  );
+}
+
+.gradient-warm-panel {
+  background-image: radial-gradient(
+    ellipse 100% 80% at 30% 45%,
+    #ed7e4c 0%,
+    #f5a072 18%,
+    #fbc093 40%,
+    #fde8d6 65%,
+    #fcf3e8 100%
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────────
  * Tactilité visible sur les boutons — inspirations Linear/Vercel.
  *
  * Stratégie 4 couches :
