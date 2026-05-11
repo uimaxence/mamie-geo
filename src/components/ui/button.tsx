@@ -1,35 +1,38 @@
 import { forwardRef, type ButtonHTMLAttributes, type AnchorHTMLAttributes } from "react";
 
-// Bouton primitif — direction Airbnb-like : 3 variants posés sur fond
-// blanc, accent terracotta réservé au CTA principal.
+// Bouton primitif — direction designme.agency / taap.it (cf. doc 10
+// § Direction actée 2026-05-11). CTA principal = noir plein arrondi
+// pill, secondaire = outline gris, ghost = transparent. Le terracotta
+// ne sert plus pour les CTAs — il reste disponible via `accent` pour
+// les cas marginaux mais doit rester rare.
 //
-// `primary`   = ink plein avec hover plus foncé (Airbnb noir/gris-950)
-// `accent`    = terracotta plein, pour CTA "Recevoir le lien" / "Lancer un run"
-// `secondary` = blanc + bordure gris-300, hover gris-50
-// `ghost`     = transparent, hover gris-50
+// Tous les boutons sont en `rounded-pill` (full radius) pour matcher
+// le langage des refs.
 
-type Variant = "primary" | "accent" | "secondary" | "ghost";
+type Variant = "primary" | "secondary" | "ghost" | "accent";
 type Size = "md" | "sm" | "lg";
 
 const variantClass: Record<Variant, string> = {
   primary:
     "bg-[color:var(--color-ink)] text-white hover:bg-[color:var(--color-gray-800)] border-[color:var(--color-ink)] no-underline",
-  accent:
-    "bg-[color:var(--color-accent)] text-white hover:bg-[color:var(--color-accent-dim)] border-[color:var(--color-accent)] no-underline",
   secondary:
     "bg-white text-[color:var(--color-ink)] border-[color:var(--color-border-strong)] hover:bg-[color:var(--color-gray-50)] no-underline",
   ghost:
     "bg-transparent text-[color:var(--color-ink)] border-transparent hover:bg-[color:var(--color-gray-100)] no-underline",
+  // Rare — gardé pour cas marginaux (ex : bouton "Beta" décoratif), pas
+  // pour CTA principal.
+  accent:
+    "bg-[color:var(--color-accent)] text-white hover:bg-[color:var(--color-accent-dim)] border-[color:var(--color-accent)] no-underline",
 };
 
 const sizeClass: Record<Size, string> = {
-  sm: "px-3 py-1.5 text-sm",
-  md: "px-4 py-2 text-sm",
-  lg: "px-5 py-3 text-base",
+  sm: "px-4 py-1.5 text-sm",
+  md: "px-5 py-2 text-sm",
+  lg: "px-6 py-3 text-base",
 };
 
 const baseClass =
-  "inline-flex items-center justify-center gap-2 rounded-[var(--radius-md)] border font-medium transition disabled:cursor-not-allowed disabled:opacity-50";
+  "inline-flex items-center justify-center gap-2 rounded-[var(--radius-pill)] border font-medium transition disabled:cursor-not-allowed disabled:opacity-50";
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant;

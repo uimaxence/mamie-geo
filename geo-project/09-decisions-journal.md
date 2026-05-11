@@ -522,6 +522,48 @@ le code (PR 1 avait pris Sonnet 4.6 par défaut, à corriger).
 
 ---
 
+#### 2026-05-11 — Refs visuelles ancrées sur designme.agency + taap.it (raffinement direction Airbnb-like)
+
+**Contexte** : après le pivot du 2026-05-07 vers une direction Airbnb-like minimaliste, Max apporte deux screenshots PDF de sites qu'il aime visuellement : `https://www.designme.agency/` et `https://taap.it/fr/radar`. Demande : « inspire toi de la charte graphique des deux screens pour l'implementer au projet et mettre à jour les fichiers de charte graphique ».
+
+**Analyse des refs** (extraite des 12 premières pages de chaque PDF) :
+
+DNA commun aux deux sites :
+
+- Fond blanc + sections alternées gris-50 pour rythme visuel (jamais de fond coloré)
+- CTA principal = **bouton noir plein arrondi pill (`rounded-full`)** — pas terracotta. CTA secondaire = outline gris (`secondary` chez nous).
+- Cards : fond blanc, bordure 1px gris-200, radius généreux (16-20px), pas d'ombre par défaut
+- Titres sans-serif épais (weight 600-700), tracking serré (`-0.025em`)
+- Body en gris muted (`gray-700`)
+- Eyebrows uppercase 12-13px gris (`type-eyebrow`)
+- Badges accent ponctuels colorés (vert pastel "Fonctionnalités" sur taap, rose pour les icônes services designme) — mais jamais en bouton CTA
+- Touches humanisantes : icônes brand circulaires, illustrations subtiles
+- Pas d'italique, une seule police
+
+Différences entre les deux :
+
+- designme.agency intègre des éléments « fancy » : frame monitor avec cross hairs, timecodes, badge vertical "Certified Partner" — accents décoratifs qui donnent du caractère sans bruiter.
+- taap.it/fr/radar plus sage, plus produit. Cards features 2 colonnes avec screenshots dedans, speech bubbles dessinées au stylo pour humaniser.
+
+**Décision** : raffiner le design system 2026-05-07 pour matcher ce DNA précis. Le pivot global reste valable (blanc, grays, 1 police, no italique) — c'est juste le styling fin qui s'aligne sur les refs.
+
+**Conséquences appliquées** :
+
+- `src/app/globals.css` : ajout d'un token `--radius-pill: 9999px` pour les boutons en full pill. `--radius-lg` passe à 16px (au lieu de 14px) pour matcher les cards taap.it.
+- `src/components/ui/button.tsx` : tous les variants passent en `rounded-[var(--radius-pill)]`. Le variant `primary` (noir plein) devient celui par défaut des CTAs. Le variant `accent` (terracotta) est **conservé mais marqué comme rare** dans le commentaire de tête — gardé pour cas marginaux décoratifs, plus pour CTA principal.
+- `src/components/ui/card.tsx` : radius passe de `lg` à `xl` (20px). Padding interne bumpé de `px-5 py-5` à `px-6 py-6`.
+- `src/components/ui/section.tsx` (nouveau) : composant `<Section variant="default" | "tinted" pad="md|lg|xl">` qui pose la trame de sections alternées blanc/gris-50 avec padding standard. Évite de réécrire la même classe à chaque page.
+- `src/app/login/page.tsx` : CTA `Recevoir le lien` passe de `accent` (terracotta) à `primary` (noir). Banners arrondies en `rounded-[var(--radius-lg)]`.
+- `src/app/(app)/app/dashboard/trigger-form.tsx` : bouton "Lancer un run" passe de `accent` à `primary` (noir). Le terracotta reste juste dans le `Badge tone="accent"` du plan trialing — accent ponctuel, comme dans les refs.
+- `src/app/(marketing)/page.tsx` : home placeholder enrichi avec un vrai header (logo + nav + 2 CTAs), hero centré avec Badge "Beta · GEO" + display title + 2 CTAs (noir pill + outline pill), première vraie section "Comment ça marche" sur fond gris-50 avec 3 cards eyebrow + h3 + body, footer minimaliste. Préfigure le travail de PR 8 (vraie home).
+
+**À revisiter** :
+
+- PR 8 (vraie home) : compléter avec « Sans Mamie GEO / Avec Mamie GEO », témoignages, founder visible, FAQ. Reproduire le pattern designme.agency : showcase de screenshots dashboard dans des « monitor frames » avec cross hairs en coin.
+- Si on veut ajouter un peu plus de personnalité comme designme/taap : envisager des touches décoratives (speech bubbles dessinées sur la home, badge vertical "Certified Partner" → "Bootstrap français"), à valider avec Max avant.
+
+---
+
 #### YYYY-MM-DD — [titre]
 
 (à compléter)

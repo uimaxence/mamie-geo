@@ -1,11 +1,14 @@
 # 10 — Direction artistique et design
 
-## ⚠️ Direction actée (mise à jour 2026-05-07) — Airbnb-like minimaliste
+## ⚠️ Direction actée (mise à jour 2026-05-11) — Airbnb-like minimaliste, refs designme.agency + taap.it
 
 > Cette section **supersede** les Directions A/B/C explorées plus bas, qui restent en archive.
-> Détail du pivot dans `09-decisions-journal.md` § 2026-05-07 (entrée pivot UI).
+> Pivot global acté le 2026-05-07, raffinement visuel ancré sur designme.agency + taap.it/fr/radar le 2026-05-11.
+> Détail dans `09-decisions-journal.md` § 2026-05-07 (pivot UI) + § 2026-05-11 (refs designme/taap).
 
-**Mood** : airbnb.com, designme.agency, sites studio premium minimalistes.
+**Refs visuelles ancrées** : `https://www.designme.agency/` et `https://taap.it/fr/radar`. Voir les PDFs joints au repo (ou recapturer) avant tout travail design.
+
+**Mood** : airbnb.com, designme.agency, taap.it, sites studio premium minimalistes.
 
 **Règles dures** :
 
@@ -17,12 +20,14 @@
 
 **Hiérarchie typographique** (cf. `src/app/globals.css` classes `.type-*`) : portée par taille + weight + letter-spacing, sans recourir à un serif. Display 600 / -0.03em, h1 600 / -0.025em, body 1rem leading 1.55.
 
-**Composants** :
+**Composants** (raffinement 2026-05-11 sur refs designme/taap) :
 
-- Cards bordure 1px `gray-200`, radius `lg` (14px), pas d'ombre par défaut.
-- Boutons : variants `primary` (ink plein), `accent` (terracotta plein, pour CTA), `secondary` (blanc + bordure), `ghost`.
-- Badges : fond gris-100 ou variant léger pour status (success/warning/error). Pas de fond coloré sur le neutral.
-- Inputs : bordure gris-300, focus ring noir (sobre, l'accent reste réservé aux CTAs).
+- **Boutons** : tous en **`rounded-pill`** (full radius). Variant `primary` (**noir plein**, CTA principal — c'est ça le langage designme/taap, pas le terracotta), `secondary` (blanc + bordure gris-300, hover gris-50), `ghost` (transparent, hover gris-100). Le variant `accent` (terracotta plein) est conservé pour des **cas marginaux décoratifs** mais ne doit jamais être le CTA principal.
+- **Cards** : fond blanc, bordure 1px `gray-200`, **radius `xl` (20px)**, pas d'ombre par défaut. Padding interne généreux (`px-6 py-6`).
+- **Sections** : composant `<Section variant="default" | "tinted">` pour alterner fond blanc et fond `gray-50`. Pattern central des deux refs — crée le rythme visuel sans cards inutiles.
+- **Badges** : fond `gray-100` neutre par défaut. Variants light bg pour status (success/warning/error). Variant `accent` (terracotta très faible) gardé pour ponctuel (badge plan, badge beta) — comme le badge vert pastel "Fonctionnalités" de taap.
+- **Inputs** : bordure `gray-300`, focus ring noir sobre, radius `md` (10px).
+- **Touches « fancy »** observées chez designme à envisager pour PR 8+ : frame monitor avec cross hairs corners pour les screenshots dashboard, timecodes décoratifs en footer, speech bubbles dessinées au stylo pour humaniser (taap).
 
 **Pourquoi le pivot** :
 
