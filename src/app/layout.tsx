@@ -1,9 +1,20 @@
 import type { Metadata } from "next";
-import { GeistSans } from "geist/font/sans";
+import { Inter } from "next/font/google";
 import "./globals.css";
 
-// Une seule police chargée — Geist Sans (cf. doc 09 § 2026-05-07
-// pivot UI). Newsreader et Geist Mono retirés.
+// Une seule police chargée — Inter (Google Font classique SaaS, cf.
+// doc 09 § 2026-05-11 update polices). Remplace Geist Sans (variable
+// CSS `--font-geist-sans` qui ne matchait pas notre code).
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+  // Weights chargés : 400 (body), 500 (médium / labels), 600 (titres),
+  // 700 (display fort). Garder le sous-ensemble réduit pour limiter
+  // le poids du bundle font.
+  weight: ["400", "500", "600", "700"],
+});
 
 export const metadata: Metadata = {
   title: {
@@ -17,7 +28,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="fr" className={GeistSans.variable}>
+    <html lang="fr" className={inter.variable}>
       <body>{children}</body>
     </html>
   );

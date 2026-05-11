@@ -104,7 +104,10 @@ export default function HomePage() {
           </span>
           <p className="type-meta">
             Site en construction. Suivre le journal de bord sur{" "}
-            <a href="https://github.com/uimaxence/mamie-geo">GitHub</a>.
+            <a href="https://github.com/uimaxence/mamie-geo" className="link">
+              GitHub
+            </a>
+            .
           </p>
         </div>
       </footer>

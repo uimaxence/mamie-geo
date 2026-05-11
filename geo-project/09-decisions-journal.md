@@ -562,6 +562,21 @@ Différences entre les deux :
 - PR 8 (vraie home) : compléter avec « Sans Mamie GEO / Avec Mamie GEO », témoignages, founder visible, FAQ. Reproduire le pattern designme.agency : showcase de screenshots dashboard dans des « monitor frames » avec cross hairs en coin.
 - Si on veut ajouter un peu plus de personnalité comme designme/taap : envisager des touches décoratives (speech bubbles dessinées sur la home, badge vertical "Certified Partner" → "Bootstrap français"), à valider avec Max avant.
 
+**Update 2026-05-11 (même jour) — fix polices + cascade CSS** :
+
+Retour Max sur le rendu preview après PR 7ter : le titre de la home s'affichait en **serif Times-like** et les CTAs noirs avaient un texte « Se connecter → » en **orange souligné** à l'intérieur. Bugs identifiés :
+
+1. **Bug police** : le package `geist` v1.7 expose la variable CSS `--font-geist-sans`, mais `src/app/globals.css` référençait `var(--font-geist)` (variable inexistante). Résultat : chaîne de fallback `ui-sans-serif, system-ui, ...` qui résolvait en serif par défaut du browser sur Vercel preview.
+2. **Bug cascade** : les règles globales `a { color: var(--color-accent); text-decoration: underline }` étaient écrites au top-level du CSS — donc plus prioritaires que les utilities Tailwind `text-white` / `no-underline` appliquées sur les `LinkButton`. Tous les `<a>` héritaient du orange souligné, même à l'intérieur des boutons noirs.
+
+Fixes appliqués :
+
+- **Police** : passage de Geist Sans à **Inter** via `next/font/google` (Max demandait « un Google Font classique sans serif » — Inter est la plus utilisée sur les SaaS modernes). Variable CSS `--font-inter` correctement référencée dans `--font-sans`. Weights 400/500/600/700 chargés. Le package `geist` est retiré des dépendances.
+- **Cascade** : toutes les règles globales (`html`, `body`, `em/i/cite`, `h1-h4`, `a`) sont maintenant wrappées dans `@layer base { ... }`. Tailwind v4 cascade priorise les utilities sur la base layer → un `LinkButton` avec `text-white no-underline` gagne contre tout default `<a>` style.
+- **Liens** : la règle globale `a { color: accent; underline }` est supprimée. Le default `<a>` est désormais `color: inherit; text-decoration: none`. Pour les liens INLINE dans du corps de texte qu'on veut visibles (ex : « GitHub » en footer), on applique explicitement la classe utilitaire `.link` (souligné gris foncé, hover terracotta) — pas de comportement global qui fuite dans les boutons.
+
+**Conséquences sur la doc 10** : remplacer toute mention de Geist Sans par Inter. Mention "police installée via package `geist`" supprimée — Inter passe par `next/font/google` natif.
+
 ---
 
 #### YYYY-MM-DD — [titre]

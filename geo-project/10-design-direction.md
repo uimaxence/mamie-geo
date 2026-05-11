@@ -14,7 +14,7 @@
 
 - Fond **toujours blanc** `#FFFFFF`, jamais teinté (pas de crème, pas de bleu, pas de gradient).
 - Couleurs principales : **nuances de gris uniquement** (gray-50 → gray-950, alignées Tailwind v4).
-- **Une seule police** : Geist Sans. Pas de serif, pas de mono, pas de seconde famille typographique.
+- **Une seule police** : **Inter** via `next/font/google` (weights 400/500/600/700 chargés). Pas de serif, pas de mono, pas de seconde famille typographique. Inter est le standard de fait des SaaS modernes — neutre, lisible, glyphs alternatifs activés via `font-feature-settings: "cv11", "ss01", "tnum"`.
 - **Pas d'italique** (ni en CSS, ni dans les balises `<em>` qui sont neutralisées en `font-style: normal`).
 - **Accent terracotta `#C5532E`** réservé aux CTAs (boutons "Recevoir le lien", "Lancer un run") et aux liens — jamais en fond, jamais en surface large.
 
