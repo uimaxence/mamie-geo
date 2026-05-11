@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
@@ -184,12 +185,16 @@ function RecentRunsTable({ rows }: { rows: RecentRun[] }) {
           {rows.map((run) => (
             <tr
               key={run.id}
-              className="border-b border-[color:var(--color-border)] last:border-b-0 hover:bg-[color:var(--color-gray-50)]"
+              className="group border-b border-[color:var(--color-border)] last:border-b-0 hover:bg-[color:var(--color-gray-50)]"
             >
               <Td>
-                <span className="block max-w-md truncate" title={run.promptText}>
+                <Link
+                  href={`/app/runs/${run.id}`}
+                  className="block max-w-md truncate text-[color:var(--color-ink)] group-hover:underline group-hover:underline-offset-2"
+                  title={run.promptText}
+                >
                   {run.promptText}
-                </span>
+                </Link>
               </Td>
               <Td>
                 <span className="text-sm">{run.llm}</span>

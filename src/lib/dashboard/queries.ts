@@ -217,3 +217,120 @@ function startOfCurrentMonthUTC(): string {
   const now = new Date();
   return `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}-01`;
 }
+
+// ─────────────────────────────────────────────────────────────────────
+// Détail d'un run (PR 14) — pour la page /app/runs/[id]
+// ─────────────────────────────────────────────────────────────────────
+
+export interface RunDetail {
+  id: string;
+  llm: LLMValue;
+  status: string;
+  costUsd: number | null;
+  durationMs: number | null;
+  scheduledAt: Date;
+  executedAt: Date | null;
+  rawResponse: string | null;
+  sources: Array<{ url: string; title: string; pageAge: string | null }>;
+  parsedBrands: ParsedBrandsPayload | null;
+  error: string | null;
+  model: string | null;
+  prompt: {
+    id: string;
+    text: string;
+    language: string;
+  };
+  brand: {
+    id: string;
+    name: string;
+    domain: string;
+  };
+}
+
+/**
+ * Charge le détail d'un run + sa hiérarchie (prompt → brand → workspace).
+ * Vérifie en même temps que l'utilisateur appartient au workspace qui
+ * possède ce run — si non (ou run absent), retourne null pour qu'on
+ * 404 proprement.
+ */
+export async function getRunDetail(runId: string, userId: string): Promise<RunDetail | null> {
+  const rows = await db
+    .select({
+      runId: runs.id,
+      llm: runs.llm,
+      status: runs.status,
+      costUsd: runs.costUsd,
+      durationMs: runs.durationMs,
+      scheduledAt: runs.scheduledAt,
+      executedAt: runs.executedAt,
+      rawResponse: runs.rawResponse,
+      parsedCitations: runs.parsedCitations,
+      parsedBrands: runs.parsedBrands,
+      runError: runs.error,
+      promptId: prompts.id,
+      promptText: prompts.text,
+      promptLanguage: prompts.language,
+      brandId: brands.id,
+      brandName: brands.name,
+      brandDomain: brands.domain,
+      workspaceId: brands.workspaceId,
+    })
+    .from(runs)
+    .innerJoin(prompts, eq(prompts.id, runs.promptId))
+    .innerJoin(brands, eq(brands.id, prompts.brandId))
+    .where(eq(runs.id, runId))
+    .limit(1);
+
+  const row = rows[0];
+  if (!row) return null;
+
+  // Auth : vérifie que le user appartient au workspace propriétaire du run
+  const membership = await db
+    .select({ workspaceId: workspaceMembers.workspaceId })
+    .from(workspaceMembers)
+    .where(
+      and(eq(workspaceMembers.workspaceId, row.workspaceId), eq(workspaceMembers.userId, userId)),
+    )
+    .limit(1);
+  if (!membership[0]) return null;
+
+  const sources = Array.isArray(row.parsedCitations)
+    ? (row.parsedCitations as Array<{ url: string; title: string; pageAge: string | null }>)
+    : [];
+  const parsedBrands = row.parsedBrands as ParsedBrandsPayload | null;
+
+  // Le model exact utilisé est stocké dans le scoring si présent ; sinon
+  // on n'a pas l'info (V0 n'écrit pas le model sur la row runs elle-même).
+  const model =
+    parsedBrands && "model" in parsedBrands.scoring && parsedBrands.scoring.model
+      ? parsedBrands.scoring.model
+      : null;
+
+  return {
+    id: row.runId,
+    llm: row.llm as LLMValue,
+    status: row.status,
+    costUsd: row.costUsd ? Number(row.costUsd) : null,
+    durationMs: row.durationMs,
+    scheduledAt: row.scheduledAt,
+    executedAt: row.executedAt,
+    rawResponse: row.rawResponse,
+    sources,
+    parsedBrands,
+    error: row.runError,
+    model,
+    prompt: {
+      id: row.promptId,
+      text: row.promptText,
+      language: row.promptLanguage,
+    },
+    brand: {
+      id: row.brandId,
+      name: row.brandName,
+      domain: row.brandDomain,
+    },
+  };
+}
+
+// Suppress lint warning : `competitors` and `citationMetricsDaily` and
+// `usageCounters` are used in `getDashboardData` above. Pas d'unused.
