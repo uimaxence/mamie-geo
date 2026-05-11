@@ -30,12 +30,24 @@ export default function LoginPage() {
       });
 
       if (result.error) {
+        // Loguer le détail brut côté DevTools — utile pour debugger
+        // les erreurs Better Auth qui ne portent pas toujours un
+        // message lisible côté client.
+        console.error("[login] Better Auth error:", result.error);
         setStatus("error");
-        setErrorMessage(result.error.message ?? "Erreur d'envoi du lien.");
+        const detail = [
+          result.error.message,
+          result.error.code ? `code: ${result.error.code}` : null,
+          result.error.status ? `status: ${result.error.status}` : null,
+        ]
+          .filter(Boolean)
+          .join(" · ");
+        setErrorMessage(detail || "Erreur d'envoi du lien (pas de détail).");
         return;
       }
       setStatus("sent");
     } catch (error) {
+      console.error("[login] fetch error:", error);
       setStatus("error");
       setErrorMessage(
         error instanceof Error
