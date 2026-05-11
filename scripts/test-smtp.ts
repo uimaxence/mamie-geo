@@ -50,9 +50,7 @@ async function main() {
   console.log("\n📋 Credentials chargés depuis .env.local :");
   console.log(`   HOST     : "${host}"`);
   console.log(`   PORT     : ${port}`);
-  console.log(
-    `   USER     : "${user}" (${user?.length ?? 0} chars)`,
-  );
+  console.log(`   USER     : "${user}" (${user?.length ?? 0} chars)`);
   console.log(
     `   PASSWORD : "${pass?.slice(0, 12)}...${pass?.slice(-5)}" (${pass?.length ?? 0} chars)`,
   );
@@ -70,6 +68,14 @@ async function main() {
         `   ⚠️  PASSWORD ne commence pas par 'xsmtpsib-' (préfixe attendu pour une clé SMTP Brevo)`,
       );
     }
+  }
+  // Le SMTP login Brevo est un identifiant généré (xxxxxxx@smtp-brevo.com),
+  // PAS l'email de compte. Si user ressemble à un email perso (gmail,
+  // outlook, etc.) c'est suspect.
+  if (user && !user.endsWith("@smtp-brevo.com")) {
+    console.log(
+      `   ⚠️  USER ne se termine pas par '@smtp-brevo.com' — Brevo attend l'identifiant SMTP généré (cf. dashboard → SMTP & API → "Connexion"), pas l'email de compte. Probable cause du 535.`,
+    );
   }
   console.log(`   FROM     : "${from}"\n`);
 
