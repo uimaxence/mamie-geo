@@ -9,10 +9,7 @@ export function MarketingHeader() {
   return (
     <header className="border-b border-[color:var(--color-border)] bg-white">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
-        <Link
-          href="/"
-          className="text-base font-bold tracking-tight text-[color:var(--color-ink)]"
-        >
+        <Link href="/" className="text-base font-bold tracking-tight text-[color:var(--color-ink)]">
           Mamie GEO
         </Link>
         <nav className="hidden gap-7 sm:flex">
