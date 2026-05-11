@@ -31,8 +31,11 @@ const sizeClass: Record<Size, string> = {
   lg: "px-6 py-3 text-base",
 };
 
+// La classe `button-shape` (cf. globals.css @layer components) pose la
+// tactilité : highlight inset top + drop shadow + hover plus prononcé
+// + active en ombre inverse + focus ring. Subtile mais visible.
 const baseClass =
-  "inline-flex items-center justify-center gap-2 rounded-[var(--radius-pill)] border font-medium transition disabled:cursor-not-allowed disabled:opacity-50";
+  "button-shape inline-flex items-center justify-center gap-2 rounded-[var(--radius-pill)] border font-medium disabled:cursor-not-allowed disabled:opacity-50";
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant;

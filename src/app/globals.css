@@ -236,3 +236,45 @@
   background-color: var(--color-border);
   margin: 0;
 }
+
+/* ─────────────────────────────────────────────────────────────────────
+ * Tactilité subtile sur les boutons — inspirations Linear/Vercel.
+ * 3 couches d'ombre superposées :
+ *   - inset top blanc translucide → "highlight LED" qui sculpte le haut
+ *   - drop shadow externe douce → léger décollement du fond
+ *   - hover : intensifie les deux
+ *   - active : inverse en ombre inset pour la sensation de pression
+ *
+ * Placé en @layer components — les utilities Tailwind (shadow-*, etc.)
+ * peuvent toujours l'écraser si besoin.
+ * ──────────────────────────────────────────────────────────────────── */
+@layer components {
+  .button-shape {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.12),
+      0 1px 2px rgba(10, 10, 10, 0.06),
+      0 1px 1px rgba(10, 10, 10, 0.04);
+    transition:
+      box-shadow 160ms ease,
+      background-color 160ms ease,
+      border-color 160ms ease;
+  }
+  .button-shape:hover:not(:disabled) {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.16),
+      0 2px 4px rgba(10, 10, 10, 0.09),
+      0 1px 2px rgba(10, 10, 10, 0.05);
+  }
+  .button-shape:active:not(:disabled) {
+    box-shadow:
+      inset 0 1px 2px rgba(10, 10, 10, 0.14),
+      0 1px 1px rgba(10, 10, 10, 0.03);
+  }
+  .button-shape:disabled {
+    box-shadow: none;
+  }
+  .button-shape:focus-visible {
+    outline: 2px solid rgba(10, 10, 10, 0.15);
+    outline-offset: 2px;
+  }
+}
