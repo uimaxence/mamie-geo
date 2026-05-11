@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
@@ -18,7 +17,11 @@ export default async function DashboardPage() {
 
   const data = await getDashboardData(session.user.id);
   if (!data) {
-    return <NoWorkspaceState email={session.user.email} />;
+    // Pas de workspace → onboarding wizard (PR 9). Le `<NoWorkspaceState>`
+    // précédent reste défini en bas de fichier au cas où on voudrait le
+    // ré-utiliser pour un edge case (ex : workspace supprimé en cours
+    // d'usage), mais le flow nominal passe par /app/onboarding.
+    redirect("/app/onboarding");
   }
 
   const claudeMetrics = data.metricsToday.find((m) => m.llm === "claude");
@@ -262,30 +265,4 @@ function formatRelative(date: Date): string {
   if (diffH < 24) return `il y a ${diffH} h`;
   const diffD = Math.floor(diffH / 24);
   return `il y a ${diffD} j`;
-}
-
-function NoWorkspaceState({ email }: { email: string }) {
-  return (
-    <main className="mx-auto max-w-2xl px-6 py-24">
-      <span className="type-eyebrow">Bienvenue</span>
-      <h1 className="type-display mt-3">{email}</h1>
-      <hr className="rule mt-8" />
-      <p className="type-body-lg mt-8">
-        Tu n&apos;as pas encore de workspace. L&apos;onboarding wizard arrive en PR 9 — en
-        attendant, lance{" "}
-        <code className="rounded bg-[color:var(--color-gray-100)] px-1.5 py-0.5 text-sm">
-          pnpm seed:dev
-        </code>{" "}
-        en dev pour générer un workspace de test.
-      </p>
-      <p className="type-meta mt-10">
-        <Link
-          href="/login"
-          className="text-[color:var(--color-muted)] hover:text-[color:var(--color-ink)]"
-        >
-          ← Se déconnecter
-        </Link>
-      </p>
-    </main>
-  );
 }
