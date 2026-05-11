@@ -29,6 +29,19 @@
 - **Inputs** : bordure `gray-300`, focus ring noir sobre, radius `md` (10px).
 - **Touches « fancy »** observées chez designme à envisager pour PR 8+ : frame monitor avec cross hairs corners pour les screenshots dashboard, timecodes décoratifs en footer, speech bubbles dessinées au stylo pour humaniser (taap).
 
+### Patterns de personnalité (update 2026-05-11 — refs Mobbin/Dribbble)
+
+Pour éviter le « trop plat » remonté par Max, 4 patterns disponibles dans le design system. À utiliser **sobrement** (pas tous sur la même page) :
+
+1. **Palette pastel pour badges colorés** — 6 tons (`blue`, `green`, `orange`, `purple`, `pink`, `yellow`) avec fond très light + texte saturé. Utilisation : catégoriser (logos LLMs, types de prompt, catégories blog), ponctuer (étapes d'un workflow). Jamais pour CTA.
+2. **`<StatusDot tone="..." pulse>`** — cercle 8px coloré avec halo léger (`--glow-*`), optionnellement pulsé. Pour signaler le live : "Beta active", "Run en cours", "Provider en ligne".
+3. **`<CornerFrame>`** — wrapper qui pose 4 cross-hairs aux coins. Signature « print éditorial » à appliquer sur 1-2 éléments par page max (hero, showcase screenshot). Casse la planéité sans bruiter.
+4. **Mix-weight dans les titres** — `<strong>` pour emphase un mot clé du headline (ex : « Sache enfin si **ChatGPT** parle de toi. »). Joue sur la hiérarchie typo sans ajouter de couleur.
+
+Inspirations directes : screen 1 du brief (status dot avec glow + cross-hairs Active Node), screen 2 (badges colorés pastel avec icônes Lucide), screen 3 (cards stats premium pour PR 8+ dashboard polish).
+
+Icônes : **`lucide-react`** ajouté en dépendance (set d'icônes sans-serif léger, tree-shake natif). Imports nommés pour ne pas alourdir le bundle.
+
 **Pourquoi le pivot** :
 
 - La Direction A "éditorial chaud" donnait un look déjà-vu et chargé (crème + serif + italique = magazine), pas adapté à un produit data-driven.

@@ -577,6 +577,40 @@ Fixes appliqués :
 
 **Conséquences sur la doc 10** : remplacer toute mention de Geist Sans par Inter. Mention "police installée via package `geist`" supprimée — Inter passe par `next/font/google` natif.
 
+**Update 2026-05-11 (3e itération du jour) — enrichissement DA suite à 4 screens Mobbin/Dribbble** :
+
+Max remonte que le rendu actuel est « trop plat » et envoie 4 screens d'inspiration : card Active Node avec status dot glow + cross-hairs marks, gallery de pills colorés pastel avec icônes, cards dashboard avec dataviz, tooltip dark mode. Demande de « décrire précisément et intégrer à la charte pour uniformiser et donner plus de personnalité, toujours clean sans extravagance ».
+
+Lecture des screens :
+
+- **Cross-hairs marks** (+ stylisés en gris ultra-light aux coins) : signature « print éditorial » que designme.agency utilise aussi. Cassent la planéité sans bruiter.
+- **Pills colorés pastel** (bleu/orange/vert/violet/rose) avec icône matching à gauche : permettent de catégoriser visuellement (LLMs, types) sans casser le minimalisme blanc.
+- **Status dots avec glow doux** : signal "live/offline" qui donne de la profondeur sans ombres lourdes.
+- **Mix-weight typo** (Active = 700, Node = 400) : joue la hiérarchie sans changer de couleur.
+
+Ajouts au design system :
+
+- `src/app/globals.css` : 12 tokens couleur pastel (`--color-blue`, `--color-blue-bg`, etc. × 6 teintes). 4 tokens glow (`--glow-red/green/orange/blue`).
+- `src/components/ui/badge.tsx` : 6 nouveaux tones (`blue/green/orange/purple/pink/yellow`) avec fond pastel + texte saturé. Prop `icon` slot pour Lucide à gauche du label.
+- `src/components/ui/status-dot.tsx` (NOUVEAU) : `<StatusDot tone="success" pulse />` — cercle 8px coloré avec halo léger, optionnellement pulsé.
+- `src/components/ui/corner-frame.tsx` (NOUVEAU) : `<CornerFrame>` — wrapper qui pose 4 cross-hairs gris-300 aux coins de son enfant. Signature à utiliser sobrement (1-2 occurrences par page).
+- `package.json` : ajout `lucide-react` (icônes sans-serif légères, tree-shake natif).
+
+Application sur la home (placeholder enrichi, pas la vraie home — celle-ci arrive en PR 8) :
+
+- Hero wrappé dans `<CornerFrame>` (signature print subtile)
+- Badge "Beta · Generative Engine Optimization" avec `StatusDot tone="accent" pulse` (signal "live")
+- Mix-weight sur le headline : « Sache enfin si **ChatGPT** parle de toi. »
+- Nouvelle section gris-50 « Les 5 IA qui répondent aux questions de tes futurs clients » avec 5 badges colorés pastel + icônes Lucide (ChatGPT green/MessageCircle, Claude purple/Bot, Perplexity blue/Search, Gemini orange/Sparkles, Le Chat pink/Cat) — c'est le « money shot » qui montre la signature visuelle pastel.
+- Section "Comment ça marche" : "Étape 01/02/03" remplacés par 3 Badge colorés (blue/orange/green) — pose la rythmique multi-couleurs sans casser le minimalisme.
+
+Règle de discipline : utiliser ces patterns **sobrement**. Une page peut avoir 1 `CornerFrame`, 1-2 `StatusDot`, et 5-7 badges colorés max. Au-delà = bruit, on retombe dans l'extravagance.
+
+**À revisiter** :
+
+- PR 8 (vraie home) : décliner ces patterns sur les sections « Sans / Avec » (badges status), « Comment ça marche » (steps colorées déjà posées), « Témoignages » (avatars + pills clients), FAQ, footer enrichi.
+- PR 9+ (dashboard polish) : appliquer `CornerFrame` sur la card hero du dashboard, `StatusDot` sur les runs en cours, badges colorés sur les LLMs dans la table des runs.
+
 ---
 
 #### YYYY-MM-DD — [titre]

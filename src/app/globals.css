@@ -44,6 +44,29 @@
   --color-error: #b91c1c;
   --color-error-bg: #fef2f2;
 
+  /* ── Palette pastel pour pills/badges colorés (inspiration screens 2)
+     Texte (couleur saturée) + bg (très light, ~12% saturation).
+     Usage : Badge tone="blue" etc. — pour catégoriser LLMs, statuts,
+     événements. Pas pour les CTAs. ──────────────────────────────── */
+  --color-blue: #2563eb;
+  --color-blue-bg: #eff6ff;
+  --color-green: #16a34a;
+  --color-green-bg: #f0fdf4;
+  --color-orange: #ea580c;
+  --color-orange-bg: #fff7ed;
+  --color-purple: #7c3aed;
+  --color-purple-bg: #faf5ff;
+  --color-pink: #db2777;
+  --color-pink-bg: #fdf2f8;
+  --color-yellow: #ca8a04;
+  --color-yellow-bg: #fefce8;
+
+  /* ── Shadows colorées (glow doux pour status dots) ──────────────── */
+  --glow-red: 0 0 12px rgba(220, 38, 38, 0.35);
+  --glow-green: 0 0 12px rgba(34, 197, 94, 0.35);
+  --glow-orange: 0 0 12px rgba(234, 88, 12, 0.35);
+  --glow-blue: 0 0 12px rgba(37, 99, 235, 0.3);
+
   /* ── Police unique : Inter via next/font/google ── */
   --font-sans:
     var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
