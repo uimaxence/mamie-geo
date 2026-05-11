@@ -28,6 +28,26 @@ export const ARTICLES: ArticleMeta[] = [
     author: "Maxence Cailleau",
     readingTimeMin: 8,
   },
+  {
+    slug: "mamie-geo-vs-profound",
+    title: "Mamie GEO vs Profound — 5 points de comparaison honnêtes",
+    description:
+      "Profound vise les grandes entreprises US à 500 $/mois avec SOC 2 et 8 LLMs. Mamie GEO vise les freelances et PME francophones à 49 €/mois avec 5 LLMs dont Le Chat. Comparaison sans bullshit.",
+    date: "2026-05-12",
+    category: "Comparatif",
+    author: "Maxence Cailleau",
+    readingTimeMin: 6,
+  },
+  {
+    slug: "etat-visibilite-ia-france-2026",
+    title: "État de la visibilité IA en France en 2026",
+    description:
+      "Chiffres, tendances et constats sur la façon dont les marques françaises sont (ou ne sont pas) citées dans ChatGPT, Claude, Perplexity, Gemini et Le Chat de Mistral.",
+    date: "2026-05-13",
+    category: "Étude",
+    author: "Maxence Cailleau",
+    readingTimeMin: 7,
+  },
 ];
 
 export function getArticleBySlug(slug: string): ArticleMeta | undefined {
