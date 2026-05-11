@@ -1,3 +1,4 @@
+import { BottomFade } from "@/components/ui";
 import { FAQ } from "./_sections/faq";
 import { Hero } from "./_sections/hero";
 import { HowItWorks } from "./_sections/how-it-works";
@@ -9,9 +10,7 @@ import { PourQui } from "./_sections/pour-qui";
 import { SansAvec } from "./_sections/sans-avec";
 
 // Home — orchestrateur. Chaque section vit dans _sections/.
-// PR 11a : section HeyMax retirée (« on s'en fou pour l'instant »).
-// Section founder pourra revenir en PR ultérieure si traction commerciale
-// le justifie (ex : « About » dédié).
+// PR 12b : BottomFade ajouté (effet d'ambiance fixed bottom).
 
 export default function HomePage() {
   return (
@@ -25,6 +24,7 @@ export default function HomePage() {
       <NEstPas />
       <FAQ />
       <MarketingFooter />
+      <BottomFade />
     </>
   );
 }

@@ -7,3 +7,4 @@ export { Input, Field } from "./input";
 export { Section } from "./section";
 export { StatusDot } from "./status-dot";
 export { CornerFrame } from "./corner-frame";
+export { BottomFade } from "./bottom-fade";

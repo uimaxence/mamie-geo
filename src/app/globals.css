@@ -92,6 +92,12 @@
  * globales — bug visible sur la home en PR 7ter)
  * ──────────────────────────────────────────────────────────────────── */
 @layer base {
+  html {
+    /* Scroll smooth pour les ancres internes (#features, #faq…) — cf.
+       PR 12b. `motion-reduce` respecté automatiquement par les browsers. */
+    scroll-behavior: smooth;
+  }
+
   html,
   body {
     background-color: var(--color-bg);
@@ -238,30 +244,57 @@
 }
 
 /* ─────────────────────────────────────────────────────────────────────
- * Gradients warm — signature brand expressive (cf. doc 09 § 2026-05-13
- * update, refs BrightNest + Tanj). À utiliser PONCTUELLEMENT :
- *   - sur 1 card featured par section (la persona principale, le plan
- *     Pro, le testimonial mis en avant…)
- *   - sur 1 panel split par page (login, signup futur)
- * Jamais sur tout un fond de section large — sinon on retombe dans
- * l'extravagance.
+ * Gradients warm — signature brand expressive (cf. doc 09 § PR 12a).
  *
- * `gradient-warm-card` : radial soft pour une card 320-400px de large.
- *   Le centre du dégradé est en bas-gauche, fade vers haut-droit
- *   pour donner un sentiment de chaleur diffuse.
- * `gradient-warm-panel` : radial intense pour un grand panel split
- *   (côté gauche d'une page de login style BrightNest). Couleurs plus
- *   saturées, transition plus dramatique.
+ * Refactor du 2026-05-14 suite retour Max :
+ *   - Le gradient ne crashe plus le texte (était dans le bg de toute
+ *     la card, lisibilité réduite). Il est désormais en pseudo-element
+ *     ::before en absolute fill DERRIÈRE le contenu.
+ *   - Apparaît au :hover smoothly (opacity 0 → 1 sur 400ms) au lieu
+ *     d'être permanent. Le repos reste minimaliste, le hover donne du
+ *     peps.
+ *   - Couleurs nettement plus light (rgba 0.06-0.12 max au lieu de
+ *     hex saturés).
+ *
+ * `.card-hover-warm` : à appliquer sur n'importe quelle card (persona,
+ *   step, feature, plan) — gradient apparaît au survol.
+ * `.gradient-warm-panel` : grand panel split (login). Toujours
+ *   permanent et plus saturé — c'est un panneau, pas une card.
  * ──────────────────────────────────────────────────────────────────── */
-.gradient-warm-card {
+
+.card-hover-warm {
+  position: relative;
+  isolation: isolate; /* contient les pseudo-elements */
+  transition:
+    transform 280ms ease,
+    box-shadow 280ms ease;
+}
+
+.card-hover-warm::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
   background-image: radial-gradient(
     ellipse 120% 120% at 25% 75%,
-    #c5532e 0%,
-    #ed7e4c 18%,
-    #fbc093 38%,
-    #fde8d6 60%,
-    #ffffff 95%
+    rgba(197, 83, 46, 0.12) 0%,
+    rgba(237, 126, 76, 0.08) 22%,
+    rgba(251, 192, 147, 0.05) 45%,
+    transparent 75%
   );
+  opacity: 0;
+  transition: opacity 400ms ease;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.card-hover-warm:hover::before {
+  opacity: 1;
+}
+
+.card-hover-warm:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 
 .gradient-warm-panel {

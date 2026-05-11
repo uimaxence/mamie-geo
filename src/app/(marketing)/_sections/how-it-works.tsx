@@ -41,7 +41,6 @@ export function HowItWorks() {
           title="Mamie GEO génère 25 prompts pertinents"
           description="Auto, via IA. Des questions réelles que tes futurs clients posent sur ChatGPT, Claude et consorts."
           illustration={<MockupIA />}
-          featured
         />
         <StepCard
           eyebrow="Étape 03"
@@ -61,31 +60,18 @@ interface StepCardProps {
   title: string;
   description: string;
   illustration: React.ReactNode;
-  featured?: boolean;
 }
 
-function StepCard({ eyebrow, tone, title, description, illustration, featured }: StepCardProps) {
-  const cardClass = featured
-    ? "gradient-warm-card text-[color:var(--color-ink)]"
-    : "border border-[color:var(--color-border)] bg-white";
-
+function StepCard({ eyebrow, tone, title, description, illustration }: StepCardProps) {
   return (
-    <li
-      className={`relative flex flex-col overflow-hidden rounded-[var(--radius-xl)] ${cardClass}`}
-    >
+    <li className="card-hover-warm relative flex flex-col overflow-hidden rounded-[var(--radius-xl)] border border-[color:var(--color-border)] bg-white">
       <div className="relative h-48 overflow-hidden">{illustration}</div>
       <div className="p-6">
         <Badge tone={tone} className="mb-3">
           {eyebrow}
         </Badge>
         <h3 className="type-h3">{title}</h3>
-        <p
-          className={`mt-2 text-sm leading-relaxed ${
-            featured ? "text-[color:var(--color-ink)]/85" : "text-[color:var(--color-ink-soft)]"
-          }`}
-        >
-          {description}
-        </p>
+        <p className="type-body mt-2 text-sm">{description}</p>
       </div>
     </li>
   );
