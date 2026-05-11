@@ -1,5 +1,15 @@
-// Layout du route group (blog). MDX articles publiés en /blog/[slug].
-// Sprint 0 : layout vide. Le pipeline MDX est mis en place en Sprint 1.
+import { MarketingFooter } from "../(marketing)/_sections/marketing-footer";
+import { MarketingHeader } from "../(marketing)/_sections/marketing-header";
+
+// Layout du route group (blog) — réutilise le header/footer marketing
+// pour qu'un lecteur blog ait la même navigation que sur la home.
+
 export default function BlogLayout({ children }: { children: React.ReactNode }) {
-  return <div className="min-h-screen">{children}</div>;
+  return (
+    <>
+      <MarketingHeader />
+      {children}
+      <MarketingFooter />
+    </>
+  );
 }

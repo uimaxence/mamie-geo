@@ -1,7 +1,10 @@
+import createMDX from "@next/mdx";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  // Routes `.mdx` traitées comme des pages App Router. cf. PR 10a.
+  pageExtensions: ["ts", "tsx", "mdx"],
   // Redirect défensif mamie-seo.fr → mamie-geo.fr (le redirect principal
   // est configuré DNS-level via Vercel Domains ; ce hook est un filet de
   // sécurité au cas où une requête atteindrait l'app avec le mauvais host).
@@ -24,4 +27,10 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+const withMDX = createMDX({
+  // Pas de plugin remark/rehype pour V0 — on garde le pipeline minimal.
+  // À ajouter en PR 10b si besoin : rehype-slug (anchors), rehype-pretty-code
+  // (syntax highlighting), remark-gfm (tables, strikethrough).
+});
+
+export default withMDX(nextConfig);
