@@ -1,0 +1,109 @@
+## Politique de confidentialité
+
+**Version V0 placeholder — à valider par juriste avant lancement public payant.**
+
+Dernière mise à jour : 11 mai 2026.
+
+### 1. Responsable du traitement
+
+Maxence Cailleau, entrepreneur individuel, exploitant `mamie-geo.fr`. Contact : `hello@mamie-geo.fr`.
+
+### 2. Données collectées
+
+Mamie GEO collecte les catégories de données suivantes :
+
+**Données de compte** :
+
+- Adresse email (pour l'authentification magic-link et la communication transactionnelle)
+- Date de création et de dernière connexion
+
+**Données configurées par l'utilisateur** :
+
+- Nom et domaine de la marque trackée
+- Noms et domaines des concurrents
+- Prompts à suivre (questions tapées par les prospects sur les LLMs)
+
+**Données générées par le service** :
+
+- Réponses des LLMs aux prompts configurés (texte brut + sources)
+- Métriques agrégées (score de visibilité, taux de citation, sentiment)
+- Logs d'usage (nombre de runs, coût LLM cumulé)
+
+**Données techniques** :
+
+- Adresse IP (logs serveur, conservés 30 jours pour la sécurité)
+- User-agent (logs serveur)
+- Cookies de session Better Auth (durée 14 jours)
+
+### 3. Finalités
+
+Les données sont utilisées pour :
+
+- Fournir le service Mamie GEO (tracking quotidien, scoring, dashboard)
+- Authentifier l'utilisateur et sécuriser son compte
+- Envoyer les emails transactionnels (magic-link, alertes de quota)
+- Calculer la facturation
+- Améliorer le service (statistiques agrégées et anonymisées)
+
+### 4. Base légale
+
+Le traitement repose sur :
+
+- L'exécution du contrat (CGU acceptées à l'inscription)
+- L'intérêt légitime de Mamie GEO pour la sécurité et l'amélioration du service
+- Le consentement explicite pour les communications marketing (opt-in à l'inscription, désinscription possible à tout moment)
+
+### 5. Hébergement et sous-traitants
+
+Toutes les données sont hébergées en Europe :
+
+| Sous-traitant | Rôle                                | Localisation |
+| ------------- | ----------------------------------- | ------------ |
+| Vercel        | Hébergement de l'application web    | Paris (cdg1) |
+| Neon          | Base de données PostgreSQL          | Francfort    |
+| Cloudflare R2 | Stockage de fichiers (rapports PDF) | EU           |
+| Brevo         | Envoi d'emails transactionnels      | France       |
+| Stripe        | Traitement des paiements            | Irlande      |
+| Anthropic     | Appels API LLM (Claude Haiku 4.5)   | États-Unis   |
+
+Concernant Anthropic (États-Unis) : les prompts envoyés sont ceux configurés par l'utilisateur (questions publiques, pas de données personnelles). Anthropic ne conserve pas les requêtes API au-delà de 30 jours et ne les utilise pas pour entraîner ses modèles, conformément à leur DPA. Un transfert hors UE est encadré par les Clauses Contractuelles Types (CCT) de la Commission Européenne.
+
+### 6. Durée de conservation
+
+- Données de compte : pendant toute la durée de l'abonnement + 30 jours après résiliation
+- Données générées (runs, métriques) : pendant toute la durée de l'abonnement
+- Logs serveur : 30 jours
+- Données de facturation : 10 ans (obligation légale française)
+
+### 7. Vos droits
+
+Conformément au RGPD, vous disposez des droits suivants :
+
+- **Accès** : obtenir une copie des données vous concernant
+- **Rectification** : corriger des données inexactes
+- **Effacement** : demander la suppression de votre compte et de ses données
+- **Limitation** : restreindre l'usage de certaines données
+- **Portabilité** : exporter vos données dans un format machine-readable
+- **Opposition** : refuser certains traitements (marketing notamment)
+
+Pour exercer ces droits, contactez `hello@mamie-geo.fr`. Réponse sous 30 jours maximum. En cas de désaccord, vous pouvez saisir la CNIL (`www.cnil.fr`).
+
+### 8. Sécurité
+
+- Authentification sans mot de passe (magic-link Better Auth)
+- Chiffrement TLS de bout en bout
+- Base de données chiffrée au repos (Neon)
+- Pas de stockage de cartes bancaires (déléguées à Stripe)
+- Audits internes trimestriels
+
+### 9. Cookies
+
+Mamie GEO utilise uniquement des cookies strictement nécessaires au fonctionnement (cookie de session Better Auth). Aucun cookie publicitaire ou de tracking tiers n'est posé. Pas de bannière cookie requise par la directive ePrivacy puisque les cookies sont fonctionnels.
+
+### 10. Modification de la politique
+
+Toute modification substantielle de la présente politique sera notifiée par email aux utilisateurs au moins 30 jours avant entrée en vigueur.
+
+### Contact
+
+Pour toute question relative à la protection des données : `hello@mamie-geo.fr`.

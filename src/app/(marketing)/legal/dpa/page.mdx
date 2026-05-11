@@ -1,0 +1,84 @@
+## Data Processing Agreement (DPA)
+
+**Version V0 placeholder — à valider par juriste avant lancement public payant.**
+
+Dernière mise à jour : 11 mai 2026.
+
+### Préambule
+
+Le présent Data Processing Agreement (DPA) complète les Conditions Générales d'Utilisation de Mamie GEO. Il définit les modalités de traitement des données personnelles confiées par le client (« Responsable du traitement ») à Mamie GEO (« Sous-traitant ») au sens du Règlement Général sur la Protection des Données (RGPD, UE 2016/679).
+
+Le DPA est inclus de plein droit dans les plans **Agence** et **Enterprise**. Pour les plans Starter et Pro, il est disponible sur demande à `hello@mamie-geo.fr`.
+
+### 1. Catégories de données traitées
+
+Mamie GEO traite, pour le compte du Responsable du traitement, les catégories de données suivantes :
+
+- **Données du client** : email, nom, raison sociale (collectées via Better Auth)
+- **Données de configuration métier** : nom de marque, domaine, concurrents, prompts
+- **Données générées par le service** : réponses LLMs, scores, métriques agrégées
+
+Aucune donnée sensible au sens de l'article 9 du RGPD (santé, opinions politiques, etc.) n'est traitée.
+
+### 2. Finalités du traitement
+
+Le traitement est strictement limité aux finalités suivantes :
+
+- Fournir le service Mamie GEO (tracking, scoring, dashboard, rapports)
+- Sécuriser l'accès au compte (authentification magic-link)
+- Calculer la facturation
+- Améliorer le service via statistiques agrégées et anonymisées
+
+### 3. Durée
+
+Le traitement dure tout le temps de l'abonnement actif. À la résiliation, les données sont conservées 30 jours puis effacées définitivement (sauf demande explicite d'export préalable).
+
+### 4. Obligations du Sous-traitant
+
+Mamie GEO s'engage à :
+
+- Traiter les données uniquement sur instruction documentée du Responsable du traitement (les CGU valent instructions par défaut)
+- Garantir que les personnes autorisées à traiter les données sont soumises au secret professionnel
+- Mettre en œuvre les mesures techniques et organisationnelles appropriées (chiffrement TLS, base chiffrée au repos, audits trimestriels, principe du moindre privilège)
+- Notifier le Responsable du traitement de toute violation de données dans les 72 heures suivant la prise de connaissance
+- Aider le Responsable du traitement à répondre aux demandes d'exercice de droits des personnes concernées (accès, rectification, effacement, portabilité)
+
+### 5. Sous-traitants ultérieurs
+
+Mamie GEO recourt aux sous-traitants ultérieurs suivants. Toute modification fait l'objet d'une notification 30 jours avant entrée en vigueur, avec droit d'opposition motivé du Responsable du traitement.
+
+| Sous-traitant ultérieur | Rôle                   | Localisation | Encadrement              |
+| ----------------------- | ---------------------- | ------------ | ------------------------ |
+| Vercel Inc.             | Hébergement web        | Paris (cdg1) | DPA Vercel + CCT         |
+| Neon Inc.               | Base de données        | Francfort    | DPA Neon                 |
+| Cloudflare R2           | Stockage fichiers      | EU           | DPA Cloudflare           |
+| Brevo                   | Emails transactionnels | France       | DPA Brevo                |
+| Stripe Payments Europe  | Paiements              | Irlande      | DPA Stripe               |
+| Anthropic PBC           | API LLM                | États-Unis   | CCT 2021 + DPA Anthropic |
+
+Concernant Anthropic (transfert hors UE) : les Clauses Contractuelles Types (CCT) de la Commission Européenne sont applicables. Anthropic ne conserve pas les requêtes API au-delà de 30 jours et ne les utilise pas pour entraîner ses modèles.
+
+### 6. Localisation des données
+
+Toutes les données sont hébergées et traitées **dans l'Espace Économique Européen**, à l'exception des appels API à Anthropic (États-Unis), encadrés par les CCT mentionnées ci-dessus. Aucune donnée n'est transférée vers un pays tiers sans encadrement juridique adéquat.
+
+### 7. Audits
+
+Le Responsable du traitement peut, à ses frais et avec préavis raisonnable de 30 jours, faire réaliser un audit annuel des traitements effectués par Mamie GEO. Les rapports d'audit interne trimestriels peuvent être communiqués sur demande.
+
+### 8. Fin du traitement
+
+À la fin du contrat, et sur instruction du Responsable du traitement, Mamie GEO procède à :
+
+- L'export des données dans un format machine-readable (JSON ou CSV)
+- L'effacement définitif des données dans un délai maximum de 30 jours
+
+Un certificat de destruction peut être fourni sur demande.
+
+### 9. Responsabilité
+
+Mamie GEO assume la responsabilité du traitement conforme aux engagements du présent DPA. Sa responsabilité totale est plafonnée au montant des sommes versées par le Responsable du traitement au cours des 12 derniers mois précédant le sinistre.
+
+### Signature
+
+Le DPA est conclu à la date d'acceptation des CGU par le Responsable du traitement. Une version signée électroniquement peut être fournie sur demande à `hello@mamie-geo.fr`.
