@@ -613,6 +613,45 @@ Règle de discipline : utiliser ces patterns **sobrement**. Une page peut avoir 
 
 ---
 
+#### 2026-05-12 — Bilan Phase A + B livrées + bascule Brevo SMTP → REST API (PR 18bis)
+
+**Contexte** : 8 jours après le démarrage Sprint 1, Max a accès au dashboard en prod sur Vercel après résolution finale du blocage login (magic-link via Brevo). Le pipeline produit (Phase A) et la couche UI (Phase B) sont livrés et fonctionnels. Une seule issue ouverte côté Phase A : les runs restent en `pending` après trigger en prod — probable problème de cron Vercel à investiguer (CRON_SECRET pas posé ? `vercel.json` mal lu ?).
+
+**Bascule Brevo SMTP → REST API** :
+
+L'envoi du magic-link de login a planté pendant 3 sessions de debug consécutives avec une cascade d'erreurs Brevo :
+
+1. `535 5.7.8 Authentication failed` → cause 1 : `BREVO_SMTP_USER` était l'email de compte Brevo (`maxencecailleau.pro@gmail.com`) alors que Brevo attend l'identifiant SMTP généré sous la forme `xxxxxxx@smtp-brevo.com` (visible dans le dashboard Brevo sous le label « Connexion » à côté du serveur SMTP). Doc et `.env.example` mis à jour pour prévenir ce piège.
+2. `525 5.7.1 Unauthorized IP address` → cause 2 : le plan Brevo Free impose une IP whitelist SMTP qu'on ne peut pas désactiver. En local on peut whitelister l'IP de la machine, mais Vercel utilise des IPs serverless dynamiques non-whitelistables stablement.
+
+**Décision** : bascule du backend Brevo de SMTP vers **REST API** (`https://api.brevo.com/v3/smtp/email`). L'API REST n'est pas soumise à l'IP whitelist du plan Free — elle s'authentifie via une clé API HTTP `xkeysib-...` (différente de la clé SMTP `xsmtpsib-...`).
+
+Implémentation : `src/lib/email.ts` supporte désormais les **2 backends en parallèle**, sélection automatique via `pickBackend()` :
+
+- Si `BREVO_API_KEY` défini → REST API (prioritaire)
+- Sinon → SMTP nodemailer (fallback legacy)
+
+Avantages :
+
+- En prod Vercel : REST API marche sans whitelist IP
+- En local : SMTP peut continuer à marcher si l'IP locale est whitelistée (utile pour debug avec `pnpm test:smtp` en mode verbose)
+- Compat retro : aucune migration imposée aux dev qui ont déjà leur config SMTP
+
+3 nouvelles vars d'env optionnelles : `BREVO_API_KEY`, `BREVO_FROM_EMAIL`, `BREVO_FROM_NAME`. Les anciennes `BREVO_SMTP_*` deviennent optional (fallback). `.env.example` documenté avec les 2 modes.
+
+**Bilan Phase A** : moteur complet sur Haiku 4.5 livré (PR 1 à 5). Le pipeline `schedule-runs → execute_prompt → score_response → recompute_metrics → dashboard` tourne en local et sur Vercel. Coûts mesurés sur seed dev : ~$0,04 par run de tracking + ~$0,003 par scoring Haiku.
+
+**Bilan Phase B** : design system custom (Tailwind v4 + composants ui/), 9 routes publiques + 5 routes app, blog MDX (3 articles), lead magnet capture, onboarding wizard 3 étapes avec suggestion de prompts via Haiku (PR 13), page settings (PR 16), pages légales V0 placeholder (PR 17). Direction artistique Airbnb-like minimaliste actée le 2026-05-07 et raffinée par dégradés warm + bento cards + hover gradients le 2026-05-11.
+
+**À revisiter** :
+
+- Issue connue Phase A : cron en prod ne traite pas les jobs (runs `pending`). À investiguer en priorité — sans cron qui tourne, le bouton « Lancer un run » crée des jobs mais aucun n'est exécuté.
+- DNS Brevo : finaliser DKIM/SPF/DMARC sur `mamie-geo.fr` pour avoir un sender `hello@mamie-geo.fr` validé. En attendant, un sender perso validé suffit.
+- Pages légales : valider avec juriste avant lancement public payant (1500 € budgété dans doc 08).
+- Le `nodemailer` reste dans les deps tant que `pnpm test:smtp` est utile pour debugger SMTP (le script construit son propre transporter local en mode verbose). À retirer quand on aura assez de recul sur la REST API.
+
+---
+
 #### YYYY-MM-DD — [titre]
 
 (à compléter)

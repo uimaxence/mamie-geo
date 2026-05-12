@@ -260,32 +260,69 @@ la doc devient un cimetière.
 
 ---
 
-## 9. État du projet (snapshot)
+## 9. État du projet (snapshot — 2026-05-12)
 
-- **Phase** : Sprint 1 / Phase A — moteur de tracking sur 1 LLM cheap (Haiku 4.5) avant design system. Phasage A → B → C acté le 2026-05-07 (cf. `geo-project/09-decisions-journal.md` § 2026-05-07) :
-  - **Phase A** : moteur (workers, scoring, dashboard data) sur Haiku 4.5 uniquement
-  - **Phase B** : design system + UI propre + marketing + blog SEO, toujours sur Haiku 4.5 en backend
-  - **Phase C** : Stripe + 4 autres LLMs + bascule éventuelle Haiku → Sonnet 4.6 par plan
-- **Prochaine étape** : finir Phase A — Seed CLI + worker `execute_prompt` (PR 2) puis citation/scoring (PR 3) puis dashboard data (PR 5). cf. `geo-project/08-roadmap-execution.md`.
-- **Build status** : `pnpm format:check`, `pnpm lint`, `pnpm type-check`, `pnpm test`, `pnpm next build` tous verts en local. PR 1 (LLMClient + Anthropic provider, 5/5 tests) mergée dans la branche worktree.
-- **Schéma DB** : migration `0000_many_human_torch.sql` appliquée sur Neon EU Frankfurt (16 tables, 13 FK, 34 indexes, 98 CHECK constraints). Cf. `09-decisions-journal.md` § 2026-05-06 pour le setup `ws` + `--env-file-if-exists` sur `pnpm db:*`.
-- **Tâches Sprint 0 humaines restantes** (hors code, à faire par Max) :
-  1. Achat / vérification domaine `mamie-geo.fr` + reconduction `mamie-seo.fr`
-  2. Comptes API LLM : OpenAI, Anthropic, Mistral, Perplexity, Google AI
-  3. Smoke-test coût LLM (10 prompts × 5 LLMs avec web search)
-  4. Comptes infra : Vercel Pro (région `cdg1`), Neon EU Frankfurt, Upstash, R2, Sentry, PostHog EU, BetterStack, Brevo SMTP
-  5. Connecter le repo à Vercel + activer preview deployments + branche Neon dédiée par PR
-  6. Renseigner `.env.local` à partir de `.env.example`
-- **Décisions Sprint 0 verrouillées** (session 2) :
-  - Direction artistique : **Pivot 2026-05-07 — Airbnb-like minimaliste** (cf. doc 09 § 2026-05-07 pivot UI). Blanc + nuances de gris, accent terracotta `#C5532E` réservé aux CTAs et liens, pas de fond coloré, pas d'italique, une seule police. La Direction A « éditorial chaud » du doc 10 (crème + serif + italique) est dépréciée — gardée comme alternative explorée.
-  - Police unique V0 : **Inter** via `next/font/google` (weights 400/500/600/700). Geist + Newsreader + Geist Mono retirés. Cf. doc 09 § 2026-05-11 (update polices).
-  - Template marketing : from scratch
-  - Naming + domaine : Mamie GEO sur `mamie-geo.fr`
-  - Magic-link Better Auth : SMTP Brevo (transport nodemailer)
-  - Le Chat dès Starter : oui sans condition
-  - Trial 14j sans carte + Stripe Tax : oui aux deux dès J0
-  - Statut juridique : EI continue, bascule SAS/EURL planifiée mois 6-9 (plafond micro ~77 700 €/an)
-  - Hard-cap LLM : 200% du quota théorique → block + email + alerte interne
-  - Redirect mamie-seo.fr : DNS-level Vercel Domains + ligne défensive `next.config.ts`
+### Phase actuelle
+
+**Phases A et B livrées. Phase C entamée (dual backend Brevo).**
+
+Phasage acté le 2026-05-07 (cf. `09-decisions-journal.md` § 2026-05-07) :
+
+- **Phase A — Moteur sur Haiku 4.5 cheap** ✅
+- **Phase B — Design system + UI complète + marketing + blog SEO + onboarding + pages légales** ✅
+- **Phase C — Multi-LLM + Stripe + send_weekly_email + bascule Haiku → Sonnet 4.6** ⏳ entamée
+
+### Livré
+
+**Pipeline produit** (Phase A) :
+
+- `LLMClient` interface + provider Anthropic Claude Haiku 4.5 avec `web_search_20250305` tool
+- Worker `execute_prompt` (cron quotidien à 06:00 UTC) → run.success en DB
+- Détection regex + scoring qualitatif Haiku tool_use (sentiment, position, concurrents)
+- Worker `recompute_metrics` inline qui upsert `citation_metrics_daily`
+- Score visibilité formule V0 (positionWeight × sentimentWeight, 0-100)
+- Idempotence queue Postgres + Vercel Cron (5 min dispatcher + 1×/jour scheduler)
+- Coût moyen mesuré : ~$0,04 par run (tracking) + ~$0,003 par scoring (Haiku)
+
+**UI complète** (Phase B) :
+
+- 9 routes publiques statiques : `/`, `/pricing`, `/blog` + 3 articles, `/outils/test-visibilite-ia`, 4 pages `/legal/*`
+- 5 routes app authentifiées : `/login`, `/app/onboarding` (wizard 3 étapes + suggestion IA), `/app/dashboard`, `/app/runs/[id]`, `/app/settings`
+- Design system custom (Tailwind v4 + composants `src/components/ui/`) — direction Airbnb-like minimaliste actée le 2026-05-07, raffinée le 2026-05-11 (refs designme.agency + taap.it)
+- 49 tests unit Vitest verts, 13 tests E2E Playwright sur les flows publics
+- Blog MDX (3 articles : « Qu'est-ce que le GEO », « Mamie GEO vs Profound », « État visibilité IA France 2026 »)
+- Lead magnet `/outils/test-visibilite-ia` avec form capture → email Brevo
+
+**Auth + infra** (Phase B finale, Phase C partielle) :
+
+- Better Auth magic-link branché via Brevo (dual backend : **REST API** prioritaire, SMTP fallback) — bascule REST API actée le 2026-05-12 pour bypass IP whitelist Free plan
+- DB Neon EU Frankfurt, 16 tables, schéma stable
+- Vercel preview accessible — login fonctionnel, dashboard accessible
+
+### Reste à faire
+
+**Court terme** (à compléter Phase A en prod) :
+
+1. **Cron Vercel** : runs restent en `pending` côté prod malgré dispatcher branché. À investiguer (vercel.json + variables CRON_SECRET en prod ?).
+2. **DNS Brevo** finalisé : DKIM/SPF/DMARC sur `mamie-geo.fr` pour pouvoir envoyer depuis `hello@mamie-geo.fr` validé. En attendant on peut utiliser un sender personnel validé.
+
+**Phase C** (à entamer) :
+
+3. Worker `send_weekly_email` (engagement utilisateur hebdo)
+4. Stripe checkout + customer portal + webhook hard-cap
+5. Providers OpenAI / Mistral / Perplexity / Google (1 PR par provider, slot derrière l'interface `LLMClient` existante)
+6. Bascule tracking par plan (Starter reste Haiku, Pro/Agency en Sonnet 4.6 quand prêt)
+7. Charts évolution dashboard (recharts ou équivalent, fenêtres 7j / 30j)
+
+### Décisions Sprint 0 verrouillées (rappel)
+
+- Direction artistique : Pivot 2026-05-07 — Airbnb-like minimaliste. Blanc + nuances de gris, accent terracotta `#C5532E` réservé aux CTAs, pas de fond coloré, pas d'italique, une seule police.
+- Police unique V0 : **Inter** via `next/font/google`. Geist + Newsreader + Geist Mono retirés.
+- Naming + domaine : Mamie GEO sur `mamie-geo.fr`. Redirect 301 défensif `mamie-seo.fr` → `mamie-geo.fr`.
+- Magic-link Better Auth : Brevo, **REST API** (acté 2026-05-12 — SMTP était bloqué par IP whitelist Free plan Brevo).
+- Le Chat dès Starter : oui sans condition.
+- Trial 14j sans carte + Stripe Tax : oui aux deux dès J0.
+- Statut juridique : EI continue, bascule SAS/EURL planifiée mois 6-9 (plafond micro ~77 700 €/an).
+- Hard-cap LLM : 200 % du quota théorique → block + email + alerte interne.
 
 À mettre à jour à chaque évolution majeure (changement de phase, sprint terminé, gate franchie).
