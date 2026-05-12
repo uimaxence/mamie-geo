@@ -1,23 +1,155 @@
 import { createTransport } from "nodemailer";
 import { env } from "@/lib/env";
 
-// Transport SMTP Brevo — un seul transport partagé pour magic-link et
-// emails transactionnels (welcome, alertes quota, etc.).
-// cf. geo-project/09-decisions-journal.md (session 2 — réponse 5)
-const transporter = createTransport({
-  host: env.BREVO_SMTP_HOST,
-  port: env.BREVO_SMTP_PORT,
-  secure: env.BREVO_SMTP_PORT === 465,
-  auth: {
-    user: env.BREVO_SMTP_USER,
-    pass: env.BREVO_SMTP_PASSWORD,
-  },
-});
+// Envoi d'emails transactionnels via Brevo. Deux backends supportés,
+// switch automatique selon les vars d'env présentes :
+//
+//   1. REST API (recommandé) — BREVO_API_KEY + BREVO_FROM_EMAIL
+//      Avantage : pas d'IP whitelist (le plan Free Brevo bloque les
+//      SMTP sur IPs non whitelistées, et Vercel n'a pas d'IPs fixes).
+//      Doc : https://developers.brevo.com/reference/sendtransacemail
+//      Clé : https://app.brevo.com/settings/keys/api (préfixe xkeysib-)
+//
+//   2. SMTP (legacy) — BREVO_SMTP_HOST/PORT/USER/PASSWORD/FROM
+//      Marche si IP whitelistée explicitement. Plus simple à debugger
+//      (script `pnpm test:smtp` avec mode verbose).
+//
+// La sélection est faite à chaque appel via `pickBackend()` plutôt
+// qu'au module-load, pour rester tolérant aux placeholders pendant
+// la build Next.js.
 
-// Envoie 2 emails pour une demande d'audit gratuit depuis le lead
-// magnet /outils/test-visibilite-ia : un email interne à
-// hello@mamie-geo.fr avec le contexte, et un auto-reply au prospect
-// confirmant la réception. cf. PR 10c.
+type Backend = "rest" | "smtp";
+
+function pickBackend(): Backend {
+  return env.BREVO_API_KEY ? "rest" : "smtp";
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// REST API backend
+// ─────────────────────────────────────────────────────────────────────
+
+const BREVO_API_ENDPOINT = "https://api.brevo.com/v3/smtp/email";
+
+interface RestSendOptions {
+  to: { email: string; name?: string }[];
+  subject: string;
+  textContent?: string;
+  htmlContent?: string;
+  replyTo?: { email: string; name?: string };
+}
+
+async function sendViaRest(options: RestSendOptions): Promise<{ messageId: string }> {
+  if (!env.BREVO_API_KEY || !env.BREVO_FROM_EMAIL) {
+    throw new Error("BREVO_API_KEY ou BREVO_FROM_EMAIL manquant pour backend REST");
+  }
+  const body = {
+    sender: { name: env.BREVO_FROM_NAME ?? "Mamie GEO", email: env.BREVO_FROM_EMAIL },
+    to: options.to,
+    subject: options.subject,
+    textContent: options.textContent,
+    htmlContent: options.htmlContent,
+    replyTo: options.replyTo,
+  };
+  const response = await fetch(BREVO_API_ENDPOINT, {
+    method: "POST",
+    headers: {
+      "api-key": env.BREVO_API_KEY,
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+  if (!response.ok) {
+    let detail = `HTTP ${response.status}`;
+    try {
+      const json = (await response.json()) as { code?: string; message?: string };
+      if (json.message) detail = `${json.code ?? "error"}: ${json.message}`;
+    } catch {
+      const text = await response.text();
+      if (text) detail = `${detail} — ${text.slice(0, 200)}`;
+    }
+    throw new Error(`Brevo REST → ${detail}`);
+  }
+  const json = (await response.json()) as { messageId: string };
+  return { messageId: json.messageId };
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// SMTP backend (legacy)
+// ─────────────────────────────────────────────────────────────────────
+
+interface SmtpSendOptions {
+  to: string;
+  subject: string;
+  text: string;
+  html?: string;
+  replyTo?: string;
+}
+
+let smtpTransporter: ReturnType<typeof createTransport> | null = null;
+
+function getSmtpTransporter() {
+  if (smtpTransporter) return smtpTransporter;
+  if (!env.BREVO_SMTP_HOST || !env.BREVO_SMTP_USER || !env.BREVO_SMTP_PASSWORD) {
+    throw new Error("Credentials SMTP Brevo manquants");
+  }
+  smtpTransporter = createTransport({
+    host: env.BREVO_SMTP_HOST,
+    port: env.BREVO_SMTP_PORT,
+    secure: env.BREVO_SMTP_PORT === 465,
+    auth: { user: env.BREVO_SMTP_USER, pass: env.BREVO_SMTP_PASSWORD },
+  });
+  return smtpTransporter;
+}
+
+async function sendViaSmtp(options: SmtpSendOptions): Promise<{ messageId: string }> {
+  if (!env.BREVO_SMTP_FROM) throw new Error("BREVO_SMTP_FROM manquant");
+  const info = await getSmtpTransporter().sendMail({
+    from: env.BREVO_SMTP_FROM,
+    to: options.to,
+    replyTo: options.replyTo,
+    subject: options.subject,
+    text: options.text,
+    html: options.html,
+  });
+  return { messageId: info.messageId };
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Public API
+// ─────────────────────────────────────────────────────────────────────
+
+export async function sendMagicLinkEmail(params: { to: string; url: string }) {
+  const { to, url } = params;
+  const backend = pickBackend();
+  const subject = "Ton lien de connexion Mamie GEO";
+  const text = `Salut,\n\nVoici ton lien de connexion (valable 10 minutes) :\n\n${url}\n\nSi tu n'as pas demandé ce lien, ignore cet email.\n\n— Mamie GEO`;
+  const html = `
+    <p>Salut,</p>
+    <p>Voici ton lien de connexion (valable 10 minutes) :</p>
+    <p><a href="${url}">${url}</a></p>
+    <p style="color:#737373;font-size:12px;">Si tu n'as pas demandé ce lien, ignore cet email.</p>
+    <p>— Mamie GEO</p>
+  `;
+
+  try {
+    const result =
+      backend === "rest"
+        ? await sendViaRest({ to: [{ email: to }], subject, textContent: text, htmlContent: html })
+        : await sendViaSmtp({ to, subject, text, html });
+    console.info(
+      `[email] magic-link envoyé à ${to} via Brevo ${backend.toUpperCase()} (messageId=${result.messageId})`,
+    );
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error(
+      `[email] échec envoi magic-link à ${to} via Brevo ${backend.toUpperCase()} : ${message}`,
+    );
+    if (error instanceof Error && error.stack) console.error(error.stack);
+    throw new Error(`Envoi magic-link échoué : ${message}`);
+  }
+}
+
 export async function sendAuditRequestEmails(params: {
   prospectEmail: string;
   domain: string;
@@ -25,28 +157,17 @@ export async function sendAuditRequestEmails(params: {
   notes?: string;
 }) {
   const { prospectEmail, domain, brandName, notes } = params;
-  try {
-    // 1. Email interne (à hello@mamie-geo.fr)
-    await transporter.sendMail({
-      from: env.BREVO_SMTP_FROM,
-      to: "hello@mamie-geo.fr",
-      replyTo: prospectEmail,
-      subject: `[Audit gratuit] ${brandName} (${domain})`,
-      text: `Demande d'audit gratuit depuis /outils/test-visibilite-ia
+  const backend = pickBackend();
+  const internalSubject = `[Audit gratuit] ${brandName} (${domain})`;
+  const internalText = `Demande d'audit gratuit depuis /outils/test-visibilite-ia
 
 Prospect : ${prospectEmail}
 Marque   : ${brandName}
 Domaine  : ${domain}
 ${notes ? `\nNotes du prospect :\n${notes}\n` : ""}
-À traiter sous 24h ouvrées. Envoyer le rapport directement à ${prospectEmail}.`,
-    });
-
-    // 2. Auto-reply au prospect
-    await transporter.sendMail({
-      from: env.BREVO_SMTP_FROM,
-      to: prospectEmail,
-      subject: "On a bien reçu ta demande d'audit Mamie GEO",
-      text: `Salut,
+À traiter sous 24h ouvrées. Envoyer le rapport directement à ${prospectEmail}.`;
+  const replySubject = "On a bien reçu ta demande d'audit Mamie GEO";
+  const replyText = `Salut,
 
 Merci pour ta demande d'audit gratuit de visibilité IA pour ${brandName} (${domain}).
 
@@ -61,49 +182,41 @@ Tu recevras le rapport sous 24h ouvrées dans cette boîte.
 À très vite,
 — Max, Mamie GEO
 
-PS : si tu veux gagner du temps, tu peux aussi créer un compte directement (14 jours d'essai sans carte) : https://mamie-geo.fr/login`,
-    });
+PS : si tu veux gagner du temps, tu peux aussi créer un compte directement (14 jours d'essai sans carte) : https://mamie-geo.fr/login`;
 
-    console.info(`[email] audit request envoyé pour ${brandName} (${domain}) → ${prospectEmail}`);
+  try {
+    if (backend === "rest") {
+      await sendViaRest({
+        to: [{ email: "hello@mamie-geo.fr" }],
+        replyTo: { email: prospectEmail },
+        subject: internalSubject,
+        textContent: internalText,
+      });
+      await sendViaRest({
+        to: [{ email: prospectEmail }],
+        subject: replySubject,
+        textContent: replyText,
+      });
+    } else {
+      await sendViaSmtp({
+        to: "hello@mamie-geo.fr",
+        replyTo: prospectEmail,
+        subject: internalSubject,
+        text: internalText,
+      });
+      await sendViaSmtp({
+        to: prospectEmail,
+        subject: replySubject,
+        text: replyText,
+      });
+    }
+    console.info(
+      `[email] audit request envoyé pour ${brandName} (${domain}) → ${prospectEmail} via ${backend.toUpperCase()}`,
+    );
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     console.error(`[email] échec envoi audit request pour ${prospectEmail} : ${message}`);
-    if (error instanceof Error && error.stack) {
-      console.error(error.stack);
-    }
+    if (error instanceof Error && error.stack) console.error(error.stack);
     throw new Error(`Envoi demande d'audit échoué : ${message}`);
-  }
-}
-
-export async function sendMagicLinkEmail(params: { to: string; url: string }) {
-  const { to, url } = params;
-  try {
-    const info = await transporter.sendMail({
-      from: env.BREVO_SMTP_FROM,
-      to,
-      subject: "Ton lien de connexion Mamie GEO",
-      text: `Salut,\n\nVoici ton lien de connexion (valable 10 minutes) :\n\n${url}\n\nSi tu n'as pas demandé ce lien, ignore cet email.\n\n— Mamie GEO`,
-      html: `
-      <p>Salut,</p>
-      <p>Voici ton lien de connexion (valable 10 minutes) :</p>
-      <p><a href="${url}">${url}</a></p>
-      <p style="color:#8c8579;font-size:12px;">Si tu n'as pas demandé ce lien, ignore cet email.</p>
-      <p>— Mamie GEO</p>
-    `,
-    });
-    console.info(
-      `[email] magic-link envoyé à ${to} via Brevo (messageId=${info.messageId}, response=${info.response})`,
-    );
-  } catch (error) {
-    // Logger explicitement avant de re-throw — sinon Better Auth swallow
-    // l'erreur et le client reste bloqué sur "sending". L'erreur typique
-    // Brevo : "554 5.7.1 Unable to send email — sender not allowed" si le
-    // BREVO_SMTP_FROM n'est pas un sender validé (DKIM + clic confirmation).
-    const message = error instanceof Error ? error.message : String(error);
-    console.error(`[email] échec envoi magic-link à ${to} via Brevo : ${message}`);
-    if (error instanceof Error && error.stack) {
-      console.error(error.stack);
-    }
-    throw new Error(`Envoi magic-link échoué : ${message}`);
   }
 }

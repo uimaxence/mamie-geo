@@ -24,11 +24,21 @@ const schema = z.object({
   BETTER_AUTH_SECRET: z.string().min(32),
   BETTER_AUTH_URL: z.string().url(),
 
-  BREVO_SMTP_HOST: z.string().min(1),
-  BREVO_SMTP_PORT: z.coerce.number().int().positive(),
-  BREVO_SMTP_USER: z.string().min(1),
-  BREVO_SMTP_PASSWORD: z.string().min(1),
-  BREVO_SMTP_FROM: z.string().min(1),
+  // Brevo : on supporte 2 modes côté code, choisi à runtime selon les
+  // vars présentes.
+  //   - REST API (recommandé, voir doc 09 § PR 18bis) : utiliser
+  //     BREVO_API_KEY + BREVO_FROM_EMAIL. Pas de filtre IP.
+  //   - SMTP (legacy) : utiliser BREVO_SMTP_HOST/PORT/USER/PASSWORD/FROM.
+  //     Soumis à l'IP whitelist Brevo Free.
+  // Si BREVO_API_KEY est défini, on prend la REST API. Sinon fallback SMTP.
+  BREVO_API_KEY: z.string().min(1).optional(),
+  BREVO_FROM_EMAIL: z.string().email().optional(),
+  BREVO_FROM_NAME: z.string().min(1).optional(),
+  BREVO_SMTP_HOST: z.string().min(1).optional(),
+  BREVO_SMTP_PORT: z.coerce.number().int().positive().optional(),
+  BREVO_SMTP_USER: z.string().min(1).optional(),
+  BREVO_SMTP_PASSWORD: z.string().min(1).optional(),
+  BREVO_SMTP_FROM: z.string().min(1).optional(),
 
   OPENAI_API_KEY: z.string().min(1).optional(),
   ANTHROPIC_API_KEY: z.string().min(1).optional(),
@@ -77,11 +87,14 @@ const buildPlaceholders: Env = {
   DATABASE_URL: "postgresql://placeholder:placeholder@placeholder.invalid/placeholder",
   BETTER_AUTH_SECRET: "placeholder-build-secret-must-be-thirty-two-chars",
   BETTER_AUTH_URL: "https://placeholder.invalid",
-  BREVO_SMTP_HOST: "placeholder.invalid",
-  BREVO_SMTP_PORT: 587,
-  BREVO_SMTP_USER: "placeholder",
-  BREVO_SMTP_PASSWORD: "placeholder",
-  BREVO_SMTP_FROM: "placeholder@placeholder.invalid",
+  BREVO_API_KEY: undefined,
+  BREVO_FROM_EMAIL: undefined,
+  BREVO_FROM_NAME: undefined,
+  BREVO_SMTP_HOST: undefined,
+  BREVO_SMTP_PORT: undefined,
+  BREVO_SMTP_USER: undefined,
+  BREVO_SMTP_PASSWORD: undefined,
+  BREVO_SMTP_FROM: undefined,
   CRON_SECRET: "placeholder-cron-secret-build-only",
   ADMIN_ALERT_EMAIL: "placeholder@placeholder.invalid",
 };
