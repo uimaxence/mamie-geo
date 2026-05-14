@@ -9,6 +9,14 @@
     {
       "path": "/api/cron/schedule-runs",
       "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/schedule-weekly-emails",
+      "schedule": "0 9 * * 1"
+    },
+    {
+      "path": "/api/cron/expire-past-due",
+      "schedule": "0 3 * * *"
     }
   ]
 }

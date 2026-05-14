@@ -89,6 +89,7 @@ export const verification = pgTable("verification", {
 
 export const PLAN_VALUES = [
   "trialing",
+  "solo",
   "starter",
   "pro",
   "agency",
@@ -119,7 +120,7 @@ export const workspaces = pgTable(
   (t) => [
     check(
       "plan_check",
-      sql`${t.plan} IN ('trialing','starter','pro','agency','enterprise','past_due','expired','canceled')`,
+      sql`${t.plan} IN ('trialing','solo','starter','pro','agency','enterprise','past_due','expired','canceled')`,
     ),
   ],
 );

@@ -8,6 +8,13 @@
       "when": 1778018311368,
       "tag": "0000_many_human_torch",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1778701935528,
+      "tag": "0001_thick_husk",
+      "breakpoints": true
     }
   ]
 }

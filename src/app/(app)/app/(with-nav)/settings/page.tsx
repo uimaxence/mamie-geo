@@ -6,6 +6,7 @@ import { brands, workspaceMembers, workspaces } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { getDashboardData } from "@/lib/dashboard/queries";
 import { Badge, Card, CardBody, CardHeader } from "@/components/ui";
+import { BillingSection } from "./billing-section";
 import { BrandAliasesForm } from "./brand-aliases-form";
 import { SignOutButton } from "./sign-out-button";
 import { WorkspaceForm } from "./workspace-form";
@@ -30,7 +31,11 @@ export default async function SettingsPage() {
     where: (u, { eq }) => eq(u.id, session.user.id),
   });
   const wsRow = await db
-    .select({ slug: workspaces.slug })
+    .select({
+      slug: workspaces.slug,
+      currentPeriodEnd: workspaces.currentPeriodEnd,
+      stripeSubscriptionId: workspaces.stripeSubscriptionId,
+    })
     .from(workspaces)
     .where(eq(workspaces.id, data.workspace.id))
     .limit(1);
@@ -102,6 +107,20 @@ export default async function SettingsPage() {
             </div>
           </dl>
         </SectionCard>
+
+        {/* Facturation — choix de plan + portal Stripe */}
+        <section id="billing">
+          <SectionCard
+            title="Facturation"
+            subtitle="Gère ton abonnement, ta carte et tes factures."
+          >
+            <BillingSection
+              plan={data.workspace.plan}
+              currentPeriodEnd={wsRow[0]?.currentPeriodEnd ?? null}
+              hasSubscription={Boolean(wsRow[0]?.stripeSubscriptionId)}
+            />
+          </SectionCard>
+        </section>
 
         {/* Usage */}
         <SectionCard title="Plan & usage" subtitle={`Période en cours : ${data.usage.periodStart}`}>

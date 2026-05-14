@@ -97,8 +97,8 @@ export default function TestVisibiliteIAPage() {
           <p className="type-body-lg mt-6 max-w-prose">
             On veut que tu puisses voir le niveau de qualité de Mamie GEO avant de t&apos;abonner.
             Le rapport est limité à 1 audit par marque pour qu&apos;on puisse le faire à la main
-            avec soin. Si après l&apos;audit tu veux un suivi quotidien, tu créeras un compte pour
-            49 €/mois — sans engagement, 14 jours d&apos;essai inclus.
+            avec soin. Si après l&apos;audit tu veux un suivi régulier, tu créeras un compte à
+            partir de 9,99 €/mois — sans engagement, garantie remboursement 14 jours.
           </p>
         </div>
       </Section>

@@ -6,6 +6,10 @@ import { Section } from "@/components/ui";
 
 const QUESTIONS = [
   {
+    q: "Y a-t-il un essai gratuit ?",
+    a: "Pas d'essai automatique. Tu peux tester gratuitement notre outil one-shot sur /outils/test-visibilite-ia (un audit complet sans inscription). Si tu t'abonnes ensuite et que Mamie GEO ne te convient pas, remboursement intégral sous 14 jours sur simple demande à hello@mamie-geo.fr.",
+  },
+  {
     q: "Quelle différence entre mensuel et annuel ?",
     a: "Mensuel : prélèvement chaque mois, annulation à tout moment. Annuel : prélèvement en 1 fois, économie 20 %, annulation possible mais sans remboursement prorata (transparence : c'est la seule contrainte).",
   },
@@ -15,27 +19,27 @@ const QUESTIONS = [
   },
   {
     q: "Quels moyens de paiement acceptés ?",
-    a: "Cartes bancaires (Visa, Mastercard, Amex) via Stripe. Pour le plan Enterprise, virement SEPA et facturation annuelle.",
+    a: "Cartes bancaires (Visa, Mastercard, Amex) via Stripe. Pour les besoins agence ou enterprise, on accepte aussi le virement SEPA — écris-nous.",
   },
   {
-    q: "Garantie satisfait ou remboursé ?",
-    a: "30 jours sans question. Un email à hello@mamie-geo.fr, remboursement intégral sous 5 jours ouvrés.",
+    q: "Garantie remboursement 14 jours, comment ça marche ?",
+    a: "Si tu n'es pas satisfait dans les 14 jours suivant ta souscription, envoie un mail à hello@mamie-geo.fr. Remboursement intégral sous 5 jours ouvrés, pas de questions.",
   },
   {
     q: "TVA et facturation B2B ?",
     a: "TVA appliquée automatiquement selon ton pays (Stripe Tax). Si tu donnes ton numéro de TVA intra-communautaire valide, on applique l'autoliquidation.",
   },
   {
-    q: "Le plan Enterprise est-il vraiment sans limite ?",
-    a: "Limites « techniques » naturelles (on a discuté ça avec ton account manager : volume de marques, fréquence, intégrations SSO). Pas de paywall caché entre fonctionnalités.",
+    q: "Pourquoi le plan Solo a-t-il une cadence hebdo ?",
+    a: "Solo (9,99 €) lance 1 run le lundi matin sur les 5 IA. Plus de cadence = plus de données = il faut passer sur Starter ou Pro qui tournent tous les jours. C'est la limite qui nous permet de garder Solo aussi accessible.",
   },
   {
-    q: "Le Chat de Mistral est-il inclus dans le plan Starter ?",
-    a: "Oui, et dans tous les plans sans exception. C'est notre engagement n°1. Pas de surcoût, pas de paywall séparé.",
+    q: "Le Chat de Mistral est-il inclus dès Solo ?",
+    a: "Oui, dans tous les plans sans exception. C'est notre engagement n°1. Pas de surcoût, pas de paywall séparé.",
   },
   {
-    q: "Que se passe-t-il après les 14 jours d'essai ?",
-    a: "Si tu n'as pas saisi ta carte bancaire, l'accès est suspendu sans charge. Si tu as choisi un plan, le prélèvement démarre au jour 15.",
+    q: "Besoin de volumes ou d'options agence ?",
+    a: "Écris-nous à hello@mamie-geo.fr — on construit un plan sur-mesure (marques illimitées, rapports en marque blanche, sièges, SSO, etc.).",
   },
 ];
 

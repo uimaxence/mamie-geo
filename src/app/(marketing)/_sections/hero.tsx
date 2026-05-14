@@ -1,8 +1,11 @@
 import { Badge, CornerFrame, LinkButton, Section, StatusDot } from "@/components/ui";
+import { HeroDataShowcase } from "./hero-data-showcase";
+import { HeroLLMRotator } from "./hero-llm-rotator";
 
 // Hero — wrappé dans <CornerFrame> pour signature print subtile.
-// Mix-weight sur le headline (ChatGPT en bold) selon pattern doc 10
-// § Patterns de personnalité (update 2026-05-11).
+// PR 2026-05-13 : le mot en gras dans le headline cycle entre les 5
+// LLMs trackés via <HeroLLMRotator>. <HeroDataShowcase> ajoute 4 cartes
+// data tiltées sous les CTAs (mini-charts + tooltips) — desktop only.
 
 export function Hero() {
   return (
@@ -13,26 +16,28 @@ export function Hero() {
             Beta · Generative Engine Optimization
           </Badge>
           <h1 className="type-display">
-            Sache enfin si <strong className="font-bold">ChatGPT</strong> parle de toi.
+            Sache enfin si <HeroLLMRotator /> parle de toi.
           </h1>
           <p className="type-body-lg mt-6 max-w-2xl">
-            Mamie GEO mesure quotidiennement la visibilité de ta marque dans ChatGPT, Claude,
-            Perplexity, Gemini et Le Chat de Mistral. En français, hébergé en Europe, à partir de 49
-            €/mois.
+            Mamie GEO mesure quotidiennement la visibilité de ta marque dans les 5 IA grand public.
+            En français, hébergé en Europe, à partir de 49&nbsp;€/mois.
           </p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
-            <LinkButton href="/login" variant="primary" size="lg">
-              Tester gratuitement →
+            <LinkButton href="/pricing" variant="primary" size="lg">
+              Voir les plans →
             </LinkButton>
-            <LinkButton href="#sans-avec" variant="secondary" size="lg">
-              Voir comment ça marche
+            <LinkButton href="/outils/test-visibilite-ia" variant="secondary" size="lg">
+              Tester gratuitement
             </LinkButton>
           </div>
           <p className="type-meta mt-6">
-            14 jours d&apos;essai · Sans carte bancaire · 5 minutes pour s&apos;inscrire
+            Dès 9,99 €/mois · Garantie remboursement 14 jours · 5 minutes pour s&apos;inscrire
           </p>
         </div>
       </CornerFrame>
+
+      {/* Aperçu data — 4 cartes tiltées avec mini-charts. Desktop only. */}
+      <HeroDataShowcase />
     </Section>
   );
 }

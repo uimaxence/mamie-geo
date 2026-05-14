@@ -5,9 +5,11 @@ import { Check } from "lucide-react";
 import { Badge, LinkButton, Section } from "@/components/ui";
 import { ANNUAL_DISCOUNT_PCT, annualMonthly, PLANS, type Plan } from "./pricing-data";
 
-// 4 cards plans + toggle mensuel/annuel. Client component pour le
-// useState du toggle. Plan "pro" reçoit un badge "Plus populaire" +
-// bordure terracotta pour le mettre en avant (cf. doc 10 § Pricing).
+// 3 cards plans + toggle mensuel/annuel + ligne "Plus de volume ? Contact".
+// Client component pour le useState du toggle. Le plan "popular" reçoit
+// un badge "Plus populaire" + bordure ink pour le mettre en avant
+// (cf. doc 10 § Pricing). Le plan Agency est retiré de l'UI publique en
+// V0 (cf. doc 09 § 2026-05-14).
 
 export function PricingPlans() {
   const [period, setPeriod] = useState<"monthly" | "annual">("monthly");
@@ -40,11 +42,22 @@ export function PricingPlans() {
         </div>
       </div>
 
-      <div className="mt-14 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+      <div className="mt-14 grid grid-cols-1 gap-6 md:grid-cols-3">
         {PLANS.map((plan) => (
           <PlanCard key={plan.id} plan={plan} period={period} />
         ))}
       </div>
+
+      <p className="mt-10 text-center type-meta">
+        Plus de volume ou besoins agence ?{" "}
+        <a
+          href="mailto:hello@mamie-geo.fr?subject=Mamie%20GEO%20—%20devis%20agence"
+          className="font-medium text-[color:var(--color-ink)] underline-offset-2 hover:underline"
+        >
+          Écris-nous
+        </a>
+        , on te fait un devis.
+      </p>
     </Section>
   );
 }
@@ -78,7 +91,7 @@ function PeriodTab({
 function PlanCard({ plan, period }: { plan: Plan; period: "monthly" | "annual" }) {
   const isPopular = plan.popular === true;
   const monthly = plan.monthlyEur;
-  const isEnterprise = monthly === null;
+  const monthlyDisplay = period === "monthly" ? monthly : annualMonthly(monthly);
 
   // Bordure et fond différents pour le plan populaire — ressort sans
   // utiliser un fond coloré (règle DA : pas de fond coloré).
@@ -102,27 +115,18 @@ function PlanCard({ plan, period }: { plan: Plan; period: "monthly" | "annual" }
 
       {/* Prix */}
       <div className="mt-6 flex items-baseline gap-1.5">
-        {isEnterprise ? (
-          <span className="type-h2">Sur devis</span>
-        ) : (
-          <>
-            <span className="type-stat text-[2.5rem]">
-              {period === "monthly" ? monthly : annualMonthly(monthly)}
-            </span>
-            <span className="text-[color:var(--color-muted)]">€/mois</span>
-          </>
-        )}
+        <span className="type-stat text-[2.5rem]">
+          {monthlyDisplay.toFixed(monthly < 20 ? 2 : 0).replace(".", ",")}
+        </span>
+        <span className="text-[color:var(--color-muted)]">€/mois HT</span>
       </div>
-      {!isEnterprise && period === "annual" && (
-        <p className="type-meta mt-1">
-          Facturé {annualMonthly(monthly!) * 12} €/an (économie −{ANNUAL_DISCOUNT_PCT} %)
-        </p>
-      )}
-      {!isEnterprise && period === "monthly" && (
-        <p className="type-meta mt-1">
-          Annuel : {annualMonthly(monthly!)} €/mois (−{ANNUAL_DISCOUNT_PCT} %)
-        </p>
-      )}
+      <p className="type-meta mt-1">
+        {period === "annual"
+          ? `Facturé ${(annualMonthly(monthly) * 12).toFixed(monthly < 20 ? 2 : 0).replace(".", ",")} €/an (économie −${ANNUAL_DISCOUNT_PCT} %)`
+          : `Annuel : ${annualMonthly(monthly)
+              .toFixed(monthly < 20 ? 2 : 0)
+              .replace(".", ",")} €/mois (−${ANNUAL_DISCOUNT_PCT} %)`}
+      </p>
 
       {/* Features */}
       <ul className="mt-6 flex flex-col gap-3">

@@ -56,10 +56,9 @@ function ComparisonGroup({ title, rows }: { title: string; rows: ComparisonRow[]
           <td className="px-3 py-3 text-sm font-medium text-[color:var(--color-ink-soft)]">
             {row.feature}
           </td>
+          <ComparisonCell value={row.solo} />
           <ComparisonCell value={row.starter} />
           <ComparisonCell value={row.pro} />
-          <ComparisonCell value={row.agency} />
-          <ComparisonCell value={row.enterprise} />
         </tr>
       ))}
     </>

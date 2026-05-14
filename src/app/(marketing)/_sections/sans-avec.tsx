@@ -1,14 +1,6 @@
-import {
-  Bot,
-  Cat,
-  Globe2,
-  MessageCircle,
-  Search,
-  Sparkles,
-  TrendingUp,
-  type LucideIcon,
-} from "lucide-react";
+import { Bot, Cat, Globe2, MessageCircle, Search, Sparkles, type LucideIcon } from "lucide-react";
 import { Section } from "@/components/ui";
+import { MockupCompetitors } from "./mockups/mockup-competitors";
 
 // Section "Avant Mamie GEO, après Mamie GEO" — refonte PR 12c en
 // bento 2×2 (cf. screenshot Max BrightNest/style services). On garde
@@ -37,12 +29,12 @@ export function SansAvec() {
         />
         <BentoCard
           title="Le Chat de Mistral, inclus sans condition."
-          description="Pas tracké chez Profound, RankIQ ou Peec AI. Chez Mamie GEO, c'est dans le plan Starter à 49 €/mois."
+          description="Pas tracké chez Profound, RankIQ ou Peec AI. Chez Mamie GEO, c'est dans tous les plans dès 9,99 €/mois."
           illustration={<MockupLeChat />}
         />
         <BentoCard
           title="Hébergé en Europe, RGPD natif."
-          description="Vercel Paris (cdg1), Neon Frankfurt, Cloudflare R2 EU. Aucune donnée ne quitte le territoire. DPA signé dès le plan Agence."
+          description="Vercel Paris (cdg1), Neon Frankfurt, Cloudflare R2 EU. Aucune donnée ne quitte le territoire. DPA disponible sur demande pour tous les plans."
           illustration={<MockupEurope />}
         />
         <BentoCard
@@ -153,61 +145,6 @@ function MockupEurope() {
   );
 }
 
-// Card 4 : mini-barchart 4 marques avec la tienne highlighted en
-// terracotta. Tendance "+12" en haut à droite pour signaler la
-// croissance.
-function MockupCompetitors() {
-  const competitors = [
-    { name: "Toi", value: 76, accent: true },
-    { name: "C1", value: 64, accent: false },
-    { name: "C2", value: 52, accent: false },
-    { name: "C3", value: 38, accent: false },
-  ];
-
-  return (
-    <div className="absolute inset-0 flex items-center justify-center bg-[color:var(--color-gray-50)] px-6">
-      <div className="w-full max-w-[260px] rounded-[var(--radius-lg)] border border-[color:var(--color-border)] bg-white p-4 shadow-[var(--shadow-md)]">
-        <div className="flex items-baseline justify-between">
-          <p className="text-[9px] font-medium uppercase tracking-wider text-[color:var(--color-muted)]">
-            Score par marque
-          </p>
-          <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-[color:var(--color-success)]">
-            <TrendingUp size={10} strokeWidth={2.5} />
-            +12
-          </span>
-        </div>
-        <div className="mt-3 flex flex-col gap-2">
-          {competitors.map((c) => (
-            <div key={c.name} className="flex items-center gap-2">
-              <span
-                className={`w-6 text-[10px] font-medium ${
-                  c.accent ? "text-[color:var(--color-accent)]" : "text-[color:var(--color-muted)]"
-                }`}
-              >
-                {c.name}
-              </span>
-              <div className="flex-1 h-2 rounded-full bg-[color:var(--color-gray-100)] overflow-hidden">
-                <div
-                  className="h-full rounded-full transition-all"
-                  style={{
-                    width: `${c.value}%`,
-                    backgroundColor: c.accent ? "var(--color-accent)" : "var(--color-gray-300)",
-                  }}
-                />
-              </div>
-              <span
-                className={`w-6 text-right text-[10px] font-semibold ${
-                  c.accent
-                    ? "text-[color:var(--color-accent)]"
-                    : "text-[color:var(--color-ink-soft)]"
-                }`}
-              >
-                {c.value}
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
+// Card 4 : mockup déplacé dans ./mockups/mockup-competitors.tsx (client
+// component avec Recharts BarChart bleu primaire). Cf. doc 09
+// § 2026-05-13 (9ᵉ itération polish UX).

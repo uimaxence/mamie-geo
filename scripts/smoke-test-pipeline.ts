@@ -43,7 +43,7 @@ async function main() {
   const { eq } = await import("drizzle-orm");
   const { db } = await import("@/db/client");
   const { runs } = await import("@/db/schema");
-  const { scheduleRuns } = await import("@/app/api/cron/schedule-runs/route");
+  const { scheduleRunsForEligiblePlans } = await import("@/lib/scheduler/schedule-runs");
   const { executePrompt } = await import("@/workers/execute-prompt");
   const { parseExecutePromptPayload } = await import("@/workers/execute-prompt-payload");
   const { scoreResponse } = await import("@/workers/score-response");
@@ -52,9 +52,11 @@ async function main() {
 
   console.log(`🚦 Smoke test pipeline (limit=${LIMIT}${DRY ? ", dry-run" : ""})…\n`);
 
-  // 1. Schedule runs (enqueue jobs + crée les runs.pending)
-  console.log("→ scheduleRuns()");
-  const summary = await scheduleRuns();
+  // 1. Schedule runs (enqueue jobs + crée les runs.pending).
+  // Smoke test = enqueue tous plans actifs (utile pour reset rapide).
+  console.log("→ scheduleRunsForEligiblePlans()");
+  const { ACTIVE_PLANS } = await import("@/lib/plans/quotas");
+  const summary = await scheduleRunsForEligiblePlans(ACTIVE_PLANS);
   console.log(`  ${JSON.stringify(summary)}\n`);
 
   if (summary.jobsEnqueued === 0) {

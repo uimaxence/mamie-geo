@@ -36,15 +36,15 @@ const QUESTIONS = [
   },
   {
     q: "Vous proposez de la marque blanche ?",
-    a: "Oui, sur le plan Agence. Rapports PDF avec ton logo et tes couleurs, envoi automatique hebdomadaire à tes clients, jusqu'à 25 marques trackées.",
+    a: "Pas dans nos plans publics. Si tu es une agence avec un besoin de rapports en marque blanche ou de plusieurs marques, écris-nous à hello@mamie-geo.fr — on monte un devis sur-mesure.",
   },
   {
     q: "Et si je ne suis pas satisfait ?",
-    a: "Garantie 30 jours satisfait ou remboursé sans question. Tu envoies un email à hello@mamie-geo.fr et on procède au remboursement intégral sous 5 jours ouvrés.",
+    a: "Garantie remboursement 14 jours sans question. Tu envoies un email à hello@mamie-geo.fr et on procède au remboursement intégral sous 5 jours ouvrés.",
   },
   {
     q: "Vous proposez des essais gratuits ?",
-    a: "14 jours d'essai gratuit sans carte bancaire. Tu testes l'outil complet, on ne te facture que si tu choisis de continuer.",
+    a: "On propose un audit complet gratuit, en one-shot, sur /outils/test-visibilite-ia (pas de carte, pas d'inscription). Si tu veux du tracking régulier, on commence à 9,99 €/mois avec garantie 14 jours.",
   },
   {
     q: "C'est compliqué à utiliser ?",

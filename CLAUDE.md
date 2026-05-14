@@ -260,7 +260,18 @@ la doc devient un cimetière.
 
 ---
 
-## 9. État du projet (snapshot — 2026-05-12)
+## 9. État du projet (snapshot — 2026-05-14)
+
+> Mise à jour 2026-05-14 — PR « Stripe billing » : checkout + portal +
+> webhooks idempotents + cron expire-past-due, intégrée dans Settings
+> (nouvelle section Facturation). Ajout plan **Solo 9,99 €/mois** (5
+> prompts × 5 LLMs × 1 run/semaine le lundi) à l'enum `plan` (migration
+> `0001_thick_husk`). Refonte page `/pricing` (3 cards Solo/Starter/Pro
+>
+> - mailto "Plus de volume ? Contact"), retrait Agency public. Pivot
+>   trial : « pas de trial automatique + garantie remboursement 14 j »
+>   remplace l'ancien trial 7j sans carte (cf. doc 09 § 2026-05-14). 128
+>   tests verts.
 
 ### Phase actuelle
 
@@ -287,8 +298,8 @@ Phasage acté le 2026-05-07 (cf. `09-decisions-journal.md` § 2026-05-07) :
 **UI complète** (Phase B) :
 
 - 9 routes publiques statiques : `/`, `/pricing`, `/blog` + 3 articles, `/outils/test-visibilite-ia`, 4 pages `/legal/*`
-- 5 routes app authentifiées : `/login`, `/app/onboarding` (wizard 3 étapes + suggestion IA), `/app/dashboard`, `/app/runs/[id]`, `/app/settings`
-- Design system custom (Tailwind v4 + composants `src/components/ui/`) — direction Airbnb-like minimaliste actée le 2026-05-07, raffinée le 2026-05-11 (refs designme.agency + taap.it)
+- 8 routes app authentifiées : `/login`, `/app/onboarding` (wizard 3 étapes + suggestion IA), `/app/dashboard`, `/app/runs/[id]`, `/app/settings` (édition workspace name + brand aliases), `/app/prompts` (liste + CRUD + suggestion IA), `/app/prompts/[id]` (détail breakdown par LLM), `/app/competitors` (liste + CRUD). Quotas enforced par plan (cf. `src/lib/plans/quotas.ts`).
+- Design system custom (Tailwind v4 + composants `src/components/ui/`) — direction Airbnb-like minimaliste actée le 2026-05-07, raffinée le 2026-05-11 (refs designme.agency + taap.it). PR 2026-05-12 ajoute 11 primitifs Radix/shadcn (Dialog, DropdownMenu, Tabs, Switch, Tooltip, Sheet, Skeleton, Banner, EmptyState, Pagination, Toaster sonner), 2 wrappers Recharts (LineChart, BarChartHorizontal) et la sidebar app. Polish dashboard 2026-05-12 (refs screens Max) : `Stat` enrichi (icône pastel + delta arrow vs J-7), `SegmentedControl` (time-range picker), `AreaChart` gradient mono-série, `BreakdownBars` (vertical bars + légende + liste valeurs). Cf. doc 10 § « Patterns dashboard ».
 - 49 tests unit Vitest verts, 13 tests E2E Playwright sur les flows publics
 - Blog MDX (3 articles : « Qu'est-ce que le GEO », « Mamie GEO vs Profound », « État visibilité IA France 2026 »)
 - Lead magnet `/outils/test-visibilite-ia` avec form capture → email Brevo
@@ -296,23 +307,39 @@ Phasage acté le 2026-05-07 (cf. `09-decisions-journal.md` § 2026-05-07) :
 **Auth + infra** (Phase B finale, Phase C partielle) :
 
 - Better Auth magic-link branché via Brevo (dual backend : **REST API** prioritaire, SMTP fallback) — bascule REST API actée le 2026-05-12 pour bypass IP whitelist Free plan
-- DB Neon EU Frankfurt, 16 tables, schéma stable
+- DB Neon EU Frankfurt, 16 tables, schéma stable. Migration `0001_thick_husk` 2026-05-14 ajoute `"solo"` à l'enum `workspaces.plan`.
 - Vercel preview accessible — login fonctionnel, dashboard accessible
+- **Crons Vercel branchés en prod** (PR 2026-05-13) : `/api/cron/dispatch` (\*/5 min), `/api/cron/schedule-runs` (06:00 UTC quotidien), `/api/cron/schedule-weekly-emails` (lundi 09:00 UTC), `/api/cron/expire-past-due` (03:00 UTC quotidien, ajouté 2026-05-14). Endpoints supportent GET et POST avec auth `Bearer CRON_SECRET`. Cause racine du blocker antérieur identifiée : Vercel Cron envoie **GET**, les routes n'exposaient que **POST** (cf. doc 09 § 2026-05-13). Instrumentation JSON via `logCronEvent()` + endpoint debug `GET /api/cron/dispatch?inspect=1` qui dump l'état queue + présence des env vars.
+- **Worker `send_weekly_email` actif** : weekly recap envoyé lundi 9h UTC aux workspaces avec ≥ 1 run.success dans les 7 derniers jours. Template HTML inline + text fallback dans `src/lib/email/templates/weekly-recap.ts`. Trial nurture (J+3 / J+10) reporté (mode trial automatique supprimé 2026-05-14 — voir doc 09).
+
+**Stripe billing** (PR 2026-05-14) :
+
+- SDK `stripe@22.x` + 4 routes API : `POST /api/checkout`, `POST /api/portal`, `POST /api/webhooks/stripe` (signature verify + idempotence via `subscription_events.stripeEventId UNIQUE`), `GET/POST /api/cron/expire-past-due` (passe past_due → expired après J+7).
+- Webhook handlers idempotents pour `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.paid`, `invoice.payment_failed`. Source de vérité du plan = `subscription.items[0].price.id` mappé via `STRIPE_PRICE_*` env vars.
+- UI billing dans `/app/settings` (section dédiée) : plan actuel + prochaine facturation + bouton "Gérer mon abonnement" (portal). Si plan inactif : grille Solo/Starter/Pro avec boutons checkout.
+- `<UpgradeBanner>` server component injecté dans `(with-nav)/layout.tsx` — affiche un message contextuel quand plan ∈ trialing/past_due/expired/canceled.
+- Plan **Solo 9,99 €** ajouté à `quotasFor()` avec champ `cadence: "daily" | "weekly"`. Le scheduler `/api/cron/schedule-runs` filtre par cadence (weekly = lundi uniquement). Agency reste dans l'enum DB mais retiré de `/pricing` public.
+- Templates email transactionnels : `welcome-paid.ts` (post-checkout) + `payment-failed.ts` (post payment_failed). Réutilisent le pattern HTML inline + text fallback de `weekly-recap.ts`.
 
 ### Reste à faire
 
-**Court terme** (à compléter Phase A en prod) :
+**Court terme** :
 
-1. **Cron Vercel** : runs restent en `pending` côté prod malgré dispatcher branché. À investiguer (vercel.json + variables CRON_SECRET en prod ?).
-2. **DNS Brevo** finalisé : DKIM/SPF/DMARC sur `mamie-geo.fr` pour pouvoir envoyer depuis `hello@mamie-geo.fr` validé. En attendant on peut utiliser un sender personnel validé.
+1. **DNS Brevo** finalisé : DKIM/SPF/DMARC sur `mamie-geo.fr` pour pouvoir envoyer depuis `hello@mamie-geo.fr` validé.
+2. **Setup Stripe Dashboard prod** : créer products + prices LIVE, configurer webhook URL `https://mamie-geo.fr/api/webhooks/stripe`, activer Stripe Tax, configurer Customer Portal (autoriser switch entre Solo/Starter/Pro + cancellation).
 
 **Phase C** (à entamer) :
 
-3. Worker `send_weekly_email` (engagement utilisateur hebdo)
-4. Stripe checkout + customer portal + webhook hard-cap
-5. Providers OpenAI / Mistral / Perplexity / Google (1 PR par provider, slot derrière l'interface `LLMClient` existante)
-6. Bascule tracking par plan (Starter reste Haiku, Pro/Agency en Sonnet 4.6 quand prêt)
-7. Charts évolution dashboard (recharts ou équivalent, fenêtres 7j / 30j)
+3. **Hard-cap enforcement worker** : `checkQuotaOrBlock()` dans `execute-prompt.ts` + email 60/100/200 %. PR dédiée.
+4. Providers OpenAI / Mistral / Perplexity / Google (1 PR par provider, slot derrière l'interface `LLMClient` existante)
+5. Bascule tracking par plan (Starter reste Haiku, Pro en Sonnet 4.6 quand prêt)
+6. **Drip d'éducation post-signup** (remplace ancien trial nurture J+3/J+10 — plus de trial auto en V0)
+7. ~~Stripe checkout + customer portal + webhook~~ — livré 2026-05-14 (128 tests verts, idempotence via `subscription_events.stripeEventId UNIQUE`)
+8. ~~Plan Solo + cadence per-plan + retrait Agency public~~ — livré 2026-05-14
+9. ~~Charts évolution dashboard~~ — livré 2026-05-12
+10. ~~Worker `send_weekly_email`~~ — livré 2026-05-13
+11. ~~Cron prod stuck~~ — résolu 2026-05-13
+12. ~~Pages CRUD app + Settings édition~~ — livré 2026-05-13
 
 ### Décisions Sprint 0 verrouillées (rappel)
 
@@ -321,7 +348,7 @@ Phasage acté le 2026-05-07 (cf. `09-decisions-journal.md` § 2026-05-07) :
 - Naming + domaine : Mamie GEO sur `mamie-geo.fr`. Redirect 301 défensif `mamie-seo.fr` → `mamie-geo.fr`.
 - Magic-link Better Auth : Brevo, **REST API** (acté 2026-05-12 — SMTP était bloqué par IP whitelist Free plan Brevo).
 - Le Chat dès Starter : oui sans condition.
-- Trial 14j sans carte + Stripe Tax : oui aux deux dès J0.
+- ~~Trial 14j sans carte~~ + Stripe Tax : pivot 2026-05-14 → **pas de trial automatique** + garantie remboursement 14 jours (refund manuel). Stripe Tax conservé.
 - Statut juridique : EI continue, bascule SAS/EURL planifiée mois 6-9 (plafond micro ~77 700 €/an).
 - Hard-cap LLM : 200 % du quota théorique → block + email + alerte interne.
 

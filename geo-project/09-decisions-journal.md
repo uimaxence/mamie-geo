@@ -161,6 +161,58 @@ haut et l'entrée "2026-05-05 — Réponses aux 10 questions de bootstrap".
 
 ### Décisions enregistrées
 
+#### 2026-05-14 — Stripe billing + plan Solo 9,99 € + pivot trial → garantie 14 j refund
+
+**Contexte** : la PR « App CRUD » (2026-05-13) a achevé le self-service. Reste à monétiser. Audit du schéma DB confirme que les colonnes Stripe (`stripeCustomerId`, `stripeSubscriptionId`, `trialEndsAt`, `currentPeriodStart/End`, `hardCapHitAt`) et les tables `subscription_events` (avec `stripeEventId UNIQUE` → idempotence webhook gratuite) + `usage_counters` sont déjà en place — le code Stripe peut être greffé sans refonte schéma.
+
+Trois questions stratégiques se sont posées avant l'implémentation :
+
+1. **Trial automatique 7 jours sans carte (décision 2026-05-05) — encore valide ?** Recalcul coûts unitaires : ~$0,043 / run (Haiku + scoring). Trial 7j × utilisateur moyen (10 prompts × 1 LLM) = ~$3 LLM gaspillés par trial. Sur 100 signups à 5 % conv = $285 de perte sèche. En Phase C complète (5 LLMs), le coût grimpe à ~$15 / trial user → ~$1 425 / 100 signups. **Non viable** en early access.
+2. **Tarifs 49/149/399 — trop chers ?** Comparaison marché : Profound $499, Athena ~$300, Otterly €69. Mamie GEO est **déjà 7-10× moins cher que Profound** et aligné avec Otterly. Baisser à 39/119/299 détruirait la marge sans changer la décision d'achat. **Tarifs conservés**.
+3. **Plan Agency 399 € — nécessaire en V0 ?** Peu de demande agences early. Risque d'effort marketing dilué. Garder Agency dans l'enum DB mais retirer de l'UI publique. Remplacer par CTA « Plus de volume ? Contact ».
+
+**Options considérées** :
+
+- A : Stripe minimal (checkout + portal + webhook seulement, ~600 lignes, trial conservé, hard-cap PR suivante)
+- B : Stripe standard (A + bascule trialing → 0/0/weekly, cadence per-plan, cron expire-past-due, ~750 lignes, hard-cap PR suivante) ← **retenu**
+- C : Stripe complet (B + hard-cap enforcement worker, ~1 000 lignes — au-delà du target CLAUDE.md § 4)
+
+**Choix** :
+
+1. **Modèle d'acquisition** : pas de trial automatique + garantie remboursement 14 jours (refund manuel via portal Stripe). Le free taster reste `/outils/test-visibilite-ia` (one-shot, ~$0,20 LLM coût, déjà déployé). Conservation Stripe Tax.
+2. **Plan d'entrée Solo 9,99 €/mois** : 5 prompts × 3 concurrents × **1 run par semaine (lundi 6h UTC)** sur les 5 LLMs. Marge brute LLM ~75 % en Phase A, ~59 % en Phase C complète. Hook commercial : « ton bilan visibilité IA chaque lundi pour le prix d'un café ».
+3. **Tarifs 49/149/399 conservés**. Agency retiré de `/pricing` public, remplacé par mailto. Reste dans enum DB pour les workspaces existants ou les contrats négociés.
+4. **Cadence per-plan** : champ `cadence: "daily" | "weekly"` dans `quotasFor(plan)`. Le scheduler skip les workspaces en cadence weekly hors lundi UTC.
+5. **UI billing dans `/app/settings`** (section dédiée) plutôt que page `/app/billing` séparée — cohérent avec le reste settings.
+6. **Webhook handlers idempotents** via `subscription_events.stripeEventId UNIQUE` plutôt que table dédiée `stripe_webhooks` brute. 5 events traités : `checkout.session.completed`, `customer.subscription.{updated,deleted}`, `invoice.{paid,payment_failed}`.
+
+**Justification** :
+
+- Trial 7j sans carte n'est pas finançable sans capital. La garantie 14j refund a le même effet rassurant côté commercial mais sans coût LLM upfront (rare en early access que des refunds soient demandés massivement).
+- Solo à 9,99 € comble le segment freelance ultra-budget (sub-Otterly) tout en gardant une marge brute saine grâce à la cadence hebdo. C'est aussi la première brique d'acquisition : « tester 1 mois pour 10 € puis upgrade Starter ».
+- Le pivot trial est documenté dans CGU et FAQ pricing — pas de friction inattendue côté user.
+- La règle d'idempotence via `stripeEventId UNIQUE` réutilise l'infrastructure existante (table `subscription_events` déjà en place), évite une nouvelle migration.
+
+**Conséquences attendues** :
+
+- Migration `0001_thick_husk` ajoute `"solo"` à `workspaces.plan` (constraint check). Aucune autre modif schéma.
+- Page `/pricing` refondue : 3 cards Solo (9,99 €) / Starter (49 €) / Pro (149 €) + ligne « Plus de volume ? Contact ».
+- Onboarding inchangé (workspace toujours créé en `trialing`, mais `quotasFor("trialing") = 0/0/weekly` → aucun run lancé tant que pas de subscription).
+- `<UpgradeBanner>` server component dans `(with-nav)/layout.tsx` : message contextuel quand plan ∈ trialing/past_due/expired/canceled.
+- Cron quotidien `/api/cron/expire-past-due` (03:00 UTC) bascule past_due → expired après 7 jours.
+- 128 tests verts (+ 23 nouveaux : quotas avec cadence, products mapping, email templates welcome/payment-failed).
+- Bouton « Plus de volume ? » dans pricing → leads agences/enterprise dirigés vers `hello@mamie-geo.fr`.
+- Coût trial gaspillé : ~$0 (vs ~$3-30 par user trial 7j sans carte) — réinvestissable en acquisition.
+
+**À revisiter** :
+
+- **Trial 7j avec carte requise** (mode `trial_period_days` natif Stripe) à reconsidérer quand capital disponible et conversion rate de la garantie 14j stabilisé. Avec carte requise, conv ~50-70 % vs ~5-15 % sans carte.
+- **Hard-cap enforcement worker** : PR suivante (~300 lignes). Sans hard-cap, le risque d'abus reste théorique avec 5 LLMs Phase C — à brancher avant marketing élargi.
+- **Pricing Pro 149 €** : à reconsidérer quand bascule Sonnet 4.6 prête en prod. Marge LLM à 18 % aujourd'hui avec Haiku 5 LLMs → recalculer avec Sonnet (plus cher) et ajuster si nécessaire.
+- **Lifetime discount early-access** (Stripe coupon code -30 % à vie pour les 50 premiers) : peut être ajouté à tout moment via dashboard Stripe + champ `discounts` dans la session checkout.
+
+---
+
 #### 2026-05-05 — Lancement du projet GEO France
 
 **Contexte** : recherche de SaaS récurrent après fatigue du freelance pur. Analyse du marché GEO, identification du trou francophone.
@@ -649,6 +701,411 @@ Avantages :
 - DNS Brevo : finaliser DKIM/SPF/DMARC sur `mamie-geo.fr` pour avoir un sender `hello@mamie-geo.fr` validé. En attendant, un sender perso validé suffit.
 - Pages légales : valider avec juriste avant lancement public payant (1500 € budgété dans doc 08).
 - Le `nodemailer` reste dans les deps tant que `pnpm test:smtp` est utile pour debugger SMTP (le script construit son propre transporter local en mode verbose). À retirer quand on aura assez de recul sur la REST API.
+
+---
+
+#### 2026-05-12 — Foundation design post-connexion : sidebar app + 11 primitifs Radix + 2 wrappers Recharts
+
+**Contexte** :
+
+L'app authentifiée n'avait que 2 liens de nav (Dashboard / Réglages) dans un `<AppHeader>` minimaliste — insuffisant pour scale aux 5+ sections nécessaires (Dashboard, Prompts, Concurrents, Runs, Réglages, Billing). Côté primitifs UI, les composants critiques pour les pages CRUD à venir (Prompts, Concurrents, Settings étendu) manquaient : Dialog, DropdownMenu, Tabs, Switch, Tooltip, Toast, Skeleton, Banner, EmptyState, Pagination, Sheet (drawer mobile). Côté charts, l'évolution 30j et le score par LLM mentionnés dans doc 02 n'étaient pas implémentés. Cette PR pose la **foundation** avant les pages CRUD elles-mêmes.
+
+**Options considérées** :
+
+| Sujet             | Option A (retenue)                              | Option B                               | Option C                                   |
+| ----------------- | ----------------------------------------------- | -------------------------------------- | ------------------------------------------ |
+| Nav app           | Sidebar verticale gauche fixed (w-60)           | Top nav étendu + brand switcher        | Hybride top global + sub-nav contextuel    |
+| Charts            | Tremor → bascule Recharts pur                   | Tremor Raw (TW v4 ready)               | Custom SVG + Recharts au besoin            |
+| Primitifs UI      | shadcn/ui sur Radix (copy-paste manuel restylé) | Radix nu + wrappers maison             | Custom from-scratch comme `Button`, `Card` |
+| Exclusion sidebar | Route group `(with-nav)` Next 15                | `useSelectedLayoutSegment` côté client | Wrapper `<WithSidebar>` opt-in par page    |
+| Toasts            | `sonner`                                        | Notistack / custom                     | —                                          |
+
+**Choix** :
+
+1. **Sidebar verticale gauche** (w-60, collapsible mobile via `<Sheet>` drawer). Pattern SaaS data-driven standard, scale propre à 6+ sections.
+2. **Recharts pur** (pas Tremor). Tremor v3 est lié à Tailwind v3, et Tremor Raw n'a pas été testé en TW v4 avec nos tokens custom — des wrappers Recharts minces suffisent et donnent un contrôle total.
+3. **shadcn/ui sur Radix** : copie manuelle des fichiers (pas de `shadcn init` car notre design system custom existe déjà), restylé avec nos tokens (`--color-ink`, `--radius-xl`, etc.). Accessibilité Radix gratuite (focus trap, ARIA, keyboard nav, ESC, click-outside).
+4. **Route group `(with-nav)`** : `/app/dashboard`, `/app/runs/[id]`, `/app/settings` déplacés sous `src/app/(app)/app/(with-nav)/`. `/app/onboarding` reste en dehors → full-screen wizard sans sidebar. Les URLs restent identiques (les groupes `()` n'affectent pas le routing).
+5. **sonner** pour les toasts (recommandé shadcn, API simple, déjà customisable via classNames).
+
+**Justification** :
+
+- Sidebar : permet de poser une nav stable avant que les pages CRUD à venir ne forcent une refonte de la nav en plein milieu. Le brand switcher (DropdownMenu) est en place dès maintenant — utile dès que les comptes Pro/Agence ajouteront 3-10 brands.
+- Recharts vs Tremor : décision tactique pendant l'exécution. Tremor v3 incompatible TW v4. Tremor Raw nécessitait du copy-paste lourd avec risque d'incompat sur les styles. Recharts est solide, sa surface API petite suffit ici (LineChart + BarChart horizontal), et il est de toute façon une transitive dep de Tremor — autant l'utiliser directement.
+- shadcn/Radix vs custom : les primitifs `Dialog`, `DropdownMenu` etc. ont une surface d'a11y non triviale (focus trap, ARIA, keyboard nav). Réécrire ça maison aurait été 2-3× plus de code pour un résultat moins solide. shadcn fournit la base, on customise les classes via nos tokens.
+- Route group : pattern Next 15 officiel pour faire varier le layout sans changer les URLs. Plus propre que `useSelectedLayoutSegment` (qui forcerait un client wrapper) ou un wrapper opt-in par page (boilerplate).
+
+**Dépendances ajoutées** :
+
+`@radix-ui/react-dialog ^1.1.15`, `@radix-ui/react-dropdown-menu ^2.1.16`, `@radix-ui/react-tabs ^1.1.13`, `@radix-ui/react-switch ^1.2.6`, `@radix-ui/react-tooltip ^1.2.8`, `@radix-ui/react-slot ^1.2.4`, `sonner ^2.0.7`, `recharts ^3.8.1`, `class-variance-authority ^0.7.1`, `clsx ^2.1.1`, `tailwind-merge ^3.6.0`.
+
+**Conséquences attendues** :
+
+- 11 primitifs UI disponibles dans `@/components/ui` (Dialog, Sheet, DropdownMenu, Tabs, Switch, Tooltip, Skeleton, Banner, EmptyState, Pagination, Toaster). 2 wrappers chart dans `@/components/charts` (LineChart, BarChartHorizontal). 1 helper `cn()` dans `@/lib/utils`.
+- 4 pages existantes rafraîchies : dashboard (charts évolution 30j + score par LLM en barres + empty states), onboarding wizard (progress bar 3 segments), run detail (tabs Réponse / Citations / Scoring), settings (sections cards).
+- `triggerRunNow` server action côté dashboard : confirmation via `<Dialog>` + feedback via `<toast>` (au lieu d'un texte inline).
+- Animations CSS ajoutées à `globals.css` (`@keyframes fade-in`, `fade-out`, `zoom-in`, `zoom-out`, `slide-in-left`, `slide-out-left`, `skeleton-pulse`) + tokens `--animate-*` consommables via classes `animate-fade-in` etc.
+- Helper data `loadSidebarData()` mémoïsé via `React.cache()` — pas de duplication query workspace/brands entre layout et page.
+- Nouvelle query `getVisibilityTrend(brandId, days=30)` dans `src/lib/dashboard/queries.ts` (agrégation `citation_metrics_daily` pivotée par LLM).
+
+**Périmètre exclu** (PRs suivantes — explicitement pas dans cette PR) :
+
+- `/app/prompts` (liste + CRUD) et `/app/prompts/[id]` (détail breakdown par LLM)
+- `/app/competitors` (gestion post-onboarding)
+- Settings étendu : sections Équipe (invitations Pro+), Billing (Customer Portal Stripe), Audit logs
+- États spéciaux : trial countdown banner, quota warnings 60 %/100 %, hard-cap 200 % block screen
+- Page `/app/admin` (MRR, runs/jour, coûts LLM)
+- E2E Playwright des 7 flows critiques (s'écriront quand les pages CRUD existent)
+- Tests unit React des primitifs Radix-wrappers (nécessiterait `@testing-library/react` + jsdom — coverage déléguée au E2E manuel en attendant)
+
+**À revisiter** :
+
+- Si le scaling de la nav atteint 8+ sections, envisager des "groups" ou une sidebar collapsible en mode rail. Pas avant.
+- Si Tailwind v4 ou un futur add-on sort une animation lib first-class, retirer les `@keyframes` custom de `globals.css`.
+- BrandSwitcher V0 montre les brands mais ne permet pas encore de switcher la brand active (URL/cookie). À traiter quand le multi-brand est livré (Pro plan).
+- Le wrapper `Pagination` est en mode prev/next simple. Si on ajoute > 100 prompts par workspace il faudra des numbers + ellipsis.
+
+---
+
+#### 2026-05-12 — Polish dashboard : Stats enrichies, SegmentedControl, AreaChart à gradient, BreakdownBars
+
+**Contexte** :
+
+Après la PR « foundation design post-connexion » (sidebar + primitifs Radix + charts de base), Max a partagé 3 screens de dashboards SaaS contemporains comme références visuelles pour aller plus loin. Le dashboard Mamie GEO restait fonctionnellement correct mais visuellement basique — il manquait les codes contemporains : delta arrow visible sur chaque stat, time-range picker au-dessus des charts, pattern « breakdown » (bars + légende + liste) pour les répartitions catégorielles, area chart à gradient. En parallèle, Max a relevé une redite : le nom « Mamie GEO » apparaissait deux fois côté sidebar (top desktop + centre du header mobile) alors que l'utilisateur connecté sait déjà où il est.
+
+**Patterns ajoutés** (cf. doc 10 § « Patterns dashboard ») :
+
+1. **`Stat` enrichie** : 8 `iconTone` pastel (blue/green/orange/purple/pink/yellow/accent/neutral), cercle 32 px à droite avec icône Lucide centrée. Prop `delta?: { value, period }` qui affiche `TrendingUp`/`Down` Lucide + pourcentage signé coloré + libellé SMALL CAPS muted.
+2. **`SegmentedControl`** : pill group horizontal, container `gray-100` + items radius `pill`, actif = fond blanc + shadow-sm. API contrôlée générique (`value`/`onValueChange`/`options`).
+3. **`AreaChart`** : Recharts `AreaChart` mono-série avec `linearGradient` (top 0.25 → bottom 0), axe Y droite, `ReferenceLine` dashée optionnelle (couleur accent terracotta).
+4. **`BreakdownBars`** : rangée de bars verticales colorées + légende dots inline + liste « dot + label · valeur tabulée à droite ». Modes `absolute` ou `share`.
+
+**Appliqués sur le dashboard** :
+
+- 4 stats du haut → `iconTone` choisi sémantiquement (Flame orange pour score visibilité, Activity green pour citations, Users purple pour concurrents, DollarSign blue pour coût). Delta `vs J-7` calculé côté serveur via le nouveau helper `computeDelta()` à partir du `getVisibilityTrend(90)`.
+- Section « Évolution de visibilité » → nouveau composant client `<TrendSection>` qui wrap le `LineChart` existant avec un `SegmentedControl` (7 j / 30 j / 90 j). Le filtrage range est client-side : on charge 90 jours côté serveur, le composant slice côté client → switch instantané sans re-fetch.
+- Section « Score par LLM aujourd'hui » → remplacée par `<BreakdownBars>` avec 5 segments (un par LLM, couleur LLM_COLORS, valeur = visibilityScore du jour, suffix `" / 100"`).
+- Section « Top concurrents cités » → retirée du dashboard (info déjà portée par la stat « Top concurrent » du haut). Réduit la verticalité, allège la page.
+
+**Mentions de marque réduites** :
+
+- Sidebar desktop top : le titre n'est plus « Mamie GEO » + workspace name en sous-titre, mais directement **le nom du workspace** comme titre primaire. Le brand switcher juste dessous précise la marque trackée.
+- Header mobile : retrait du « Mamie GEO » centré. On garde juste le hamburger à gauche et le nom du workspace à côté.
+- Pages marketing/blog/login : aucun changement (utilisateur non identifié, contexte différent).
+- Placeholder onboarding `placeholder="Mamie GEO"` dans le formulaire de création de brand : conservé (c'est une démo d'exemple, pas une affirmation de marque).
+
+**Justification** :
+
+- Les screens partagés (Lead Source Breakdown + quad stats avec icons + area chart à gradient) sont des standards SaaS modernes. Les copier exactement aurait été coûteux et hors charte ; les **adapter au design system Airbnb-like** existant (tokens custom, palette pastel déjà en place) est cohérent et rapide.
+- Le pattern « breakdown bars + légende + liste » est plus lisible que le `BarChartHorizontal` Recharts initial pour une répartition à 5 segments — il combine visualisation et lecture exacte des valeurs dans le même bloc. Le `BarChartHorizontal` reste exporté pour des cas futurs (>5 segments, comparatif large).
+- Réduire les répétitions « Mamie GEO » dans le chrome de l'app est de l'hygiène UX. L'utilisateur connecté est dans le produit — affirmer le nom à chaque écran tient du brand fatigue.
+
+**Conséquences attendues** :
+
+- API `Stat` enrichie est rétro-compatible (`icon`, `iconTone`, `delta` sont tous optionnels — l'appel `<Stat label value />` continue de marcher).
+- `computeDelta(current, previous)` exposé depuis `@/lib/dashboard/queries` — utilisable par d'autres pages (`/app/competitors` à venir notamment).
+- Nouveau wrapper client `TrendSection` à côté de `page.tsx` — pattern à reproduire pour les autres charts qui auront besoin d'un time-range picker.
+- Le dashboard reste pleinement fonctionnel quand l'historique est vide (EmptyState par section, deltas qui retombent sur `hint`).
+
+**Périmètre exclu** (PRs suivantes) :
+
+- Le `BarChartHorizontal` reste dans le repo (utilisable ailleurs) mais n'est plus dans le dashboard.
+- Le pattern toolbar « Import/Export + Create New » du screen 1 n'est pas ajouté : pas de feature CRUD encore (Prompts et Competitors arrivent en PR suivante avec leur propre toolbar).
+- L'`AreaChart` est livré dans la lib mais n'est pas encore utilisé dans le dashboard — il servira pour les métriques single-series (coût cumulé, volumétrie de runs) en PRs futures.
+
+**À revisiter** :
+
+- Le delta « vs J-7 » est codé en dur. Quand on aura plusieurs périodes pertinentes (J-7, J-30, mois calendaire), le rendre paramétrable via le futur `SegmentedControl` global du dashboard.
+- Couleurs LLM dans `BreakdownBars` : aujourd'hui le mapping vient de `LLM_COLORS` côté charts. Quand on aura un Brand multi-LLM, vérifier que l'ordre stable (chatgpt/claude/perplexity/gemini/lechat) est cohérent partout (sidebar, charts, listes, badges).
+
+---
+
+#### 2026-05-13 — Cron prod stuck résolu (cause racine Vercel Cron GET vs POST) + worker `send_weekly_email` (weekly recap)
+
+**Contexte** :
+
+Deux chantiers liés. (1) Les runs restaient en `pending` côté prod alors que tout marchait en local — blocker critique sans lequel rien ne tournait pour la beta. (2) Le worker `send_weekly_email` était un stub qui throwait `not yet implemented (Phase A)` — bloquait la boucle d'engagement utilisateur.
+
+**Cause racine du cron prod stuck** :
+
+À la lecture du code des endpoints `/api/cron/dispatch` et `/api/cron/schedule-runs`, l'erreur saute aux yeux : **les routes n'exposent que `POST`**, mais **Vercel Cron envoie uniquement des `GET`** (avec header `Authorization: Bearer ${CRON_SECRET}` automatiquement injecté). Conséquence : Vercel pingait les endpoints, qui répondaient `{ ok: true }` via le handler `GET` (sans rien exécuter), et le dispatcher ne tournait jamais.
+
+Diagnostic confirmé sans avoir besoin des logs Vercel (la cause est évidente à lecture du code une fois la convention Vercel Cron rappelée).
+
+**Options considérées** :
+
+- **A : Faire pointer GET et POST sur le même handler** (retenue). Simple, rétro-compatible avec les tests manuels `curl -X POST`, et match la convention Vercel.
+- B : Refactor pour n'exposer que GET (cassait les tests manuels existants côté `/api/runs/trigger`-style).
+- C : Wrapper l'endpoint avec un middleware qui transforme GET → POST. Trop d'abstraction pour un problème de 2 lignes.
+
+**Choix** : option A. `export const GET = handler; export const POST = handler;` (en pratique : `export async function GET(req) { return handle(req); }` + idem POST). Tous les 3 endpoints cron (`dispatch`, `schedule-runs`, `schedule-weekly-emails`) suivent ce pattern.
+
+**Instrumentation ajoutée** :
+
+- Helper `logCronEvent()` dans `src/lib/cron-logger.ts` : émet `console.log(JSON.stringify({...}))` ligne-par-ligne. Vercel parse les JSON logs nativement → events filtrables dans le dashboard sans regex (`event:"job_succeeded"`, etc.).
+- Endpoint debug `GET /api/cron/dispatch?inspect=1` (auth requise) : retourne JSON avec `countsByStatus` (pending/claimed/done/failed/dead), 10 derniers jobs, présence (booléen seul, jamais la valeur) des env vars critiques (`CRON_SECRET`, `DATABASE_URL`, `ANTHROPIC_API_KEY`, `BREVO_API_KEY`, `NEXT_PUBLIC_APP_URL`), server time UTC. Permet de diagnostiquer un futur blocker sans déployer du code.
+
+**Worker `send_weekly_email` — scope V0 « weekly recap uniquement »** :
+
+Cf. arbitrage 2026-05-12 (avant la session) : on couvre uniquement le récap hebdo, pas la nurture trial (J+3 / J+10). Justification : la nurture trial nécessite de connaître le state Stripe (`trialEndsAt`, `currentPeriodStart`) qui sera fiabilisé dans la PR « Stripe checkout + webhooks ». Lier les deux maintenant aurait introduit du code à re-aligner.
+
+**Flow du worker** :
+
+1. Charge workspace + brand principale (V0 = 1 brand par workspace).
+2. Compte `runs.success` des 7 derniers jours. Si 0 → log `email_skipped_no_data` et return early (pas d'email vide envoyé).
+3. Agrège `citation_metrics_daily` sur 7 j (cette semaine) et 7 j antérieurs (semaine précédente) pour calculer les deltas par moyenne.
+4. Charge top 3 concurrents cités cette semaine via `competitorsData` JSONB.
+5. Charge les membres du workspace (V0 = owner uniquement, prêt pour invitations Pro+).
+6. Render le template via `renderWeeklyRecap()` (HTML inline + text fallback).
+7. Envoie via `sendWeeklyRecapEmail()` qui passe par le `sendTransactional()` générique (Brevo REST API prioritaire, SMTP fallback).
+8. Log `events.kind = "email_sent"` par destinataire avec `messageId`.
+
+**Template** :
+
+Structure HTML inline (table-based pour compat Gmail/Outlook), CSS dans `<style>` + `style="..."` attributes pour les éléments dynamiques. 4 stats en grille 2×2 (label, valeur, delta avec flèche colorée), bloc top 3 concurrents, CTA pill noir « Voir le dashboard complet », footer avec rappel d'inscription + lien vers `/app/settings`. Échappement HTML sur tous les champs dynamiques (test inclus pour XSS sur `workspaceName`).
+
+**Idempotence** :
+
+`idempotency_key = send_weekly_email:{workspaceId}:{isoWeek}` (déjà défini dans `src/lib/queue/types.ts`). Format ISO 8601 semaine `YYYY-Www` via le helper `isoWeekFromDate()` (algo standard jeudi de la semaine ISO). Si le cron `schedule-weekly-emails` est rejoué dans la même semaine ISO → re-enqueue no-op.
+
+**Conséquences attendues** :
+
+- Tous les workers en pending côté prod vont commencer à être traités au prochain tick de cron (toutes les 5 min). Premier email weekly recap envoyé le lundi suivant le merge pour le workspace de test (Max).
+- Le pattern logs JSON + endpoint inspect est désormais le standard pour les futurs crons (`schedule-weekly-emails` l'applique d'emblée).
+- Nouveau helper `sendTransactional()` dans `src/lib/email.ts` factorise le switch REST/SMTP — utilisé par `sendWeeklyRecapEmail()`, utilisable par les futurs templates (nurture, audit-ready alert, etc.) sans re-dupliquer le boilerplate.
+- 19 nouveaux tests unit (10 payload parser + 9 template render) — couvre les briques pures. Les tests d'intégration full DB du worker viendront avec le setup branche-Neon-par-PR mentionné dans CLAUDE.md.
+
+**Fichiers ajoutés** :
+
+- `src/lib/cron-logger.ts`
+- `src/lib/email/templates/weekly-recap.ts` (+ `.test.ts`)
+- `src/workers/send-weekly-email.ts` + `send-weekly-email-payload.ts` (+ `.test.ts`)
+- `src/app/api/cron/schedule-weekly-emails/route.ts`
+
+**Fichiers modifiés** :
+
+- `src/app/api/cron/dispatch/route.ts` (GET handler + JSON logs + inspect mode + case `send_weekly_email`)
+- `src/app/api/cron/schedule-runs/route.ts` (GET handler + JSON logs)
+- `src/lib/email.ts` (ajout `sendTransactional()` + `sendWeeklyRecapEmail()`)
+- `vercel.json` (ajout du cron `0 9 * * 1` pour `schedule-weekly-emails`)
+
+**À revisiter** :
+
+- Si le pattern `events` table de logs (kind `email_sent`, `email_skipped_no_data`, etc.) devient riche, considérer un index supplémentaire sur `(kind, createdAt)` ou une vue matérialisée pour les requêtes BI internes.
+- Le worker envoie 1 email par membre du workspace. En V1 multi-membre (Pro = 10 users), considérer un bouton de désinscription par membre (UNSUBSCRIBE_TOKEN) plutôt qu'un opt-out workspace global.
+- Aujourd'hui le worker fait 4 queries SQL (workspace, brand, métriques this+last, top concurrents). Si on a beaucoup de workspaces actifs, profiler et envisager un CTE unique.
+- Le helper `isoWeekFromDate()` est dupliqué côté worker (peut-être déplaçable dans `src/lib/dates.ts` si on en a besoin ailleurs).
+
+---
+
+#### 2026-05-13 — Refresh home inspiré Semrush AI SEO (data + features nommées + glossaire vocabulaire)
+
+**Contexte** :
+
+Analyse comparative de `https://www.semrush.com/ai-seo/overview/` (référence du marché) vs notre home Mamie GEO. 4 gaps identifiés : (1) aucun chiffre marketing chez nous vs 10+ stats chez Semrush, (2) features non nommées (« tracking » générique) vs 12 produits Semrush distincts, (3) vocabulaire métrique flou vs 3 termes Semrush ownés (« AI Visibility Score », « Share of Voice », « Sentiment »), (4) pas de narrative « why now » vs Semrush qui ouvre sur l'urgence. À l'opposé, on identifie 8 forces à PROTÉGER que Semrush ne peut pas copier : tonalité tu/direct, honnêteté « n'est pas… », Le Chat inclus, EU/RGPD, pricing transparent + trial sans CB, personas humains, lead magnet.
+
+Cette PR refresh la home avec **2 sections nouvelles** (« Pourquoi maintenant ? » avec 4 stats, « Tes outils » avec 5 features nommées) + retouche le hero (chiffre-marteau en ouverture du sous-titre) + cale le vocabulaire métrique dans la doc 02 (glossaire officiel) + snapshot Semrush daté dans la doc 01.
+
+**Options considérées** :
+
+- **A : Refresh ciblé** (retenue). 2 sections nouvelles + hero retouché + glossaire + snapshot. Scope ~415 lignes, faisable en une PR.
+- B : Refresh minimal. Juste un chiffre dans le hero + glossaire. ~150 lignes mais ne ferme aucun gap structurel.
+- C : Refonte complète. Tout A + page `/comparatif` dédiée + roadmap V1 enrichie (Prompt Research DB, AI-Readiness audit…). ~1200+ lignes, plusieurs PR, sortie de scope « inspiré » → « copié ».
+
+**Choix** : A (refresh ciblé). Justification : pose les fondations (vocabulaire, data, features nommées) sans surcharger le scope. Le reste suit en PRs futures si la traction confirme l'intérêt.
+
+**Sourcing des chiffres** :
+
+Choix : **mix externe + 1 stat FR**. Les 3 stats externes (×6 trafic AI 2025, ×4,4 conversion, 60 % zero-click) viennent de Semrush blog / SparkToro — publics et réutilisables. La 4ᵉ « stat » FR est un fait verifiable (« 5 plateformes IA majeures dont Le Chat de Mistral ») qui sert aussi de pont vers la section LLMBadges qui suit immédiatement.
+
+**Règle de vérité** posée : **aucun chiffre inventé**. Pour chaque stat, la source est cliquable (lien externe ou ancre interne vers `/blog/etat-visibilite-ia-france-2026`). Si une source est retirée du web, on remplace le chiffre, on ne maintient pas un sourcing mort.
+
+**Décisions copy/UX en regard** :
+
+- **Tutoiement tu/te/ta** : strictement conservé dans les nouvelles sections (« Pourquoi tu dois t'y mettre maintenant »). Différenciateur fort vs Semrush impersonnel.
+- **5 features, pas 12** : V0 honnête. On ne crée pas de feature fictive. Les 5 sont : Score de visibilité IA / Part de voix / Sentiment / Comparatif concurrents / Rapport hebdo — toutes déjà ou bientôt implémentées (Rapport hebdo livré 2026-05-13).
+- **Vocabulaire français** : « Part de voix » au lieu de « Share of Voice ». Sentiment garde son nom (le mot est suffisamment courant en FR). Glossaire officiel dans doc 02 § « Glossaire vocabulaire ».
+- **Pas de demo path** : on n'ajoute PAS « Demander une démo » côté CTA. Notre funnel transparent (trial 14j sans CB + pricing public) reste un différenciateur — un demo gate serait régression UX.
+- **Pas de social proof artificielle** : on n'invente pas de « Mamie GEO Awards » ou de logos clients pour faire genre. On attend les vrais beta testers signés.
+
+**Conséquences attendues** :
+
+- Crédibilité home augmentée (4 chiffres massue + 5 features nommées vs précédent « tracking » générique).
+- Vocabulaire métrique aligné entre produit, marketing et doc commerciale — facilite onboarding nouveaux relecteurs / contractuels.
+- Snapshot Semrush daté dans doc 01 → veille structurée, repère pour les prochaines comparaisons.
+- Pas d'impact backend / API / DB — purement marketing + doc.
+
+**Hors scope explicite** :
+
+- ❌ Page `/comparatif` dédiée (différée — pourrait être une PR follow-up si la traction le justifie)
+- ❌ Live demo path (anti-décision documentée)
+- ❌ Implémentation des features Semrush absentes chez nous (Prompt Research DB 261M, AI-Readiness audit, AI traffic dashboard) — restent en V1/V2 dans roadmap doc 02 § V3 et au-delà éventuellement
+- ❌ Refactor des sections home existantes (`<SansAvec>`, `<HowItWorks>`, `<PourQui>`, `<NEstPas>`, `<FAQ>`) — elles fonctionnent
+
+**Fichiers ajoutés** :
+
+- `src/app/(marketing)/_sections/pourquoi-maintenant.tsx`
+- `src/app/(marketing)/_sections/tes-outils.tsx`
+
+**Fichiers modifiés** :
+
+- `src/app/(marketing)/_sections/hero.tsx` (sous-titre avec chiffre + footnote source)
+- `src/app/(marketing)/page.tsx` (montage des 2 nouvelles sections)
+- `geo-project/02-produit-roadmap.md` (section « Glossaire vocabulaire » officiel)
+- `geo-project/01-marche-concurrence.md` (snapshot Semrush AI SEO Overview daté 2026-05-13)
+
+**À revisiter** :
+
+- Si la traction confirme l'intérêt narrative pour le canal Agence (Aline), envisager une **page `/comparatif`** publique avec tableau Mamie GEO vs Semrush vs Profound vs Peec — utile pour le SEO + closing agence (~1 PR dédiée).
+- Le chiffre « 5 plateformes IA » dans la 4ᵉ stat est passable mais un peu light vs les 3 autres bien sourcées. Si on trouve un chiffre Médiamétrie ou Frenchweb sur l'usage IA en France, le remplacer.
+- La règle « 5 features nommées » peut évoluer quand on livre vraiment les pages CRUD Prompts / Competitors — à ce moment on pourra peut-être faire passer la liste à 6-7 sans inventer.
+- Mesurer l'impact des nouvelles sections sur le funnel (rebond, scroll depth, click-through CTAs) après le merge — décider en M2 si on garde le format ou si on simplifie.
+
+---
+
+#### 2026-05-13 — Polish UX home (hero interactif + scroll-fill dark section + pastilles LLM partagées) + pivot trial 14j → 7j
+
+**Contexte** :
+
+Suite à la PR refresh marketing « inspiré Semrush » (entrée précédente du même jour), Max a poussé une 2ᵉ vague de demandes UX/UI :
+
+1. Hero interactif (le mot en gras dans le headline cycle entre les 5 LLMs trackés)
+2. La data « En 2025… » sortie du hero pour devenir une **section dédiée fond sombre avec effet scroll-fill** (texte qui se révèle au scroll, section sticky)
+3. Pastilles LLM **harmonisées partout** dans le site (style commun, angles légèrement décalés, gaps resserrés)
+4. **Touche subtile de couleur** (gradient ou contraste inversé, pas flashy) pour éviter que le site ne soit trop plat
+5. **Passage du trial 14 jours à 7 jours**
+
+Les 4 premières demandes se consolident bien dans la même PR — la section sombre scroll-fill cumule l'inversion contraste (point 4), le narratif data (réutilisé du hero, point 2) et les pastilles LLM inline (point 3). Le hero rotator (point 1) utilise la même map de couleurs LLM que les pastilles → cohérence visuelle systémique.
+
+**Choix techniques** :
+
+| Sujet                   | Choix                                                                                                      |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Hero rotator            | Client component `<HeroLLMRotator>` qui cycle les 5 LLMs toutes les 2,4 s avec leur couleur saturée        |
+| Source unique pastilles | Nouveau composant `LLMPill` dans `src/components/marketing/llm-pill.tsx` + map `LLM_KEYS_ORDER`            |
+| Rotation pastilles      | Déterministe par LLM (-2°/+3°/-1°/+2°/-3°) — effet « sticker » sans random qui changerait par rendu        |
+| Scroll-fill             | CSS pur via `animation-timeline: view()` + `background-clip: text` (Chrome 115+ / Safari 17+) — JS inutile |
+| Fallback scroll         | `color: gray-300` en `:not(@supports)` → toujours lisible sans animation                                   |
+| Contraste inversé       | Section `<PourquoiMaintenant>` sur fond `--color-ink` + radial warm subtile (rgba terracotta < 0.22)       |
+| Trial 14j → 7j          | Override commercial du rationale antérieur (citation drift) — cf. doc 04 § Couche 3                        |
+
+**Pivot trial 14j → 7j — justifications** (cf. doc 04 § « Pivot 2026-05-13 vers 7 jours ») :
+
+- Force la décision payante plus rapidement → réduction du « zombie trial »
+- Matche les standards SaaS modernes (Notion, Linear, Vercel Pro) — moins de friction perçue
+- La citation drift se voit sur 30+ jours de toute façon ; 7 vs 14 ne change pas la perception initiale
+- L'audit gratuit `/outils/test-visibilite-ia` joue déjà le rôle de « démo sans engagement »
+- **À revisiter** après 30 jours de feedback prospects : si la conversion trial → payant chute, repasser à 10j ou 14j
+
+**Mentions de marque** : tous les `14 jours` / `14 j` ont été remplacés par `7 jours` / `7 j` dans :
+
+- Hero trust signal, FAQ home, pricing-faq, pricing-data CTAs ×3, pricing page metadata, lead magnet `/outils/test-visibilite-ia`, CGU, blog `mamie-geo-vs-profound`, audit reply email (`src/lib/email.ts`), docs 02/03/04/10, snapshot Semrush doc 01.
+- **Exclusion** : `privacy/page.mdx` qui mentionne « Cookies de session Better Auth (durée 14 jours) » — non lié au trial, on garde.
+- **Historique doc 09** : les entrées datées du Sprint 0 (lignes 65, 104, 231) qui mentionnent « trial 14j » **restent inchangées** — elles documentent ce qui était décidé à l'époque ; cette nouvelle entrée acte le pivot 2026-05-13.
+
+**Conséquences attendues** :
+
+- Home post-refresh : hero plus light (le paragraphe data est sorti) + section dark percutante au scroll qui sert d'inversion contraste + pastilles LLM cohérentes partout.
+- Engagement attendu : la section dark scroll-fill devient un « moment de pause » dans le scroll qui force l'attention.
+- Funnel : trial 7j réduit la queue d'utilisateurs hésitants ; à mesurer.
+
+**Fichiers ajoutés** :
+
+- `src/components/marketing/llm-pill.tsx` (composant + LLM_KEYS_ORDER + getLLMConfig)
+- `src/app/(marketing)/_sections/hero-llm-rotator.tsx`
+
+**Fichiers modifiés** :
+
+- `src/app/globals.css` (animations `scroll-reveal-text` + `scroll-reveal-skip` + keyframes `scroll-reveal`)
+- `src/app/(marketing)/_sections/hero.tsx` (rotator + paragraphe simplifié + 7 jours)
+- `src/app/(marketing)/_sections/pourquoi-maintenant.tsx` (réécrit en dark scroll-fill)
+- `src/app/(marketing)/_sections/llm-badges.tsx` (utilise `LLMPill` + gap resserré)
+- 14 fichiers touchés pour le pivot 14j → 7j (cf. liste ci-dessus)
+
+**À revisiter** :
+
+- Mesurer impact UX (rebond, scroll depth, taux de clic CTA) après le merge — décider en M2 si la section dark reste ou évolue.
+- Si le scroll-fill ne fonctionne pas bien sur Safari < 17 (~ 8% du trafic FR estimé), envisager un fallback IntersectionObserver-based.
+- Le rotator hero peut être étendu : ajouter un mode « pause au focus clavier » plus visible si retour user.
+- La rotation des pastilles (-2°/+3°…) est déterministe par LLM ; si on ajoute Grok ou autre LLM, lui assigner sa rotation dans `LLM_CONFIG`.
+- Le pivot trial 7j sera revisité à 30 jours de feedback prospects (cf. doc 04 § Couche 3).
+
+---
+
+#### 2026-05-13 — Pages CRUD app (Prompts + Competitors) + Settings édition + helper `getUserContext`
+
+**Contexte** :
+
+L'application post-login avait une chaîne UX incomplète : un user pouvait créer son workspace, sa brand, ses concurrents et ses 5+ prompts à l'onboarding, mais ne pouvait rien gérer après coup. Pas de page pour ajouter / éditer / supprimer / pauser un prompt. Pas de page pour gérer les concurrents. `/app/settings` était en read-only. Cette PR complète la chaîne « onboarding → tracking → gestion » et permet le **self-service complet** pour les beta-testeurs.
+
+**Choix retenus** :
+
+| Sujet                 | Choix                                                                 |
+| --------------------- | --------------------------------------------------------------------- |
+| Détail prompt         | Page dédiée `/app/prompts/[id]` (URL partageable + breakdown par LLM) |
+| Settings édition      | Inclure (workspace name + brand aliases) — ~200 lignes en plus        |
+| Brand switcher action | ❌ Reporté (V0 = 1 brand par workspace)                               |
+| Invitations équipe    | ❌ Reporté (Better Auth invitations système séparé)                   |
+| Bulk upload CSV       | ❌ Reporté (UX dédié)                                                 |
+| Pagination prompts    | Activée (Pro = 100, Agency = 300)                                     |
+
+**Architecture** :
+
+- **Schémas Zod** dans `src/lib/prompts/schemas.ts`, `src/lib/competitors/schemas.ts`, `src/lib/settings/schemas.ts`. Trim + dédoublon case-insensitive sur les aliases (côté server pour éviter dups). Strings vides dans les arrays d'aliases **acceptées côté Zod** et filtrées par le transform — sinon `"alias, , alias2"` rejette tout le payload au lieu de garder `alias` + `alias2`.
+- **Quotas par plan** centralisés dans `src/lib/plans/quotas.ts` (single source of truth) : Starter 25 prompts / 5 concurrents, Pro 100 / 10, Agency 300 / illimité. Enforcement côté server actions avant insert. `quota_reached` error structurée renvoyée au client.
+- **Helper auth `getUserContext(userId)`** dans `src/lib/auth/user-context.ts` : charge workspace + brand + role en une query. Utilisé par toutes les server actions + queries pour éviter le code dupliqué.
+- **Server actions** : `create`, `update`, `delete`, `togglePromptActive` côté prompts ; `create`, `update`, `delete` côté competitors. Toutes avec `revalidatePath` sur les paths concernés.
+- **Pages serveur** : `prompts/page.tsx`, `prompts/[id]/page.tsx`, `competitors/page.tsx` chargent les données puis délèguent à un client wrapper pour la partie interactive (filtre, dialogs, toast). Settings page wire les 2 forms d'édition inline.
+- **Form Dialogs** : `prompt-form-dialog.tsx` et `competitor-form-dialog.tsx` réutilisent `<Dialog>` Radix. State initial via `useState` (pas `useEffect`) pour respecter le lint React `no-set-state-in-effect`. Parent passe `key={item.id}` pour forcer remount entre éditions.
+- **Tag input aliases** : Enter/virgule pour ajouter, Backspace sur input vide pour retirer le dernier, max 10 aliases. Validation server (trim + dedupe case-insensitive).
+
+**Quotas enforced en server actions** :
+
+| Plan         | Prompts  | Concurrents |
+| ------------ | -------- | ----------- |
+| `trialing`   | 100      | 10          |
+| `starter`    | 25       | 5           |
+| `pro`        | 100      | 10          |
+| `agency`     | 300      | illimité    |
+| `enterprise` | illimité | illimité    |
+
+Quand un user trial atteint 100 prompts et tente d'en créer un 101ᵉ, l'action renvoie `{ ok: false, error: "quota_reached", current: 100, max: 100, plan: "trialing" }` et le client affiche une erreur via `toast.error()`.
+
+**Suggestion IA dans `/app/prompts`** :
+
+Réutilise le helper `suggestPrompts()` de `src/app/(app)/app/onboarding/actions.ts` (Haiku 4.5, coût ~$0,003). Le user clique « Suggérer via IA » → 5 prompts apparaissent dans une zone éphémère sous le header → click « Ajouter » pour insérer un par un (avec quota check). Pas d'auto-insert (l'utilisateur valide).
+
+**Conséquences attendues** :
+
+- Tout utilisateur trial peut gérer ses prompts / concurrents / aliases sans email à Max → réduction du support load
+- Quotas enforced → les conversions Starter → Pro deviennent visibles (un user qui hit le quota 25 voit un message → upgrade)
+- Page détail prompt avec breakdown par LLM = nouvel argument marketing (vue granulaire par prompt, pas dispo chez Profound entry)
+- 105 tests Vitest verts (avant : 76). Pas de tests E2E sur ces flows ajoutés (gap identifié pour PR dédiée).
+
+**Fichiers ajoutés** (16) :
+
+- `src/lib/plans/quotas.ts` (source de vérité quotas par plan)
+- `src/lib/auth/user-context.ts` (helper auth user → workspace + brand)
+- `src/lib/prompts/{schemas,schemas.test,queries}.ts`
+- `src/lib/competitors/{schemas,schemas.test,queries}.ts`
+- `src/lib/settings/{schemas,schemas.test}.ts`
+- `src/app/(app)/app/(with-nav)/prompts/page.tsx` + `actions.ts` + `prompts-list.tsx` + `prompt-form-dialog.tsx`
+- `src/app/(app)/app/(with-nav)/prompts/[id]/page.tsx`
+- `src/app/(app)/app/(with-nav)/competitors/page.tsx` + `actions.ts` + `competitors-list.tsx` + `competitor-form-dialog.tsx`
+- `src/app/(app)/app/(with-nav)/settings/actions.ts` + `workspace-form.tsx` + `brand-aliases-form.tsx`
+
+**Fichiers modifiés** :
+
+- `src/app/(app)/app/(with-nav)/settings/page.tsx` (wire les 2 forms d'édition)
+- `CLAUDE.md` (§ 9 — passe de 5 à 8 routes app authentifiées)
+
+**À revisiter** :
+
+- **Bulk upload CSV** de prompts (Pro = 100 prompts, fastidieux à entrer un par un). UX dédié en PR follow-up.
+- **Invitations équipe** Pro+ : nécessite système Better Auth invitations. Pas pris dans cette PR.
+- **Édition brand.name / brand.domain** : reportée car ces champs changent l'identité tracking (matching détection citation se base dessus). Si on les rend éditables, décider quoi faire des runs historiques.
+- **DELETE cascade prompts → runs** : actuellement irréversible. Si plaintes user, envisager un soft-delete (`deletedAt` colonne) + restauration 30j.
+- **Tests E2E** auth + app sur ces flows : gap connu CLAUDE.md, à faire en PR dédiée Playwright.
 
 ---
 

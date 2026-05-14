@@ -1,0 +1,67 @@
+import { and, eq, lt, sql } from "drizzle-orm";
+import { NextResponse, type NextRequest } from "next/server";
+import { db } from "@/db/client";
+import { subscriptionEvents, workspaces } from "@/db/schema";
+import { logCronEvent } from "@/lib/cron-logger";
+import { env } from "@/lib/env";
+
+// Cron quotidien (03:00 UTC) : trouve les workspaces past_due dont la
+// période de facturation est terminée depuis plus de 7 jours sans
+// régularisation et les passe en `expired`.
+//
+// Stripe gère le retry de paiement automatiquement, mais après plusieurs
+// échecs successifs le user reste en past_due → on coupe l'accès propre
+// après J+7. Le user peut toujours réactiver via le portail.
+//
+// GET et POST exposés (Vercel Cron envoie GET, cf. doc 09 § 2026-05-13).
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+const PAST_DUE_GRACE_DAYS = 7;
+
+export async function GET(request: NextRequest) {
+  return handle(request);
+}
+export async function POST(request: NextRequest) {
+  return handle(request);
+}
+
+async function handle(request: NextRequest): Promise<NextResponse> {
+  const authHeader = request.headers.get("authorization");
+  if (authHeader !== `Bearer ${env.CRON_SECRET}`) {
+    return NextResponse.json({ ok: true, ts: new Date().toISOString(), mode: "healthcheck" });
+  }
+
+  const cutoff = new Date(Date.now() - PAST_DUE_GRACE_DAYS * 24 * 60 * 60 * 1000);
+  const candidates = await db
+    .select()
+    .from(workspaces)
+    .where(and(eq(workspaces.plan, "past_due"), lt(workspaces.currentPeriodEnd, cutoff)));
+
+  logCronEvent({
+    event: "expire_past_due_start",
+    candidates: candidates.length,
+    cutoff: cutoff.toISOString(),
+  });
+
+  let expired = 0;
+  for (const ws of candidates) {
+    await db
+      .update(workspaces)
+      .set({ plan: "expired", updatedAt: new Date() })
+      .where(eq(workspaces.id, ws.id));
+
+    await db.insert(subscriptionEvents).values({
+      workspaceId: ws.id,
+      eventType: "expired_after_past_due",
+      fromPlan: "past_due",
+      toPlan: "expired",
+      metadata: sql`${JSON.stringify({ gracePeriodDays: PAST_DUE_GRACE_DAYS, cutoff: cutoff.toISOString() })}::jsonb`,
+    });
+    expired += 1;
+  }
+
+  logCronEvent({ event: "expire_past_due_end", expired });
+  return NextResponse.json({ ok: true, expired, candidates: candidates.length });
+}

@@ -1,100 +1,63 @@
-import { randomUUID } from "node:crypto";
-import { and, eq, isNull } from "drizzle-orm";
 import { NextResponse, type NextRequest } from "next/server";
-import { db } from "@/db/client";
-import { brands, prompts, runs, workspaces } from "@/db/schema";
+import { logCronEvent } from "@/lib/cron-logger";
 import { env } from "@/lib/env";
-import { enqueue } from "@/lib/queue";
-import type { LLMValue } from "@/lib/llm";
+import { ACTIVE_PLANS, quotasFor } from "@/lib/plans/quotas";
+import { scheduleRunsForEligiblePlans, TRACKED_LLMS } from "@/lib/scheduler/schedule-runs";
 
 // Cron quotidien (cf. vercel.json) : pour chaque prompt actif d'un
-// workspace non hard-capé, enqueue 1 job execute_prompt × LLM tracké
-// (Phase A : seul "claude"). Le worker dispatcher consommera derrière
-// au tick suivant.
+// workspace en plan ACTIVE_PLANS et non hard-capé, enqueue 1 job
+// execute_prompt × LLM tracké (Phase A : seul "claude").
 //
-// Idempotence : la queue refuse les doublons via idempotency_key
-// `execute_prompt:{promptId}:{llm}:{date}` (cf. src/lib/queue/types.ts).
-// Si schedule-runs tourne deux fois le même jour, le 2e passage no-op.
+// Cadence per-plan (cf. doc 09 § 2026-05-14, ajout Solo) :
+//   - daily  : enqueue chaque jour (Starter, Pro, Agency, Enterprise)
+//   - weekly : enqueue uniquement le lundi UTC (Solo)
+// Le cron tournant tous les jours à 06:00 UTC, le lundi déclenche toutes
+// les cadences ; les autres jours uniquement daily.
+//
+// La logique d'enqueue est extraite dans `src/lib/scheduler/schedule-runs.ts`
+// pour être appelable aussi depuis le webhook Stripe (run immédiat
+// post-checkout).
+//
+// GET ET POST acceptés (cf. doc 09 § 2026-05-13) : Vercel Cron envoie GET.
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
-// Phase A : seul Claude est tracké. Phase C ajoute les 4 autres.
-const TRACKED_LLMS: readonly LLMValue[] = ["claude"] as const;
+export async function GET(request: NextRequest) {
+  return handle(request);
+}
 
 export async function POST(request: NextRequest) {
-  if (request.headers.get("authorization") !== `Bearer ${env.CRON_SECRET}`) {
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  return handle(request);
+}
+
+async function handle(request: NextRequest): Promise<NextResponse> {
+  const authHeader = request.headers.get("authorization");
+  if (authHeader !== `Bearer ${env.CRON_SECRET}`) {
+    return NextResponse.json({ ok: true, ts: new Date().toISOString(), mode: "healthcheck" });
   }
 
-  const summary = await scheduleRuns();
+  const startedAt = Date.now();
+  const isMonday = new Date().getUTCDay() === 1;
+  const eligiblePlans = isMonday
+    ? (ACTIVE_PLANS as readonly string[])
+    : (ACTIVE_PLANS as readonly string[]).filter((p) => quotasFor(p).cadence === "daily");
+
+  logCronEvent({
+    event: "schedule_runs_start",
+    method: request.method,
+    trackedLlms: TRACKED_LLMS,
+    isMonday,
+    eligiblePlans,
+  });
+
+  const summary = await scheduleRunsForEligiblePlans(eligiblePlans);
+
+  logCronEvent({
+    event: "schedule_runs_end",
+    ...summary,
+    totalDurationMs: Date.now() - startedAt,
+  });
+
   return NextResponse.json(summary);
-}
-
-export async function GET() {
-  // Healthcheck local — sans secret, pas d'effet de bord
-  return NextResponse.json({ ok: true, ts: new Date().toISOString() });
-}
-
-interface ScheduleSummary {
-  promptsScanned: number;
-  jobsEnqueued: number;
-  runsCreated: number;
-  skipped: number;
-}
-
-export async function scheduleRuns(): Promise<ScheduleSummary> {
-  // Tous les prompts actifs sur des workspaces non hard-capés. Filtre
-  // côté SQL pour ne pas charger des prompts qui seraient ignorés ensuite.
-  const activePrompts = await db
-    .select({
-      promptId: prompts.id,
-    })
-    .from(prompts)
-    .innerJoin(brands, eq(brands.id, prompts.brandId))
-    .innerJoin(workspaces, eq(workspaces.id, brands.workspaceId))
-    .where(and(eq(prompts.isActive, true), isNull(workspaces.hardCapHitAt)));
-
-  let jobsEnqueued = 0;
-  let runsCreated = 0;
-  let skipped = 0;
-
-  for (const row of activePrompts) {
-    for (const llm of TRACKED_LLMS) {
-      // 1. Tenter d'enqueue (idempotent par idempotency_key). On génère
-      //    un runId et le passe dans le payload. Si la queue retourne
-      //    null → ce couple (prompt × llm × date) est déjà queued, skip.
-      const runId = randomUUID();
-      const jobId = await enqueue({
-        kind: "execute_prompt",
-        payload: { promptId: row.promptId, llm, runId },
-      });
-
-      if (!jobId) {
-        skipped += 1;
-        continue;
-      }
-
-      jobsEnqueued += 1;
-
-      // 2. Créer la run row associée. Si l'INSERT échoue après l'enqueue
-      //    réussi, le worker lèvera une erreur "Run introuvable" → la
-      //    queue retry/dead. Acceptable en V0.
-      await db.insert(runs).values({
-        id: runId,
-        promptId: row.promptId,
-        llm,
-        status: "pending",
-        scheduledAt: new Date(),
-      });
-      runsCreated += 1;
-    }
-  }
-
-  return {
-    promptsScanned: activePrompts.length,
-    jobsEnqueued,
-    runsCreated,
-    skipped,
-  };
 }

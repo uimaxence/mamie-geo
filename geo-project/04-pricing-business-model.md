@@ -6,7 +6,7 @@
 2. **Sous Peec AI sur l'entrée de gamme** (€49 vs €89) pour démocratiser et capter freelances
 3. **Marque blanche dès le tier Pro** (pas en addon) — différenciateur agence majeur
 4. **Annuel à -15-20%** pour favoriser cashflow et réduire churn
-5. **Pas de freemium permanent** — trial gratuit 14 jours sans carte requise, puis payant
+5. **Pas de freemium permanent** — trial gratuit 7 jours sans carte requise, puis payant
 6. **Pas de remises silencieuses** — annuel, ETI, education clairement affichés
 7. **Pricing en EUR** sur le marché FR/EU, USD pour exports si besoin
 
@@ -34,7 +34,7 @@ Sur le site marketing, un outil web public :
 - L'utilisateur entre son domaine + 5 prompts
 - L'outil lance 1 LLM (ChatGPT) avec recherche web
 - Rapport délivré en 60 secondes : score, position, concurrents cités, sources
-- CTA fin : "Voulez-vous le suivi quotidien sur 5 LLMs ? → Essayer Mamie GEO 14 jours"
+- CTA fin : "Voulez-vous le suivi quotidien sur 5 LLMs ? → Essayer Mamie GEO 7 jours"
 
 **Économique** : ~$0.015 par audit. Cap à 100/jour = ~$45/mois maximum.
 
@@ -42,19 +42,24 @@ Sur le site marketing, un outil web public :
 
 C'est le **pont** entre le média gratuit et le SaaS payant. Il fait quasiment tout le travail d'acquisition.
 
-### Couche 3 — trial 14 jours sans carte sur l'app
+### Couche 3 — pas de trial automatique + garantie remboursement 14 jours
 
-Le SaaS lui-même :
+**Pivot 2026-05-14** (cf. doc 09 § 2026-05-14). Le trial automatique a été supprimé du parcours d'inscription.
 
-- 14 jours d'accès complet au plan **Pro** (le tier mid)
-- Pas de carte bancaire requise à l'inscription
-- Email J+3 et J+10 pour engagement
-- Demande de carte au J+14 pour passer en payant
-- Si pas de carte : downgrade en compte verrouillé (lecture seule des données collectées) avec relance email pendant 30 jours, puis suppression
+À la place :
 
-**Pourquoi 14 jours et pas 7** : le tracking GEO n'a de valeur que dans la durée (citation drift). 7 jours n'est pas suffisant pour voir une évolution. 14 jours = 2 cycles de tracking quotidiens minimum.
+- **Pas de tracking gratuit** : un compte créé sans paiement (`plan: "trialing"`) a `quotasFor() = { prompts: 0, competitors: 0, cadence: "weekly" }` → aucun run lancé tant que pas de subscription. Le user peut explorer l'UI (dashboard vide, pages CRUD vides) mais l'engagement matériel est zéro côté infra.
+- **Garantie remboursement 14 jours** : sur toute première souscription, l'utilisateur peut demander un remboursement intégral sous 14 jours par email à `hello@mamie-geo.fr`. Refund manuel via portal Stripe — pas de mécanisme self-service en V0 (acceptable car volume early-access faible).
+- **Free taster reste `/outils/test-visibilite-ia`** (couche 2) : audit one-shot ~$0,20 LLM coût, démo qualitative sans inscription.
 
-**Pourquoi sans carte** : la friction d'inscription tombe à zéro, le funnel d'acquisition est plus large, et la perte de "trials qui n'ont jamais voulu payer" est compensée par le volume.
+**Pourquoi ce pivot** :
+
+- Coût LLM réel ~$0,043 / run (Haiku + scoring). Un trial 7j moyen (10 prompts × 1 LLM) = ~$3 LLM gaspillés. Sur 100 signups à 5 % conv = $285 de perte sèche.
+- En Phase C complète (5 LLMs), le coût grimpe à ~$15 / trial user → ~$1 425 / 100 signups. **Non finançable** en early access.
+- L'outil one-shot `/outils/test-visibilite-ia` joue déjà le rôle de « démo de qualité » sans coût récurrent.
+- La garantie 14j a le même effet rassurant côté commercial, mais le coût n'est dépensé qu'en cas de refund explicite (rare).
+
+**À revisiter quand capital disponible** (typiquement après 50+ payants stabilisés) : ajouter un trial 7 jours **avec carte requise** (mode `subscription.trial_period_days` natif Stripe). Conversion attendue 50-70 % au lieu de 5-15 % parce que la carte est déjà saisie. Le risque coût LLM reste mais le ROI est bien meilleur.
 
 ### Pas de couche freemium permanente dans le SaaS
 
@@ -77,6 +82,22 @@ Question récurrente : "Pourquoi pas un free tier dans le SaaS, genre 1 marque +
 ---
 
 ## Grille tarifaire détaillée
+
+### Plan Solo — 9,99 €/mois (ou 7,99 €/mois en annuel)
+
+**Cible** : freelance qui veut tester GEO sans engagement, première brique d'acquisition.
+
+- 1 marque trackée
+- **3 concurrents** trackés
+- **5 prompts** trackés
+- 5 LLMs : ChatGPT, Claude, Perplexity, Gemini, Le Chat (inclus sans condition dès Solo)
+- Fréquence **hebdomadaire** : 1 run le lundi 6h UTC
+- Historique : 90 jours
+- Dashboard + email récap hebdo
+- 1 utilisateur
+- Support : email, réponse J+3
+
+**Ajouté 2026-05-14** (cf. doc 09 § 2026-05-14). Marge brute LLM ~75 % en Phase A (Haiku 4.5), ~59 % en Phase C complète. Hook commercial : « ton bilan visibilité IA chaque lundi pour le prix d'un café ». Limite produit : 1 run/semaine = pas adapté pour qui veut piloter activement → motive l'upgrade Starter.
 
 ### Plan Starter — 49 €/mois (ou 39 €/mois en annuel)
 
@@ -110,7 +131,9 @@ Question récurrente : "Pourquoi pas un free tier dans le SaaS, genre 1 marque +
 - Support : email + chat, réponse < 24h
 - Module **AI-readiness audit** (à partir de V1, mois 4)
 
-### Plan Agence — 399 €/mois (ou 319 €/mois en annuel)
+### Plan Agence — 399 €/mois (ou 319 €/mois en annuel) — sur devis depuis 2026-05-14
+
+**Statut UI** : retiré de la grille publique `/pricing` (cf. doc 09 § 2026-05-14). Remplacé par CTA « Plus de volume ? Contact » dans la page pricing. Reste disponible dans l'enum DB `workspaces.plan` pour les contrats négociés ou les workspaces grand-fathered. La fiche ci-dessous reste valable comme référence commerciale interne.
 
 **Cible** : agences SEO/marketing, consultants avec portefeuille clients
 
@@ -363,7 +386,7 @@ Plan B : LinkedIn outbound + paid Google Ads (CAC 200-400€)
 À trancher avant ouverture des inscriptions, à logger dans 09 :
 
 - [ ] Prix exact entrée Starter (49€ vs 39€ vs 59€)
-- [ ] Trial gratuit : 7 ou 14 jours
+- [x] Trial gratuit : 7 jours (acté 2026-05-13)
 - [ ] Carte requise au trial : oui ou non
 - [ ] Annuel discount : 15%, 20% ou 25%
 - [ ] Plan gratuit permanent : oui (rapport one-shot par mois) ou non
