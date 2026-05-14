@@ -1,4 +1,4 @@
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, gte } from "drizzle-orm";
 import { db } from "@/db/client";
 import {
   brands,
@@ -216,6 +216,67 @@ function todayUTC(): string {
 function startOfCurrentMonthUTC(): string {
   const now = new Date();
   return `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}-01`;
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Évolution 30j — pour le LineChart du dashboard
+// ─────────────────────────────────────────────────────────────────────
+
+export interface VisibilityTrendPoint {
+  /** ISO date YYYY-MM-DD */
+  date: string;
+  /** Score par LLM (clé = `llm`, valeur = visibility score 0-100) */
+  [llm: string]: number | string;
+}
+
+/**
+ * Calcule une variation relative en % (today - prev) / prev. Renvoie
+ * `null` si `prev` vaut 0 ou est absent (rapport non défini), 0 si
+ * identique. Arrondi à 1 décimale.
+ */
+export function computeDelta(current: number, previous: number | null | undefined): number | null {
+  if (previous === null || previous === undefined) return null;
+  if (previous === 0) return current === 0 ? 0 : null;
+  const pct = ((current - previous) / previous) * 100;
+  return Math.round(pct * 10) / 10;
+}
+
+/**
+ * Récupère l'évolution visibilité sur les `days` derniers jours pour la
+ * brand donnée, pivoté par LLM. Retourne `[]` si pas d'historique
+ * suffisant (cas onboarding récent) — l'UI affiche alors un EmptyState.
+ */
+export async function getVisibilityTrend(
+  brandId: string,
+  days = 30,
+): Promise<VisibilityTrendPoint[]> {
+  // Fenêtre [J-days, J0]
+  const end = new Date();
+  const start = new Date(end);
+  start.setUTCDate(end.getUTCDate() - (days - 1));
+  const startStr = start.toISOString().slice(0, 10);
+
+  const rows = await db
+    .select({
+      date: citationMetricsDaily.date,
+      llm: citationMetricsDaily.llm,
+      visibilityScore: citationMetricsDaily.visibilityScore,
+    })
+    .from(citationMetricsDaily)
+    .where(and(eq(citationMetricsDaily.brandId, brandId), gte(citationMetricsDaily.date, startStr)))
+    .orderBy(citationMetricsDaily.date);
+
+  // Pivot : { date → { llm → score } }
+  const byDate = new Map<string, Record<string, number>>();
+  for (const row of rows) {
+    const slot = byDate.get(row.date) ?? {};
+    slot[row.llm] = row.visibilityScore ? Number(row.visibilityScore) : 0;
+    byDate.set(row.date, slot);
+  }
+
+  return Array.from(byDate.entries())
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([date, scores]) => ({ date, ...scores }));
 }
 
 // ─────────────────────────────────────────────────────────────────────

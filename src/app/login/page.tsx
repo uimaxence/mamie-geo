@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Asterisk } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { Button, Field, Input } from "@/components/ui";
+import { Logo } from "@/components/marketing/logo";
 
 // Login en split panel asymétrique (cf. doc 09 § PR 11b, ref
 // BrightNest signup) :
@@ -61,8 +62,12 @@ export default function LoginPage() {
     <main className="grid min-h-screen grid-cols-1 md:grid-cols-2">
       {/* Panel gauche — dégradé warm + identité brand. Caché sur mobile. */}
       <aside className="gradient-warm-panel relative hidden flex-col justify-between p-10 text-[color:var(--color-ink)] md:flex">
-        <Link href="/" className="text-base font-bold tracking-tight text-[color:var(--color-ink)]">
-          Mamie GEO
+        <Link
+          href="/"
+          className="flex items-center gap-2 text-base font-bold tracking-tight text-[color:var(--color-ink)]"
+        >
+          <Logo size={28} />
+          <span>Mamie GEO</span>
         </Link>
 
         <div className="max-w-md">
@@ -78,9 +83,11 @@ export default function LoginPage() {
         <div className="mx-auto w-full max-w-md">
           <Link
             href="/"
-            className="mb-8 inline-block text-sm font-semibold text-[color:var(--color-ink)] hover:opacity-70 md:hidden"
+            className="mb-8 inline-flex items-center gap-1.5 text-sm font-semibold text-[color:var(--color-ink)] hover:opacity-70 md:hidden"
           >
-            ← Mamie GEO
+            <span className="text-base">←</span>
+            <Logo size={20} />
+            <span>Mamie GEO</span>
           </Link>
 
           <Asterisk

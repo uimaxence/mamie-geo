@@ -1,20 +1,10 @@
-import { Bot, Cat, MessageCircle, Search, Sparkles, type LucideIcon } from "lucide-react";
-import { Badge, Section } from "@/components/ui";
+import { Section } from "@/components/ui";
+import { LLM_KEYS_ORDER, LLMPill } from "@/components/marketing/llm-pill";
 
-// Les 5 LLMs trackés — badges pastel colorés avec icônes Lucide.
-// Signature visuelle DA (cf. doc 10 § Patterns de personnalité).
-
-const LLMS: {
-  name: string;
-  tone: "green" | "purple" | "blue" | "orange" | "pink";
-  Icon: LucideIcon;
-}[] = [
-  { name: "ChatGPT", tone: "green", Icon: MessageCircle },
-  { name: "Claude", tone: "purple", Icon: Bot },
-  { name: "Perplexity", tone: "blue", Icon: Search },
-  { name: "Gemini", tone: "orange", Icon: Sparkles },
-  { name: "Le Chat", tone: "pink", Icon: Cat },
-];
+// Les 5 LLMs trackés. Source de vérité visuelle = composant <LLMPill>
+// (cf. src/components/marketing/llm-pill.tsx). Gap resserré + rotations
+// légères déterministes par LLM pour un effet « stickers » dynamique
+// sans casser la lisibilité (cf. doc 09 § 2026-05-13).
 
 export function LLMBadges() {
   return (
@@ -24,16 +14,9 @@ export function LLMBadges() {
         <h2 className="type-h2 mt-3">
           Les 5 IA qui répondent aux questions de tes futurs clients.
         </h2>
-        <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
-          {LLMS.map((llm) => (
-            <Badge
-              key={llm.name}
-              tone={llm.tone}
-              icon={<llm.Icon size={14} strokeWidth={2.2} />}
-              className="px-3 py-1.5 text-sm"
-            >
-              {llm.name}
-            </Badge>
+        <div className="mt-10 flex flex-wrap items-center justify-center gap-1.5">
+          {LLM_KEYS_ORDER.map((llm) => (
+            <LLMPill key={llm} llm={llm} />
           ))}
         </div>
       </div>

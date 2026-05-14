@@ -97,6 +97,21 @@ export function OnboardingWizard({ userEmail }: { userEmail: string }) {
         <Badge tone="neutral">Étape {step} / 3</Badge>
       </header>
 
+      {/* Progress bar 3 segments — repère visuel d'avancement. Segments
+       * passent en noir au fur et à mesure. */}
+      <div className="mb-10 flex items-center gap-2" aria-hidden>
+        {([1, 2, 3] as const).map((s) => (
+          <div
+            key={s}
+            className={
+              s <= step
+                ? "h-1 flex-1 rounded-full bg-[color:var(--color-ink)] transition-colors"
+                : "h-1 flex-1 rounded-full bg-[color:var(--color-gray-200)] transition-colors"
+            }
+          />
+        ))}
+      </div>
+
       {step === 1 && <Step1 state={state} setState={setState} />}
       {step === 2 && <Step2 state={state} setState={setState} />}
       {step === 3 && <Step3 state={state} setState={setState} />}
@@ -149,7 +164,7 @@ function Step1({ state, setState }: { state: WizardState; setState: (s: WizardSt
           type="text"
           value={state.brandName}
           onChange={(e) => setState({ ...state, brandName: e.target.value })}
-          placeholder="Mamie GEO"
+          placeholder="Ta marque"
           maxLength={80}
         />
       </Field>
@@ -159,7 +174,7 @@ function Step1({ state, setState }: { state: WizardState; setState: (s: WizardSt
           type="text"
           value={state.domain}
           onChange={(e) => setState({ ...state, domain: e.target.value.toLowerCase() })}
-          placeholder="mamie-geo.fr"
+          placeholder="ton-domaine.fr"
           maxLength={120}
           inputMode="url"
         />

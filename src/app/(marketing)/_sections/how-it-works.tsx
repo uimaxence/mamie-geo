@@ -1,14 +1,6 @@
-import {
-  Bot,
-  Cat,
-  Check,
-  MessageCircle,
-  Search,
-  Sparkles,
-  TrendingUp,
-  type LucideIcon,
-} from "lucide-react";
+import { Bot, Cat, Check, MessageCircle, Search, Sparkles, type LucideIcon } from "lucide-react";
 import { Badge, Section } from "@/components/ui";
+import { MockupReport } from "./mockups/mockup-report";
 
 // "Comment ça marche" — 3 étapes (cf. doc 10 § Composants obligatoires).
 // PR 11c : chaque card a maintenant un mini-mockup illustré au-dessus
@@ -165,65 +157,6 @@ function MockupIA() {
   );
 }
 
-// Étape 03 : mini-dashboard avec score + bar chart + 3 LLM badges
-// avec leur pourcentage. Reproduit le ton du vrai dashboard.
-function MockupReport() {
-  const llmStats: { name: string; pct: number; tone: "green" | "purple" | "blue" }[] = [
-    { name: "ChatGPT", pct: 42, tone: "green" },
-    { name: "Claude", pct: 58, tone: "purple" },
-    { name: "Perplexity", pct: 31, tone: "blue" },
-  ];
-
-  return (
-    <div className="absolute inset-0 flex items-center justify-center bg-[color:var(--color-gray-50)] px-6">
-      <div className="w-full max-w-[260px] rounded-[var(--radius-lg)] border border-[color:var(--color-border)] bg-white p-4 shadow-[var(--shadow-md)]">
-        <div className="flex items-baseline justify-between">
-          <p className="text-[9px] font-medium uppercase tracking-wider text-[color:var(--color-muted)]">
-            Score visibilité
-          </p>
-          <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-[color:var(--color-success)]">
-            <TrendingUp size={10} strokeWidth={2.5} />
-            +12
-          </span>
-        </div>
-        <div className="mt-1 flex items-baseline gap-1.5">
-          <span className="font-semibold text-3xl leading-none tracking-tight text-[color:var(--color-ink)]">
-            44
-          </span>
-          <span className="text-xs text-[color:var(--color-muted)]">/100</span>
-        </div>
-
-        {/* Mini-barchart */}
-        <div className="mt-3 flex h-6 items-end gap-1">
-          {[18, 28, 22, 35, 38, 44].map((h, i) => (
-            <div
-              key={i}
-              className="flex-1 rounded-sm bg-[color:var(--color-gray-200)]"
-              style={{ height: `${h}%` }}
-            />
-          ))}
-        </div>
-
-        {/* Mini-stats par LLM */}
-        <div className="mt-3 flex flex-col gap-1.5">
-          {llmStats.map((s) => (
-            <div key={s.name} className="flex items-center justify-between text-[10px]">
-              <span className="font-medium text-[color:var(--color-ink-soft)]">{s.name}</span>
-              <span
-                className={
-                  s.tone === "green"
-                    ? "font-semibold text-[color:var(--color-green)]"
-                    : s.tone === "purple"
-                      ? "font-semibold text-[color:var(--color-purple)]"
-                      : "font-semibold text-[color:var(--color-blue)]"
-                }
-              >
-                {s.pct}%
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
+// Étape 03 : mockup déplacé dans ./mockups/mockup-report.tsx (client
+// component avec Recharts AreaChart bleu primaire). Cf. doc 09
+// § 2026-05-13 (9ᵉ itération polish UX).

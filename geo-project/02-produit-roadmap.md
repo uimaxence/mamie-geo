@@ -86,6 +86,43 @@ Module **Tracker** uniquement. Rien d'autre. Pas d'optimization, pas de content,
 
 ---
 
+## Glossaire vocabulaire (officiel, V0)
+
+> Mise à jour 2026-05-13 — refresh home inspiré Semrush AI SEO (cf. doc 09 § 2026-05-13).
+> Ces 3 termes doivent être employés tels quels dans le produit (UI, emails, exports CSV), le marketing (home, pricing, blog) et la doc commerciale. **Ne pas mixer** avec des variations anglaises (« share of voice », « visibility score »).
+
+### Score de visibilité IA
+
+- **Définition** : note 0–100 par LLM, par marque, par jour. Vue globale d'à quel point ta marque est citée et bien positionnée dans les réponses générées.
+- **Formule V0** (cf. `src/lib/metrics/visibility.ts`) : `positionWeight × sentimentWeight × 100`, agrégée sur tous les runs success du jour (brand, llm, date).
+  - `positionWeight` : first_paragraph = 1.0 / middle = 0.5 / end = 0.25 / absent = 0
+  - `sentimentWeight` : positive = 1.0 / neutral = 0.5 / negative = 0 / absent = 0
+- **Intervalle** : `[0, 100]`, 1 décimale affichée.
+- **Quand utiliser** : suivre la performance d'une marque dans un LLM donné dans le temps (dashboard sparkline, recap hebdo, KPI).
+
+### Part de voix
+
+- **Définition** : pourcentage de citations qui vont à ta marque vs. tes concurrents sur un prompt donné (ou une catégorie de prompts).
+- **Formule V0** : `citations_ta_marque / (citations_ta_marque + Σ citations_concurrents) × 100`. Calculée sur tous les runs success de la fenêtre (jour / 7 j / 30 j).
+- **Intervalle** : `[0, 100]` %.
+- **Quand utiliser** : comparatif concurrentiel sur un prompt précis ou un cluster de prompts (vertical, intent). Pas pour suivre l'évolution d'une marque seule — utiliser Score de visibilité IA pour ça.
+
+### Sentiment
+
+- **Définition** : qualitatif sur **comment** ta marque est citée, pas combien de fois.
+- **Valeurs (enum)** : `positive` (flatteur, recommandation explicite) / `neutral` (mentionnée sans qualification) / `negative` (critique, comparée défavorablement) / `absent` (pas citée).
+- **Calcul** : produit par Claude Haiku 4.5 en mode `tool_use` forcé (cf. `src/lib/citation/score.ts`), schéma `report_scoring`.
+- **Quand utiliser** : alerter sur un sentiment qui se dégrade, prioriser les prompts à fort impact négatif, segmenter le Score (un score 70 avec sentiment majoritairement négatif est pire qu'un 60 positif).
+
+### Termes à NE PAS utiliser (équivalents anglais)
+
+- ❌ « AI Visibility Score » → ✅ **Score de visibilité IA**
+- ❌ « Share of Voice » / « SOV » → ✅ **Part de voix**
+- ❌ « Brand Sentiment » → ✅ **Sentiment** (suffisamment précis en contexte)
+- ❌ « Mentions » seul (ambigu) → ✅ **Citations** (notre vocabulaire standard)
+
+---
+
 ## V1 — Module Audit (mois 3-6)
 
 ### Vision
@@ -291,7 +328,7 @@ Activer le canal agence à pleine puissance avec un module pensé pour eux.
 │  ← Retour                                                      │
 │                                                                │
 │  Prompt : "meilleur logiciel CRM PME France"                  │
-│  Trackée depuis 14 jours · Mise à jour : il y a 6h            │
+│  Trackée depuis 7 jours · Mise à jour : il y a 6h             │
 │                                                                │
 │  Score de visibilité : 58%                                     │
 │  ┌──────────────────────────────────────────────────────────┐ │

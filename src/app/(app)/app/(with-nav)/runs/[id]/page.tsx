@@ -4,11 +4,11 @@ import { notFound, redirect } from "next/navigation";
 import { ArrowLeft, ExternalLink } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { getRunDetail, type RunDetail } from "@/lib/dashboard/queries";
-import { Badge } from "@/components/ui";
+import { Badge, Banner, Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui";
 
-// Page détail d'un run /app/runs/[id] — affiche le prompt envoyé, la
-// réponse LLM brute, les sources web citées, et le scoring (regex +
-// Haiku) si présent. Accès gated par membership workspace.
+// Page détail d'un run /app/runs/[id] — réponse brute, citations
+// détectées (sources web + brands), scoring & coûts. Organisée en
+// onglets (PR design foundation) pour réduire le scroll.
 
 export const dynamic = "force-dynamic";
 
@@ -54,76 +54,84 @@ export default async function RunDetailPage({ params }: { params: Promise<{ id: 
         </dl>
       </header>
 
-      <hr className="rule mt-8" />
-
-      {/* Erreur si run failed */}
+      {/* Erreur si run failed — sortie du Tabs pour rester visible */}
       {run.status === "failed" && run.error && (
-        <section className="mt-8 rounded-[var(--radius-lg)] border border-[color:var(--color-error)]/20 bg-[color:var(--color-error-bg)] p-5">
-          <p className="text-xs font-semibold uppercase tracking-wider text-[color:var(--color-error)]">
-            Erreur d&apos;exécution
-          </p>
-          <pre className="mt-2 overflow-x-auto whitespace-pre-wrap text-sm text-[color:var(--color-error)]">
-            {run.error}
-          </pre>
-        </section>
+        <Banner tone="error" title="Erreur d'exécution" className="mt-8">
+          <pre className="mt-1 overflow-x-auto whitespace-pre-wrap text-sm">{run.error}</pre>
+        </Banner>
       )}
 
-      {/* Réponse LLM brute */}
-      {run.rawResponse && (
-        <section className="mt-10">
-          <div className="flex items-baseline justify-between">
-            <h2 className="type-h3">Réponse LLM</h2>
-            <span className="type-meta">{countWords(run.rawResponse)} mots</span>
-          </div>
-          <hr className="rule mt-3" />
-          <div className="mt-5 rounded-[var(--radius-lg)] border border-[color:var(--color-border)] bg-white p-6">
-            <p className="whitespace-pre-wrap text-sm leading-relaxed text-[color:var(--color-ink-soft)]">
-              {run.rawResponse}
-            </p>
-          </div>
-        </section>
-      )}
+      {/* Tabs : Réponse · Citations · Scoring */}
+      <Tabs defaultValue="response" className="mt-8">
+        <TabsList>
+          <TabsTrigger value="response">Réponse LLM</TabsTrigger>
+          <TabsTrigger value="citations">
+            Citations
+            {run.sources.length > 0 && <span className="type-meta">({run.sources.length})</span>}
+          </TabsTrigger>
+          <TabsTrigger value="scoring">Scoring & coûts</TabsTrigger>
+        </TabsList>
 
-      {/* Sources web citées */}
-      {run.sources.length > 0 && (
-        <section className="mt-12">
-          <div className="flex items-baseline justify-between">
-            <h2 className="type-h3">Sources web citées</h2>
-            <span className="type-meta">{run.sources.length} source(s)</span>
-          </div>
-          <hr className="rule mt-3" />
-          <ul className="mt-5 flex flex-col gap-3">
-            {run.sources.map((source) => (
-              <li
-                key={source.url}
-                className="rounded-[var(--radius-lg)] border border-[color:var(--color-border)] bg-white p-4"
-              >
-                <a
-                  href={source.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group flex items-start justify-between gap-3"
+        <TabsContent value="response">
+          {run.rawResponse ? (
+            <div className="rounded-[var(--radius-lg)] border border-[color:var(--color-border)] bg-white p-6">
+              <div className="flex items-baseline justify-between">
+                <span className="type-eyebrow">{countWords(run.rawResponse)} mots</span>
+              </div>
+              <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-[color:var(--color-ink-soft)]">
+                {run.rawResponse}
+              </p>
+            </div>
+          ) : (
+            <p className="type-body text-sm">Pas de réponse brute enregistrée.</p>
+          )}
+        </TabsContent>
+
+        <TabsContent value="citations">
+          {run.sources.length === 0 ? (
+            <p className="type-body text-sm">Aucune source web citée par le LLM.</p>
+          ) : (
+            <ul className="flex flex-col gap-3">
+              {run.sources.map((source) => (
+                <li
+                  key={source.url}
+                  className="rounded-[var(--radius-lg)] border border-[color:var(--color-border)] bg-white p-4"
                 >
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-[color:var(--color-ink)] group-hover:underline group-hover:underline-offset-2">
-                      {source.title}
-                    </p>
-                    <p className="type-meta mt-1 truncate">{source.url}</p>
-                  </div>
-                  <ExternalLink
-                    size={14}
-                    strokeWidth={2}
-                    className="mt-0.5 shrink-0 text-[color:var(--color-muted)]"
-                  />
-                </a>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
+                  <a
+                    href={source.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group flex items-start justify-between gap-3"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-[color:var(--color-ink)] group-hover:underline group-hover:underline-offset-2">
+                        {source.title}
+                      </p>
+                      <p className="type-meta mt-1 truncate">{source.url}</p>
+                    </div>
+                    <ExternalLink
+                      size={14}
+                      strokeWidth={2}
+                      className="mt-0.5 shrink-0 text-[color:var(--color-muted)]"
+                    />
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
+        </TabsContent>
 
-      {/* Scoring */}
-      {run.parsedBrands && <ScoringSection parsedBrands={run.parsedBrands} />}
+        <TabsContent value="scoring">
+          {run.parsedBrands ? (
+            <ScoringSection parsedBrands={run.parsedBrands} />
+          ) : (
+            <p className="type-body text-sm">
+              Pas encore de scoring (run pending ou échec en amont). Le scoring tourne après le run
+              principal — environ +5s.
+            </p>
+          )}
+        </TabsContent>
+      </Tabs>
 
       <footer className="mt-16 type-meta">
         Run ID :{" "}
@@ -158,15 +166,9 @@ function ScoringSection({
   const isSkipped = "skipped" in scoring;
 
   return (
-    <section className="mt-12">
-      <div className="flex items-baseline justify-between">
-        <h2 className="type-h3">Analyse citation</h2>
-        <span className="type-meta">scoré {formatRelative(new Date(parsedBrands.scoredAt))}</span>
-      </div>
-      <hr className="rule mt-3" />
-
+    <div className="flex flex-col gap-8">
       {/* Detection regex */}
-      <div className="mt-5">
+      <div>
         <p className="type-eyebrow">Détections regex</p>
         {parsedBrands.detection.length === 0 ? (
           <p className="type-body mt-2 text-sm">
@@ -184,8 +186,13 @@ function ScoringSection({
       </div>
 
       {/* Scoring Haiku */}
-      <div className="mt-8">
-        <p className="type-eyebrow">Scoring Haiku 4.5</p>
+      <div>
+        <p className="type-eyebrow">
+          Scoring Haiku 4.5 ·{" "}
+          <span className="font-normal normal-case tracking-normal text-[color:var(--color-muted)]">
+            scoré {formatRelative(new Date(parsedBrands.scoredAt))}
+          </span>
+        </p>
         {isSkipped ? (
           <p className="type-body mt-2 text-sm">
             Scoring sauté ({scoring.reason}) — pas d&apos;appel LLM, économie ~$0.003.
@@ -213,7 +220,7 @@ function ScoringSection({
           </dl>
         )}
       </div>
-    </section>
+    </div>
   );
 }
 

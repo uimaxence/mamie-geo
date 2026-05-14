@@ -312,7 +312,7 @@ Tables attendues (V0, configuration magic-link uniquement) :
 -- ──────────────────────────────────────────────────────────────────────
 
 -- États possibles de workspaces.plan :
---   'trialing'   = trial 14j actif (pas de carte requise)
+--   'trialing'   = trial 7j actif (pas de carte requise — pivot 2026-05-13)
 --   'starter'    = abonnement Starter actif
 --   'pro'        = abonnement Pro actif
 --   'agency'     = abonnement Agence actif
@@ -629,13 +629,13 @@ cycle de facturation Stripe (webhook `invoice.created`).
 
 ### Quotas par plan
 
-| Plan              | Brands   | Concurrents | Prompts   | LLMs           | Fréquence | Historique |
-| ----------------- | -------- | ----------- | --------- | -------------- | --------- | ---------- |
-| Trial 14j (= Pro) | 3        | 10          | 100       | 5              | Quotidien | 90j        |
-| Starter (49€)     | 1        | 5           | 25        | 5 dont Le Chat | Hebdo     | 90j        |
-| Pro (149€)        | 3        | 10          | 100       | 5              | Quotidien | 1 an       |
-| Agence (399€)     | 10       | 10/marque   | 300       | 5              | Quotidien | 1 an       |
-| Enterprise        | illimité | illimité    | sur devis | 5+             | sur devis | illimité   |
+| Plan             | Brands   | Concurrents | Prompts   | LLMs           | Fréquence | Historique |
+| ---------------- | -------- | ----------- | --------- | -------------- | --------- | ---------- |
+| Trial 7j (= Pro) | 3        | 10          | 100       | 5              | Quotidien | 90j        |
+| Starter (49€)    | 1        | 5           | 25        | 5 dont Le Chat | Hebdo     | 90j        |
+| Pro (149€)       | 3        | 10          | 100       | 5              | Quotidien | 1 an       |
+| Agence (399€)    | 10       | 10/marque   | 300       | 5              | Quotidien | 1 an       |
+| Enterprise       | illimité | illimité    | sur devis | 5+             | sur devis | illimité   |
 
 ---
 

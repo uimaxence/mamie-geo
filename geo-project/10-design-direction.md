@@ -42,6 +42,55 @@ Inspirations directes : screen 1 du brief (status dot avec glow + cross-hairs Ac
 
 Icônes : **`lucide-react`** ajouté en dépendance (set d'icônes sans-serif léger, tree-shake natif). Imports nommés pour ne pas alourdir le bundle.
 
+### Patterns dashboard (update 2026-05-12 — refs screens partagés par Max)
+
+Quatre patterns visuels supplémentaires entrés dans le design system pour les pages applicatives (post-connexion). Sources d'inspiration : dashboards SaaS contemporains type Linear / Stripe Sigma / Posthog.
+
+1. **Stat enrichie** (`<Stat icon iconTone delta />` dans `src/components/ui/stat.tsx`) :
+   - Layout : eyebrow label en haut gauche · cercle pastel coloré avec icône Lucide en haut droite · grand chiffre (type-stat 2.25rem weight 600) · ligne delta sous le chiffre.
+   - Delta : flèche `TrendingUp`/`TrendingDown` Lucide + pourcentage signé coloré (vert >0, rouge <0, gris =0) + libellé de période en SMALL CAPS muted (« VS J-7 »).
+   - `iconTone` : 8 valeurs alignées sur la palette pastel (`blue`, `green`, `orange`, `purple`, `pink`, `yellow`, `accent`, `neutral`). Choix sémantique par stat — pas de couleur arbitraire.
+   - Fallback : si pas de delta calculable, retombe sur `hint` (texte gris simple).
+2. **SegmentedControl** (`<SegmentedControl value onValueChange options size />` dans `src/components/ui/segmented-control.tsx`) :
+   - Pill group horizontal : container `gray-100` border subtile + items radius `pill` ; actif = fond blanc + shadow-sm, inactifs = transparent + texte muted hover ink.
+   - Usage typique : fenêtre temporelle (« 7 j / 30 j / 90 j ») au-dessus d'un chart, ou toggle d'agrégation (« Day / Week / Month »).
+   - API contrôlée — l'appelant gère le state. Génère `aria-pressed` sur chaque bouton.
+3. **AreaChart à gradient** (`<AreaChart data tone referenceValue />` dans `src/components/charts/area-chart.tsx`) :
+   - Recharts `AreaChart` mono-série, fill `linear-gradient` (top stopOpacity 0.25 → bottom 0) sur la couleur de tonalité choisie.
+   - Axe Y aligné à droite (`orientation="right"`), unité optionnelle (« % », « $ »).
+   - Référence dashée optionnelle (couleur accent terracotta) avec label aligné droite — pour afficher une moyenne ou un seuil.
+   - À utiliser pour les métriques single-series (cumul, volumétrie). Pour multi-LLM, garder `<LineChart>`.
+4. **BreakdownBars** (`<BreakdownBars segments mode total />` dans `src/components/charts/breakdown-bars.tsx`) :
+   - Rangée de barres verticales colorées (une par segment), hauteur proportionnelle à la valeur (mode `absolute`) ou parts du total (mode `share`).
+   - Sous le chart : légende dots horizontaux puis liste « dot + label · valeur tabulée à droite » avec séparateurs subtils.
+   - Idéal pour les répartitions catégorielles à 3-7 segments (visibilité par LLM, sources d'acquisition, types de prompt).
+   - Couleurs reprises de la palette pastel ou de `LLM_COLORS` selon le contexte — pas de couleur arbitraire.
+
+**Règle d'usage** : pas plus de **2 patterns dashboard différents par section visible** (au-dessus du fold). Un dashboard surchargé en visualisations devient illisible. Privilégier `Stat` en haut, **1 graphique principal** (Line / Area / Bar), et listes/tableaux en dessous.
+
+**Mentions de marque dans l'app** (update 2026-05-12) :
+
+- Côté pages applicatives `(app)/*`, le nom **« Mamie GEO »** n'apparaît **jamais** dans le chrome. Le top de sidebar suit le pattern **Vercel** (cf. screen Max 2026-05-12) : deux pills empilés, **workspace** au-dessus (avatar dégradé terracotta + nom + plan badge) et **brand/domaine** dessous (square noir avec initiale + domaine + chevron switcher). L'utilisateur sait où il est — répéter le nom produit est du bruit.
+- Côté pages publiques (`(marketing)`, `(blog)`, `/login`), le nom reste affiché normalement (utilisateur non identifié, contexte ≠).
+- Côté placeholders de formulaires (onboarding), **rester générique** : `placeholder="Ta marque"` / `placeholder="ton-domaine.fr"` plutôt que des exemples nommés de la marque elle-même.
+
+**Pattern « Workspace + Brand pills »** (pattern Vercel) :
+
+Deux pills empilés en haut de la sidebar, séparés par 6 px de gap :
+
+1. **Workspace pill** (`<WorkspacePill workspace />`) :
+   - Avatar 24 px : cercle avec dégradé `from-[--color-accent] to-[--color-accent-dim]` + initiale du workspace (1 lettre, weight 600, blanc).
+   - Label : nom du workspace, weight medium, truncate.
+   - Badge plan à droite (tone `accent` si `trialing`, `neutral` sinon).
+   - V0 : pas de chevron (un seul workspace par user). Greffer un `DropdownMenu` quand le multi-workspace arrivera.
+2. **Brand pill** (`<BrandSwitcher brands currentBrandId />`) :
+   - Avatar 24 px : square `radius-sm` `bg-[--color-ink]` + initiale en blanc — codifie la marque visuellement, distinct du cercle workspace.
+   - Label : **le domaine** (pas le nom), c'est ce qui identifie une marque de façon non ambigüe côté GEO. Le nom complet apparaît dans le dropdown et dans le `title` attribute.
+   - Chevron `ChevronsUpDown` à droite — c'est un switcher actif dès V0.
+   - Dropdown : liste des brands du workspace, chacune avec son square + nom + domaine ; check sur la courante.
+
+**Règle de cohérence** : le square noir = identité brand, le cercle dégradé = identité workspace. Cette distinction visuelle se retrouve partout (dropdown items, headers d'écran si besoin) — ne jamais inverser les formes.
+
 **Pourquoi le pivot** :
 
 - La Direction A "éditorial chaud" donnait un look déjà-vu et chargé (crème + serif + italique = magazine), pas adapté à un produit data-driven.
@@ -258,7 +307,7 @@ Le tout en français, hébergé en France, à partir de 49€/mois."
 "Tester gratuitement →"
 
 [Sous-CTA]
-"Sans carte bancaire · 14 jours d'essai · 5 minutes pour s'inscrire"
+"Sans carte bancaire · 7 jours d'essai · 5 minutes pour s'inscrire"
 
 [Visuel : screenshot du dashboard avec données réalistes]
 ```

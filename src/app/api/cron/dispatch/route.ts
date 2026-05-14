@@ -1,18 +1,33 @@
+import { sql } from "drizzle-orm";
 import { NextResponse, type NextRequest } from "next/server";
-import { claim, complete, fail } from "@/lib/queue";
+import { db } from "@/db/client";
+import { queueJobs } from "@/db/schema";
+import { logCronEvent } from "@/lib/cron-logger";
 import { env } from "@/lib/env";
-import { executePrompt, parseExecutePromptPayload } from "@/workers/execute-prompt";
-import { scoreResponse, parseScoreResponsePayload } from "@/workers/score-response";
+import { claim, complete, fail } from "@/lib/queue";
 import {
   parseRecomputeMetricsPayload,
   recomputeMetricsForBrandLLMDate,
 } from "@/lib/metrics/recompute";
+import { executePrompt, parseExecutePromptPayload } from "@/workers/execute-prompt";
+import { scoreResponse, parseScoreResponsePayload } from "@/workers/score-response";
+import { parseSendWeeklyEmailPayload, sendWeeklyEmail } from "@/workers/send-weekly-email";
 
 // Endpoint déclenché par Vercel Cron toutes les 5 minutes (cf. vercel.json).
-// Il pull jusqu'à BATCH_SIZE jobs et les exécute. Phase A : seul le worker
-// `execute_prompt` est branché ; les autres kinds (score_response,
-// recompute_metrics, send_weekly_email) sont rejetés explicitement comme
-// failed pour éviter un swallow silencieux.
+// Pull jusqu'à BATCH_SIZE jobs et les exécute.
+//
+// IMPORTANT (cf. doc 09 § 2026-05-13) : Vercel Cron envoie des **GET**
+// avec `Authorization: Bearer ${CRON_SECRET}`. C'est la cause racine du
+// blocker prod précédent (la route n'exportait que POST → cron tirait
+// dans le vide via le healthcheck GET). GET et POST pointent maintenant
+// sur le même handler.
+//
+// Modes :
+//   - GET/POST authentifié → exécute le dispatch
+//   - GET/POST ?inspect=1 authentifié → retourne l'état de la queue
+//     sans rien exécuter (debug visibility)
+//   - GET sans auth → healthcheck léger (sans body sensible)
+//
 // cf. geo-project/03-architecture-technique.md § Workers et orchestration
 
 const BATCH_SIZE = 25;
@@ -20,37 +35,85 @@ const BATCH_SIZE = 25;
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
+export async function GET(request: NextRequest) {
+  return handle(request);
+}
+
 export async function POST(request: NextRequest) {
-  // Vercel Cron envoie Authorization: Bearer ${CRON_SECRET}
+  return handle(request);
+}
+
+async function handle(request: NextRequest): Promise<NextResponse> {
+  const url = new URL(request.url);
+  const inspectMode = url.searchParams.get("inspect") === "1";
   const authHeader = request.headers.get("authorization");
-  if (authHeader !== `Bearer ${env.CRON_SECRET}`) {
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  const isAuthed = authHeader === `Bearer ${env.CRON_SECRET}`;
+
+  // Sans auth : healthcheck non sensible (utile pour ping local rapide).
+  if (!isAuthed) {
+    return NextResponse.json({ ok: true, ts: new Date().toISOString(), mode: "healthcheck" });
   }
 
+  if (inspectMode) {
+    const inspect = await collectInspectData();
+    logCronEvent({ event: "cron_dispatch_inspect", ...inspect.summary });
+    return NextResponse.json(inspect);
+  }
+
+  return runDispatch(request);
+}
+
+async function runDispatch(request: NextRequest): Promise<NextResponse> {
+  const startedAt = Date.now();
+  logCronEvent({
+    event: "cron_dispatch_start",
+    method: request.method,
+    sourceIp: request.headers.get("x-forwarded-for") ?? null,
+    userAgent: request.headers.get("user-agent") ?? null,
+  });
+
   const jobs = await claim(BATCH_SIZE);
-  let processed = 0;
-  const failures: { id: string; error: string }[] = [];
+  logCronEvent({ event: "jobs_claimed", count: jobs.length });
+
+  let succeeded = 0;
+  const failures: { id: string; kind: string; error: string }[] = [];
 
   for (const job of jobs) {
+    const jobStartedAt = Date.now();
     try {
-      console.info(`[cron] claimed job ${job.id} kind=${job.kind}`);
       await runWorker(job);
       await complete(job.id);
-      processed += 1;
+      succeeded += 1;
+      logCronEvent({
+        event: "job_succeeded",
+        jobId: job.id,
+        kind: job.kind,
+        durationMs: Date.now() - jobStartedAt,
+      });
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      console.error(`[cron] job ${job.id} (${job.kind}) failed:`, message);
       await fail(job.id, message);
-      failures.push({ id: job.id, error: message });
+      failures.push({ id: job.id, kind: job.kind, error: message });
+      logCronEvent({
+        level: "error",
+        event: "job_failed",
+        jobId: job.id,
+        kind: job.kind,
+        durationMs: Date.now() - jobStartedAt,
+        error: message,
+      });
     }
   }
 
-  return NextResponse.json({ claimed: jobs.length, processed, failures });
-}
+  const summary = {
+    claimed: jobs.length,
+    succeeded,
+    failed: failures.length,
+    totalDurationMs: Date.now() - startedAt,
+  };
+  logCronEvent({ event: "cron_dispatch_end", ...summary });
 
-export async function GET() {
-  // Healthcheck local — pas de secret requis.
-  return NextResponse.json({ ok: true, ts: new Date().toISOString() });
+  return NextResponse.json({ ...summary, failures });
 }
 
 interface ClaimedJob {
@@ -80,9 +143,78 @@ async function runWorker(job: ClaimedJob): Promise<void> {
       await recomputeMetricsForBrandLLMDate(payload);
       return;
     }
-    case "send_weekly_email":
-      throw new Error(`Worker ${job.kind} pas encore implémenté (Phase A)`);
+    case "send_weekly_email": {
+      const payload = parseSendWeeklyEmailPayload(job.payload);
+      await sendWeeklyEmail(payload);
+      return;
+    }
     default:
       throw new Error(`Job kind inconnu : ${job.kind}`);
   }
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Inspect mode — retourne l'état de la queue sans exécuter de jobs.
+// Utile en debug prod : `curl -H "Authorization: Bearer ..."
+// "https://.../api/cron/dispatch?inspect=1"`.
+// ─────────────────────────────────────────────────────────────────────
+
+async function collectInspectData() {
+  const statusRows = await db.execute<{
+    status: string;
+    n: string | number;
+  }>(sql`
+    SELECT status, COUNT(*) AS n FROM ${queueJobs} GROUP BY status ORDER BY status
+  `);
+  const recentRows = await db.execute<{
+    id: string;
+    kind: string;
+    status: string;
+    attempts: number;
+    scheduled_at: Date;
+    last_error: string | null;
+  }>(sql`
+    SELECT id, kind, status, attempts, scheduled_at, last_error
+    FROM ${queueJobs}
+    ORDER BY scheduled_at DESC
+    LIMIT 10
+  `);
+
+  const countsByStatus: Record<string, number> = {};
+  for (const row of statusRows.rows) {
+    countsByStatus[row.status] = Number(row.n);
+  }
+  const recentJobs = recentRows.rows.map((r) => ({
+    id: r.id,
+    kind: r.kind,
+    status: r.status,
+    attempts: r.attempts,
+    scheduledAt:
+      r.scheduled_at instanceof Date ? r.scheduled_at.toISOString() : String(r.scheduled_at),
+    lastError: r.last_error,
+  }));
+
+  // Présence (booléen) des env vars critiques — jamais leur valeur.
+  // Vérifie que la prod a bien les vars posées.
+  const envPresence = {
+    CRON_SECRET: Boolean(env.CRON_SECRET),
+    DATABASE_URL: Boolean(env.DATABASE_URL),
+    ANTHROPIC_API_KEY: Boolean(env.ANTHROPIC_API_KEY),
+    BREVO_API_KEY: Boolean(env.BREVO_API_KEY),
+    NEXT_PUBLIC_APP_URL: Boolean(env.NEXT_PUBLIC_APP_URL),
+  };
+
+  return {
+    summary: {
+      pending: countsByStatus.pending ?? 0,
+      claimed: countsByStatus.claimed ?? 0,
+      done: countsByStatus.done ?? 0,
+      failed: countsByStatus.failed ?? 0,
+      dead: countsByStatus.dead ?? 0,
+    },
+    countsByStatus,
+    recentJobs,
+    envPresence,
+    serverTimeUtc: new Date().toISOString(),
+  };
 }

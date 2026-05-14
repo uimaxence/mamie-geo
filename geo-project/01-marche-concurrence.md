@@ -103,6 +103,56 @@ Méthode : France ≈ 4-5% du marché mondial logiciel B2B → 60-75 M€ en 202
 - **Faiblesses** : ergonomie ajoutée, pas natif GEO, lourd pour solo
 - **Le risque qu'ils intensifient leur module GEO en 2026-2027 est élevé**
 
+##### Snapshot AI SEO Overview (analyse 2026-05-13)
+
+Analyse de la page produit `https://www.semrush.com/ai-seo/overview/` au 2026-05-13. Sert de référence pour le refresh home Mamie GEO (cf. doc 09 § 2026-05-13).
+
+**12 features nommées exposées par Semrush** (verbatim) :
+
+| Feature                            | Cœur de ce que ça fait                                    | LLMs trackés                              |
+| ---------------------------------- | --------------------------------------------------------- | ----------------------------------------- |
+| **Visibility Overview**            | Vue globale citations + mentions par plateforme IA        | ChatGPT, Gemini, Google AI Mode + AIO     |
+| **Brand Performance**              | Share of Voice + sentiment, mise à jour hebdo             | ChatGPT, Perplexity, Gemini, AIO, AI Mode |
+| **Competitor Research**            | Comparatif jusqu'à 4 concurrents en simultané             | Toutes les majeures                       |
+| **Prompt Research**                | Base 261M+ prompts, recherche d'opportunités              | Toutes                                    |
+| **Position Tracking**              | Rankings quotidien SEO + AI                               | ChatGPT, AI Mode, Google Search, AIO      |
+| **Domain Overview**                | AI Visibility Score + métriques SEO classiques unifiées   | Général                                   |
+| **Organic Rankings**               | Quels mots-clés SEO déclenchent les AI Overviews          | Google AIO uniquement                     |
+| **AI Traffic Dashboard**           | Estimation trafic AI vs concurrents (clickstream-based)   | ChatGPT, Gemini                           |
+| **My Reports**                     | Dashboards drag-and-drop AI + SEO                         | Sources intégrées                         |
+| **AI-Readiness Site Audit**        | Détection des AI crawlers bloqués techniquement           | 7 crawlers IA listés                      |
+| **Content Toolkit AI Search Opt.** | Analyse drafts contre facteurs de probabilité de citation | Toutes                                    |
+| **Semrush Enterprise AIO**         | Plateforme custom multi-marché / multi-brand à scale      | Toutes + custom                           |
+
+**Vocabulaire métrique Semrush** : `AI Visibility Score`, `Share of Voice`, `Sentiment` (positive/neutral/négatif), `Mentions` vs `Citations` (distinction explicite).
+
+**Claims chiffrés marketing** (sources Semrush blog) :
+
+- **×6** trafic AI search (jan-mai 2025 vs 2024)
+- **×4,4** conversion AI search vs Google trad
+- **60 %** zero-click (post AI Overviews)
+- **700 M** utilisateurs hebdo ChatGPT
+- **44,3 %** des pages top 10 Google citées dans au moins une réponse IA
+
+**Funnel Semrush** : 6 tiers de pricing (Free → $99 → $199 → $549 → Enterprise custom), CTAs « Sign Up » + « Request live demo », **pas** de lead magnet one-shot, freemium gate côté SEO classique (Domain Overview, Site Audit).
+
+**Tone Semrush** : impersonnel B2B (« Your brand can… »), pas de tutoiement, pas d'humour, data-driven. Anglais natif, traductions FR machine probable.
+
+**Positionnement différenciateur Mamie GEO** (en regard) :
+
+| Axe                        | Semrush                             | Mamie GEO (différenciation)                                  |
+| -------------------------- | ----------------------------------- | ------------------------------------------------------------ |
+| Tonalité                   | Impersonnel B2B EN                  | **Tu/direct/honest** FR — Semrush ne peut pas pivoter dessus |
+| Le Chat de Mistral         | Tracké (mention vague « 20+ LLMs ») | **Inclus dès Starter explicitement** — différenciateur n°1   |
+| Hébergement                | US (Semrush HQ Boston)              | **EU (Vercel Paris, Neon Frankfurt), RGPD natif**            |
+| Pricing                    | 6 tiers + demo gate                 | **3 plans transparents + trial 7j sans CB**                  |
+| Persona                    | Enterprise / mid-market             | **SMB FR (freelance, PME, agence) — pricing 49-399 €/mois**  |
+| Lead magnet                | Aucun                               | **`/outils/test-visibilite-ia`** (audit gratuit one-shot)    |
+| Humanisation               | « Success stories » corporate       | **3 personas humains** (Sophie, Thomas, Aline)               |
+| Honest competitor mentions | Compare sans agressivité            | **Section explicite « n'est PAS Profound »** dans la home    |
+
+**Conclusion stratégique** : Semrush a la profondeur de catalogue (12 features) et le scale (261M prompts), mais reste **anglo-saxon et impersonnel**. Mamie GEO ne peut pas concurrencer sur le catalogue — on doit gagner sur **focus FR + Le Chat + transparence + tone humain**. Les chiffres marketing (×6, ×4,4, 60 %) sont **publics et réutilisables** dans notre home — c'est ce qu'on fait dans la section « Pourquoi maintenant ? ».
+
 #### Ahrefs
 
 - **Pricing** : ~€129+/mois

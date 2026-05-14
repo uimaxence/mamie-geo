@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Logo } from "@/components/marketing/logo";
 
 // Footer enrichi PR 8b — 4 colonnes (Mamie GEO / Produit / Ressources
 // / Légal) + barre de copyright en bas avec liens socials.
@@ -47,9 +48,10 @@ export function MarketingFooter() {
           <div className="col-span-2 md:col-span-1">
             <Link
               href="/"
-              className="text-base font-bold tracking-tight text-[color:var(--color-ink)]"
+              className="flex items-center gap-2 text-base font-bold tracking-tight text-[color:var(--color-ink)]"
             >
-              Mamie GEO
+              <Logo size={24} />
+              <span>Mamie GEO</span>
             </Link>
             <p className="type-meta mt-3 max-w-xs">
               Le premier SaaS francophone de tracking de visibilité dans les IA. Hébergé en Europe,

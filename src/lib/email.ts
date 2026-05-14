@@ -116,6 +116,42 @@ async function sendViaSmtp(options: SmtpSendOptions): Promise<{ messageId: strin
 }
 
 // ─────────────────────────────────────────────────────────────────────
+// Helper générique (utilisé par les wrappers thématiques ci-dessous).
+// Évite la duplication du switch backend dans chaque sendXxx().
+// ─────────────────────────────────────────────────────────────────────
+
+export interface SendTransactionalOptions {
+  to: string;
+  subject: string;
+  text: string;
+  html?: string;
+  replyTo?: string;
+}
+
+export async function sendTransactional(
+  options: SendTransactionalOptions,
+): Promise<{ messageId: string; backend: Backend }> {
+  const backend = pickBackend();
+  const result =
+    backend === "rest"
+      ? await sendViaRest({
+          to: [{ email: options.to }],
+          subject: options.subject,
+          textContent: options.text,
+          htmlContent: options.html,
+          replyTo: options.replyTo ? { email: options.replyTo } : undefined,
+        })
+      : await sendViaSmtp({
+          to: options.to,
+          subject: options.subject,
+          text: options.text,
+          html: options.html,
+          replyTo: options.replyTo,
+        });
+  return { messageId: result.messageId, backend };
+}
+
+// ─────────────────────────────────────────────────────────────────────
 // Public API
 // ─────────────────────────────────────────────────────────────────────
 
@@ -147,6 +183,27 @@ export async function sendMagicLinkEmail(params: { to: string; url: string }) {
     );
     if (error instanceof Error && error.stack) console.error(error.stack);
     throw new Error(`Envoi magic-link échoué : ${message}`);
+  }
+}
+
+export async function sendWeeklyRecapEmail(params: {
+  to: string;
+  subject: string;
+  html: string;
+  text: string;
+}): Promise<{ messageId: string }> {
+  const { to, subject, html, text } = params;
+  try {
+    const result = await sendTransactional({ to, subject, html, text });
+    console.info(
+      `[email] weekly-recap envoyé à ${to} via Brevo ${result.backend.toUpperCase()} (messageId=${result.messageId})`,
+    );
+    return { messageId: result.messageId };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error(`[email] échec envoi weekly-recap à ${to} : ${message}`);
+    if (error instanceof Error && error.stack) console.error(error.stack);
+    throw new Error(`Envoi weekly-recap échoué : ${message}`);
   }
 }
 
@@ -182,7 +239,7 @@ Tu recevras le rapport sous 24h ouvrées dans cette boîte.
 À très vite,
 — Max, Mamie GEO
 
-PS : si tu veux gagner du temps, tu peux aussi créer un compte directement (14 jours d'essai sans carte) : https://mamie-geo.fr/login`;
+PS : si tu veux gagner du temps, tu peux aussi créer un compte directement (7 jours d'essai sans carte) : https://mamie-geo.fr/login`;
 
   try {
     if (backend === "rest") {
