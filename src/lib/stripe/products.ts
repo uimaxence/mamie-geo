@@ -1,21 +1,10 @@
 import { env } from "@/lib/env";
 import type { PlanKey } from "@/lib/plans/quotas";
+import type { PurchasablePlan } from "./plan-catalog";
 
-// Mapping plan ↔ Stripe price_id. Lookup via env vars pour pouvoir
-// avoir des IDs distincts en test mode vs live mode (Stripe ne mélange
-// pas les environnements ; cf. doc 09 § 2026-05-14).
-//
-// Plans souscriptibles publiquement : solo / starter / pro.
-// Les autres états (trialing, agency, enterprise, past_due, expired, canceled)
-// ne sont pas associés à un price Stripe (gestion interne ou sur devis).
-
-export type PurchasablePlan = "solo" | "starter" | "pro";
-
-export const PURCHASABLE_PLANS: readonly PurchasablePlan[] = ["solo", "starter", "pro"] as const;
-
-export function isPurchasablePlan(value: unknown): value is PurchasablePlan {
-  return typeof value === "string" && (PURCHASABLE_PLANS as readonly string[]).includes(value);
-}
+// Helpers Stripe price_id ↔ plan — **server-only** car ils accèdent
+// aux env vars (`STRIPE_PRICE_*`) qui ne sont pas exposées au client.
+// Pour les types et constantes d'affichage côté client, voir `./plan-catalog.ts`.
 
 /** Renvoie le `price_id` Stripe associé à un plan souscriptible. Throw si l'env var manque. */
 export function priceIdForPlan(plan: PurchasablePlan): string {
@@ -38,10 +27,3 @@ export function planFromPriceId(priceId: string): PlanKey | null {
   if (env.STRIPE_PRICE_PRO && priceId === env.STRIPE_PRICE_PRO) return "pro";
   return null;
 }
-
-/** Affichage marketing du prix (utilisé page pricing + billing section). EUR HT. */
-export const PLAN_PRICE_EUR: Record<PurchasablePlan, number> = {
-  solo: 9.99,
-  starter: 49,
-  pro: 149,
-};

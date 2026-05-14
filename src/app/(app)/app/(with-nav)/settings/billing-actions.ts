@@ -8,7 +8,8 @@ import { auth } from "@/lib/auth";
 import { getUserContext } from "@/lib/auth/user-context";
 import { env } from "@/lib/env";
 import { getStripe } from "@/lib/stripe/client";
-import { isPurchasablePlan, priceIdForPlan, type PurchasablePlan } from "@/lib/stripe/products";
+import { isPurchasablePlan, type PurchasablePlan } from "@/lib/stripe/plan-catalog";
+import { priceIdForPlan } from "@/lib/stripe/products";
 
 // Server actions billing — appelées depuis `<BillingSection>` côté client.
 // Centralisent la création des sessions Stripe pour éviter de dupliquer

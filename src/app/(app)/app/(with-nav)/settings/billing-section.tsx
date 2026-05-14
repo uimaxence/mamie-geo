@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { Badge, Banner, Button, toast } from "@/components/ui";
-import { PLAN_PRICE_EUR, type PurchasablePlan } from "@/lib/stripe/products";
+import { PLAN_PRICE_EUR, type PurchasablePlan } from "@/lib/stripe/plan-catalog";
 import { openCheckout, openPortal } from "./billing-actions";
 
 // Section Facturation dans /app/settings.

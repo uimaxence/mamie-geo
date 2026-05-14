@@ -6,7 +6,8 @@ import { workspaces } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { getUserContext } from "@/lib/auth/user-context";
 import { env } from "@/lib/env";
-import { isPurchasablePlan, priceIdForPlan } from "@/lib/stripe/products";
+import { isPurchasablePlan } from "@/lib/stripe/plan-catalog";
+import { priceIdForPlan } from "@/lib/stripe/products";
 import { getStripe } from "@/lib/stripe/client";
 
 // POST /api/checkout — crée une session Stripe Checkout pour le user

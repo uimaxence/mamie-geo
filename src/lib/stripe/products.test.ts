@@ -1,33 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-// Tests sur les helpers products — mapping plan ↔ price_id via env vars.
-// On doit mocker `@/lib/env` car les vars peuvent être absentes en CI.
-
-describe("stripe/products — isPurchasablePlan + PLAN_PRICE_EUR", () => {
-  it("PURCHASABLE_PLANS contient exactement solo, starter, pro", async () => {
-    const { PURCHASABLE_PLANS } = await import("./products");
-    expect([...PURCHASABLE_PLANS]).toEqual(["solo", "starter", "pro"]);
-  });
-
-  it("isPurchasablePlan accepte solo/starter/pro et rejette le reste", async () => {
-    const { isPurchasablePlan } = await import("./products");
-    expect(isPurchasablePlan("solo")).toBe(true);
-    expect(isPurchasablePlan("starter")).toBe(true);
-    expect(isPurchasablePlan("pro")).toBe(true);
-    expect(isPurchasablePlan("agency")).toBe(false);
-    expect(isPurchasablePlan("trialing")).toBe(false);
-    expect(isPurchasablePlan("")).toBe(false);
-    expect(isPurchasablePlan(null)).toBe(false);
-    expect(isPurchasablePlan(42)).toBe(false);
-  });
-
-  it("PLAN_PRICE_EUR expose les prix officiels affichés sur /pricing", async () => {
-    const { PLAN_PRICE_EUR } = await import("./products");
-    expect(PLAN_PRICE_EUR.solo).toBe(9.99);
-    expect(PLAN_PRICE_EUR.starter).toBe(49);
-    expect(PLAN_PRICE_EUR.pro).toBe(149);
-  });
-});
+// Tests sur les helpers env-dépendants — mapping price_id ↔ plan via
+// env vars STRIPE_PRICE_*. On mock `@/lib/env`.
+//
+// Les tests du catalogue (types + display constants, sans env) vivent
+// dans `./plan-catalog.test.ts`.
 
 describe("stripe/products — priceIdForPlan + planFromPriceId (mocked env)", () => {
   beforeEach(() => {
