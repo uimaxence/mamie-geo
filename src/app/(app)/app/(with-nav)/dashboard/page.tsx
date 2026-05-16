@@ -1,6 +1,6 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { Activity, BarChart3, DollarSign, Flame, Users } from "lucide-react";
+import { Activity, DollarSign, Flame, Users } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { computeDelta, getDashboardData, getVisibilityTrend } from "@/lib/dashboard/queries";
 import { Card, EmptyState, Stat } from "@/components/ui";
@@ -120,26 +120,26 @@ export default async function DashboardPage() {
         <TrendSection fullTrend={fullTrend} series={trendSeries} />
       </div>
 
-      {/* Breakdown par LLM (bars verticales + légende + liste) */}
+      {/* Breakdown par LLM (bars verticales + légende + liste).
+       * Toujours rendu, même quand tous les scores sont à 0 — les 5 LLMs
+       * trackés restent visibles avec leur couleur et leur label, ce qui
+       * fait pédagogie sur la dimension du tracking dès J0. Les barres à 0
+       * ont déjà un rendu fantôme (opacity 0.18 + hauteur min 8%) côté
+       * <BreakdownBars>. Cf. doc 09 § 2026-05-17. */}
       <section className="mt-14">
         <div className="flex items-baseline justify-between">
           <div>
             <h2 className="type-h2">Visibilité par LLM</h2>
-            <p className="type-meta mt-1">Snapshot du jour, score 0–100 par moteur</p>
+            <p className="type-meta mt-1">
+              {breakdownSegments.every((s) => s.value === 0)
+                ? "Snapshot du jour — en attente du premier run"
+                : "Snapshot du jour, score 0–100 par moteur"}
+            </p>
           </div>
         </div>
-        {breakdownSegments.every((s) => s.value === 0) ? (
-          <EmptyState
-            icon={BarChart3}
-            title="Aucun score aujourd'hui"
-            description="Le score se calcule après les premiers runs du jour. Tu peux en lancer un via le bouton en haut à droite."
-            className="mt-6"
-          />
-        ) : (
-          <div className="mt-6">
-            <BreakdownBars segments={breakdownSegments} mode="absolute" />
-          </div>
-        )}
+        <div className="mt-6">
+          <BreakdownBars segments={breakdownSegments} mode="absolute" />
+        </div>
       </section>
 
       {/* Runs récents */}
