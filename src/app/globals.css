@@ -78,6 +78,14 @@
   --glow-orange: 0 0 12px rgba(234, 88, 12, 0.35);
   --glow-blue: 0 0 12px rgba(37, 99, 235, 0.3);
 
+  /* ── Gradient "AI" rose → indigo (boutons Ask AI, Suggérer prompts,
+     audit IA). Inspiration refs Kree8 2026-05-16. Réservé aux actions
+     IA pour qu'il garde sa rareté et son sens. ───────────────────── */
+  --gradient-ai: linear-gradient(135deg, #f8c4d1 0%, #c8b4f6 50%, #a5b4f6 100%);
+  --gradient-ai-hover: linear-gradient(135deg, #f6b4c4 0%, #bca4f4 50%, #95a4f4 100%);
+  --glow-ai: 0 0 24px -4px rgba(248, 180, 196, 0.55), 0 4px 14px -2px rgba(165, 180, 246, 0.35);
+  --glow-ai-hover: 0 0 28px -2px rgba(248, 180, 196, 0.7), 0 6px 18px -2px rgba(165, 180, 246, 0.5);
+
   /* ── Police unique : Inter via next/font/google ── */
   --font-sans:
     var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
@@ -206,6 +214,19 @@
   }
   to {
     transform: translateY(-100%);
+    opacity: 0;
+  }
+}
+
+/* Caret typewriter (section TesConcurrentsPasToi). Step-2 = on/off
+ * net plutôt que fade, plus crédible pour un curseur de saisie. */
+@keyframes blink {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  50.01%,
+  100% {
     opacity: 0;
   }
 }
@@ -482,4 +503,37 @@
 .button-shape:focus-visible {
   outline: 2px solid rgba(10, 10, 10, 0.2);
   outline-offset: 2px;
+}
+
+/* Variant AI — dégradé rose/indigo + glow externe. Override les 4 couches
+ * du button-shape pour préserver le halo lumineux. Texte blanc forcé,
+ * highlight inner top pour donner du modelé (look "smooth pill"). */
+.button-ai-shape {
+  background-image: var(--gradient-ai);
+  background-size: 150% 150%;
+  background-position: 0% 0%;
+  color: #fff;
+  border-color: transparent;
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.45),
+    inset 0 -1px 0 0 rgba(40, 0, 60, 0.1),
+    var(--glow-ai);
+  transition:
+    background-position 320ms ease,
+    box-shadow 200ms ease,
+    transform 100ms ease;
+}
+.button-ai-shape:hover:not(:disabled) {
+  background-position: 100% 100%;
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.55),
+    inset 0 -1px 0 0 rgba(40, 0, 60, 0.12),
+    var(--glow-ai-hover);
+  transform: translateY(-0.5px);
+}
+.button-ai-shape:active:not(:disabled) {
+  box-shadow:
+    inset 0 2px 4px 0 rgba(40, 0, 60, 0.2),
+    var(--glow-ai);
+  transform: translateY(0.5px);
 }
