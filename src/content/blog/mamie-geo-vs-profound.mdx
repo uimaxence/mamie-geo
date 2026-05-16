@@ -1,3 +1,14 @@
+---
+title: "Mamie GEO vs Profound — 5 points de comparaison honnêtes"
+description: "Profound vise les grandes entreprises US à 500 $/mois avec SOC 2 et 8 LLMs. Mamie GEO vise les freelances et PME francophones dès 9,99 €/mois avec 5 LLMs dont Le Chat. Comparaison sans bullshit."
+date: 2026-05-12
+category: Comparatif
+author: Maxence Cailleau
+readingTimeMin: 6
+keywords: [Profound, comparatif, GEO, Le Chat, Mistral, pricing]
+cta: solo
+---
+
 ## Le contexte avant tout
 
 Profound (US, lancé 2023, levée Series A en 2024) a popularisé le tracking de visibilité dans les LLMs. C'est l'outil de référence aux US pour les grandes entreprises tech. Mamie GEO arrive en 2026 sur le marché francophone avec un positionnement et un pricing différents.
@@ -14,9 +25,9 @@ Cette comparaison n'est pas un « Mamie GEO est mieux que Profound ». C'est plu
 
 **Profound** : 500 $/mois en plan Starter, jusqu'à 2 000 $/mois en Enterprise. Pas d'essai gratuit, démo obligatoire avec un commercial.
 
-**Mamie GEO** : 49 €/mois en Starter, 149 € en Pro, 399 € en Agence. 7 jours d'essai gratuit sans carte bancaire.
+**Mamie GEO** : 9,99 €/mois en Solo, 49 € en Starter, 149 € en Pro. Pas de trial automatique mais **garantie remboursement 14 jours** sur toute première souscription, et outil d'audit gratuit one-shot sur `/outils/test-visibilite-ia`.
 
-Différence d'un facteur 10. Logique : Profound vise des budgets US grande entreprise, Mamie GEO vise le marché européen freelance/PME.
+Différence d'un facteur 10 à 50. Logique : Profound vise des budgets US grande entreprise, Mamie GEO vise le marché européen freelance/PME.
 
 ## 3. LLMs trackés
 
@@ -30,7 +41,7 @@ Trade-off explicite : si tu cibles un marché anglo-saxon global avec besoin de 
 
 **Profound** : hébergement AWS US, SOC 2 Type II, conformité RGPD via SCC. Pas de DPA prêt à l'emploi sur le plan Starter.
 
-**Mamie GEO** : hébergement Vercel cdg1 + Neon Frankfurt (100 % UE), RGPD compliant by design. DPA signé dès le plan Agence, audit RGPD inclus.
+**Mamie GEO** : hébergement Vercel cdg1 + Neon Frankfurt (100 % UE), RGPD compliant by design. DPA disponible sur demande pour tous les plans, inclus de plein droit en Enterprise.
 
 Pour les secteurs régulés en Europe (santé, finance, public), l'hébergement EU + DPA est souvent obligatoire. Mamie GEO démarre conforme, Profound demande de la négociation.
 
@@ -46,8 +57,23 @@ Petit détail qui fait grosse différence sur un audit à présenter à un comit
 
 > **Choisir Profound si** : grande entreprise US/UK, budget supérieur à 5 k$/mois sur le tooling, besoin de SOC 2 Type II / SAML SSO / 8 LLMs ou plus anglo-saxons, équipe marketing de 50 personnes ou plus habituée aux outils US.
 
-> **Choisir Mamie GEO si** : freelance ou PME francophone, budget inférieur à 500 €/mois sur ce poste, besoin de Le Chat dans le tracking, valeur l'hébergement EU et le support en français, veux 7 jours d'essai pour tester avant de signer.
+> **Choisir Mamie GEO si** : freelance ou PME francophone, budget inférieur à 500 €/mois sur ce poste, besoin de Le Chat dans le tracking, valeur l'hébergement EU et le support en français, veux pouvoir tester sans engagement (garantie 14 jours).
 
 Pas de marketing fragile — les deux outils sont sérieux, ils ciblent des marchés différents.
 
-[Tester Mamie GEO gratuitement →](/login)
+<BlogFAQ
+  items={[
+    {
+      q: "Pourquoi Mamie GEO ne track-t-il pas Grok, DeepSeek ou Copilot ?",
+      a: "Choix éditorial V0 : on track les 5 LLMs les plus utilisés en France (ChatGPT, Claude, Perplexity, Gemini, Le Chat). Ajouter Grok ou DeepSeek alourdit le coût LLM sans valeur pour notre cible francophone. On les ajoutera si la demande émerge.",
+    },
+    {
+      q: "Mamie GEO peut-il remplacer Profound pour une grande entreprise FR ?",
+      a: "Probablement pas en V0 — pas de SSO SAML, pas de SOC 2, pas d'API avancée. Pour une grande entreprise qui veut un outil français, on peut discuter d'un plan custom (hello@mamie-geo.fr). Mais pour 90 % des PME françaises, Mamie GEO suffit largement.",
+    },
+    {
+      q: "Combien coûte Mamie GEO vs Profound sur un an ?",
+      a: "Mamie GEO Pro 149 €/mois = 1 788 €/an. Profound Starter 500 $/mois = ~5 500 €/an. Différence d'environ 3 700 €/an pour des features comparables sur les LLMs grand public + un meilleur tracking du marché FR (Le Chat).",
+    },
+  ]}
+/>

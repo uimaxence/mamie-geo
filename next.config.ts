@@ -1,4 +1,8 @@
 import createMDX from "@next/mdx";
+import rehypeAutolinkHeadings from "rehype-autolink-headings";
+import rehypeSlug from "rehype-slug";
+import remarkFrontmatter from "remark-frontmatter";
+import remarkGfm from "remark-gfm";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
@@ -27,10 +31,28 @@ const nextConfig: NextConfig = {
   },
 };
 
+// MDX pipeline — ajouté 2026-05-16 (cf. doc 09 § Sprint 2 blog) :
+//   - remark-frontmatter : reconnait + RETIRE le YAML du contenu rendu
+//     (sinon il serait rendu comme texte brut au top de chaque article)
+//   - remark-gfm : tables, strikethrough, autolinks markdown
+//   - rehype-slug : id auto sur h1/h2/h3 (basé sur le texte)
+//   - rehype-autolink-headings (behavior: wrap) : ajoute un <a> autour
+//     du heading avec classe `.heading-anchor` pour styler une icône
+//     lien au hover (cf. globals.css)
 const withMDX = createMDX({
-  // Pas de plugin remark/rehype pour V0 — on garde le pipeline minimal.
-  // À ajouter en PR 10b si besoin : rehype-slug (anchors), rehype-pretty-code
-  // (syntax highlighting), remark-gfm (tables, strikethrough).
+  options: {
+    remarkPlugins: [remarkFrontmatter, remarkGfm],
+    rehypePlugins: [
+      rehypeSlug,
+      [
+        rehypeAutolinkHeadings,
+        {
+          behavior: "wrap",
+          properties: { className: "heading-anchor" },
+        },
+      ],
+    ],
+  },
 });
 
 export default withMDX(nextConfig);

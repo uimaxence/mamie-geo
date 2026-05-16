@@ -1,9 +1,13 @@
 import type { MDXComponents } from "mdx/types";
 import type { ReactNode } from "react";
+import { BlogFAQ } from "@/components/blog/blog-faq";
 
 // MDX components — mapping global pour que les .mdx rendent avec notre
 // design system (cf. doc 10 § Direction). Tous les `<h1>` MDX appliquent
 // la classe `.type-h1`, etc. Layout prose tenu sur une largeur lisible.
+//
+// Composants métier exposés globalement (cf. doc 09 § 2026-05-16) :
+//   - <BlogFAQ items=[{q,a},…]/> — bloc FAQ accessible + JSON-LD auto
 //
 // Fichier au root (next to package.json) selon convention @next/mdx :
 // https://nextjs.org/docs/app/building-your-application/configuring/mdx
@@ -53,10 +57,33 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
         {children}
       </pre>
     ),
+    table: ({ children }) => (
+      <div className="mt-6 overflow-x-auto rounded-[var(--radius-lg)] border border-[color:var(--color-border)]">
+        <table className="w-full border-collapse text-sm">{children}</table>
+      </div>
+    ),
+    thead: ({ children }) => (
+      <thead className="border-b border-[color:var(--color-border)] bg-[color:var(--color-gray-50)]">
+        {children}
+      </thead>
+    ),
+    th: ({ children }) => (
+      <th className="px-3 py-2 text-left text-xs font-semibold text-[color:var(--color-ink)]">
+        {children}
+      </th>
+    ),
+    tr: ({ children }) => (
+      <tr className="border-b border-[color:var(--color-border)] last:border-b-0">{children}</tr>
+    ),
+    td: ({ children }) => (
+      <td className="px-3 py-2 align-top text-[color:var(--color-ink-soft)]">{children}</td>
+    ),
     hr: () => <hr className="rule my-12 max-w-prose" />,
     strong: ({ children }: { children?: ReactNode }) => (
       <strong className="font-semibold text-[color:var(--color-ink)]">{children}</strong>
     ),
+    // Composants métier blog exposés sans import explicite dans les .mdx.
+    BlogFAQ,
     ...components,
   };
 }

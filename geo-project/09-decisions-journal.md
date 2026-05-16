@@ -161,6 +161,55 @@ haut et l'entrée "2026-05-05 — Réponses aux 10 questions de bootstrap".
 
 ### Décisions enregistrées
 
+#### 2026-05-16 — Sprint 2 blog : pipeline content-driven + SEO/GEO complet
+
+**Contexte** : le blog avait 3 articles MDX bloqués sur une architecture manuelle — registry TS hardcodé dans `src/app/(blog)/blog/articles-registry.ts`, pas de frontmatter YAML, pas d'OG image dynamique, pas de JSON-LD, pas de sitemap. Impossible de "copier-coller un markdown" pour ajouter un article, et les LLM/Google ne pouvaient pas tirer parti des FAQ structured data qui boostent le ranking GEO.
+
+**Objectif** : transformer le blog en machine SEO/GEO autonome — Max colle un fichier `src/content/blog/{slug}.mdx` avec frontmatter YAML, le système fait le reste (meta, OG, JSON-LD, CTA contextuel, articles liés, sitemap).
+
+**Options considérées** :
+
+- A : Garder l'architecture manuelle + ajouter juste sitemap/OG (~400 lignes mais ne scale pas)
+- B : Refacto complet content-driven + SEO/GEO complet (~1400 lignes, scale à 100+ articles) ← **retenu**
+- C : Migrer vers contentlayer/velite (libraries content-as-data) — overkill V0, nouvelle dépendance externe
+
+**Choix** :
+
+1. **Format MDX + frontmatter YAML** : `src/content/blog/{slug}.mdx` autonomes, frontmatter validé par Zod au scan filesystem (rejette les articles mal formés au build).
+2. **Plugins MDX** ajoutés à `next.config.ts` : `remark-frontmatter` (retire YAML du rendu), `remark-gfm` (tables, strikethrough), `rehype-slug` (id auto sur h2/h3), `rehype-autolink-headings` (`behavior: "wrap"` + classe `.heading-anchor` pour styler une icône # au hover).
+3. **Registry filesystem** (`src/lib/blog/registry.ts`) : `listArticles()` + `getArticleBySlug()` + `getRelatedArticles()` scannent `src/content/blog/` avec `gray-matter`, mémoïsés via `cache()` per-request.
+4. **JSON-LD complet** sur chaque article : `Article` + `BreadcrumbList` + `FAQPage` (auto-injecté par `<BlogFAQ>`). FAQPage est le boost GEO majeur — Google et les LLM citent en priorité ces contenus.
+5. **OG image dynamique** via `next/og` ImageResponse, 1200×630, halo gradient catégorie + branding Mamie GEO. Template unique paramétré (cf. `src/app/(blog)/blog/[slug]/opengraph-image.tsx`).
+6. **`<ArticleCTA>` auto** : 4 variantes (solo / starter / pro / audit-gratuit) selon `frontmatter.cta`, injectée en fin d'article. `audit-gratuit` utilise le variant `Button ai` (gradient terracotta→purple→blue).
+7. **Maillage interne via `<RelatedArticles>`** (3 articles via scoring catégorie + keywords overlap). Pas de rehype plugin auto-liens : complexité disproportionnée pour V0, le maillage interne est suffisamment couvert par les RelatedArticles + liens manuels que l'auteur peut écrire.
+8. **`<TOC>` sticky desktop** (articles ≥ 6 min) + `<ReadingProgress>` bar fixed top. Parsé du DOM via les ids posés par rehype-slug.
+9. **`sitemap.ts` + `robots.ts`** auto-générés. Mise à jour automatique quand un .mdx est ajouté.
+10. **Newsletter** : reportée à une PR future (décision validée 2026-05-16 — on attend que le blog drive du trafic).
+
+**Justification** :
+
+- Le pipeline content-driven résout le bottleneck Max (« copier-coller du markdown »). Plus de double maintenance registry TS + .mdx — un seul fichier = un article complet.
+- Les structured data (Article + FAQPage + BreadcrumbList) sont **le levier GEO** : les LLM citent en priorité les contenus structurés. ROI direct sur la mission de Mamie GEO.
+- L'architecture est scalable à 100+ articles sans modification (filesystem scan + cache per-request).
+- 145 tests verts (+ 15 nouveaux : schemas frontmatter, registry, blog-faq).
+- Pas de Lighthouse CI — validation PageSpeed manuelle post-deploy suffit pour V0.
+
+**Conséquences attendues** :
+
+- Workflow Max : 1 fichier .mdx = 1 article complet (meta, OG, JSON-LD, CTA, articles liés auto).
+- Tous les articles sont SSG (`generateStaticParams`) — pages HTML pures, TTFB minimal.
+- Page `/sitemap.xml` listée dans `robots.txt`, prête pour Google Search Console.
+- Score Google PageSpeed cible ≥ 98 (Perf + SEO) sur les articles — à valider manuellement après deploy sur https://pagespeed.web.dev/.
+
+**À revisiter** :
+
+- **Newsletter form + endpoint Brevo addToList** : quand le blog drive du trafic significatif (~500 visiteurs uniques/semaine sur le blog), brancher pour capturer les leads. Brevo liste à créer à ce moment-là.
+- **rehype plugin auto-liens internes** : si on dépasse 30+ articles et que le maillage interne devient un facteur SEO critique, ré-évaluer. Pour l'instant `<RelatedArticles>` + liens manuels suffisent.
+- **Lighthouse CI dans GitHub Actions** : à ajouter quand on aura > 10 articles pour catch les régressions perf au build.
+- **Pages-templates spécialisées** : si on lance des "guides longs" (10k+ mots), créer un template `<LongFormGuide>` avec TOC enrichie + ancres sticky mobile.
+
+---
+
 #### 2026-05-14 — Stripe billing + plan Solo 9,99 € + pivot trial → garantie 14 j refund
 
 **Contexte** : la PR « App CRUD » (2026-05-13) a achevé le self-service. Reste à monétiser. Audit du schéma DB confirme que les colonnes Stripe (`stripeCustomerId`, `stripeSubscriptionId`, `trialEndsAt`, `currentPeriodStart/End`, `hardCapHitAt`) et les tables `subscription_events` (avec `stripeEventId UNIQUE` → idempotence webhook gratuite) + `usage_counters` sont déjà en place — le code Stripe peut être greffé sans refonte schéma.

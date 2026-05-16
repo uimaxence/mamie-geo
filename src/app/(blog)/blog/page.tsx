@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Badge, Section } from "@/components/ui";
-import { ARTICLES, CATEGORY_TONE, type ArticleMeta } from "./articles-registry";
+import { listArticles, type Article } from "@/lib/blog/registry";
+import { CATEGORY_TONE } from "@/lib/blog/schemas";
 
 export const metadata: Metadata = {
   title: "Blog",
@@ -9,24 +10,13 @@ export const metadata: Metadata = {
     "Méthodes, études et tutoriels pour mesurer et améliorer la visibilité de ta marque dans ChatGPT, Claude, Perplexity, Gemini et Le Chat de Mistral.",
 };
 
-// Index blog — liste les articles publiés. Tri par date DESC, pas de
-// pagination (V0 a moins de 10 articles).
-
-type Tone =
-  | "neutral"
-  | "success"
-  | "warning"
-  | "error"
-  | "accent"
-  | "blue"
-  | "green"
-  | "orange"
-  | "purple"
-  | "pink"
-  | "yellow";
+// Index blog — liste les articles publiés via le registry filesystem
+// (cf. doc 09 § 2026-05-16). Plus de registry TS manuel ; tout vient
+// du scan de `src/content/blog/*.mdx`. Pas de pagination en V0
+// (< 10 articles).
 
 export default function BlogIndexPage() {
-  const sorted = [...ARTICLES].sort((a, b) => b.date.localeCompare(a.date));
+  const articles = listArticles();
 
   return (
     <>
@@ -43,7 +33,7 @@ export default function BlogIndexPage() {
 
       <Section variant="tinted" pad="xl">
         <ul className="mx-auto grid max-w-5xl grid-cols-1 gap-6 md:grid-cols-2">
-          {sorted.map((article) => (
+          {articles.map((article) => (
             <li key={article.slug}>
               <ArticleCard article={article} />
             </li>
@@ -54,15 +44,14 @@ export default function BlogIndexPage() {
   );
 }
 
-function ArticleCard({ article }: { article: ArticleMeta }) {
-  const tone = CATEGORY_TONE[article.category] as Tone;
+function ArticleCard({ article }: { article: Article }) {
   return (
     <Link
       href={`/blog/${article.slug}`}
-      className="group flex h-full flex-col rounded-[var(--radius-xl)] border border-[color:var(--color-border)] bg-white p-6 transition hover:border-[color:var(--color-border-strong)]"
+      className="group flex h-full flex-col rounded-[var(--radius-xl)] border border-[color:var(--color-border)] bg-white p-6 transition hover:border-[color:var(--color-border-strong)] hover:shadow-[var(--shadow-sm)]"
     >
       <div className="flex items-center gap-2">
-        <Badge tone={tone}>{article.category}</Badge>
+        <Badge tone={CATEGORY_TONE[article.category]}>{article.category}</Badge>
         <span className="type-meta">{formatDate(article.date)}</span>
         <span className="type-meta">·</span>
         <span className="type-meta">{article.readingTimeMin} min</span>

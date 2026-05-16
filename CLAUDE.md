@@ -260,18 +260,17 @@ la doc devient un cimetière.
 
 ---
 
-## 9. État du projet (snapshot — 2026-05-14)
+## 9. État du projet (snapshot — 2026-05-16)
 
-> Mise à jour 2026-05-14 — PR « Stripe billing » : checkout + portal +
-> webhooks idempotents + cron expire-past-due, intégrée dans Settings
-> (nouvelle section Facturation). Ajout plan **Solo 9,99 €/mois** (5
-> prompts × 5 LLMs × 1 run/semaine le lundi) à l'enum `plan` (migration
-> `0001_thick_husk`). Refonte page `/pricing` (3 cards Solo/Starter/Pro
->
-> - mailto "Plus de volume ? Contact"), retrait Agency public. Pivot
->   trial : « pas de trial automatique + garantie remboursement 14 j »
->   remplace l'ancien trial 7j sans carte (cf. doc 09 § 2026-05-14). 128
->   tests verts.
+> Mise à jour 2026-05-16 — PR « Sprint 2 blog content-driven » : refacto
+> complet du blog vers `src/content/blog/*.mdx` + frontmatter YAML +
+> registry filesystem scan. Pipeline SEO/GEO complet (JSON-LD Article +
+> FAQPage + BreadcrumbList, OG image dynamique, sitemap.ts, robots.ts).
+> `<BlogFAQ>` auto-injecte le JSON-LD FAQPage (boost GEO majeur).
+> `<ArticleCTA>` automatique selon `frontmatter.cta` (solo/starter/pro/
+> audit-gratuit). `<RelatedArticles>` + `<TOC>` + `<ReadingProgress>`.
+> Workflow "copier-coller MDX" opérationnel (cf. `src/content/blog/README.md`).
+> 145 tests verts. Suivi 2026-05-14 — PR Stripe billing — déjà en prod.
 
 ### Phase actuelle
 
@@ -301,7 +300,7 @@ Phasage acté le 2026-05-07 (cf. `09-decisions-journal.md` § 2026-05-07) :
 - 8 routes app authentifiées : `/login`, `/app/onboarding` (wizard 3 étapes + suggestion IA), `/app/dashboard`, `/app/runs/[id]`, `/app/settings` (édition workspace name + brand aliases), `/app/prompts` (liste + CRUD + suggestion IA), `/app/prompts/[id]` (détail breakdown par LLM), `/app/competitors` (liste + CRUD). Quotas enforced par plan (cf. `src/lib/plans/quotas.ts`).
 - Design system custom (Tailwind v4 + composants `src/components/ui/`) — direction Airbnb-like minimaliste actée le 2026-05-07, raffinée le 2026-05-11 (refs designme.agency + taap.it). PR 2026-05-12 ajoute 11 primitifs Radix/shadcn (Dialog, DropdownMenu, Tabs, Switch, Tooltip, Sheet, Skeleton, Banner, EmptyState, Pagination, Toaster sonner), 2 wrappers Recharts (LineChart, BarChartHorizontal) et la sidebar app. Polish dashboard 2026-05-12 (refs screens Max) : `Stat` enrichi (icône pastel + delta arrow vs J-7), `SegmentedControl` (time-range picker), `AreaChart` gradient mono-série, `BreakdownBars` (vertical bars + légende + liste valeurs). Cf. doc 10 § « Patterns dashboard ».
 - 49 tests unit Vitest verts, 13 tests E2E Playwright sur les flows publics
-- Blog MDX (3 articles : « Qu'est-ce que le GEO », « Mamie GEO vs Profound », « État visibilité IA France 2026 »)
+- Blog MDX **content-driven** (cf. doc 09 § 2026-05-16) : articles dans `src/content/blog/*.mdx` avec frontmatter YAML, scannés par `src/lib/blog/registry.ts`. Plugins remark-gfm + rehype-slug + rehype-autolink-headings. Composant `<BlogFAQ>` qui auto-injecte JSON-LD FAQPage (boost GEO majeur). 3 articles migrés : « Qu'est-ce que le GEO », « Mamie GEO vs Profound », « État visibilité IA France 2026 ». OG image dynamique par article (`next/og`), JSON-LD Article + BreadcrumbList, `<ArticleCTA>` automatique selon `frontmatter.cta`, `<RelatedArticles>` (3 articles liés via catégorie + keywords overlap), `<TOC>` sticky desktop, `<ReadingProgress>` bar. Sitemap.ts + robots.ts auto-générés.
 - Lead magnet `/outils/test-visibilite-ia` avec form capture → email Brevo
 
 **Auth + infra** (Phase B finale, Phase C partielle) :

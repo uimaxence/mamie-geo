@@ -232,6 +232,28 @@
   }
 }
 
+/* rehype-autolink-headings wrap chaque h2/h3 dans un <a class="heading-anchor">.
+ * On retire la décoration de lien par défaut et on affiche un # discret au
+ * hover du heading pour signaler que l'ancre est cliquable (ancrage profond
+ * depuis Google search results). */
+.heading-anchor {
+  color: inherit;
+  text-decoration: none;
+  position: relative;
+}
+.heading-anchor::before {
+  content: "#";
+  position: absolute;
+  left: -1.25rem;
+  color: var(--color-faint);
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+.heading-anchor:hover::before,
+.heading-anchor:focus-visible::before {
+  opacity: 1;
+}
+
 /* ─────────────────────────────────────────────────────────────────────
  * Base — wrap dans @layer base pour que les utilities Tailwind aient
  * priorité (sinon les utilities .text-white / .no-underline appliquées
