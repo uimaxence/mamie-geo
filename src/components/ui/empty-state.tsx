@@ -30,7 +30,7 @@ export function EmptyState({
       {...props}
     >
       {Icon && (
-        <div className="mb-1 inline-flex size-10 items-center justify-center rounded-full bg-white text-[color:var(--color-muted)] shadow-[var(--shadow-sm)]">
+        <div className="mb-1 inline-flex size-10 items-center justify-center rounded-[var(--radius-pill)] bg-white text-[color:var(--color-muted)] shadow-[var(--shadow-sm)]">
           <Icon size={18} strokeWidth={1.75} />
         </div>
       )}

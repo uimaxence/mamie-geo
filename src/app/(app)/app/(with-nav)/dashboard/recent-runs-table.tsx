@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui";
+import { RunStatusBadge } from "@/components/app/run-status-badge";
 import { cn } from "@/lib/utils";
 import type { RecentRun } from "@/lib/dashboard/queries";
 
@@ -155,10 +156,7 @@ function Td({ children, align = "left" }: { children: React.ReactNode; align?: "
 }
 
 function StatusBadge({ status }: { status: string }) {
-  if (status === "success") return <Badge tone="success">success</Badge>;
-  if (status === "running") return <Badge tone="accent">running</Badge>;
-  if (status === "failed") return <Badge tone="error">failed</Badge>;
-  return <Badge tone="neutral">{status}</Badge>;
+  return <RunStatusBadge status={status} />;
 }
 
 function BrandSignal({ value }: { value: RecentRun["brandMentioned"] }) {

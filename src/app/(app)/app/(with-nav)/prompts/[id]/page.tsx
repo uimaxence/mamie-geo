@@ -7,6 +7,7 @@ import { getPromptDetail } from "@/lib/prompts/queries";
 import { Badge, Card, EmptyState, Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui";
 import { BreakdownBars } from "@/components/charts/breakdown-bars";
 import { LLM_COLORS, LLM_LABELS } from "@/components/charts/llm-colors";
+import { RunStatusBadge } from "@/components/app/run-status-badge";
 
 // Page détail prompt /app/prompts/[id].
 // Affiche : header (texte + actions) + 4 stats agrégées + breakdown par
@@ -254,13 +255,6 @@ function Td({ children, align = "left" }: { children: React.ReactNode; align?: "
       {children}
     </td>
   );
-}
-
-function RunStatusBadge({ status }: { status: string }) {
-  if (status === "success") return <Badge tone="success">success</Badge>;
-  if (status === "running") return <Badge tone="accent">running</Badge>;
-  if (status === "failed") return <Badge tone="error">failed</Badge>;
-  return <Badge tone="neutral">{status}</Badge>;
 }
 
 function BrandSignal({ value }: { value: boolean | "skipped" | "unscored" }) {

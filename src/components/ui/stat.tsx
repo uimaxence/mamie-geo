@@ -78,7 +78,7 @@ export function Stat({
           <span
             aria-hidden
             className={cn(
-              "inline-flex size-8 shrink-0 items-center justify-center rounded-full",
+              "inline-flex size-8 shrink-0 items-center justify-center rounded-[var(--radius-pill)] shadow-[var(--shadow-sm)]",
               iconToneClass[iconTone],
             )}
           >

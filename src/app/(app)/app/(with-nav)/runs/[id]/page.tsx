@@ -5,6 +5,7 @@ import { ArrowLeft, ExternalLink } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { getRunDetail, type RunDetail } from "@/lib/dashboard/queries";
 import { Badge, Banner, Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui";
+import { RunStatusBadge } from "@/components/app/run-status-badge";
 
 // Page détail d'un run /app/runs/[id] — réponse brute, citations
 // détectées (sources web + brands), scoring & coûts. Organisée en
@@ -151,10 +152,7 @@ function Meta({ label, value }: { label: string; value: string }) {
 }
 
 function StatusBadge({ status }: { status: string }) {
-  if (status === "success") return <Badge tone="success">success</Badge>;
-  if (status === "running") return <Badge tone="accent">running</Badge>;
-  if (status === "failed") return <Badge tone="error">failed</Badge>;
-  return <Badge tone="neutral">{status}</Badge>;
+  return <RunStatusBadge status={status} />;
 }
 
 function ScoringSection({
