@@ -13,6 +13,7 @@ import {
   MessageSquareQuote,
   Receipt,
   Users,
+  Wrench,
   type LucideIcon,
 } from "lucide-react";
 import { useState } from "react";
@@ -49,6 +50,7 @@ const NAV: NavItem[] = [
   { href: "/app/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/app/prompts", label: "Prompts", icon: MessageSquareQuote },
   { href: "/app/competitors", label: "Concurrents", icon: Users },
+  { href: "/app/audits", label: "Audits techniques", icon: Wrench },
   { href: "/app/runs", label: "Runs", icon: ListChecks },
   { href: "/app/settings", label: "Réglages", icon: Cog },
 ];

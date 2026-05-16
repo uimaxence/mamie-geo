@@ -161,6 +161,75 @@ haut et l'entrée "2026-05-05 — Réponses aux 10 questions de bootstrap".
 
 ### Décisions enregistrées
 
+#### 2026-05-17 — Sprint 6 PR B — app /app/audits Premium + charts dashboard vivants
+
+**Contexte** : PR A (2026-05-16) a promu l'audit technique en home + blog. PR B livre la version premium dans l'app : audit on-demand depuis `/app/audits/new`, historique en DB, audit hebdo automatique sur la brand, alerte email si chute ≥ 10 pts, et matrice comparative avec les concurrents (différenciateur Pro/Agency). En parallèle, suppression des EmptyState dashboard pour rendre les charts visibles dès J0 (la première impression du dashboard était mortifère pour un nouveau user qui n'avait pas encore de data).
+
+**Options considérées (audit-app)** :
+
+- A : One-shot full premium (table DB + 4 pages + worker + cron + email + comparaison concurrents) en un seul push ← **retenu**
+- B : Lean MVP d'abord (juste on-demand + list + detail), puis cron/email/compare dans une PR ultérieure
+- C : Audit on-demand côté server action + cron, mais pas d'historique DB (juste cache mémoire éphémère)
+
+**Choix (audit-app, livré 2026-05-17)** :
+
+1. **Table `technical_audits`** (workspaceId, brandId nullable, url, isCompetitor, scoreGlobal, subScores jsonb, checks jsonb, htmlSizeKb, httpStatus, psiUnavailable, fetchedAt, createdAt). Index `(workspaceId, createdAt)` + `(workspaceId, url)`. `brandId` nullable pour les audits concurrents qui ne pointent pas vers `brands.id`.
+2. **Table `audit_counters`** (workspaceId, periodStart YYYY-MM-01, auditsCount, competitorAuditsCount) avec PK composite — fenêtre mois calendaire UTC. Compteurs séparés pour ne pas qu'un batch concurrents consomme tout le quota mensuel. Helper `incrementAuditCounter()` UPSERT atomique avec pré-check du quota fini.
+3. **Quotas par plan** étendus dans `PlanQuotas` : `audits` (mensuel) + `comparisonCompetitors` (batch max). Solo 5/0, Starter 30/3, Pro 100/10, Agency ∞/∞. Trial/past_due/expired/canceled : 0/0.
+4. **Server action `runWorkspaceAudit`** synchrone — quota check + increment AVANT `runAudit()` (5-15s) + insert DB. Tient dans Vercel functions 60s. L'incrément consomme une "tentative" même si l'audit échoue (anti-spam URLs invalides).
+5. **Server action `runCompetitorsBatch`** async — enqueue N jobs `audit_workspace_url` (1 par concurrent avec domaine). Limité à `quotas.comparisonCompetitors`. Solo bloqué (0).
+6. **Worker `audit_workspace_url`** (nouveau queue kind ajouté à `QUEUE_KIND`). Idempotence `audit_workspace_url:{workspaceId}:{url}:{date}` — lance la même URL le même jour est dédupliqué. Si `notifyOnDrop=true` ET delta ≥ -10 pts vs précédent → envoie l'email score-drop aux membres.
+7. **4 pages app** : `/app/audits` (list groupée par URL + delta vs précédent + badge nb d'audits), `/app/audits/new` (form URL pré-rempli sur `brand.domain` + checkbox batch concurrents pour Starter+), `/app/audits/[id]` (détail full avec recos `getRecommendation()`, organisé par failures / warnings / passed), `/app/audits/compare` (matrice URL × catégorie SEO/GEO/A11y/Perf — owned highlighted + concurrents en dessous). Solo voit `/compare` en mode verrouillé (upsell vers Starter).
+8. **Cron `/api/cron/schedule-audits`** lundi 05:00 UTC. Pour chaque workspace actif non hard-capé, enqueue 1 audit sur `brand.domain` avec `notifyOnDrop=true`. Quota check inclus (skippe si workspace a déjà épuisé son quota mensuel via on-demand).
+9. **Email `audit-score-drop`** : template HTML inline branded, table avec score précédent/actuel + URL, CTA vers `/app/audits`. Reprend le pattern `weekly-recap.ts`. Seulement sur owned, jamais sur concurrents.
+10. **Sidebar entry** « Audits techniques » + icon `Wrench` (lucide). Position : après Concurrents, avant Runs.
+
+**Choix (charts vivants, livré 2026-05-17)** :
+
+1. **TrendSection** : suppression de l'EmptyState « pas assez d'historique ». Toujours rendu via `<LineChart>` avec un scaffold de N jours (7/30/90 selon range) où les jours sans data ont `value: 0` pour chaque LLM. Visuellement la ligne « monte du sol » à mesure que les runs arrivent. Overlay flottant central avec backdrop blur quand `fullTrend.length < SPARSE_THRESHOLD (3)` : « Données en cours de collecte — N jours sur 3 requis ». Fallback série `["claude"]` (Phase A) si server renvoie `series=[]`.
+2. **BreakdownBars** dashboard : suppression de l'EmptyState « aucun score aujourd'hui ». Les 5 LLMs trackés restent visibles en permanence avec couleur + label + valeur (0 si pas de run). Le composant `<BreakdownBars>` gère déjà gracefully `value === 0` (opacity 0.18 + hauteur min 8 %). Sous-titre change quand tout est à 0 (« Snapshot du jour — en attente du premier run »).
+3. **RecentRunsTable** : EmptyState **conservé** (une table de 0 lignes est triste, le texte est plus utile que des cases vides).
+
+**Justifications** :
+
+- **Audits synchrones côté on-demand** : `runAudit()` prend ~10s en moyenne (fetch + parse + PSI parallèle). Vercel functions 60s laisse une marge confortable. Pas d'async pour une expérience instantanée — l'utilisateur clique « Lancer », voit un spinner, et arrive sur le rapport. Le batch concurrents (10 URLs × 10s = 100s) DOIT être async via queue, sinon dépassement Vercel.
+- **`brandId` nullable pour les concurrents** : un concurrent n'est pas dans `brands` (table dédiée à la marque trackée). On garde `brandId` pour les audits owned, et `null` pour les concurrents qui ont `competitors.domain` comme source. Avantage : pas besoin d'une table polymorphique ou de discriminator.
+- **Quotas séparés owned vs concurrents** : sinon un batch de 10 concurrents consommerait 10/30 du quota mensuel d'un Starter, ne laissant que 20 audits owned pour le mois. Avec compteur séparé, Starter a 30 audits owned + 3 concurrents par batch — quota concurrent moins strict car valeur business plus faible (snapshot ponctuel vs suivi continu).
+- **Variant `notifyOnDrop`** : on ne veut PAS d'email d'alerte si l'utilisateur lance lui-même un audit ad hoc et constate une chute (il est déjà sur la page, l'email serait redondant). L'email est réservé aux audits programmés (cron hebdo) où la chute serait passée inaperçue. Implementé via flag dans le payload `audit_workspace_url`.
+- **Charts vivants — pas de mock data** : malgré la tentation de pré-remplir avec un dataset « démo » pour l'effet wow, on a refusé. Mensonge → confusion. Baseline 0 + overlay « collecte » est honnête : l'utilisateur sait que ses propres données vont remplir la courbe, et la grille temporelle communique la promesse (tracking continu) sans tromper.
+- **RecentRunsTable garde son EmptyState** : à l'inverse des charts, une table avec 0 ligne et juste les en-têtes ne communique rien d'utile — le texte explicatif (« le cron tourne à 06:00 UTC ») est plus actionable.
+
+**Conséquences attendues** :
+
+- L'app gagne un onglet « Audits techniques » qui rend tangible la promesse « plus qu'un tracker LLM » de Mamie GEO — différencie de Profound/Otterly qui ne font que du tracking IA.
+- KPI à suivre : ratio `audits / runs` par workspace actif (objectif > 0.5 = chaque workspace audite au moins une fois par mois). Click-through `/app/dashboard` → `/app/audits` (mesure adoption de la nouvelle feature).
+- Risque de coût LLM : zéro (audit n'utilise pas de LLM). Risque de coût Google PSI : un appel par audit, gratuit jusqu'à 25K/jour. Risque de coût Vercel functions : un audit ~10s = 10× plus cher qu'un run LLM en compute time, mais on-demand donc rare en pratique.
+- Le cron hebdo lundi 5h UTC tournera demain (2026-05-18) sur les workspaces actifs avec brand.domain — premier batch d'audits programmés.
+
+**Hors scope PR B (à revisiter)** :
+
+- ❌ Audit d'URLs internes multiples (page produit, blog post) — V0 audite uniquement la home. Évolution simple : on garde `audit_counters` séparé par URL si on veut tracker tout un site.
+- ❌ Diff visuel entre 2 audits (« qu'est-ce qui a changé ? ») — pour l'instant on voit juste le delta de score global ; la liste des checks qui ont changé exigerait un diff structurel des `checks` jsonb, à coder plus tard.
+- ❌ Export PDF du rapport — la page `/app/audits/[id]` est déjà print-friendly mais pas d'export bouton.
+
+**À revisiter** : 2026-06-15 — décider si on retire le test visibilité IA humain (`/outils/test-visibilite-ia`) maintenant que l'audit-app Premium tient la promesse principale.
+
+**Fichiers touchés PR B** :
+
+- DB : `src/db/schema.ts` (+ `technicalAudits` + `auditCounters` + queue kind), `src/db/migrations/0002_classy_joshua_kane.sql`
+- Lib : `src/lib/plans/quotas.ts` (+ champs `audits` + `comparisonCompetitors`), `src/lib/audits/counters.ts` (NOUVEAU), `src/lib/queue/types.ts` (+ `AuditWorkspaceUrlPayload`), `src/lib/email/templates/audit-score-drop.ts` (NOUVEAU)
+- Worker : `src/workers/audit-workspace-url.ts` + `src/workers/audit-workspace-url-payload.ts` (NOUVEAUX), `src/app/api/cron/dispatch/route.ts` (+ case `audit_workspace_url`), `src/app/api/cron/schedule-audits/route.ts` (NOUVEAU)
+- Pages : `src/app/(app)/app/(with-nav)/audits/{page,actions}.ts`, `audits/new/{page,new-audit-form}.tsx`, `audits/[id]/page.tsx`, `audits/compare/{page,competitors-batch-button}.tsx` (TOUS NOUVEAUX)
+- UI : `src/app/(app)/app-sidebar.tsx` (+ entry « Audits techniques » + icon `Wrench`)
+- Cron config : `vercel.json` (+ schedule `0 5 * * 1`)
+
+**Fichiers touchés charts vivants** :
+
+- `src/app/(app)/app/(with-nav)/dashboard/page.tsx` (suppr empty state BreakdownBars)
+- `src/app/(app)/app/(with-nav)/dashboard/trend-section.tsx` (scaffold baseline + overlay « collecte »)
+
+---
+
 #### 2026-05-16 — Sprint 6 PR A — promotion audit technique sur la home + blog
 
 **Contexte** : audit ROI marketing fait après Sprint 5. Deux lead magnets en prod : `/outils/test-visibilite-ia` (humain, ~24 h ouvrées, ~$0,20 LLM/audit, capacité limitée par mon temps) et `/outils/audit-technique` (instantané, pas d'appel LLM, coût marginal 0 €, scalable à l'infini). Le second est massivement sous-promu : pas de mention en hero, pas de section home dédiée, listé après le test IA dans le footer. Le test visibilité IA est mis en avant partout alors qu'il scale mal.

@@ -291,6 +291,11 @@ export const QUEUE_KIND = [
   "score_response",
   "send_weekly_email",
   "recompute_metrics",
+  // Audit technique : exécute `runAudit(url)` pour un workspace donné.
+  // Utilisé par (a) le batch concurrents lancé depuis /app/audits/new
+  // et (b) le cron hebdo /api/cron/schedule-audits (lundi 5h UTC).
+  // Audit on-demand single = server action synchrone (pas via queue).
+  "audit_workspace_url",
 ] as const;
 export const QUEUE_STATUS = ["pending", "claimed", "done", "failed", "dead"] as const;
 
@@ -314,7 +319,7 @@ export const queueJobs = pgTable(
     index("idx_queue_jobs_claim").on(t.scheduledAt),
     check(
       "queue_kind_check",
-      sql`${t.kind} IN ('execute_prompt','score_response','send_weekly_email','recompute_metrics')`,
+      sql`${t.kind} IN ('execute_prompt','score_response','send_weekly_email','recompute_metrics','audit_workspace_url')`,
     ),
     check("queue_status_check", sql`${t.status} IN ('pending','claimed','done','failed','dead')`),
   ],
@@ -379,6 +384,67 @@ export const usageCounters = pgTable(
     warnedAt60pct: timestamp({ withTimezone: true }),
     warnedAt100pct: timestamp({ withTimezone: true }),
     hardcapHitAt: timestamp({ withTimezone: true }),
+  },
+  (t) => [primaryKey({ columns: [t.workspaceId, t.periodStart] })],
+);
+
+// ──────────────────────────────────────────────────────────────────────
+// Technical audits — Sprint 6 PR B (cf. doc 09 § 2026-05-17)
+// Historise les audits techniques lancés depuis l'app (vs lead magnet
+// public `/outils/audit-technique` qui ne persiste rien).
+// ──────────────────────────────────────────────────────────────────────
+
+export const technicalAudits = pgTable(
+  "technical_audits",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    workspaceId: uuid()
+      .notNull()
+      .references(() => workspaces.id, { onDelete: "cascade" }),
+    /** brandId nullable : null pour les audits de concurrents qui ne sont
+     *  pas dans la table `brands`. Pour les audits de la marque principale,
+     *  pointe vers le `brand.id`. */
+    brandId: uuid().references(() => brands.id, { onDelete: "set null" }),
+    /** URL réellement auditée (peut différer du domaine brand si page interne). */
+    url: text().notNull(),
+    /** Marque l'audit comme étant celui d'un concurrent — utilisé par la
+     *  page compare et pour filtrer les alertes (pas d'alerte sur concurrent). */
+    isCompetitor: boolean().notNull().default(false),
+    /** Score global pondéré 0-100 (computeGlobalScore). */
+    scoreGlobal: integer().notNull(),
+    /** Sub-scores SEO/GEO/A11y/Perf sérialisés. */
+    subScores: jsonb().notNull(),
+    /** Liste complète des checks (pour replay du rapport). */
+    checks: jsonb().notNull(),
+    htmlSizeKb: decimal({ precision: 10, scale: 2 }),
+    httpStatus: integer().notNull(),
+    psiUnavailable: boolean().notNull().default(false),
+    /** Date à laquelle le HTML a été fetché. */
+    fetchedAt: timestamp({ withTimezone: true }).notNull(),
+    createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index("idx_technical_audits_workspace_created").on(t.workspaceId, t.createdAt),
+    index("idx_technical_audits_workspace_url").on(t.workspaceId, t.url),
+  ],
+);
+
+// ──────────────────────────────────────────────────────────────────────
+// Audit counters — fenêtre = mois calendaire UTC, quota par plan
+// ──────────────────────────────────────────────────────────────────────
+
+export const auditCounters = pgTable(
+  "audit_counters",
+  {
+    workspaceId: uuid()
+      .notNull()
+      .references(() => workspaces.id, { onDelete: "cascade" }),
+    /** Premier jour du mois UTC en YYYY-MM-01. */
+    periodStart: date().notNull(),
+    /** Compte les audits "owned" (brand + URLs internes) hors concurrents. */
+    auditsCount: integer().notNull().default(0),
+    /** Compte les audits concurrents (quota séparé moins strict). */
+    competitorAuditsCount: integer().notNull().default(0),
   },
   (t) => [primaryKey({ columns: [t.workspaceId, t.periodStart] })],
 );

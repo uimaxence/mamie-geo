@@ -263,24 +263,32 @@ la doc devient un cimetière.
 
 ---
 
-## 9. État du projet (snapshot — 2026-05-16)
+## 9. État du projet (snapshot — 2026-05-17)
 
-> Mise à jour 2026-05-16 — PR « Sprint 6 PR A — promotion audit
-> technique ». Hero refait avec 2 CTAs (Voir les plans + Audit technique
-> en variant `ai`) + line discrète vers Test visibilité IA. Nouvelle
-> section `<AuditTeaser />` (after `<TesConcurrentsPasToi />`) — copy
-> « Première action concrète » + mockup rapport animé (score global +
-> 4 sub-scores SEO/GEO/A11y/Perf + 1 issue critique aperçu). Footer
-> outils réordonné (audit-technique en premier — scalable, coût 0 €).
-> Nouveau variant CTA blog `audit-technique` (à utiliser sur les futurs
-> articles « comment optimiser pour les LLM »). PR B (app /app/audits
-> Premium) suit après livraison PR A.
+> Mise à jour 2026-05-17 — PR « Sprint 6 PR B — app /app/audits Premium »
 >
-> Précédentes : Sprint 5 premier wow moment (2026-05-16) — onboarding
-> skippable + one-shot run post-onboarding + SSE `/api/runs/events` +
-> `<RunActivityBar>`. Sprint 4 hard-cap LLM (2026-05-16) + Sprint 3
-> audit technique (2026-05-16) + Sprint 2 blog content-driven
-> (2026-05-16) + Stripe billing (2026-05-14) déjà en prod.
+> - PR « charts vivants ». Côté audits : nouvelles tables DB
+>   `technical_audits` (historise tous les audits app) et `audit_counters`
+>   (compteur mensuel par workspace). Quotas par plan ajoutés :
+>   Solo 5/mois (pas de comparaison), Starter 30 + 3 concurrents,
+>   Pro 100 + 10, Agency illimité. 4 pages app : `/app/audits` (list groupée
+>   par URL + delta), `/app/audits/new` (form pré-rempli sur brand.domain,
+>   ~10s synchrone), `/app/audits/[id]` (rapport full avec recos
+>   actionnables), `/app/audits/compare` (matrice URL × catégorie pour
+>   Starter+). Worker `audit_workspace_url` (queue Postgres) + cron hebdo
+>   `/api/cron/schedule-audits` (lundi 5h UTC) + email alerte
+>   `audit-score-drop` (delta < -10 pts). Sidebar entry « Audits techniques »
+>   (icon Wrench). Côté UX : charts dashboard rendus en permanence avec
+>   baseline 0 + overlay « données en cours de collecte » dès J0
+>   (TrendSection + BreakdownBars), suppression des EmptyState
+>   intempestifs.
+>
+> Précédentes : Sprint 6 PR A (2026-05-16) — promotion audit technique
+> sur la home + variant CTA blog. Sprint 5 premier wow moment
+> (2026-05-16) — onboarding skippable + one-shot run + SSE + bannière.
+> Sprint 4 hard-cap LLM (2026-05-16) + Sprint 3 audit technique
+> (2026-05-16) + Sprint 2 blog content-driven (2026-05-16) + Stripe
+> billing (2026-05-14) déjà en prod.
 >
 > Précédentes : Sprint 4 hard-cap LLM (2026-05-16) + Sprint 3 audit
 > technique (2026-05-16) + Sprint 2 blog content-driven (2026-05-16) +
@@ -311,7 +319,7 @@ Phasage acté le 2026-05-07 (cf. `09-decisions-journal.md` § 2026-05-07) :
 **UI complète** (Phase B) :
 
 - 9 routes publiques statiques : `/`, `/pricing`, `/blog` + 3 articles, `/outils/test-visibilite-ia`, 4 pages `/legal/*`
-- 8 routes app authentifiées : `/login`, `/app/onboarding` (wizard 3 étapes + suggestion IA), `/app/dashboard`, `/app/runs/[id]`, `/app/settings` (édition workspace name + brand aliases), `/app/prompts` (liste + CRUD + suggestion IA), `/app/prompts/[id]` (détail breakdown par LLM), `/app/competitors` (liste + CRUD). Quotas enforced par plan (cf. `src/lib/plans/quotas.ts`).
+- 12 routes app authentifiées : `/login`, `/app/onboarding` (wizard 3 étapes + suggestion IA), `/app/dashboard`, `/app/runs/[id]`, `/app/settings` (édition workspace name + brand aliases), `/app/prompts` (liste + CRUD + suggestion IA), `/app/prompts/[id]` (détail breakdown par LLM), `/app/competitors` (liste + CRUD), `/app/audits` + `/app/audits/new` + `/app/audits/[id]` + `/app/audits/compare` (Sprint 6 PR B 2026-05-17). Quotas enforced par plan (cf. `src/lib/plans/quotas.ts`).
 - Design system custom (Tailwind v4 + composants `src/components/ui/`) — direction Airbnb-like minimaliste actée le 2026-05-07, raffinée le 2026-05-11 (refs designme.agency + taap.it). PR 2026-05-12 ajoute 11 primitifs Radix/shadcn (Dialog, DropdownMenu, Tabs, Switch, Tooltip, Sheet, Skeleton, Banner, EmptyState, Pagination, Toaster sonner), 2 wrappers Recharts (LineChart, BarChartHorizontal) et la sidebar app. Polish dashboard 2026-05-12 (refs screens Max) : `Stat` enrichi (icône pastel + delta arrow vs J-7), `SegmentedControl` (time-range picker), `AreaChart` gradient mono-série, `BreakdownBars` (vertical bars + légende + liste valeurs). Cf. doc 10 § « Patterns dashboard ».
 - 49 tests unit Vitest verts, 13 tests E2E Playwright sur les flows publics
 - Blog MDX **content-driven** (cf. doc 09 § 2026-05-16) : articles dans `src/content/blog/*.mdx` avec frontmatter YAML, scannés par `src/lib/blog/registry.ts`. Plugins remark-gfm + rehype-slug + rehype-autolink-headings. Composant `<BlogFAQ>` qui auto-injecte JSON-LD FAQPage (boost GEO majeur). 3 articles migrés : « Qu'est-ce que le GEO », « Mamie GEO vs Profound », « État visibilité IA France 2026 ». OG image dynamique par article (`next/og`), JSON-LD Article + BreadcrumbList, `<ArticleCTA>` automatique selon `frontmatter.cta`, `<RelatedArticles>` (3 articles liés via catégorie + keywords overlap), `<TOC>` sticky desktop, `<ReadingProgress>` bar. Sitemap.ts + robots.ts auto-générés.
@@ -321,9 +329,9 @@ Phasage acté le 2026-05-07 (cf. `09-decisions-journal.md` § 2026-05-07) :
 **Auth + infra** (Phase B finale, Phase C partielle) :
 
 - Better Auth magic-link branché via Brevo (dual backend : **REST API** prioritaire, SMTP fallback) — bascule REST API actée le 2026-05-12 pour bypass IP whitelist Free plan
-- DB Neon EU Frankfurt, 16 tables, schéma stable. Migration `0001_thick_husk` 2026-05-14 ajoute `"solo"` à l'enum `workspaces.plan`.
+- DB Neon EU Frankfurt, 18 tables, schéma stable. Migration `0001_thick_husk` 2026-05-14 ajoute `"solo"` à l'enum `workspaces.plan`. Migration `0002_classy_joshua_kane` 2026-05-17 ajoute les tables `technical_audits` (historique app audits) et `audit_counters` (quota mensuel) + queue kind `audit_workspace_url`.
 - Vercel preview accessible — login fonctionnel, dashboard accessible
-- **Crons Vercel branchés en prod** (PR 2026-05-13) : `/api/cron/dispatch` (\*/5 min), `/api/cron/schedule-runs` (06:00 UTC quotidien), `/api/cron/schedule-weekly-emails` (lundi 09:00 UTC), `/api/cron/expire-past-due` (03:00 UTC quotidien, ajouté 2026-05-14). Endpoints supportent GET et POST avec auth `Bearer CRON_SECRET`. Cause racine du blocker antérieur identifiée : Vercel Cron envoie **GET**, les routes n'exposaient que **POST** (cf. doc 09 § 2026-05-13). Instrumentation JSON via `logCronEvent()` + endpoint debug `GET /api/cron/dispatch?inspect=1` qui dump l'état queue + présence des env vars.
+- **Crons Vercel branchés en prod** (PR 2026-05-13) : `/api/cron/dispatch` (\*/5 min), `/api/cron/schedule-runs` (06:00 UTC quotidien), `/api/cron/schedule-weekly-emails` (lundi 09:00 UTC), `/api/cron/expire-past-due` (03:00 UTC quotidien, ajouté 2026-05-14), `/api/cron/schedule-audits` (lundi 05:00 UTC, ajouté 2026-05-17 — Sprint 6 PR B). Endpoints supportent GET et POST avec auth `Bearer CRON_SECRET`. Cause racine du blocker antérieur identifiée : Vercel Cron envoie **GET**, les routes n'exposaient que **POST** (cf. doc 09 § 2026-05-13). Instrumentation JSON via `logCronEvent()` + endpoint debug `GET /api/cron/dispatch?inspect=1` qui dump l'état queue + présence des env vars.
 - **Worker `send_weekly_email` actif** : weekly recap envoyé lundi 9h UTC aux workspaces avec ≥ 1 run.success dans les 7 derniers jours. Template HTML inline + text fallback dans `src/lib/email/templates/weekly-recap.ts`. Trial nurture (J+3 / J+10) reporté (mode trial automatique supprimé 2026-05-14 — voir doc 09).
 
 **Stripe billing** (PR 2026-05-14) :

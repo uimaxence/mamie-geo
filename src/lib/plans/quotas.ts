@@ -26,30 +26,46 @@ export interface PlanQuotas {
   prompts: number; // Infinity si illimité
   competitors: number;
   cadence: PlanCadence;
+  /** Audits techniques "owned" (brand + URLs internes) par mois calendaire.
+   *  Sprint 6 PR B (cf. doc 09 § 2026-05-17). */
+  audits: number;
+  /** Nombre max de concurrents auditables en batch (page compare).
+   *  0 = feature désactivée (Solo). */
+  comparisonCompetitors: number;
 }
 
 const QUOTAS: Record<PlanKey, PlanQuotas> = {
   // Compte créé sans paiement — aucun run lancé tant que pas de subscription.
   // Pivot 2026-05-14 : remplace l'ancien "trial 7j sans carte" (cf. doc 09).
-  trialing: { prompts: 0, competitors: 0, cadence: "weekly" },
+  trialing: { prompts: 0, competitors: 0, cadence: "weekly", audits: 0, comparisonCompetitors: 0 },
   // Plan d'entrée 9,99 € — 1 run par semaine sur 5 LLMs, marge ~75 % en Phase A
-  solo: { prompts: 5, competitors: 3, cadence: "weekly" },
-  starter: { prompts: 25, competitors: 5, cadence: "daily" },
-  pro: { prompts: 100, competitors: 10, cadence: "daily" },
+  solo: { prompts: 5, competitors: 3, cadence: "weekly", audits: 5, comparisonCompetitors: 0 },
+  starter: {
+    prompts: 25,
+    competitors: 5,
+    cadence: "daily",
+    audits: 30,
+    comparisonCompetitors: 3,
+  },
+  pro: { prompts: 100, competitors: 10, cadence: "daily", audits: 100, comparisonCompetitors: 10 },
   agency: {
     prompts: 300,
     competitors: Number.POSITIVE_INFINITY,
     cadence: "daily",
+    audits: Number.POSITIVE_INFINITY,
+    comparisonCompetitors: Number.POSITIVE_INFINITY,
   },
   enterprise: {
     prompts: Number.POSITIVE_INFINITY,
     competitors: Number.POSITIVE_INFINITY,
     cadence: "daily",
+    audits: Number.POSITIVE_INFINITY,
+    comparisonCompetitors: Number.POSITIVE_INFINITY,
   },
-  // États dégradés : lecture seule, pas de runs.
-  past_due: { prompts: 0, competitors: 0, cadence: "weekly" },
-  expired: { prompts: 0, competitors: 0, cadence: "weekly" },
-  canceled: { prompts: 0, competitors: 0, cadence: "weekly" },
+  // États dégradés : lecture seule, pas de runs ni d'audits.
+  past_due: { prompts: 0, competitors: 0, cadence: "weekly", audits: 0, comparisonCompetitors: 0 },
+  expired: { prompts: 0, competitors: 0, cadence: "weekly", audits: 0, comparisonCompetitors: 0 },
+  canceled: { prompts: 0, competitors: 0, cadence: "weekly", audits: 0, comparisonCompetitors: 0 },
 };
 
 export function quotasFor(plan: string): PlanQuotas {
@@ -74,14 +90,14 @@ export function isActivePlan(plan: string): boolean {
 export interface QuotaReachedError {
   ok: false;
   error: "quota_reached";
-  resource: "prompts" | "competitors";
+  resource: "prompts" | "competitors" | "audits" | "comparison_competitors";
   current: number;
   max: number; // Number si fini, "illimité" jamais (pas de quota_reached si illimité)
   plan: PlanKey;
 }
 
 export function quotaReached(
-  resource: "prompts" | "competitors",
+  resource: QuotaReachedError["resource"],
   current: number,
   max: number,
   plan: PlanKey,

@@ -9,6 +9,7 @@ import {
   parseRecomputeMetricsPayload,
   recomputeMetricsForBrandLLMDate,
 } from "@/lib/metrics/recompute";
+import { auditWorkspaceUrl, parseAuditWorkspaceUrlPayload } from "@/workers/audit-workspace-url";
 import { executePrompt, parseExecutePromptPayload } from "@/workers/execute-prompt";
 import { scoreResponse, parseScoreResponsePayload } from "@/workers/score-response";
 import { parseSendWeeklyEmailPayload, sendWeeklyEmail } from "@/workers/send-weekly-email";
@@ -146,6 +147,11 @@ async function runWorker(job: ClaimedJob): Promise<void> {
     case "send_weekly_email": {
       const payload = parseSendWeeklyEmailPayload(job.payload);
       await sendWeeklyEmail(payload);
+      return;
+    }
+    case "audit_workspace_url": {
+      const payload = parseAuditWorkspaceUrlPayload(job.payload);
+      await auditWorkspaceUrl(payload);
       return;
     }
     default:
