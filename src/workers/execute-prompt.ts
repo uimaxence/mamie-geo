@@ -1,6 +1,7 @@
 import { eq, sql } from "drizzle-orm";
 import { db } from "@/db/client";
 import { brands, prompts, runs, usageCounters } from "@/db/schema";
+import { checkQuotaBeforeRun } from "@/lib/hardcap/check";
 import { getLLMClient, LLMError, type LLMClient, type LLMValue } from "@/lib/llm";
 import { enqueue } from "@/lib/queue";
 import type { ExecutePromptPayload } from "./execute-prompt-payload";
@@ -43,6 +44,25 @@ export async function executePrompt(
     where: eq(brands.id, prompt.brandId),
   });
   if (!brand) throw new Error(`Brand ${prompt.brandId} introuvable pour prompt ${promptId}`);
+
+  // 1bis. Hard-cap check (cf. src/lib/hardcap/check.ts) — bloque si le
+  //       workspace a dépassé 200 % de son quota théorique mensuel, ou
+  //       si hardCapHitAt est déjà posé. Envoie aussi les warnings 60/100 %.
+  //       Si bloqué, on marque le run en `skipped` et on ne chaîne pas
+  //       score_response. Le scheduler filtre déjà sur hardCapHitAt donc
+  //       ce cas concerne surtout les runs déjà queued au moment du hit.
+  const guard = await checkQuotaBeforeRun(brand.workspaceId);
+  if (guard.blocked) {
+    await db
+      .update(runs)
+      .set({
+        status: "skipped",
+        error: `Hard-cap : ${guard.reason}`,
+        executedAt: new Date(),
+      })
+      .where(eq(runs.id, runId));
+    return;
+  }
 
   // 2. Marquer le run comme running. Le run row a été créé en pending par
   //    schedule-runs ou /api/runs/trigger.

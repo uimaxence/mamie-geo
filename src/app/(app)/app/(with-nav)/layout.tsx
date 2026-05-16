@@ -17,7 +17,7 @@ export default async function WithNavLayout({ children }: { children: React.Reac
     <div className="md:flex md:min-h-screen">
       <AppSidebar data={data} />
       <main className="flex-1 min-w-0">
-        <UpgradeBanner plan={data.workspace.plan} />
+        <UpgradeBanner plan={data.workspace.plan} hardCapHitAt={data.workspace.hardCapHitAt} />
         {children}
       </main>
     </div>

@@ -14,7 +14,15 @@ import { auth } from "@/lib/auth";
 
 export interface SidebarData {
   user: { id: string; email: string };
-  workspace: { id: string; name: string; plan: string; slug: string };
+  workspace: {
+    id: string;
+    name: string;
+    plan: string;
+    slug: string;
+    /** Timestamp du hard-cap LLM hit — non null = workspace gelé,
+     *  utilisé par UpgradeBanner pour afficher le statut. */
+    hardCapHitAt: Date | null;
+  };
   brands: Array<{ id: string; name: string; domain: string }>;
   currentBrandId: string;
 }
@@ -29,6 +37,7 @@ export const loadSidebarData = cache(async (): Promise<SidebarData | null> => {
       name: workspaces.name,
       plan: workspaces.plan,
       slug: workspaces.slug,
+      hardCapHitAt: workspaces.hardCapHitAt,
     })
     .from(workspaceMembers)
     .innerJoin(workspaces, eq(workspaces.id, workspaceMembers.workspaceId))
@@ -54,6 +63,7 @@ export const loadSidebarData = cache(async (): Promise<SidebarData | null> => {
       name: ws.name,
       plan: ws.plan,
       slug: ws.slug,
+      hardCapHitAt: ws.hardCapHitAt,
     },
     brands: brandsRows,
     // V0 : 1 seule brand par workspace, on prend la plus ancienne. V1
