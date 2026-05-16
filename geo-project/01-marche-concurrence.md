@@ -204,16 +204,16 @@ Analyse de la page produit `https://www.semrush.com/ai-seo/overview/` au 2026-05
 
 ## Matrice comparative compacte
 
-| Outil         | Prix entrée | LLMs trackés       | Le Chat | UI FR     | Marque blanche      | Cible                |
-| ------------- | ----------- | ------------------ | ------- | --------- | ------------------- | -------------------- |
-| Profound      | $99-499     | 8+                 | ❌      | ❌        | Premium tier        | Enterprise           |
-| Peec AI       | €89         | 3-5                | ❌      | Partielle | Limitée             | Mid-market           |
-| Goodie AI     | $495        | 6                  | ❌      | ❌        | Premium             | Enterprise           |
-| Otterly       | $29         | 5                  | ❌      | ❌        | Standard tier       | TPE                  |
-| Rankscale     | €20         | 4                  | ❌      | ❌        | Limitée             | Solo                 |
-| Cairrot       | $99         | 5                  | ❌      | ❌        | Standard            | Agences B2B          |
-| Semrush AI    | inclus      | Plusieurs          | ❌      | ✅        | Non                 | SEO teams            |
-| **Mamie GEO** | **€49**     | **5 dont Le Chat** | **✅**  | **✅**    | **Cœur de produit** | **SMB + agences FR** |
+| Outil         | Prix entrée   | LLMs trackés       | Le Chat | UI FR     | Marque blanche      | Cible                            |
+| ------------- | ------------- | ------------------ | ------- | --------- | ------------------- | -------------------------------- |
+| Profound      | $99-499       | 8+                 | ❌      | ❌        | Premium tier        | Enterprise                       |
+| Peec AI       | €89           | 3-5                | ❌      | Partielle | Limitée             | Mid-market                       |
+| Goodie AI     | $495          | 6                  | ❌      | ❌        | Premium             | Enterprise                       |
+| Otterly       | $29           | 5                  | ❌      | ❌        | Standard tier       | TPE                              |
+| Rankscale     | €20           | 4                  | ❌      | ❌        | Limitée             | Solo                             |
+| Cairrot       | $99           | 5                  | ❌      | ❌        | Standard            | Agences B2B                      |
+| Semrush AI    | inclus        | Plusieurs          | ❌      | ✅        | Non                 | SEO teams                        |
+| **Mamie GEO** | **€9,99-149** | **5 dont Le Chat** | **✅**  | **✅**    | **Cœur de produit** | **Freelance + SMB + agences FR** |
 
 ---
 

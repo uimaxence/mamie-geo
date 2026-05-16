@@ -937,16 +937,23 @@ Après analyse coût × scalabilité × testabilité, voici les choix actés pou
 
 ## Roadmap technique par version
 
-### V0 (semaines 1-8)
+### V0 (semaines 1-8) — Livré 2026-05
 
-- Stack de base + Auth + Stripe
-- Onboarding wizard
-- Workers de tracking pour 5 LLMs
-- Détection citation (regex + Claude Haiku)
-- Dashboard principal + vue prompt
-- Email hebdo
-- Export CSV
-- Page paramètres + facturation
+- Stack de base + Auth Better Auth magic-link + Stripe billing complet
+- Onboarding wizard 3 étapes + bouton skip (`quickSetup`) + suggestion IA prompts
+- Worker `execute_prompt` (Phase A Haiku 4.5, Phase C ajoutera OpenAI / Mistral / Perplexity / Google)
+- Détection citation (regex + scoring qualitatif Claude Haiku)
+- Dashboard principal (Stat cards + AreaChart + BreakdownBars)
+- Pages CRUD `/app/prompts`, `/app/competitors`, `/app/settings` (édition workspace + brand aliases)
+- Email hebdo (`send_weekly_email` worker)
+- Plans Solo / Starter / Pro avec quotas + cadence per-plan (`daily` ou `weekly`)
+- **Hard-cap LLM 200 %** (`src/lib/hardcap/`) — bloque les workspaces qui dépassent + emails warning 60/100/200 %
+- **SSE temps réel** `/api/runs/events` + `<RunActivityBar>` + toasts à chaque transition
+- **One-shot run gratuit post-onboarding** (1 prompt × Claude ~$0,04 par signup)
+- **Blog content-driven** `src/content/blog/*.mdx` + JSON-LD Article/FAQPage/BreadcrumbList + OG image dynamique + sitemap.ts + robots.ts
+- **Outil audit technique site sans LLM** `/outils/audit-technique` (30+ checks, knowledge base recommandations rédigée main, PageSpeed Insights API)
+- Lead magnet existant `/outils/test-visibilite-ia`
+- Page interne `/styleguide` (noindex) — référence visuelle complète du design system
 
 ### V1 (mois 3-6)
 

@@ -36,37 +36,43 @@ Module **Tracker** uniquement. Rien d'autre. Pas d'optimization, pas de content,
 
 ### Fonctionnalités V0
 
-| Feature                                                         | Priorité | Notes                                           |
-| --------------------------------------------------------------- | -------- | ----------------------------------------------- |
-| Inscription / login (email + magic link)                        | P0       | Better Auth (cf. doc 03)                        |
-| Onboarding wizard (domaine → infos marque → prompts suggérés)   | P0       | Génération prompts via Claude API               |
-| Configuration des marques et concurrents                        | P0       | Max 5 concurrents trackés en V0                 |
-| Lancement / pause du tracking                                   | P0       |                                                 |
-| Exécution périodique des prompts (1×/jour ou 1×/sem selon plan) | P0       | Postgres-based queue + Vercel Cron (cf. doc 03) |
-| Stockage des réponses LLM brutes                                | P0       | Pour traçabilité + audit                        |
-| Détection de mention de marque + concurrents                    | P0       | Regex + LLM scoring (Claude Haiku)              |
-| Détection des sources citées (URLs)                             | P0       | Parser des réponses                             |
-| Score de visibilité global + par LLM + par prompt               | P0       | Pourcentage de citation pondéré                 |
-| Dashboard principal                                             | P0       | Cards + graphes recharts                        |
-| Vue détaillée par prompt (réponses brutes consultables)         | P0       |                                                 |
-| Vue concurrents (qui est cité, à quelle fréquence)              | P0       |                                                 |
-| Évolution dans le temps (graph 30 jours)                        | P0       |                                                 |
-| Email hebdo automatique                                         | P0       | Brevo                                           |
-| Export CSV                                                      | P0       |                                                 |
-| Page facturation Stripe Customer Portal                         | P0       |                                                 |
-| Plans Starter / Pro avec limitations volumes                    | P0       | Pas Agence en V0                                |
+| Feature                                                         | Priorité | Notes                                                  |
+| --------------------------------------------------------------- | -------- | ------------------------------------------------------ |
+| Inscription / login (email + magic link)                        | P0       | Better Auth (cf. doc 03)                               |
+| Onboarding wizard (domaine → infos marque → prompts suggérés)   | P0       | Génération prompts via Claude API                      |
+| Configuration des marques et concurrents                        | P0       | Max 5 concurrents trackés en V0                        |
+| Lancement / pause du tracking                                   | P0       |                                                        |
+| Exécution périodique des prompts (1×/jour ou 1×/sem selon plan) | P0       | Postgres-based queue + Vercel Cron (cf. doc 03)        |
+| Stockage des réponses LLM brutes                                | P0       | Pour traçabilité + audit                               |
+| Détection de mention de marque + concurrents                    | P0       | Regex + LLM scoring (Claude Haiku)                     |
+| Détection des sources citées (URLs)                             | P0       | Parser des réponses                                    |
+| Score de visibilité global + par LLM + par prompt               | P0       | Pourcentage de citation pondéré                        |
+| Dashboard principal                                             | P0       | Cards + graphes recharts                               |
+| Vue détaillée par prompt (réponses brutes consultables)         | P0       |                                                        |
+| Vue concurrents (qui est cité, à quelle fréquence)              | P0       |                                                        |
+| Évolution dans le temps (graph 30 jours)                        | P0       |                                                        |
+| Email hebdo automatique                                         | P0       | Brevo                                                  |
+| Export CSV                                                      | P0       |                                                        |
+| Page facturation Stripe Customer Portal                         | P0       | Livré 2026-05-14                                       |
+| Plans Solo / Starter / Pro avec limitations volumes             | P0       | Solo 9,99 € ajouté 2026-05-14, Agency retiré UI public |
+| Hard-cap LLM 200 % du quota théorique mensuel                   | P0       | Livré 2026-05-16 (`src/lib/hardcap/`)                  |
+| Outil audit technique site (lead magnet, sans LLM)              | P0       | `/outils/audit-technique`, livré 2026-05-16            |
+| SSE temps réel des runs + bannière + toasts                     | P0       | `/api/runs/events`, livré 2026-05-16                   |
+| One-shot run gratuit post-onboarding (~$0,04)                   | P0       | Livré 2026-05-16                                       |
+| Onboarding skippable (« configurer plus tard »)                 | P0       | `quickSetup`, livré 2026-05-16                         |
+| Blog content-driven MDX + JSON-LD FAQPage GEO                   | P0       | Livré 2026-05-16 (`src/content/blog/*.mdx`)            |
 
 ### Hors périmètre V0 (explicite)
 
-- ❌ Recommandations d'optimisation
-- ❌ Audit du site (llms.txt, schema.org, etc.)
-- ❌ Marque blanche / multi-workspaces
+- ❌ Recommandations d'optimisation IA dans l'app (audit technique sépare ce besoin via /outils/audit-technique)
+- ❌ Marque blanche / multi-workspaces (réintroduit en V2 via plan Agency sur devis)
 - ❌ API publique
 - ❌ Intégrations GA4, Search Console
 - ❌ SSO
 - ❌ Mobile app (responsive web suffit)
 - ❌ Notifications Slack
 - ❌ Comparaison historique > 90 jours
+- ❌ Multi-providers LLM (OpenAI / Mistral / Perplexity / Google) — V0 Haiku 4.5 seul ; 4 providers viendront en Phase C
 
 ### Critères de qualité V0
 
@@ -79,9 +85,14 @@ Module **Tracker** uniquement. Rien d'autre. Pas d'optimization, pas de content,
 ### Métriques de succès V0
 
 - 50 inscriptions en 30 jours après lancement
-- 20% de conversion freemium → payant (10 clients payants)
+- 20 % de conversion signup → payant (10 clients payants)
 - NPS > 30 après 60 jours
-- Churn mensuel < 10%
+- Churn mensuel < 10 %
+
+> Note 2026-05-14 : pas de freemium permanent. Conversion mesurée depuis
+> le signup direct, l'outil audit one-shot, ou le pricing direct
+> (garantie 14 j refund).
+
 - 1 retour produit par semaine analysé et logué
 
 ---

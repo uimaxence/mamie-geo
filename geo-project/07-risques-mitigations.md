@@ -12,24 +12,24 @@ Chaque risque est noté sur 3 axes :
 
 ## Matrice synthétique
 
-| #   | Risque                                                             | Probabilité | Impact                   | Fenêtre     |
-| --- | ------------------------------------------------------------------ | ----------- | ------------------------ | ----------- |
-| R1  | Semrush / Ahrefs lancent un module GEO FR sérieux                  | Moyenne     | Élevé                    | Moyen       |
-| R2  | Peec AI localise sérieusement en français                          | Élevée      | Élevé                    | Court-moyen |
-| R3  | Coûts LLM augmentent ou volume hors budget                         | Moyenne     | Élevé                    | Continu     |
-| R4  | Marché FR plus petit que prévu                                     | Moyenne     | Critique                 | Court       |
-| R5  | Burnout / désengagement solo founder                               | Moyenne     | Critique                 | Continu     |
-| R6  | LLM majeurs ferment ou changent leur API                           | Faible      | Élevé                    | Continu     |
-| R7  | Citation drift trop important rend le tracking fiable              | Moyenne     | Moyen                    | Continu     |
-| R8  | Mistral n'investit pas Le Chat à long terme                        | Faible      | Moyen                    | Long        |
-| R9  | Bug critique ou perte de données                                   | Faible      | Critique                 | Continu     |
-| R10 | Réglementation IA / scrap restrictif                               | Faible      | Élevé                    | Long        |
-| R11 | Mamie SEO ne génère pas le trafic attendu                          | Moyenne     | Élevé                    | Court       |
-| R12 | Difficulté de closing agences                                      | Moyenne     | Élevé                    | Court-moyen |
-| R13 | Concurrent FR sort en parallèle                                    | Faible      | Moyen                    | Court-moyen |
-| R14 | Churn > 10% mensuel                                                | Moyenne     | Critique                 | Court       |
-| R15 | Procès / problème juridique                                        | Faible      | Élevé                    | Continu     |
-| R16 | Dépassement plafond micro-entrepreneur (~77 700 €/an BIC services) | Élevée      | Critique si non anticipé | Court-moyen |
+| #   | Risque                                                             | Probabilité                | Impact                   | Fenêtre                                                      |
+| --- | ------------------------------------------------------------------ | -------------------------- | ------------------------ | ------------------------------------------------------------ |
+| R1  | Semrush / Ahrefs lancent un module GEO FR sérieux                  | Moyenne                    | Élevé                    | Moyen                                                        |
+| R2  | Peec AI localise sérieusement en français                          | Élevée                     | Élevé                    | Court-moyen                                                  |
+| R3  | Coûts LLM augmentent ou volume hors budget                         | Moyenne                    | Élevé                    | Continu                                                      |
+| R4  | Marché FR plus petit que prévu                                     | Moyenne                    | Critique                 | Court                                                        |
+| R5  | Burnout / désengagement solo founder                               | Moyenne                    | Critique                 | Continu                                                      |
+| R6  | LLM majeurs ferment ou changent leur API                           | Faible                     | Élevé                    | Continu                                                      |
+| R7  | Citation drift trop important rend le tracking fiable              | Moyenne                    | Moyen                    | Continu                                                      |
+| R8  | Mistral n'investit pas Le Chat à long terme                        | Faible                     | Moyen                    | Long                                                         |
+| R9  | Bug critique ou perte de données                                   | Faible                     | Critique                 | Continu                                                      |
+| R10 | Réglementation IA / scrap restrictif                               | Faible                     | Élevé                    | Long                                                         |
+| R11 | Mamie SEO ne génère pas le trafic attendu                          | Moyenne                    | Élevé                    | Court                                                        |
+| R12 | Difficulté de closing agences                                      | Moyenne                    | Élevé                    | Court-moyen                                                  |
+| R13 | Concurrent FR sort en parallèle                                    | Faible                     | Moyen                    | Court-moyen                                                  |
+| R14 | Churn > 10% mensuel                                                | Moyenne                    | Critique                 | Court                                                        |
+| R15 | Procès / problème juridique                                        | Faible                     | Élevé                    | Continu                                                      |
+| R16 | Dépassement plafond micro-entrepreneur (~77 700 €/an BIC services) | **Imminente (2026-05-16)** | Critique si non anticipé | **Court** — bascule SAS/EURL à anticiper M9-10 si ARR > 50K€ |
 
 ---
 
@@ -347,6 +347,12 @@ applicable au SaaS) a un plafond de chiffre d'affaires annuel de
 **~77 700 €** (seuil 2026, à confirmer chaque année). Au-delà, sortie automatique
 du régime, application de la TVA (même rétroactive si pas anticipée), et
 fiscalité réelle simplifiée.
+
+> **Update 2026-05-16** — Risque réévalué **imminent** plutôt que théorique.
+> L'ajout du plan Solo 9,99 € multiplie le volume de signups attendu sans
+> baisser proportionnellement le CA (ARPU blended ~110 €/mois vs 140 € avant).
+> Trajectoire conservatrice révisée doc 04 + outil audit-technique comme
+> lead magnet scalable = exposition réelle au dépassement entre **M6 et M9**.
 
 **Pourquoi probable** : trajectoire conservateur du doc 04 prévoit ~70 K€ de
 revenus cumulés sur l'année 1, ce qui frôle le plafond. Trajectoire base ou

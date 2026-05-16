@@ -12,9 +12,12 @@ Mamie GEO est le **premier SaaS francophone de Generative Engine
 Optimization** : il mesure quotidiennement la visibilité d'une marque
 dans **ChatGPT, Claude, Perplexity, Gemini et Le Chat (Mistral)**, et
 livre des recommandations actionnables. Cible cœur : freelances SEO,
-PME marketing, agences SEO/marketing FR. Pricing : **49 / 149 / 399 €**
+PME marketing, agences SEO/marketing FR.
 
-- Enterprise sur devis.
+Pricing public : **Solo 9,99 € / Starter 49 € / Pro 149 €**. Plan Agency
+(300 prompts) retiré de la grille publique 2026-05-14, reste sur devis.
+Enterprise sur devis. Pas de trial automatique — garantie remboursement
+14 jours.
 
 Détail : `geo-project/00-vision-strategie.md` et `01-marche-concurrence.md`.
 

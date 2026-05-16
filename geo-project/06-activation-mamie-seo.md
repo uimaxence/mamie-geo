@@ -120,31 +120,50 @@ Objectif : devenir LA source FR sur le GEO. Métaphysiquement, ces articles sero
 
 ## Lead magnets (outils gratuits)
 
-### Lead magnet n°1 — "Test ma visibilité IA"
+### Lead magnet n°1 — « Test ma visibilité IA »
 
-URL : `mamie-geo.fr/outils/test-visibilite-ia` (route `(marketing)` du mono-repo, cf. doc 03)
+URL : `mamie-geo.fr/outils/test-visibilite-ia` (route `(marketing)` du mono-repo, cf. doc 03).
 
 #### Comment ça marche (UX)
 
-1. L'utilisateur entre son nom de marque + son domaine
-2. Il choisit 5 prompts (suggérés ou custom)
-3. L'outil lance un appel ChatGPT (1 LLM seulement, sinon trop coûteux pour gratuit)
-4. Résultat affiché en 60 secondes : score sur 5, position, concurrents
-5. CTA : "Voulez-vous le faire sur les 5 LLMs et le suivre dans le temps ?" → trial Mamie GEO
+1. L'utilisateur entre son nom de marque + son domaine + 5 prompts custom (suggérés via Claude Haiku optionnel)
+2. L'équipe ops génère l'audit manuellement sous 24 h ouvrées (rapport personnalisé email)
+3. CTA : « Voulez-vous le faire sur les 5 LLMs et le suivre dans le temps ? » → souscription Mamie GEO (Solo 9,99 € dès l'entrée)
+
+> Note 2026-05-14 : pas de trial automatique. Le CTA pointe vers la grille `/pricing` avec garantie remboursement 14 jours.
 
 #### Coût unitaire
 
-- 5 prompts × 1 LLM × ~$0.003 = **$0.015 par audit gratuit** (cohérent avec doc 04)
-- Cap à 100 audits gratuits/jour pour budget contrôlé
-- Limite 1 par email pour éviter abuse
+- Génération manuelle : ~10 min de travail humain (Max ou ops) + ~$0,20 LLM pour 5 prompts × 1 LLM
+- Limite 1 par marque pour éviter abuse + qualité éditoriale
 
 #### Conversion attendue
 
-- 100 audits/jour × 30 = 3000 audits/mois
-- Conversion en trial 5-10% = 150-300 trials/mois
-- Conversion trial → payant 15-25% = 22-75 clients/mois
+- 30-50 audits/mois en V0 (génération manuelle scalable jusqu'à 100)
+- Conversion audit → souscription 10-20 %
+- Cible : 5-10 clients payants/mois via ce canal
 
-> Cet outil est probablement le levier d'acquisition le plus puissant à activer.
+### Lead magnet n°2 — « Audit technique site » (sans LLM)
+
+URL : `mamie-geo.fr/outils/audit-technique` — **livré 2026-05-16**, complète l'outil ci-dessus.
+
+#### Comment ça marche (UX)
+
+1. L'utilisateur entre une URL
+2. L'outil fetche la page (cheerio) + appelle Google PageSpeed Insights API
+3. 30+ checks codés humainement (SEO classique, GEO-specific FAQPage JSON-LD / llms.txt / E-E-A-T, Open Graph, a11y, sécurité, mobile, Core Web Vitals)
+4. **Teaser public** : score global + 4 sub-scores + 3-5 issues prioritaires affichés en 10 s
+5. **Email gate** pour le rapport complet (30+ checks + recommandations détaillées par issue, rédigées à la main, lien doc externe)
+6. CTA produit en fin : « Tu veux qu'on tracke ta visibilité IA en continu ? » → `/pricing`
+
+#### Différenciateur
+
+- Sans LLM = 0 € de coût marginal par audit (vs ~$0,20 si on passait par Haiku)
+- Knowledge base recommandations rédigée humainement = qualité supérieure à un outil SEO LLM-générique
+- Checks GEO-specific (FAQPage, llms.txt, E-E-A-T) que personne d'autre ne fait
+- 100 % gratuit en perpétuité (mode teaser), lead capture sur l'email rapport
+
+> **Probablement notre lead magnet le plus scalable** car aucun coût marginal LLM. Multiplie sans contrainte de budget.
 
 ### Lead magnet n°2 — Newsletter Mamie GEO
 

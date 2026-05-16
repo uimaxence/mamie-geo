@@ -2,11 +2,11 @@
 
 ## Philosophie pricing
 
-1. **Pricing transparent et public** — pas de "contact us" sauf Enterprise
-2. **Sous Peec AI sur l'entrée de gamme** (€49 vs €89) pour démocratiser et capter freelances
-3. **Marque blanche dès le tier Pro** (pas en addon) — différenciateur agence majeur
+1. **Pricing transparent et public** — pas de "contact us" sauf Enterprise et Agency
+2. **Sous Peec AI sur l'entrée de gamme** (Solo 9,99 € + Starter 49 €, vs Peec 89 €) pour démocratiser et capter freelances
+3. **Marque blanche réservée Agency sur devis** — différenciateur agence majeur, retiré de la grille publique 2026-05-14
 4. **Annuel à -15-20%** pour favoriser cashflow et réduire churn
-5. **Pas de freemium permanent** — trial gratuit 7 jours sans carte requise, puis payant
+5. **Pas de freemium permanent, pas de trial automatique** (pivot 2026-05-14) — garantie remboursement 14 jours sur toute première souscription + outils gratuits one-shot pour démontrer la valeur
 6. **Pas de remises silencieuses** — annuel, ETI, education clairement affichés
 7. **Pricing en EUR** sur le marché FR/EU, USD pour exports si besoin
 
@@ -220,23 +220,28 @@ Calcul de référence pour le plan Pro (149 €/mois) :
 
 ### Marge brute par plan (après coûts LLM uniquement)
 
-| Plan    | Prix  | Coût LLM/mois | Marge brute | %       |
-| ------- | ----- | ------------- | ----------- | ------- |
-| Starter | 49 €  | ~1.50 €       | 47.50 €     | **97%** |
-| Pro     | 149 € | ~45 €         | 104 €       | **70%** |
-| Agence  | 399 € | ~135 €        | 264 €       | **66%** |
+Coût LLM par run = ~$0,043 (Haiku 4.5 tracking + scoring). Phase C (5 LLMs simultanés) multiplie par ~5.
+
+| Plan               | Prix HT | Cadence | Runs/mois Phase A | Coût LLM/mois | Marge brute Phase A |
+| ------------------ | ------- | ------- | ----------------- | ------------- | ------------------- |
+| **Solo**           | 9,99 €  | weekly  | 20 (5×4 sem)      | ~$0,86        | **~91 %**           |
+| **Starter**        | 49 €    | daily   | 750 (25×30)       | ~$32          | **~39 %**           |
+| **Pro**            | 149 €   | daily   | 3000 (100×30)     | ~$129         | **~18 %** ⚠️        |
+| Agency (sur devis) | 399 €   | daily   | 9000              | ~$390         | **~3 %** ⚠️         |
+
+> ⚠️ Phase C (5 LLMs simultanés) — Pro et Agency basculeront sur Sonnet 4.6 (plus cher mais qualité supérieure). Marge à recalculer dès que la bascule LLMs aura lieu. Solo reste sur Haiku (cadence weekly suffit).
 
 ### Marge brute après tous coûts variables
 
-Ajout : Stripe (1.5% + 0.25€), Brevo (forfait absorbé), hébergement (réparti) :
+Ajout : Stripe (1,5 % + 0,25 €), Brevo (forfait absorbé), hébergement (réparti), traitement (cheerio audit) :
 
-| Plan    | Marge nette ~ |
-| ------- | ------------- |
-| Starter | ~93%          |
-| Pro     | ~65%          |
-| Agence  | ~62%          |
+| Plan    | Marge nette ~ Phase A |
+| ------- | --------------------- |
+| Solo    | ~88 %                 |
+| Starter | ~36 %                 |
+| Pro     | ~15 %                 |
 
-**Conclusion** : pricing tient si les hypothèses LLM sont vérifiées. Le Pro est le tier le plus risqué — à monitorer mensuellement.
+**Conclusion** : Solo est le plus profitable en valeur relative (cadence hebdo + faible volume). Starter reste viable. **Pro doit basculer Sonnet 4.6 + tarif à reconsidérer** avant Phase C — sinon marge insuffisante pour absorber le coût d'acquisition.
 
 ---
 
@@ -244,14 +249,21 @@ Ajout : Stripe (1.5% + 0.25€), Brevo (forfait absorbé), hébergement (répart
 
 ### Hypothèses de mix client
 
+> Mise à jour 2026-05-16 — refonte du mix avec ajout du plan Solo 9,99 €
+> (le plus accessible, recrute les freelances ultra-budget). Le mix
+> historique 50/35/13/2 est obsolète.
+
 À l'équilibre (mois 12), répartition cible :
 
-- 50% Starter
-- 35% Pro
-- 13% Agence
-- 2% Enterprise
+- **20 % Solo** (entry-point freelance, conversion principale via /pricing + outils gratuits)
+- **45 % Starter** (cœur de marché)
+- **25 % Pro** (PME marketing)
+- **8 % Agency** (sur devis)
+- **2 % Enterprise**
 
-ARPU blended cible : ~140 €/mois
+ARPU blended cible : ~110 €/mois (vs ~140 € avant ajout Solo)
+
+> Note : la baisse d'ARPU est compensée par un volume de signups supérieur attendu — Solo capte des prospects qui n'auraient pas converti à 49 € minimum. Net positif sur le revenu total si conversion Solo → Starter à 12 mois ≥ 25 %.
 
 ### Scénario conservateur — mois par mois
 
