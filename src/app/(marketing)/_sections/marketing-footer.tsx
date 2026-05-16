@@ -15,8 +15,14 @@ const COLUMNS = [
     links: [
       { label: "Features", href: "/#how-it-works" },
       { label: "Tarif", href: "/pricing" },
-      { label: "Outils gratuits", href: "/outils/test-visibilite-ia" },
-      { label: "Changelog", href: "/changelog" },
+      { label: "Blog", href: "/blog" },
+    ],
+  },
+  {
+    title: "Outils gratuits",
+    links: [
+      { label: "Test visibilité IA", href: "/outils/test-visibilite-ia" },
+      { label: "Audit technique site", href: "/outils/audit-technique" },
     ],
   },
   {

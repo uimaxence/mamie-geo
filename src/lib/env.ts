@@ -55,6 +55,11 @@ const schema = z.object({
 
   CRON_SECRET: z.string().min(16),
   ADMIN_ALERT_EMAIL: z.string().email(),
+
+  // Google PageSpeed Insights API — clé optionnelle. Sans clé, l'API
+  // est limitée à 25K req/jour partagés par IP, ce qui suffit pour V0.
+  // Avec clé gratuite, illimité. cf. /outils/audit-technique.
+  GOOGLE_PAGESPEED_API_KEY: z.string().min(1).optional(),
 });
 
 export type Env = z.infer<typeof schema>;

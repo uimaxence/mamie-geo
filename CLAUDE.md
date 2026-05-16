@@ -262,15 +262,17 @@ la doc devient un cimetière.
 
 ## 9. État du projet (snapshot — 2026-05-16)
 
-> Mise à jour 2026-05-16 — PR « Sprint 2 blog content-driven » : refacto
-> complet du blog vers `src/content/blog/*.mdx` + frontmatter YAML +
-> registry filesystem scan. Pipeline SEO/GEO complet (JSON-LD Article +
-> FAQPage + BreadcrumbList, OG image dynamique, sitemap.ts, robots.ts).
-> `<BlogFAQ>` auto-injecte le JSON-LD FAQPage (boost GEO majeur).
-> `<ArticleCTA>` automatique selon `frontmatter.cta` (solo/starter/pro/
-> audit-gratuit). `<RelatedArticles>` + `<TOC>` + `<ReadingProgress>`.
-> Workflow "copier-coller MDX" opérationnel (cf. `src/content/blog/README.md`).
-> 145 tests verts. Suivi 2026-05-14 — PR Stripe billing — déjà en prod.
+> Mise à jour 2026-05-16 — PR « Sprint 3 audit technique site sans LLM » :
+> nouvel outil `/outils/audit-technique` (lead magnet additionnel).
+> Pipeline 30+ checks sans IA — SEO classique (~10) + GEO-specific
+> (FAQPage JSON-LD, Article JSON-LD, llms.txt, E-E-A-T) + Open Graph +
+> a11y + sécurité + mobile + Core Web Vitals via PageSpeed Insights API.
+> Knowledge base recommandations rédigée à la main (~35 entrées, notre
+> différenciateur qualitatif). Modèle teaser public + rapport complet
+> par email Brevo. 177 tests verts.
+>
+> Précédentes : Sprint 2 blog content-driven (2026-05-16) + Stripe billing
+> (2026-05-14) déjà en prod.
 
 ### Phase actuelle
 
