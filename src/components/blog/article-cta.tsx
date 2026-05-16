@@ -5,11 +5,12 @@ import type { BlogCta } from "@/lib/blog/schemas";
 // frontmatter `cta:` détermine quelle variante afficher — pas de logique
 // par-catégorie ni par-tag pour rester simple. L'auteur choisit.
 //
-// 4 variantes :
-//   solo          → "Commencer avec Solo 9,99 €/mois" + accent terracotta
-//   starter       → "Commencer avec Starter 49 €/mois"
-//   pro           → "Découvrir Pro"
-//   audit-gratuit → "Audit gratuit" + variant ai (gradient terracotta→purple→blue)
+// 5 variantes :
+//   solo            → "Commencer avec Solo 9,99 €/mois" + accent terracotta
+//   starter         → "Commencer avec Starter 49 €/mois"
+//   pro             → "Découvrir Pro"
+//   audit-gratuit   → "Audit IA gratuit" (humain, 24 h ouvrées) + variant ai
+//   audit-technique → "Audit technique gratuit" (outil instantané) + variant ai
 
 interface CTAConfig {
   headline: string;
@@ -46,6 +47,13 @@ const CTA_CONFIG: Record<BlogCta, CTAConfig> = {
     body: "5 prompts critiques de ton secteur, testés sur les 5 IA grand public, comparatif avec 3 concurrents. Rapport personnalisé sous 24 h ouvrées.",
     href: "/outils/test-visibilite-ia",
     buttonLabel: "Audit IA gratuit",
+    buttonVariant: "ai",
+  },
+  "audit-technique": {
+    headline: "Audit technique de ton site, en 10 secondes.",
+    body: "30+ checks SEO + GEO avec recommandations actionnables. Sans IA, sans inscription. Tu vois immédiatement ce qui cloche.",
+    href: "/outils/audit-technique",
+    buttonLabel: "Lancer l'audit gratuit",
     buttonVariant: "ai",
   },
 };

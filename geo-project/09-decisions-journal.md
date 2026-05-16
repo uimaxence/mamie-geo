@@ -161,6 +161,71 @@ haut et l'entrée "2026-05-05 — Réponses aux 10 questions de bootstrap".
 
 ### Décisions enregistrées
 
+#### 2026-05-16 — Sprint 6 PR A — promotion audit technique sur la home + blog
+
+**Contexte** : audit ROI marketing fait après Sprint 5. Deux lead magnets en prod : `/outils/test-visibilite-ia` (humain, ~24 h ouvrées, ~$0,20 LLM/audit, capacité limitée par mon temps) et `/outils/audit-technique` (instantané, pas d'appel LLM, coût marginal 0 €, scalable à l'infini). Le second est massivement sous-promu : pas de mention en hero, pas de section home dédiée, listé après le test IA dans le footer. Le test visibilité IA est mis en avant partout alors qu'il scale mal.
+
+**Objectif** : faire de l'audit technique le lead magnet #1 — il est ownable (peu de concurrents font de l'audit GEO-spécifique), gratuit-forever sans contrainte coût, et c'est la première action concrète à recommander à quelqu'un qui découvre le GEO. Le test visibilité IA reste exposé mais en second.
+
+**Options considérées** :
+
+- A : Refonte home large + promo audit + app /app/audits Premium dans un seul gros PR (~2000 lignes, risque merge)
+- B : 2 PRs séquentielles — (PR A) promotion audit dans home + blog seule ; (PR B) app /app/audits Premium séparée ← **retenu**
+- C : Juste ajouter une mention discrète dans le footer + un bouton ghost en hero (suffisant à court terme mais ne capitalise pas)
+
+**Choix PR A (livrée 2026-05-16)** :
+
+1. **Hero refait** : primary inchangé (« Voir les plans »), secondary remplacé par `<LinkButton variant="ai">` « Audit technique gratuit » → `/outils/audit-technique`. Lien texte discret vers `/outils/test-visibilite-ia` en dessous. Sous-titre mis à jour avec « 30+ checks SEO + GEO en 10 secondes, sans inscription ».
+2. **Nouvelle section `<AuditTeaser />`** insérée dans la home **après `<TesConcurrentsPasToi />` et avant `<LLMBadges />`** — logique narrative : (a) « les IA citent les concurrents pas toi » pose le problème, (b) AuditTeaser pose la première solution actionnable et gratuite. Layout 2 colonnes : copy à gauche (eyebrow « Première action concrète » + titre + mini-stats « 30+ checks · 10 sec · 0 € forever · sans inscription » + CTA `variant="ai"`) + mockup à droite (`<MockupAudit />` client component qui simule un rapport : score global 67/100, 4 sub-scores SEO/GEO/A11y/Perf avec progress bars animées au mount, issue critique FAQPage JSON-LD avec recommandation).
+3. **Footer outils réordonné** : « Audit technique site » remonte en première position, « Test visibilité IA » en seconde — l'outil le plus scalable doit être premier.
+4. **Nouveau variant CTA blog `audit-technique`** ajouté à `BLOG_CTAS` (`src/lib/blog/schemas.ts`) + entry correspondante dans `CTA_CONFIG` (`src/components/blog/article-cta.tsx`). Pas appliqué aux 3 articles existants — sera utilisé sur les **futurs articles** orientés « comment optimiser pour les LLM » (où l'audit technique est la première action recommandée). On garde `audit-gratuit` (humain) pour les articles généralistes GEO ; les deux variants coexistent.
+
+**Hors scope PR A (refusé)** :
+
+- ❌ Refonte hero copy/animations large — reporté, on attend feedback users
+- ❌ Réorganisation profonde des sections home (juste 1 ajout après TesConcurrentsPasToi)
+- ❌ Refonte du blog au-delà du nouveau variant CTA
+- ❌ App version audit (sera PR B)
+
+**Justification** :
+
+- **PR séquentielles plutôt que big bang** : PR A est ~400 lignes, mergeable en 24 h. PR B (app /app/audits Premium, ~1500 lignes estimées) part sur une base déjà déployée et bénéficie du feedback users sur la nouvelle home avant qu'on investisse dans la version premium.
+- **Variant `ai` pour les CTAs audit-technique** : cohérent avec le langage déjà posé (le variant `ai` injecte Sparkles + gradient terracotta→purple→blue). Visuellement, le CTA hero a la même signature que le CTA fin d'article + le CTA AuditTeaser → l'utilisateur identifie « outil » sans avoir besoin de lire.
+- **Mockup animé plutôt que screenshot statique** : un screenshot vieillit (UI bouge), un mockup en composant React reflète le design system courant. Les progress bars qui s'animent au mount cassent la froideur d'une capture figée et donnent envie de cliquer pour voir « son » rapport.
+- **Pas d'A/B test V0** : trafic insuffisant pour conclure. On bascule franchement, on mesure conversion sur 14 jours, on ajuste si besoin.
+
+**Conséquences attendues** :
+
+- Conversion `landing → /outils/audit-technique` montera (estimation : ×3-5 vs niveau actuel quasi nul) car le CTA passe d'un lien footer obscur à un emplacement hero + une section home dédiée.
+- Inversement, conversion vers `/outils/test-visibilite-ia` baissera mécaniquement de ~30-50 %. Acceptable : c'était un goulot d'étranglement de toute façon (capacité limitée par mon temps).
+- L'audit technique reste sans inscription en V0 (pas de gate email pour l'instant — cf. décision Sprint 3) ; ce sera revu dans la PR B Premium si la conversion organique nous fournit déjà assez de leads.
+- KPI à suivre dans `09 § Suivi KPI mensuel` : ratio `/outils/audit-technique` page views ÷ home views, taux click-through CTA hero variant `ai`, taux complétion form audit-technique.
+
+**À revisiter** : 2026-06-15 — décider si on garde les 2 lead magnets ou si on retire le test IA humain (devenu redondant avec l'app version audit Premium PR B).
+
+**Fichiers touchés PR A** :
+
+- `src/app/(marketing)/_sections/hero.tsx` (modif CTA secondaire + sous-titre)
+- `src/app/(marketing)/_sections/audit-teaser.tsx` (NOUVEAU — server component)
+- `src/app/(marketing)/_sections/mockups/mockup-audit.tsx` (NOUVEAU — client, progress bars animées)
+- `src/app/(marketing)/page.tsx` (wire `<AuditTeaser />` après `<TesConcurrentsPasToi />`)
+- `src/app/(marketing)/_sections/marketing-footer.tsx` (réordonner outils)
+- `src/lib/blog/schemas.ts` (ajouter `"audit-technique"` à `BLOG_CTAS`)
+- `src/components/blog/article-cta.tsx` (ajouter entry au `CTA_CONFIG`)
+- `CLAUDE.md` § 9 + ce doc
+
+**Plan PR B (résumé — détail à écrire au moment de la PR)** :
+
+- Table `technical_audits` + migration Drizzle
+- Pages `/app/audits` (list grouped by URL + sparkline 30j), `/app/audits/new` (form + checkbox concurrent), `/app/audits/[id]` (rapport full réutilisant `<AuditResults>`), `/app/audits/compare` (matrice URL × catégorie)
+- Server actions `runWorkspaceAudit` / `runCompetitorsBatch` / `listAudits` / `getAuditDetail` / `deleteAudit` + quota check
+- Worker `audit_workspace_url` async + cron `/api/cron/schedule-audits` (lundi 5h UTC)
+- Email alerte `audit-score-drop` (delta < -10 pts vs audit précédent)
+- Sidebar entry « Audits techniques »
+- Quotas : Solo 5/mois, Starter 30, Pro 100, Agency illimité ; comparaison concurrents Starter ✅ 3 / Pro ✅ 10 / Agency ✅ illimité ; Solo ❌
+
+---
+
 #### 2026-05-16 — Sprint 2 blog : pipeline content-driven + SEO/GEO complet
 
 **Contexte** : le blog avait 3 articles MDX bloqués sur une architecture manuelle — registry TS hardcodé dans `src/app/(blog)/blog/articles-registry.ts`, pas de frontmatter YAML, pas d'OG image dynamique, pas de JSON-LD, pas de sitemap. Impossible de "copier-coller un markdown" pour ajouter un article, et les LLM/Google ne pouvaient pas tirer parti des FAQ structured data qui boostent le ranking GEO.

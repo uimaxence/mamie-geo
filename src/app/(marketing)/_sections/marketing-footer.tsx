@@ -21,8 +21,10 @@ const COLUMNS = [
   {
     title: "Outils gratuits",
     links: [
-      { label: "Test visibilité IA", href: "/outils/test-visibilite-ia" },
+      // Audit technique en premier : coût marginal 0 € + plus scalable
+      // (cf. doc 09 § 2026-05-16).
       { label: "Audit technique site", href: "/outils/audit-technique" },
+      { label: "Test visibilité IA", href: "/outils/test-visibilite-ia" },
     ],
   },
   {

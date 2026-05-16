@@ -10,7 +10,15 @@ import { z } from "zod";
 export const BLOG_CATEGORIES = ["Tutoriel", "Étude", "Méthodo", "Comparatif", "Actualité"] as const;
 export type BlogCategory = (typeof BLOG_CATEGORIES)[number];
 
-export const BLOG_CTAS = ["solo", "starter", "pro", "audit-gratuit"] as const;
+export const BLOG_CTAS = [
+  "solo",
+  "starter",
+  "pro",
+  "audit-gratuit",
+  // Lead magnet outil audit technique (sans inscription) — utiliser sur
+  // les articles « comment optimiser pour les LLM ». Cf. doc 09 § 2026-05-16.
+  "audit-technique",
+] as const;
 export type BlogCta = (typeof BLOG_CTAS)[number];
 
 export const blogFrontmatterSchema = z.object({

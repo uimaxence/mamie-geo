@@ -1,4 +1,5 @@
 import { BottomFade } from "@/components/ui";
+import { AuditTeaser } from "./_sections/audit-teaser";
 import { FAQ } from "./_sections/faq";
 import { Hero } from "./_sections/hero";
 import { HowItWorks } from "./_sections/how-it-works";
@@ -19,6 +20,9 @@ import { TesOutils } from "./_sections/tes-outils";
 // PR 2026-05-16 : ajout TesConcurrentsPasToi (démo LLM live), placée
 // juste après PourquoiMaintenant (section noire) pour ne pas casser
 // le rythme cards-sous-section-noire qui structure le scroll.
+// PR 2026-05-16 (promo audit) : ajout AuditTeaser après
+// TesConcurrentsPasToi — solution actionnable gratuite juste après
+// la mise en scène du problème.
 
 export default function HomePage() {
   return (
@@ -27,6 +31,7 @@ export default function HomePage() {
       <Hero />
       <PourquoiMaintenant />
       <TesConcurrentsPasToi />
+      <AuditTeaser />
       <LLMBadges />
       <SansAvec />
       <HowItWorks />

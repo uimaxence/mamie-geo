@@ -20,18 +20,24 @@ export function Hero() {
           </h1>
           <p className="type-body-lg mt-6 max-w-2xl">
             Mamie GEO mesure quotidiennement la visibilité de ta marque dans les 5 IA grand public.
-            En français, hébergé en Europe, à partir de 49&nbsp;€/mois.
+            En français, hébergé en Europe, à partir de 9,99&nbsp;€/mois.
           </p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
             <LinkButton href="/pricing" variant="primary" size="lg">
               Voir les plans →
             </LinkButton>
-            <LinkButton href="/outils/test-visibilite-ia" variant="secondary" size="lg">
-              Tester gratuitement
+            <LinkButton href="/outils/audit-technique" variant="ai" size="lg">
+              Audit technique gratuit
             </LinkButton>
           </div>
           <p className="type-meta mt-6">
-            Dès 9,99 €/mois · Garantie remboursement 14 jours · 5 minutes pour s&apos;inscrire
+            30+ checks SEO + GEO en 10 secondes · sans inscription ·{" "}
+            <a
+              href="/outils/test-visibilite-ia"
+              className="underline decoration-[color:var(--color-ink-soft)]/40 underline-offset-2 transition hover:decoration-[color:var(--color-ink)]"
+            >
+              ou tester la visibilité IA
+            </a>
           </p>
         </div>
       </CornerFrame>

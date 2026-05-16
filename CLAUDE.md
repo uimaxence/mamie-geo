@@ -265,17 +265,22 @@ la doc devient un cimetière.
 
 ## 9. État du projet (snapshot — 2026-05-16)
 
-> Mise à jour 2026-05-16 — PR « Sprint 5 premier wow moment » : refonte
-> UX du parcours signup → premier run. Fix `?next=` propagation login →
-> magic-link → callback. Email magic-link refondu (HTML branded, instructions
-> mobile-friendly, CTA renvoyer). Onboarding skippable via `quickSetup`
-> action (workspace + brand minimaux, pas de competitors/prompts).
-> **One-shot run gratuit post-onboarding** (1 prompt × Claude Haiku
-> ~$0,04) — premier datapoint immédiat. SSE endpoint `/api/runs/events`
+> Mise à jour 2026-05-16 — PR « Sprint 6 PR A — promotion audit
+> technique ». Hero refait avec 2 CTAs (Voir les plans + Audit technique
+> en variant `ai`) + line discrète vers Test visibilité IA. Nouvelle
+> section `<AuditTeaser />` (after `<TesConcurrentsPasToi />`) — copy
+> « Première action concrète » + mockup rapport animé (score global +
+> 4 sub-scores SEO/GEO/A11y/Perf + 1 issue critique aperçu). Footer
+> outils réordonné (audit-technique en premier — scalable, coût 0 €).
+> Nouveau variant CTA blog `audit-technique` (à utiliser sur les futurs
+> articles « comment optimiser pour les LLM »). PR B (app /app/audits
+> Premium) suit après livraison PR A.
 >
-> - hook `useRunEvents` + bannière `<RunActivityBar>` qui montre l'état
->   des runs en temps réel + toasts à chaque transition. Confirmation
->   paiement explicite sur `/app/settings?checkout=success`. 191 tests verts.
+> Précédentes : Sprint 5 premier wow moment (2026-05-16) — onboarding
+> skippable + one-shot run post-onboarding + SSE `/api/runs/events` +
+> `<RunActivityBar>`. Sprint 4 hard-cap LLM (2026-05-16) + Sprint 3
+> audit technique (2026-05-16) + Sprint 2 blog content-driven
+> (2026-05-16) + Stripe billing (2026-05-14) déjà en prod.
 >
 > Précédentes : Sprint 4 hard-cap LLM (2026-05-16) + Sprint 3 audit
 > technique (2026-05-16) + Sprint 2 blog content-driven (2026-05-16) +
@@ -311,6 +316,7 @@ Phasage acté le 2026-05-07 (cf. `09-decisions-journal.md` § 2026-05-07) :
 - 49 tests unit Vitest verts, 13 tests E2E Playwright sur les flows publics
 - Blog MDX **content-driven** (cf. doc 09 § 2026-05-16) : articles dans `src/content/blog/*.mdx` avec frontmatter YAML, scannés par `src/lib/blog/registry.ts`. Plugins remark-gfm + rehype-slug + rehype-autolink-headings. Composant `<BlogFAQ>` qui auto-injecte JSON-LD FAQPage (boost GEO majeur). 3 articles migrés : « Qu'est-ce que le GEO », « Mamie GEO vs Profound », « État visibilité IA France 2026 ». OG image dynamique par article (`next/og`), JSON-LD Article + BreadcrumbList, `<ArticleCTA>` automatique selon `frontmatter.cta`, `<RelatedArticles>` (3 articles liés via catégorie + keywords overlap), `<TOC>` sticky desktop, `<ReadingProgress>` bar. Sitemap.ts + robots.ts auto-générés.
 - Lead magnet `/outils/test-visibilite-ia` avec form capture → email Brevo
+- Lead magnet `/outils/audit-technique` (cf. doc 09 § 2026-05-16) : 30+ checks SEO + GEO (FAQPage, llms.txt, schema Article, E-E-A-T) + Google PSI + scoring 4 axes (SEO/GEO/A11y/Perf). Pas d'appel LLM → coût marginal 0 €. **Promu en home** via `<AuditTeaser />` (placée après `<TesConcurrentsPasToi />`) + CTA hero variant `ai`. Variant CTA blog `audit-technique` disponible pour les articles « optimisation pour les LLM ».
 
 **Auth + infra** (Phase B finale, Phase C partielle) :
 
