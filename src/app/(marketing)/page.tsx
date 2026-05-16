@@ -16,17 +16,17 @@ import { TesOutils } from "./_sections/tes-outils";
 // PR 12b : BottomFade ajouté (effet d'ambiance fixed bottom).
 // PR 2026-05-13 : ajout de PourquoiMaintenant (data) et TesOutils
 // (features nommées) — cf. doc 09 § 2026-05-13 (refresh inspiré Semrush).
-// PR 2026-05-16 : ajout TesConcurrentsPasToi (démo LLM live) après le
-// hero pour cogner sur le problème dès le scroll initial — cf. design
-// refs Kree8.
+// PR 2026-05-16 : ajout TesConcurrentsPasToi (démo LLM live), placée
+// juste après PourquoiMaintenant (section noire) pour ne pas casser
+// le rythme cards-sous-section-noire qui structure le scroll.
 
 export default function HomePage() {
   return (
     <>
       <MarketingHeader />
       <Hero />
-      <TesConcurrentsPasToi />
       <PourquoiMaintenant />
+      <TesConcurrentsPasToi />
       <LLMBadges />
       <SansAvec />
       <HowItWorks />

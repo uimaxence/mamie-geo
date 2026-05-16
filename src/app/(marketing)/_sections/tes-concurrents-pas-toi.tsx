@@ -29,11 +29,14 @@ gsap.registerPlugin(ScrollTrigger);
 const USER_PROMPT = "Quels outils de monitoring de visibilité GEO me recommandes-tu ?";
 
 // Tokens de réponse — chaque entrée = un "token" qui s'affiche en bloc.
-// Les `competitor` sont highlight visuellement à la fin. La marque
-// "Mamie GEO" est volontairement absente de la réponse.
+// Les `competitor` sont highlight rouge (= concurrent qui rafle la mise).
+// Mamie GEO apparaît en 4ᵉ avec un highlight terracotta (= notre marque
+// est citée mais pas en tête, ce qui légitime le pitch « il y a de la
+// place pour grimper »).
 type Token =
   | { type: "text"; value: string }
   | { type: "competitor"; value: string }
+  | { type: "self"; value: string }
   | { type: "newline" };
 
 const RESPONSE_TOKENS: Token[] = [
@@ -61,6 +64,13 @@ const RESPONSE_TOKENS: Token[] = [
   { type: "competitor", value: "Otterly.AI" },
   { type: "text", value: " — " },
   { type: "text", value: "plus accessible" },
+  { type: "newline" },
+  { type: "text", value: "• " },
+  { type: "self", value: "Mamie GEO" },
+  { type: "text", value: " — " },
+  { type: "text", value: "le concurrent " },
+  { type: "text", value: "francophone, " },
+  { type: "text", value: "pensé PME" },
 ];
 
 export function TesConcurrentsPasToi() {
@@ -93,6 +103,7 @@ export function TesConcurrentsPasToi() {
       gsap.set(tokens, { opacity: 0, y: 4 });
       gsap.set(thinkingRef.current, { opacity: 0 });
       gsap.set(".competitor-highlight", { backgroundColor: "rgba(0,0,0,0)" });
+      gsap.set(".self-highlight", { backgroundColor: "rgba(0,0,0,0)" });
 
       const tl = gsap.timeline({
         scrollTrigger: {
@@ -141,7 +152,8 @@ export function TesConcurrentsPasToi() {
         stagger: 0.07,
       });
 
-      // 6. Highlight des noms de concurrents (background sweep).
+      // 6a. Highlight des concurrents (background rouge clair) — "ils
+      //     prennent les premières places".
       tl.to(
         ".competitor-highlight",
         {
@@ -151,6 +163,19 @@ export function TesConcurrentsPasToi() {
           stagger: 0.15,
         },
         "+=0.3",
+      );
+
+      // 6b. Highlight Mamie GEO (terracotta faint) — "tu y es, mais en
+      //     queue de peloton". L'effet finit après les concurrents pour
+      //     ramener l'œil vers la marque.
+      tl.to(
+        ".self-highlight",
+        {
+          backgroundColor: "var(--color-accent-faint)",
+          duration: 0.45,
+          ease: "power2.out",
+        },
+        "+=0.15",
       );
     },
     { scope: containerRef },
@@ -292,6 +317,16 @@ function LLMMockup({ promptRef, caretRef, submitRef, thinkingRef, responseRef }:
                   <span
                     key={idx}
                     className="response-token competitor-highlight rounded-sm px-1 font-semibold text-[color:var(--color-error)]"
+                  >
+                    {token.value}
+                  </span>
+                );
+              }
+              if (token.type === "self") {
+                return (
+                  <span
+                    key={idx}
+                    className="response-token self-highlight rounded-sm px-1 font-semibold text-[color:var(--color-accent)]"
                   >
                     {token.value}
                   </span>

@@ -78,13 +78,14 @@
   --glow-orange: 0 0 12px rgba(234, 88, 12, 0.35);
   --glow-blue: 0 0 12px rgba(37, 99, 235, 0.3);
 
-  /* ── Gradient "AI" rose → indigo (boutons Ask AI, Suggérer prompts,
-     audit IA). Inspiration refs Kree8 2026-05-16. Réservé aux actions
-     IA pour qu'il garde sa rareté et son sens. ───────────────────── */
-  --gradient-ai: linear-gradient(135deg, #f8c4d1 0%, #c8b4f6 50%, #a5b4f6 100%);
-  --gradient-ai-hover: linear-gradient(135deg, #f6b4c4 0%, #bca4f4 50%, #95a4f4 100%);
-  --glow-ai: 0 0 24px -4px rgba(248, 180, 196, 0.55), 0 4px 14px -2px rgba(165, 180, 246, 0.35);
-  --glow-ai-hover: 0 0 28px -2px rgba(248, 180, 196, 0.7), 0 6px 18px -2px rgba(165, 180, 246, 0.5);
+  /* ── Gradient "AI" — combine les deux couleurs marque Mamie GEO
+     (terracotta + primary blue) avec un purple en passerelle pour
+     l'aspect IA. Distinctif et 100 % Mamie GEO. Réservé aux actions
+     IA (audit, suggérer prompts, futurs Ask AI). ─────────────────── */
+  --gradient-ai: linear-gradient(135deg, #c5532e 0%, #7c3aed 55%, #329cff 100%);
+  --gradient-ai-hover: linear-gradient(135deg, #b54824 0%, #6d28d9 55%, #1d7ee5 100%);
+  --glow-ai: 0 0 22px -4px rgba(197, 83, 46, 0.45), 0 4px 14px -2px rgba(50, 156, 255, 0.35);
+  --glow-ai-hover: 0 0 28px -2px rgba(197, 83, 46, 0.6), 0 6px 18px -2px rgba(50, 156, 255, 0.5);
 
   /* ── Police unique : Inter via next/font/google ── */
   --font-sans:
