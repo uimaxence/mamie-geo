@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Sparkles, X } from "lucide-react";
 import { Badge, Button, Field, Input } from "@/components/ui";
-import { submitOnboarding, suggestPrompts, type OnboardingInput } from "./actions";
+import { quickSetup, submitOnboarding, suggestPrompts, type OnboardingInput } from "./actions";
 
 // Wizard onboarding 3 étapes — client component avec state local.
 // PR 13 : step 3 a maintenant un bouton "Suggérer 5 prompts via IA"
@@ -31,12 +31,20 @@ const INITIAL_STATE: WizardState = {
   prompts: ["", "", "", "", ""],
 };
 
-export function OnboardingWizard({ userEmail }: { userEmail: string }) {
+export function OnboardingWizard({
+  userEmail,
+  nextAfter,
+}: {
+  userEmail: string;
+  /** Redirect path après onboarding/skip (de `?next=` du login). */
+  nextAfter: string | null;
+}) {
   const router = useRouter();
   const [step, setStep] = useState<Step>(1);
   const [state, setState] = useState<WizardState>(INITIAL_STATE);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const redirectTarget = nextAfter ?? "/app/dashboard";
 
   function canGoNext(): boolean {
     if (step === 1) {
@@ -82,7 +90,34 @@ export function OnboardingWizard({ userEmail }: { userEmail: string }) {
     startTransition(async () => {
       try {
         await submitOnboarding(payload);
-        router.push("/app/dashboard");
+        router.push(redirectTarget);
+        router.refresh();
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Erreur inconnue");
+      }
+    });
+  }
+
+  function canSkip(): boolean {
+    // Skip requiert au minimum l'étape 1 (workspace + brand + domain).
+    return (
+      state.workspaceName.trim().length > 0 &&
+      state.brandName.trim().length > 0 &&
+      /^[a-z0-9.-]+\.[a-z]{2,}$/i.test(state.domain.trim())
+    );
+  }
+
+  function handleSkip() {
+    if (!canSkip()) return;
+    setError(null);
+    startTransition(async () => {
+      try {
+        await quickSetup({
+          workspaceName: state.workspaceName.trim(),
+          brandName: state.brandName.trim(),
+          domain: state.domain.trim(),
+        });
+        router.push(redirectTarget);
         router.refresh();
       } catch (err) {
         setError(err instanceof Error ? err.message : "Erreur inconnue");
@@ -134,6 +169,22 @@ export function OnboardingWizard({ userEmail }: { userEmail: string }) {
           {step === 3 ? (pending ? "Création en cours…" : "Terminer →") : "Suivant →"}
         </Button>
       </div>
+
+      {/* Skip — visible dès que l'étape 1 est valide. Le user peut
+       * passer direct au dashboard / paiement avec un workspace minimal.
+       * Pratique pour les conversions impulsives via /pricing. */}
+      {step < 3 && canSkip() && (
+        <div className="mt-6 flex items-center justify-center">
+          <button
+            type="button"
+            onClick={handleSkip}
+            disabled={pending}
+            className="text-sm font-medium text-[color:var(--color-muted)] underline-offset-4 hover:text-[color:var(--color-ink)] hover:underline disabled:opacity-50"
+          >
+            {pending ? "Configuration…" : "Configurer plus tard, j'y vais directement →"}
+          </button>
+        </div>
+      )}
     </main>
   );
 }

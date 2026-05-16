@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
-import { Asterisk } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { Asterisk, ArrowLeft, Mail } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { Button, Field, Input } from "@/components/ui";
 import { Logo } from "@/components/marketing/logo";
@@ -13,27 +14,44 @@ import { Logo } from "@/components/marketing/logo";
 //     + tagline éditoriale en bas
 //   - Panel droite : asterisque accent + form magic-link
 // Sur mobile : seul le panel form est rendu, plein écran.
+//
+// Param `?next=/app/...` propagé en callbackURL Better Auth (cf. doc 09
+// § 2026-05-16 PR « premier wow moment » fix friction post-pricing).
 
 export default function LoginPage() {
+  return (
+    <Suspense fallback={<LoginFallback />}>
+      <LoginContent />
+    </Suspense>
+  );
+}
+
+function LoginFallback() {
+  return <main className="grid min-h-screen grid-cols-1 md:grid-cols-2" />;
+}
+
+function LoginContent() {
+  const params = useSearchParams();
+  // Whitelist : seuls les paths internes commençant par / sont acceptés.
+  // Évite open-redirect (un attaquant pourrait pousser `?next=https://evil`).
+  const rawNext = params.get("next");
+  const next = rawNext && rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : null;
+  const callbackURL = next ?? "/app/dashboard";
+
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (status === "sending") return;
     setStatus("sending");
     setErrorMessage(null);
 
     try {
-      const result = await authClient.signIn.magicLink({
-        email,
-        callbackURL: "/app/dashboard",
-      });
+      const result = await authClient.signIn.magicLink({ email, callbackURL });
 
       if (result.error) {
-        // Loguer le détail brut côté DevTools — utile pour debugger
-        // les erreurs Better Auth qui ne portent pas toujours un
-        // message lisible côté client.
         console.error("[login] Better Auth error:", result.error);
         setStatus("error");
         const detail = [
@@ -58,6 +76,23 @@ export default function LoginPage() {
     }
   }
 
+  async function handleResend() {
+    if (status === "sending" || !email) return;
+    setStatus("sending");
+    try {
+      const result = await authClient.signIn.magicLink({ email, callbackURL });
+      if (result.error) {
+        setStatus("error");
+        setErrorMessage(result.error.message ?? "Erreur d'envoi du lien.");
+        return;
+      }
+      setStatus("sent");
+    } catch (error) {
+      setStatus("error");
+      setErrorMessage(error instanceof Error ? error.message : "Erreur inattendue.");
+    }
+  }
+
   return (
     <main className="grid min-h-screen grid-cols-1 md:grid-cols-2">
       {/* Panel gauche — dégradé warm + identité brand. Caché sur mobile. */}
@@ -73,7 +108,7 @@ export default function LoginPage() {
         <div className="max-w-md">
           <p className="type-eyebrow text-[color:var(--color-ink)]/70">Tu peux enfin</p>
           <h2 className="mt-4 font-semibold text-[2rem] leading-tight tracking-tight text-[color:var(--color-ink)] sm:text-[2.5rem]">
-            mesurer ta visibilité dans ChatGPT, Claude et Le Chat — en français, à 49 €/mois.
+            mesurer ta visibilité dans ChatGPT, Claude et Le Chat — en français, dès 9,99 €/mois.
           </h2>
         </div>
       </aside>
@@ -90,57 +125,142 @@ export default function LoginPage() {
             <span>Mamie GEO</span>
           </Link>
 
-          <Asterisk
-            size={28}
-            strokeWidth={2.5}
-            className="text-[color:var(--color-accent)]"
-            aria-hidden
-          />
-
-          <h1 className="type-h1 mt-4">On t&apos;envoie un lien magique.</h1>
-          <p className="type-body-lg mt-3">
-            Pas de mot de passe à retenir. Un lien valable 10 minutes arrive dans ta boîte.
-          </p>
-
-          <form onSubmit={handleSubmit} className="mt-10 flex flex-col gap-5">
-            <Field label="Adresse email">
-              <Input
-                type="email"
-                required
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                placeholder="prenom@exemple.fr"
-                autoComplete="email"
-                autoFocus
-              />
-            </Field>
-            <Button
-              type="submit"
-              variant="primary"
-              size="lg"
-              disabled={status === "sending" || !email}
-            >
-              {status === "sending" ? "Envoi en cours…" : "Recevoir le lien →"}
-            </Button>
-          </form>
-
-          {status === "sent" && (
-            <div className="mt-6 rounded-[var(--radius-lg)] border border-[color:var(--color-success)]/20 bg-[color:var(--color-success-bg)] px-4 py-3 text-sm text-[color:var(--color-success)]">
-              Lien envoyé à <strong>{email}</strong>. Vérifie ta boîte (et tes spams).
-            </div>
+          {status === "sent" ? (
+            <SentState email={email} onResend={handleResend} onEdit={() => setStatus("idle")} />
+          ) : (
+            <IdleState
+              email={email}
+              setEmail={setEmail}
+              status={status}
+              errorMessage={errorMessage}
+              onSubmit={handleSubmit}
+              next={next}
+            />
           )}
-          {status === "error" && errorMessage && (
-            <div className="mt-6 rounded-[var(--radius-lg)] border border-[color:var(--color-error)]/20 bg-[color:var(--color-error-bg)] px-4 py-3 text-sm text-[color:var(--color-error)]">
-              {errorMessage}
-            </div>
-          )}
-
-          <p className="type-meta mt-12">
-            Pas encore de compte ? Il sera créé automatiquement à la 1<sup>re</sup> connexion. 14
-            jours d&apos;essai sans carte bancaire.
-          </p>
         </div>
       </section>
     </main>
+  );
+}
+
+function IdleState({
+  email,
+  setEmail,
+  status,
+  errorMessage,
+  onSubmit,
+  next,
+}: {
+  email: string;
+  setEmail: (v: string) => void;
+  status: "idle" | "sending" | "sent" | "error";
+  errorMessage: string | null;
+  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+  next: string | null;
+}) {
+  return (
+    <>
+      <Asterisk
+        size={28}
+        strokeWidth={2.5}
+        className="text-[color:var(--color-accent)]"
+        aria-hidden
+      />
+
+      <h1 className="type-h1 mt-4">On t&apos;envoie un lien magique.</h1>
+      <p className="type-body-lg mt-3">
+        Pas de mot de passe à retenir. Un lien valable 10 minutes arrive dans ta boîte.
+      </p>
+
+      {next && (
+        <p className="mt-4 rounded-[var(--radius-md)] bg-[color:var(--color-gray-50)] px-3 py-2 text-xs text-[color:var(--color-ink-soft)]">
+          Une fois connecté, on te ramène automatiquement à&nbsp;
+          <code className="font-mono text-[color:var(--color-ink)]">{next}</code>.
+        </p>
+      )}
+
+      <form onSubmit={onSubmit} className="mt-8 flex flex-col gap-5">
+        <Field label="Adresse email">
+          <Input
+            type="email"
+            required
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            placeholder="prenom@exemple.fr"
+            autoComplete="email"
+            autoFocus
+          />
+        </Field>
+        <Button type="submit" variant="primary" size="lg" disabled={status === "sending" || !email}>
+          {status === "sending" ? "Envoi en cours…" : "Recevoir le lien →"}
+        </Button>
+      </form>
+
+      {status === "error" && errorMessage && (
+        <div className="mt-6 rounded-[var(--radius-lg)] border border-[color:var(--color-error)]/20 bg-[color:var(--color-error-bg)] px-4 py-3 text-sm text-[color:var(--color-error)]">
+          {errorMessage}
+        </div>
+      )}
+
+      <p className="type-meta mt-12">
+        Pas encore de compte ? Il sera créé automatiquement à la 1<sup>re</sup> connexion. Garantie
+        remboursement 14 jours sur toute première souscription.
+      </p>
+    </>
+  );
+}
+
+function SentState({
+  email,
+  onResend,
+  onEdit,
+}: {
+  email: string;
+  onResend: () => void;
+  onEdit: () => void;
+}) {
+  return (
+    <div>
+      <div className="inline-flex size-12 items-center justify-center rounded-[var(--radius-pill)] bg-[color:var(--color-success-bg)] text-[color:var(--color-success)] shadow-[var(--shadow-sm)]">
+        <Mail size={22} strokeWidth={2} />
+      </div>
+
+      <h1 className="type-h1 mt-4">Vérifie ta boîte mail.</h1>
+      <p className="type-body-lg mt-3">
+        On a envoyé un lien de connexion à <strong>{email}</strong>. Tu as 10 minutes pour cliquer
+        dessus.
+      </p>
+
+      <div className="mt-6 rounded-[var(--radius-lg)] bg-[color:var(--color-gray-50)] p-4 text-sm text-[color:var(--color-ink-soft)]">
+        <p className="font-medium text-[color:var(--color-ink)]">Si tu utilises ton téléphone</p>
+        <p className="mt-1">
+          Le lien s&apos;ouvrira dans ton navigateur — pas dans l&apos;app email. Tu peux fermer
+          cette page et revenir y plus tard, ta session sera active partout.
+        </p>
+      </div>
+
+      <div className="mt-8 flex flex-col gap-3">
+        <Button variant="secondary" size="md" onClick={onResend}>
+          Renvoyer le lien
+        </Button>
+        <button
+          type="button"
+          onClick={onEdit}
+          className="inline-flex items-center gap-1 self-start text-sm font-medium text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]"
+        >
+          <ArrowLeft size={14} strokeWidth={2.2} />
+          Utiliser une autre adresse
+        </button>
+      </div>
+
+      <p className="type-meta mt-10">
+        Rien reçu ? Vérifie tes spams. Si toujours rien après 2 min, renvoie le lien ou
+        contacte-nous à{" "}
+        <a href="mailto:hello@mamie-geo.fr" className="link">
+          hello@mamie-geo.fr
+        </a>
+        .
+      </p>
+    </div>
   );
 }

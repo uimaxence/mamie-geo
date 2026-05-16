@@ -262,17 +262,21 @@ la doc devient un cimetière.
 
 ## 9. État du projet (snapshot — 2026-05-16)
 
-> Mise à jour 2026-05-16 — PR « Sprint 3 audit technique site sans LLM » :
-> nouvel outil `/outils/audit-technique` (lead magnet additionnel).
-> Pipeline 30+ checks sans IA — SEO classique (~10) + GEO-specific
-> (FAQPage JSON-LD, Article JSON-LD, llms.txt, E-E-A-T) + Open Graph +
-> a11y + sécurité + mobile + Core Web Vitals via PageSpeed Insights API.
-> Knowledge base recommandations rédigée à la main (~35 entrées, notre
-> différenciateur qualitatif). Modèle teaser public + rapport complet
-> par email Brevo. 177 tests verts.
+> Mise à jour 2026-05-16 — PR « Sprint 5 premier wow moment » : refonte
+> UX du parcours signup → premier run. Fix `?next=` propagation login →
+> magic-link → callback. Email magic-link refondu (HTML branded, instructions
+> mobile-friendly, CTA renvoyer). Onboarding skippable via `quickSetup`
+> action (workspace + brand minimaux, pas de competitors/prompts).
+> **One-shot run gratuit post-onboarding** (1 prompt × Claude Haiku
+> ~$0,04) — premier datapoint immédiat. SSE endpoint `/api/runs/events`
 >
-> Précédentes : Sprint 2 blog content-driven (2026-05-16) + Stripe billing
-> (2026-05-14) déjà en prod.
+> - hook `useRunEvents` + bannière `<RunActivityBar>` qui montre l'état
+>   des runs en temps réel + toasts à chaque transition. Confirmation
+>   paiement explicite sur `/app/settings?checkout=success`. 191 tests verts.
+>
+> Précédentes : Sprint 4 hard-cap LLM (2026-05-16) + Sprint 3 audit
+> technique (2026-05-16) + Sprint 2 blog content-driven (2026-05-16) +
+> Stripe billing (2026-05-14) déjà en prod.
 
 ### Phase actuelle
 

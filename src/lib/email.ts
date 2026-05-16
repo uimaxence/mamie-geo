@@ -159,14 +159,51 @@ export async function sendMagicLinkEmail(params: { to: string; url: string }) {
   const { to, url } = params;
   const backend = pickBackend();
   const subject = "Ton lien de connexion Mamie GEO";
-  const text = `Salut,\n\nVoici ton lien de connexion (valable 10 minutes) :\n\n${url}\n\nSi tu n'as pas demandé ce lien, ignore cet email.\n\n— Mamie GEO`;
-  const html = `
-    <p>Salut,</p>
-    <p>Voici ton lien de connexion (valable 10 minutes) :</p>
-    <p><a href="${url}">${url}</a></p>
-    <p style="color:#737373;font-size:12px;">Si tu n'as pas demandé ce lien, ignore cet email.</p>
-    <p>— Mamie GEO</p>
-  `;
+  const text = `Bonjour,
+
+Voici ton lien de connexion (valable 10 minutes) :
+
+${url}
+
+Si tu utilises ton téléphone : le lien s'ouvrira dans ton navigateur, pas dans l'app email. Pas d'inquiétude, ta session sera active partout.
+
+Tu n'as pas demandé ce lien ? Ignore cet email, il ne se passera rien.
+
+— L'équipe Mamie GEO`;
+  // HTML inline branded — gradient halo terracotta/blue, logo Mamie,
+  // CTA bouton noir, instructions mobile-friendly + fallback support.
+  const html = `<!doctype html>
+<html lang="fr">
+  <body style="margin:0;padding:24px;background:#fafafa;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;color:#191919;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;margin:0 auto;background:#fff;border-radius:12px;border:1px solid #e6e6e6;">
+      <tr><td style="padding:32px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:24px;">
+          <span style="display:inline-flex;width:32px;height:32px;border-radius:10px;background:#329cff;color:#fff;align-items:center;justify-content:center;font-size:20px;font-weight:700;">M</span>
+          <span style="font-size:17px;font-weight:600;letter-spacing:-0.01em;">Mamie GEO</span>
+        </div>
+
+        <h1 style="margin:0 0 16px;font-size:22px;font-weight:700;letter-spacing:-0.01em;">Voici ton lien de connexion</h1>
+        <p style="margin:0 0 24px;font-size:15px;line-height:1.6;color:#404040;">Il est valable <strong>10 minutes</strong>. Clique simplement dessous, on s'occupe du reste.</p>
+
+        <p style="margin:24px 0;">
+          <a href="${url}" style="display:inline-block;background:#191919;color:#fff;text-decoration:none;padding:14px 24px;border-radius:10px;font-weight:500;font-size:15px;">Me connecter →</a>
+        </p>
+
+        <p style="margin:24px 0 0;font-size:13px;color:#737373;line-height:1.6;">Ou copie-colle cette URL dans ton navigateur :<br /><a href="${url}" style="color:#329cff;word-break:break-all;font-size:12px;">${url}</a></p>
+
+        <div style="margin:32px 0 0;padding:16px;background:linear-gradient(135deg,rgba(197,83,46,0.06) 0%,rgba(50,156,255,0.06) 100%);border-radius:10px;">
+          <p style="margin:0 0 6px;font-size:13px;font-weight:600;color:#191919;">📱 Sur ton téléphone&nbsp;?</p>
+          <p style="margin:0;font-size:13px;line-height:1.55;color:#525252;">Le lien s'ouvrira dans ton navigateur, pas dans l'app email. Pas besoin de revenir manuellement à la page de login — ta session sera active partout.</p>
+        </div>
+
+        <p style="margin:32px 0 0;padding-top:20px;border-top:1px solid #efefef;font-size:12px;color:#737373;line-height:1.55;">
+          Tu n'as pas demandé ce lien&nbsp;? Ignore cet email, il ne se passera rien.<br />
+          Problème ? Écris-nous à <a href="mailto:hello@mamie-geo.fr" style="color:#737373;">hello@mamie-geo.fr</a>.
+        </p>
+      </td></tr>
+    </table>
+  </body>
+</html>`;
 
   try {
     const result =

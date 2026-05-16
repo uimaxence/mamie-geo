@@ -20,12 +20,18 @@ import { WorkspaceForm } from "./workspace-form";
 
 export const dynamic = "force-dynamic";
 
-export default async function SettingsPage() {
+interface PageProps {
+  searchParams: Promise<{ checkout?: string }>;
+}
+
+export default async function SettingsPage({ searchParams }: PageProps) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) redirect("/login");
 
   const data = await getDashboardData(session.user.id);
   if (!data) redirect("/app/onboarding");
+
+  const { checkout } = await searchParams;
 
   const userRows = await db.query.user.findFirst({
     where: (u, { eq }) => eq(u.id, session.user.id),
@@ -56,6 +62,26 @@ export default async function SettingsPage() {
         <span className="type-eyebrow">Réglages</span>
         <h1 className="type-h1 mt-2">Ton compte et ton workspace.</h1>
       </header>
+
+      {checkout === "success" && (
+        <div className="mt-6 rounded-[var(--radius-xl)] border border-[color:var(--color-success)]/20 bg-[color:var(--color-success-bg)] px-5 py-4">
+          <p className="font-semibold text-[color:var(--color-success)]">
+            ✓ Paiement validé — bienvenue !
+          </p>
+          <p className="type-body mt-1 text-sm text-[color:var(--color-ink-soft)]">
+            Ton abonnement est actif. Le premier run est lancé sur les IA suivies — tu verras les
+            résultats sur ton dashboard d&apos;ici quelques minutes.
+          </p>
+        </div>
+      )}
+      {checkout === "cancel" && (
+        <div className="mt-6 rounded-[var(--radius-xl)] border border-[color:var(--color-warning)]/20 bg-[color:var(--color-warning-bg)] px-5 py-4">
+          <p className="font-semibold text-[color:var(--color-warning)]">Checkout annulé</p>
+          <p className="type-body mt-1 text-sm text-[color:var(--color-ink-soft)]">
+            Rien n&apos;a été débité. Tu peux relancer un abonnement quand tu veux ci-dessous.
+          </p>
+        </div>
+      )}
 
       <div className="mt-10 flex flex-col gap-6">
         {/* Compte */}

@@ -18,7 +18,7 @@ export interface Plan {
   /** Features mises en avant sur la card (4-6 items max) */
   features: string[];
   ctaLabel: string;
-  /** Pour les 3 plans souscriptibles, on redirige vers /login?next=/app/settings#billing
+  /** Pour les 3 plans souscriptibles, on redirige vers /login?next=%2Fapp%2Fsettings%23billing
       qui présente le checkout après auth. Pas d'URL Stripe directe pour préserver
       la création du customer via /api/checkout. */
   ctaHref: string;
@@ -41,7 +41,7 @@ export const PLANS: Plan[] = [
       "Dashboard + email récap",
     ],
     ctaLabel: "Commencer avec Solo",
-    ctaHref: "/login?next=/app/settings#billing",
+    ctaHref: "/login?next=%2Fapp%2Fsettings%23billing",
   },
   {
     id: "starter",
@@ -59,7 +59,7 @@ export const PLANS: Plan[] = [
       "Support email J+2",
     ],
     ctaLabel: "S'abonner à Starter",
-    ctaHref: "/login?next=/app/settings#billing",
+    ctaHref: "/login?next=%2Fapp%2Fsettings%23billing",
   },
   {
     id: "pro",
@@ -77,7 +77,7 @@ export const PLANS: Plan[] = [
       "Support email J+1",
     ],
     ctaLabel: "S'abonner à Pro",
-    ctaHref: "/login?next=/app/settings#billing",
+    ctaHref: "/login?next=%2Fapp%2Fsettings%23billing",
   },
 ];
 
