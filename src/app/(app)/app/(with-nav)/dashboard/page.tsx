@@ -3,10 +3,10 @@ import { redirect } from "next/navigation";
 import { Activity, DollarSign, Flame, Users } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { computeDelta, getDashboardData, getVisibilityTrend } from "@/lib/dashboard/queries";
-import { Card, EmptyState, Stat } from "@/components/ui";
+import { Card, Stat } from "@/components/ui";
 import { BreakdownBars } from "@/components/charts/breakdown-bars";
 import { LLM_COLORS, LLM_LABELS } from "@/components/charts/llm-colors";
-import { RecentRunsTable } from "./recent-runs-table";
+import { BatchesTable } from "@/components/app/batches-table";
 import { TrendSection } from "./trend-section";
 import { TriggerRunForm } from "./trigger-form";
 
@@ -142,22 +142,20 @@ export default async function DashboardPage() {
         </div>
       </section>
 
-      {/* Runs récents */}
+      {/* Runs récents — groupés par batch (prompt × jour) */}
       <section className="mt-14">
         <div className="flex items-baseline justify-between">
-          <h2 className="type-h2">10 derniers runs</h2>
-          <span className="type-meta">tous statuts</span>
+          <h2 className="type-h2">10 derniers batches</h2>
+          <span className="type-meta">tous statuts · cliquer pour le détail par LLM</span>
         </div>
-        {data.recentRuns.length === 0 ? (
-          <EmptyState
-            icon={Activity}
-            title="Aucun run pour l'instant"
-            description="Le cron quotidien se déclenche à 06:00 UTC. Tu peux aussi lancer un run immédiatement via le bouton en haut à droite."
-            className="mt-6"
-          />
-        ) : (
-          <RecentRunsTable rows={data.recentRuns} />
-        )}
+        <BatchesTable
+          batches={data.recentBatches}
+          emptyState={{
+            title: "Aucun run pour l'instant",
+            description:
+              "Le cron quotidien se déclenche à 06:00 UTC. Tu peux aussi lancer un run immédiatement via le bouton en haut à droite.",
+          }}
+        />
       </section>
 
       <footer className="mt-20">

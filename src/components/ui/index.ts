@@ -43,6 +43,7 @@ export {
   DropdownMenuRadioGroup,
 } from "./dropdown-menu";
 export { Tabs, TabsList, TabsTrigger, TabsContent } from "./tabs";
+export { Collapsible, CollapsibleTrigger, CollapsibleContent } from "./collapsible";
 export { Switch } from "./switch";
 export { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "./tooltip";
 export { Skeleton } from "./skeleton";

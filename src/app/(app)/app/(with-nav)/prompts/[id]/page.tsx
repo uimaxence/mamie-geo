@@ -7,7 +7,7 @@ import { getPromptDetail } from "@/lib/prompts/queries";
 import { Badge, Card, EmptyState, Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui";
 import { BreakdownBars } from "@/components/charts/breakdown-bars";
 import { LLM_COLORS, LLM_LABELS } from "@/components/charts/llm-colors";
-import { RunStatusBadge } from "@/components/app/run-status-badge";
+import { BatchesTable } from "@/components/app/batches-table";
 
 // Page détail prompt /app/prompts/[id].
 // Affiche : header (texte + actions) + 4 stats agrégées + breakdown par
@@ -163,114 +163,17 @@ export default async function PromptDetailPage({ params }: { params: Promise<{ i
         </TabsContent>
 
         <TabsContent value="runs">
-          {detail.recentRuns.length === 0 ? (
-            <EmptyState
-              title="Aucun run pour l'instant"
-              description="Le cron quotidien se déclenche à 06:00 UTC. Tu peux aussi en lancer un depuis le dashboard."
-            />
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse text-left">
-                <thead>
-                  <tr className="border-b border-[color:var(--color-border)]">
-                    <Th>LLM</Th>
-                    <Th>Statut</Th>
-                    <Th>Citée</Th>
-                    <Th align="right">Coût</Th>
-                    <Th align="right">Durée</Th>
-                    <Th align="right">Exécuté</Th>
-                    <Th align="right" />
-                  </tr>
-                </thead>
-                <tbody>
-                  {detail.recentRuns.map((run) => (
-                    <tr
-                      key={run.id}
-                      className="border-b border-[color:var(--color-border)] last:border-b-0 hover:bg-[color:var(--color-gray-50)]"
-                    >
-                      <Td>
-                        <span className="text-sm">{LLM_LABELS[run.llm] ?? run.llm}</span>
-                      </Td>
-                      <Td>
-                        <RunStatusBadge status={run.status} />
-                      </Td>
-                      <Td>
-                        <BrandSignal value={run.brandMentioned} />
-                      </Td>
-                      <Td align="right">
-                        <span className="type-tabular text-sm">
-                          {run.costUsd !== null ? `$${run.costUsd.toFixed(4)}` : "—"}
-                        </span>
-                      </Td>
-                      <Td align="right">
-                        <span className="type-tabular text-sm">
-                          {run.durationMs !== null ? `${(run.durationMs / 1000).toFixed(1)}s` : "—"}
-                        </span>
-                      </Td>
-                      <Td align="right">
-                        <span className="type-meta">
-                          {run.executedAt ? formatRelative(run.executedAt) : "en attente"}
-                        </span>
-                      </Td>
-                      <Td align="right">
-                        <Link
-                          href={`/app/runs/${run.id}`}
-                          className="type-meta hover:text-[color:var(--color-ink)] hover:underline"
-                        >
-                          Détail →
-                        </Link>
-                      </Td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+          <BatchesTable
+            batches={detail.recentBatches}
+            showPromptColumn={false}
+            emptyState={{
+              title: "Aucun run pour l'instant",
+              description:
+                "Le cron quotidien se déclenche à 06:00 UTC. Tu peux aussi en lancer un depuis le dashboard.",
+            }}
+          />
         </TabsContent>
       </Tabs>
     </main>
   );
-}
-
-function Th({
-  children,
-  align = "left",
-}: {
-  children?: React.ReactNode;
-  align?: "left" | "right";
-}) {
-  return (
-    <th
-      className={`type-eyebrow py-2.5 px-3 ${align === "right" ? "text-right" : "text-left"}`}
-      scope="col"
-    >
-      {children}
-    </th>
-  );
-}
-
-function Td({ children, align = "left" }: { children: React.ReactNode; align?: "left" | "right" }) {
-  return (
-    <td className={`py-3 px-3 align-middle ${align === "right" ? "text-right" : "text-left"}`}>
-      {children}
-    </td>
-  );
-}
-
-function BrandSignal({ value }: { value: boolean | "skipped" | "unscored" }) {
-  if (value === true) return <Badge tone="success">citée</Badge>;
-  if (value === false) return <span className="type-meta">non</span>;
-  if (value === "skipped") return <span className="type-meta">regex 0</span>;
-  return <span className="type-meta">—</span>;
-}
-
-function formatRelative(date: Date): string {
-  const diffMs = Date.now() - new Date(date).getTime();
-  const diffMin = Math.floor(diffMs / 60_000);
-  if (diffMin < 1) return "à l'instant";
-  if (diffMin < 60) return `il y a ${diffMin} min`;
-  const diffH = Math.floor(diffMin / 60);
-  if (diffH < 24) return `il y a ${diffH} h`;
-  const diffD = Math.floor(diffH / 24);
-  return `il y a ${diffD} j`;
 }

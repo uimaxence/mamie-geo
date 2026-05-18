@@ -1,4 +1,4 @@
-import { and, desc, eq, gte } from "drizzle-orm";
+import { and, eq, gte } from "drizzle-orm";
 import { db } from "@/db/client";
 import {
   brands,
@@ -12,6 +12,7 @@ import {
 } from "@/db/schema";
 import type { ParsedBrandsPayload } from "@/lib/citation/types";
 import type { LLMValue } from "@/lib/llm";
+import { getRunBatches, type RunBatch } from "@/lib/runs/batches";
 
 // Server-side queries pour le dashboard. Chargées dans des React Server
 // Components, donc accès direct DB sans surcouche API. La session a déjà
@@ -35,7 +36,7 @@ export interface DashboardData {
   competitorsCount: number;
   promptsCount: number;
   metricsToday: MetricsPerLLM[];
-  recentRuns: RecentRun[];
+  recentBatches: RunBatch[];
   usage: UsagePeriod;
 }
 
@@ -47,17 +48,6 @@ export interface MetricsPerLLM {
   // Décimal stocké en string Postgres → on parse en number côté client
   visibilityScore: number;
   topCompetitors: Array<{ name: string; citationCount: number }>;
-}
-
-export interface RecentRun {
-  id: string;
-  llm: LLMValue;
-  status: string;
-  costUsd: number | null;
-  durationMs: number | null;
-  executedAt: Date | null;
-  promptText: string;
-  brandMentioned: boolean | "skipped" | "unscored";
 }
 
 export interface UsagePeriod {
@@ -127,45 +117,9 @@ export async function getDashboardData(userId: string): Promise<DashboardData | 
     };
   });
 
-  // 5. 10 derniers runs (toutes statuts confondus pour voir le pending)
-  const recentRunsRaw = await db
-    .select({
-      id: runs.id,
-      llm: runs.llm,
-      status: runs.status,
-      costUsd: runs.costUsd,
-      durationMs: runs.durationMs,
-      executedAt: runs.executedAt,
-      promptText: prompts.text,
-      parsedBrands: runs.parsedBrands,
-    })
-    .from(runs)
-    .innerJoin(prompts, eq(prompts.id, runs.promptId))
-    .where(eq(prompts.brandId, brand.id))
-    .orderBy(desc(runs.scheduledAt))
-    .limit(10);
-
-  const recentRuns: RecentRun[] = recentRunsRaw.map((r) => {
-    const parsed = r.parsedBrands as ParsedBrandsPayload | null;
-    let brandMentioned: RecentRun["brandMentioned"];
-    if (!parsed) {
-      brandMentioned = "unscored";
-    } else if ("skipped" in parsed.scoring) {
-      brandMentioned = "skipped";
-    } else {
-      brandMentioned = parsed.scoring.brandMentioned;
-    }
-    return {
-      id: r.id,
-      llm: r.llm as LLMValue,
-      status: r.status,
-      costUsd: r.costUsd ? Number(r.costUsd) : null,
-      durationMs: r.durationMs,
-      executedAt: r.executedAt,
-      promptText: r.promptText,
-      brandMentioned,
-    };
-  });
+  // 5. 10 derniers batches (groupés prompt × jour, cf. src/lib/runs/batches.ts).
+  //    Couvre tous les statuts pour afficher pending/running aussi.
+  const recentBatches = await getRunBatches({ brandId: brand.id, limit: 10 });
 
   // 6. Usage du mois courant
   const periodStart = startOfCurrentMonthUTC();
@@ -203,7 +157,7 @@ export async function getDashboardData(userId: string): Promise<DashboardData | 
     competitorsCount,
     promptsCount,
     metricsToday,
-    recentRuns,
+    recentBatches,
     usage,
   };
 }

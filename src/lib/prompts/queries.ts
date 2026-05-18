@@ -11,6 +11,7 @@ import {
 import { getUserContext } from "@/lib/auth/user-context";
 import type { LLMValue } from "@/lib/llm";
 import type { ParsedBrandsPayload } from "@/lib/citation/types";
+import { getRunBatches, type RunBatch } from "@/lib/runs/batches";
 
 // Queries pour les pages /app/prompts (liste + détail).
 // Toutes les queries appliquent un auth check par userId — pas de
@@ -114,16 +115,8 @@ export interface PromptDetail {
   };
   /** Sentiment dominant (positive/neutral/negative/absent) sur la fenêtre */
   dominantSentiment: string;
-  /** 10 derniers runs sur ce prompt, tous statuts */
-  recentRuns: Array<{
-    id: string;
-    llm: LLMValue;
-    status: string;
-    executedAt: Date | null;
-    costUsd: number | null;
-    durationMs: number | null;
-    brandMentioned: boolean | "skipped" | "unscored";
-  }>;
+  /** 10 derniers batches (prompt × jour) sur ce prompt, tous statuts */
+  recentBatches: RunBatch[];
 }
 
 export async function getPromptDetail(
@@ -274,27 +267,8 @@ export async function getPromptDetail(
     }
   }
 
-  // Recent runs (10 derniers, tous statuts)
-  const recentRuns: PromptDetail["recentRuns"] = runsRows.slice(0, 10).map((r) => {
-    const parsed = r.parsedBrands as ParsedBrandsPayload | null;
-    let brandMentioned: PromptDetail["recentRuns"][number]["brandMentioned"];
-    if (!parsed) {
-      brandMentioned = "unscored";
-    } else if ("skipped" in parsed.scoring) {
-      brandMentioned = "skipped";
-    } else {
-      brandMentioned = parsed.scoring.brandMentioned;
-    }
-    return {
-      id: r.id,
-      llm: r.llm as LLMValue,
-      status: r.status,
-      executedAt: r.executedAt,
-      costUsd: r.costUsd ? Number(r.costUsd) : null,
-      durationMs: r.durationMs,
-      brandMentioned,
-    };
-  });
+  // Recent batches (10 derniers batches prompt × jour, tous statuts)
+  const recentBatches = await getRunBatches({ promptId, limit: 10 });
 
   return {
     id: row.promptId,
@@ -316,7 +290,7 @@ export async function getPromptDetail(
       citationRate: totalRuns > 0 ? (brandCited / totalRuns) * 100 : 0,
     },
     dominantSentiment,
-    recentRuns,
+    recentBatches,
   };
 }
 
