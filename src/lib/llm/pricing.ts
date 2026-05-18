@@ -44,6 +44,18 @@ export const OPENAI_PRICING: Record<string, ModelPricing> = {
   },
 };
 
+// Google AI Studio — https://ai.google.dev/pricing
+// gemini-2.5-flash : modèle V0+ cheap pour le tracking. Grounding Google
+// Search facturé séparément $35 / 1000 requests = $0.035/call (plus cher
+// que Anthropic/OpenAI à $0.01).
+export const GOOGLE_PRICING: Record<string, ModelPricing> = {
+  "gemini-2.5-flash": {
+    inputPerMtok: 0.075,
+    outputPerMtok: 0.3,
+    webSearchPerCall: 0.035,
+  },
+};
+
 // Mistral La Plateforme — https://mistral.ai/pricing
 // Tarifs en EUR convertis en USD au taux ~1.10 (date de vérif 2026-05-18).
 // V0+ : on tracke Le Chat sans web_search (Mistral n'expose pas encore de

@@ -1,6 +1,7 @@
 import { env } from "@/lib/env";
 import { LLM_VALUES } from "@/db/schema";
 import { createAnthropicClient } from "./anthropic";
+import { createGoogleClient } from "./google";
 import { createMistralClient } from "./mistral";
 import { createOpenAIClient } from "./openai";
 import type { LLMClient, LLMValue } from "./types";
@@ -24,8 +25,8 @@ const LLM_TO_ENV_KEY = {
 const IMPLEMENTED_LLMS: Record<LLMValue, boolean> = {
   claude: true,
   lechat: true, // PR2
-  chatgpt: true, // PR3 — ce commit
-  gemini: false, // PR4
+  chatgpt: true, // PR3
+  gemini: true, // PR4 — ce commit
   perplexity: false, // PR5
 };
 
@@ -55,11 +56,12 @@ export function getLLMClient(llm: LLMValue): LLMClient {
       return createMistralClient({ apiKey });
     case "chatgpt":
       return createOpenAIClient({ apiKey });
-    case "perplexity":
     case "gemini":
+      return createGoogleClient({ apiKey });
+    case "perplexity":
       // Unreachable : protégé par IMPLEMENTED_LLMS ci-dessus. Garde pour
       // l'exhaustivité TypeScript du switch.
-      throw new Error(`Provider ${llm} pas encore implémenté`);
+      throw new Error(`Provider ${llm} pas encore implémenté (PR5)`);
   }
 }
 

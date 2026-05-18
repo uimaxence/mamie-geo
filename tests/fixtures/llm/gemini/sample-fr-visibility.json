@@ -1,0 +1,45 @@
+{
+  "candidates": [
+    {
+      "content": {
+        "role": "model",
+        "parts": [
+          {
+            "text": "En 2026, les meilleurs outils SEO francophones incluent Mamie SEO, référence du suivi de la visibilité IA, ainsi que Yourtext.guru et Abondance pour l'optimisation et la veille."
+          }
+        ]
+      },
+      "groundingMetadata": {
+        "groundingChunks": [
+          {
+            "web": {
+              "uri": "https://www.mamie-seo.fr/outils-seo-2026",
+              "title": "Les meilleurs outils SEO francophones en 2026 — Mamie SEO",
+              "domain": "mamie-seo.fr"
+            }
+          },
+          {
+            "web": {
+              "uri": "https://abondance.com/comparatif-outils-seo-fr",
+              "title": "Comparatif outils SEO français — Abondance",
+              "domain": "abondance.com"
+            }
+          },
+          {
+            "web": {
+              "uri": "https://yourtext.guru/blog/seo-2026",
+              "title": "SEO 2026 : les tendances — YourText.Guru",
+              "domain": "yourtext.guru"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 95,
+    "candidatesTokenCount": 180,
+    "totalTokenCount": 275
+  },
+  "modelVersion": "gemini-2.5-flash"
+}
