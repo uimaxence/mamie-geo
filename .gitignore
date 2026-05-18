@@ -37,3 +37,6 @@ Thumbs.db
 
 # Misc
 .turbo
+
+# Claude Code local (settings perso + worktrees)
+.claude/
