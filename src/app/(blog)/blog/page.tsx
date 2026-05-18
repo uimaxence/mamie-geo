@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Badge, Section } from "@/components/ui";
+import { BlogNewsletterForm } from "@/components/blog/newsletter-form";
 import { listArticles, type Article } from "@/lib/blog/registry";
 import { CATEGORY_TONE } from "@/lib/blog/schemas";
 
@@ -21,13 +22,14 @@ export default function BlogIndexPage() {
   return (
     <>
       <Section pad="xl">
-        <div className="mx-auto max-w-3xl text-center">
-          <span className="type-eyebrow">Le journal Mamie GEO</span>
-          <h1 className="type-display mt-3">Méthodes, études et opinions.</h1>
+        <div className="mx-auto max-w-2xl text-center">
+          <span className="type-eyebrow">Blog</span>
+          <h1 className="type-display mt-3">Dernières actualités.</h1>
           <p className="type-body-lg mt-6">
-            On publie ici nos méthodes pour mesurer et améliorer la visibilité dans les IA. Pas de
-            listicles génériques générés par IA — du contenu écrit à la main.
+            Méthodes, études et tutoriels pour piloter ta visibilité dans ChatGPT, Claude,
+            Perplexity, Gemini et Le Chat. Écrit à la main, pas généré.
           </p>
+          <BlogNewsletterForm />
         </div>
       </Section>
 

@@ -132,6 +132,43 @@ Pour chaque article effectivement pushé (i.e. après push réussi) :
 - Remplacer `status=draft` → `status=published` sur la ligne du slug.
 - Append dans la colonne `notes` : ` | pushed:{ISO_timestamp_UTC}` (ex : `pushed:2026-05-20T08:32:41Z`).
 
+### Étape 5b — Déclencher la newsletter Brevo (1 appel par article pushé)
+
+Pour chaque article effectivement pushé à l'étape 4, appeler l'endpoint
+de notification newsletter immédiatement après la MAJ CSV de l'étape 5.
+Récupérer la valeur de `CRON_SECRET` dans `/Users/maxencecailleau/Documents/PROGRAMMATION/mamie-geo/.env.local`
+(lecture seule du fichier, ne pas l'exposer dans les logs).
+
+Commande à exécuter (substituer `{slug}`, `{title}`, `{description}`,
+`{category}`, `{readingTimeMin}` par les valeurs du frontmatter normalisé,
+et `{CRON_SECRET}` par la valeur lue depuis `.env.local`) :
+
+```bash
+curl -fsS -X POST https://mamie-geo.fr/api/blog/notify-publish \
+  -H "Authorization: Bearer {CRON_SECRET}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "slug": "{slug}",
+    "title": "{title}",
+    "description": "{description}",
+    "category": "{category}",
+    "readingTimeMin": {readingTimeMin}
+  }'
+```
+
+Le endpoint :
+- Retourne `{ ok: true, sent: true, campaignId: <id> }` si la campagne
+  a bien été envoyée → logger `notified:campaign-<id>` dans
+  `_log-publication.txt` à côté du SHA git.
+- Retourne `{ ok: true, sent: false, reason: "brevo not configured" }`
+  si la liste/clé Brevo manque côté prod → logger `notified:skipped` (pas
+  une erreur, c'est attendu en preview / si la liste n'est pas créée).
+- Retourne `{ ok: false, error: ... }` (4xx/5xx) → logger
+  `notified:failed:<error>` mais **ne pas stopper le run** : l'article
+  est déjà publié, seule la notification a échoué. Continuer avec les
+  articles suivants. Écrire `_FLAG_NEWSLETTER_FAILED_{slug}.md` avec
+  l'erreur pour traitement manuel.
+
 ### Étape 6 — Log
 
 Append dans `/Users/maxencecailleau/Documents/Claude/Projects/Mamie GEO/articles/_log-publication.txt`, pour chaque article pushé :
@@ -167,7 +204,7 @@ Flags ouverts (à traiter manuellement) :
 - ❌ `git push --force` (jamais)
 - ❌ `git push --no-verify` (jamais)
 - ❌ Modifier un article déjà publié (autres slugs existants dans `src/content/blog/`)
-- ❌ Modifier des fichiers en dehors de `src/content/blog/` (dans le repo) et `_historique.csv` + `_log-publication.txt` + `_FLAG_*.md` + `_log-launchd.txt` (dans `/articles/`)
+- ❌ Modifier des fichiers en dehors de `src/content/blog/` (dans le repo) et `_historique.csv` + `_log-publication.txt` + `_FLAG_*.md` + `_log-launchd.txt` (dans `/articles/`). Le `.env.local` est en **lecture seule** (pour récupérer `CRON_SECRET` à l'étape 5b).
 - ❌ Re-tenter automatiquement après un échec de push (laisser l'humain trancher)
 - ❌ Modifier `.claude-code/publication-articles-prompt.md` (ce fichier)
 - ❌ Toucher au schéma DB, à CLAUDE.md, à `geo-project/`, à `package.json` ou à toute config du repo

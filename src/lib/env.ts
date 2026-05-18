@@ -34,6 +34,13 @@ const schema = z.object({
   BREVO_API_KEY: z.string().min(1).optional(),
   BREVO_FROM_EMAIL: z.string().email().optional(),
   BREVO_FROM_NAME: z.string().min(1).optional(),
+  // ID numérique de la liste Brevo "Newsletter blog" — utilisée pour les
+  // inscriptions depuis /blog et les notifications à la publication d'un
+  // nouvel article. Optionnelle : si absente, l'inscription échoue
+  // gracieusement et la notification est skippée (cf. src/lib/email.ts).
+  // À créer dans https://app.brevo.com/contact/list-listing puis copier
+  // l'ID dans Vercel env vars.
+  BREVO_BLOG_LIST_ID: z.coerce.number().int().positive().optional(),
   BREVO_SMTP_HOST: z.string().min(1).optional(),
   BREVO_SMTP_PORT: z.coerce.number().int().positive().optional(),
   BREVO_SMTP_USER: z.string().min(1).optional(),
@@ -98,6 +105,7 @@ const buildPlaceholders: Env = {
   BREVO_API_KEY: undefined,
   BREVO_FROM_EMAIL: undefined,
   BREVO_FROM_NAME: undefined,
+  BREVO_BLOG_LIST_ID: undefined,
   BREVO_SMTP_HOST: undefined,
   BREVO_SMTP_PORT: undefined,
   BREVO_SMTP_USER: undefined,

@@ -244,6 +244,191 @@ export async function sendWeeklyRecapEmail(params: {
   }
 }
 
+// ─────────────────────────────────────────────────────────────────────
+// Newsletter blog — inscription liste Brevo + campagne à la publication
+// ─────────────────────────────────────────────────────────────────────
+
+/**
+ * Ajoute (ou met à jour) un contact dans la liste Brevo `BREVO_BLOG_LIST_ID`.
+ * Si le contact existe déjà, `updateEnabled=true` rattache simplement la
+ * liste (pas d'erreur). Retourne `{ created: bool }` pour distinguer
+ * nouveau vs déjà inscrit côté server action.
+ *
+ * Échoue avec un message lisible si la clé API ou le list ID manquent —
+ * le caller (server action) traduit en message UX-friendly.
+ */
+export async function subscribeContactToBlogList(
+  email: string,
+): Promise<{ created: boolean }> {
+  if (!env.BREVO_API_KEY) {
+    throw new Error("BREVO_API_KEY manquant — inscription newsletter indisponible");
+  }
+  if (!env.BREVO_BLOG_LIST_ID) {
+    throw new Error("BREVO_BLOG_LIST_ID manquant — créer la liste Brevo et setter l'env var");
+  }
+
+  const response = await fetch("https://api.brevo.com/v3/contacts", {
+    method: "POST",
+    headers: {
+      "api-key": env.BREVO_API_KEY,
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({
+      email,
+      listIds: [env.BREVO_BLOG_LIST_ID],
+      updateEnabled: true,
+    }),
+  });
+
+  if (response.status === 201) {
+    return { created: true };
+  }
+  if (response.status === 204) {
+    // 204 No Content = contact existant mis à jour
+    return { created: false };
+  }
+  // Brevo renvoie 400 avec code "duplicate_parameter" si déjà inscrit
+  // ET updateEnabled=false — on a updateEnabled=true donc on ne devrait
+  // pas tomber ici, mais on gère gracieusement.
+  if (response.status === 400) {
+    const json = (await response.json().catch(() => ({}))) as {
+      code?: string;
+      message?: string;
+    };
+    if (json.code === "duplicate_parameter") {
+      return { created: false };
+    }
+    throw new Error(`Brevo contacts → ${json.code ?? "error"}: ${json.message ?? "HTTP 400"}`);
+  }
+  const text = await response.text().catch(() => "");
+  throw new Error(`Brevo contacts → HTTP ${response.status}${text ? ` — ${text.slice(0, 200)}` : ""}`);
+}
+
+/**
+ * Crée puis envoie immédiatement une campagne Brevo annonçant un nouvel
+ * article. Cible la liste `BREVO_BLOG_LIST_ID`. Le rendu HTML est inline
+ * (pas de template Brevo à pré-créer), basé sur le pattern magic-link
+ * pour la cohérence visuelle.
+ *
+ * Utilisé par `/api/blog/notify-publish` après chaque push d'article via
+ * le workflow launchd publication (cf. .claude-code/publication-articles-prompt.md).
+ *
+ * Skip silencieusement si la liste ou la clé n'est pas configurée (en
+ * dev / preview sans newsletter) — log warn et retourne null.
+ */
+export async function sendNewArticleNewsletter(article: {
+  slug: string;
+  title: string;
+  description: string;
+  category: string;
+  readingTimeMin: number;
+}): Promise<{ campaignId: number } | null> {
+  if (!env.BREVO_API_KEY || !env.BREVO_BLOG_LIST_ID || !env.BREVO_FROM_EMAIL) {
+    console.warn(
+      `[email] notify-publish ${article.slug} — BREVO_BLOG_LIST_ID / API_KEY / FROM_EMAIL manquant, skip`,
+    );
+    return null;
+  }
+
+  const articleUrl = `${env.NEXT_PUBLIC_APP_URL}/blog/${article.slug}`;
+  const subject = `Nouveau sur Mamie GEO — ${article.title}`;
+  const htmlContent = buildNewArticleHtml({ ...article, url: articleUrl });
+
+  // 1. Create campaign
+  const createRes = await fetch("https://api.brevo.com/v3/emailCampaigns", {
+    method: "POST",
+    headers: {
+      "api-key": env.BREVO_API_KEY,
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({
+      name: `Blog: ${article.slug}`,
+      subject,
+      sender: { name: env.BREVO_FROM_NAME ?? "Mamie GEO", email: env.BREVO_FROM_EMAIL },
+      htmlContent,
+      recipients: { listIds: [env.BREVO_BLOG_LIST_ID] },
+      tag: "blog-new-article",
+    }),
+  });
+  if (!createRes.ok) {
+    const text = await createRes.text().catch(() => "");
+    throw new Error(
+      `Brevo emailCampaigns create → HTTP ${createRes.status}${text ? ` — ${text.slice(0, 200)}` : ""}`,
+    );
+  }
+  const created = (await createRes.json()) as { id: number };
+
+  // 2. Send now
+  const sendRes = await fetch(
+    `https://api.brevo.com/v3/emailCampaigns/${created.id}/sendNow`,
+    {
+      method: "POST",
+      headers: {
+        "api-key": env.BREVO_API_KEY,
+        Accept: "application/json",
+      },
+    },
+  );
+  if (!sendRes.ok) {
+    const text = await sendRes.text().catch(() => "");
+    throw new Error(
+      `Brevo emailCampaigns sendNow → HTTP ${sendRes.status}${text ? ` — ${text.slice(0, 200)}` : ""}`,
+    );
+  }
+
+  console.info(
+    `[email] blog newsletter envoyée — campaignId=${created.id} slug=${article.slug}`,
+  );
+  return { campaignId: created.id };
+}
+
+function buildNewArticleHtml(article: {
+  slug: string;
+  title: string;
+  description: string;
+  category: string;
+  readingTimeMin: number;
+  url: string;
+}): string {
+  return `<!doctype html>
+<html lang="fr">
+  <body style="margin:0;padding:24px;background:#fafafa;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;color:#191919;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;margin:0 auto;background:#fff;border-radius:12px;border:1px solid #e6e6e6;">
+      <tr><td style="padding:32px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:32px;">
+          <span style="display:inline-flex;width:32px;height:32px;border-radius:10px;background:#329cff;color:#fff;align-items:center;justify-content:center;font-size:20px;font-weight:700;">M</span>
+          <span style="font-size:17px;font-weight:600;letter-spacing:-0.01em;">Mamie GEO</span>
+        </div>
+
+        <p style="margin:0 0 8px;font-size:12px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#737373;">Nouvel article · ${article.category} · ${article.readingTimeMin} min</p>
+        <h1 style="margin:0 0 16px;font-size:24px;font-weight:700;letter-spacing:-0.015em;line-height:1.3;">${escapeHtml(article.title)}</h1>
+        <p style="margin:0 0 28px;font-size:15px;line-height:1.6;color:#525252;">${escapeHtml(article.description)}</p>
+
+        <p style="margin:0 0 32px;">
+          <a href="${article.url}" style="display:inline-block;background:#191919;color:#fff;text-decoration:none;padding:14px 24px;border-radius:10px;font-weight:500;font-size:15px;">Lire l'article →</a>
+        </p>
+
+        <p style="margin:0;padding-top:24px;border-top:1px solid #efefef;font-size:12px;color:#737373;line-height:1.55;">
+          Tu reçois cet email parce que tu es abonné·e à la newsletter du blog Mamie GEO.<br />
+          <a href="{{unsubscribe}}" style="color:#737373;">Se désinscrire</a>
+        </p>
+      </td></tr>
+    </table>
+  </body>
+</html>`;
+}
+
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 export async function sendAuditRequestEmails(params: {
   prospectEmail: string;
   domain: string;
