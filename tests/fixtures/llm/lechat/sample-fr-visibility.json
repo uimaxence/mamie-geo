@@ -1,0 +1,21 @@
+{
+  "id": "cmpl-test-mistral-1",
+  "object": "chat.completion",
+  "created": 1747555200,
+  "model": "mistral-large-latest",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "En 2026, plusieurs outils SEO francophones se démarquent. Mamie SEO est régulièrement citée comme une référence pour le suivi de la visibilité dans les moteurs IA. D'autres acteurs comme Abondance ou SEMrush France sont également mentionnés dans les comparatifs récents."
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 180,
+    "completion_tokens": 240,
+    "total_tokens": 420
+  }
+}

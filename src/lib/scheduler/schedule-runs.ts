@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { and, eq, inArray, isNull } from "drizzle-orm";
 import { db } from "@/db/client";
 import { brands, prompts, runs, workspaces } from "@/db/schema";
-import type { LLMValue } from "@/lib/llm";
+import { getConfiguredLLMs, type LLMValue } from "@/lib/llm";
 import { enqueue } from "@/lib/queue";
 
 // Coeur de la logique scheduler — partagé entre :
@@ -12,8 +12,18 @@ import { enqueue } from "@/lib/queue";
 // `execute_prompt:{promptId}:{llm}:{date}`. Donc un workspace qui paie
 // le matin puis attend le cron quotidien ne re-double pas ses runs.
 //
-// Phase A : seul Claude est tracké. Phase C ajoute les 4 autres.
-export const TRACKED_LLMS: readonly LLMValue[] = ["claude"] as const;
+// Source de vérité des LLMs à scheduler : `getConfiguredLLMs()` côté
+// `src/lib/llm/index.ts`. Détecté dynamiquement selon les env vars
+// présentes + les providers implémentés. Permet de lancer un V0+ avec
+// 4 providers et d'activer Perplexity plus tard sans redéploiement
+// (cf. doc 09 § 2026-05-18 — pas de clé Perplexity en V0+, $50 minimum).
+//
+// Fonction (pas constante) pour ré-évaluer à chaque cron tick si jamais
+// les env vars changent en cours d'exécution (cas Vercel reload sur
+// nouveau deploy avec une clé ajoutée).
+export function getTrackedLLMs(): readonly LLMValue[] {
+  return getConfiguredLLMs();
+}
 
 export interface ScheduleSummary {
   promptsScanned: number;
@@ -26,9 +36,10 @@ async function enqueueForPrompts(promptRows: { promptId: string }[]): Promise<Sc
   let jobsEnqueued = 0;
   let runsCreated = 0;
   let skipped = 0;
+  const trackedLlms = getTrackedLLMs();
 
   for (const row of promptRows) {
-    for (const llm of TRACKED_LLMS) {
+    for (const llm of trackedLlms) {
       const runId = randomUUID();
       const jobId = await enqueue({
         kind: "execute_prompt",

@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { logCronEvent } from "@/lib/cron-logger";
 import { env } from "@/lib/env";
 import { ACTIVE_PLANS, quotasFor } from "@/lib/plans/quotas";
-import { scheduleRunsForEligiblePlans, TRACKED_LLMS } from "@/lib/scheduler/schedule-runs";
+import { getTrackedLLMs, scheduleRunsForEligiblePlans } from "@/lib/scheduler/schedule-runs";
 
 // Cron quotidien (cf. vercel.json) : pour chaque prompt actif d'un
 // workspace en plan ACTIVE_PLANS et non hard-capé, enqueue 1 job
@@ -46,7 +46,7 @@ async function handle(request: NextRequest): Promise<NextResponse> {
   logCronEvent({
     event: "schedule_runs_start",
     method: request.method,
-    trackedLlms: TRACKED_LLMS,
+    trackedLlms: getTrackedLLMs(),
     isMonday,
     eligiblePlans,
   });

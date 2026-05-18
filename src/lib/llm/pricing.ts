@@ -3,7 +3,7 @@
 // déclencher une recalibration des marges (cf. doc 04 § marges) et une
 // entrée dans 09-decisions-journal.md.
 //
-// Dernière vérification : 2026-05-06
+// Dernière vérification : 2026-05-18 (Mistral pricing ajouté pour PR2)
 
 export interface ModelPricing {
   inputPerMtok: number;
@@ -24,6 +24,20 @@ export const ANTHROPIC_PRICING: Record<string, ModelPricing> = {
     inputPerMtok: 1,
     outputPerMtok: 5,
     webSearchPerCall: 0.01,
+  },
+};
+
+// Mistral La Plateforme — https://mistral.ai/pricing
+// Tarifs en EUR convertis en USD au taux ~1.10 (date de vérif 2026-05-18).
+// V0+ : on tracke Le Chat sans web_search (Mistral n'expose pas encore de
+// tool serveur natif type web_search Anthropic). Bascule vers Mistral
+// Agents API + connector web prévue dès qu'elle quitte la beta — sinon
+// la fidélité « ce que voit l'utilisateur dans Le Chat » n'est pas totale.
+export const MISTRAL_PRICING: Record<string, ModelPricing> = {
+  "mistral-large-latest": {
+    inputPerMtok: 2.2, // ~€2/Mtok
+    outputPerMtok: 6.6, // ~€6/Mtok
+    webSearchPerCall: 0, // pas de web_search natif en V0+
   },
 };
 
