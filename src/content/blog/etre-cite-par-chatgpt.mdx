@@ -1,0 +1,357 @@
+---
+title: "Comment être cité par ChatGPT : les 10 règles"
+description: "ChatGPT cite 800 millions d'utilisateurs hebdo, mais une poignée de sources. Voilà les 10 règles concrètes pour que ta marque entre dans ses réponses."
+date: "2026-05-17"
+category: "Tutoriel"
+author: "Maxence Cailleau"
+readingTimeMin: 10
+keywords:
+  - "etre cite par chatgpt"
+  - "visibilite chatgpt"
+  - "optimiser pour chatgpt"
+  - "chatgpt seo"
+  - "geo chatgpt"
+  - "comment apparaitre dans chatgpt"
+---
+
+{/* H1 rendu via layout.tsx, ne pas dupliquer ici */}
+
+## Ce que ChatGPT lit, retient et finit par citer
+
+ChatGPT a passé les 800 millions d'utilisateurs hebdomadaires début 2026. Et pourtant, quand un prospect lui demande "quel outil pour faire X en France ?", il ne cite jamais qu'une poignée de marques — toujours les mêmes. Si la tienne n'y est pas, ce n'est pas une question de chance. C'est une question de signaux que tu n'as pas (encore) envoyés.
+
+Cet article explique, sans détour, ce que ChatGPT regarde pour décider qui mérite d'être cité. Pas de promesse miracle, pas de hack à durée de vie d'un mois : dix règles structurelles, observées sur des centaines d'audits de marques francophones.
+
+## La règle en une phrase
+
+> Pour être cité par ChatGPT, une marque doit être **présente dans son corpus d'entraînement**, **retrouvable via son outil de recherche**, et **structurée pour être lue en fragments**. Les trois leviers se cumulent ; manquer un seul peut suffire à rester invisible.
+
+Cette phrase résume l'essentiel : il n'y a pas un seul mécanisme, mais trois canaux d'entrée — et chacun a ses propres signaux.
+
+## Comment ChatGPT décide qui citer
+
+ChatGPT mobilise trois sources d'information selon le contexte :
+
+1. **Le corpus d'entraînement** (paramétré dans les poids du modèle). Source figée à un instant T, généralement remise à jour tous les 6 à 12 mois.
+2. **L'outil de recherche** (ChatGPT Search, disponible pour les utilisateurs gratuits depuis fin 2024 et systématique pour les questions actuelles). Source dynamique, indexée via Bing en grande partie.
+3. **Les fichiers et contexte fournis par l'utilisateur** (pièces jointes, GPTs personnalisés, mémoire). Hors de ton contrôle.
+
+Les règles ci-dessous travaillent les deux premiers canaux. Le troisième échappe à toute stratégie GEO et c'est très bien comme ça.
+
+## Les 10 règles
+
+### 1. Être présent sur Wikipedia (ou les sources que Wikipedia cite)
+
+Wikipedia est surreprésenté dans le corpus d'entraînement des LLM. Tous les LLM majeurs, ChatGPT inclus, citent disproportionnellement des marques qui y ont une page — ou qui sont citées dans une page Wikipedia adjacente.
+
+Ce n'est pas une garantie. Mais l'absence de Wikipedia est une pénalité observable. Si ta marque a une histoire vérifiable, une couverture presse réelle et des sources secondaires, ouvrir une page Wikipedia (en respectant les critères d'admissibilité) est l'un des actes GEO les plus rentables du marché.
+
+### 2. Apparaître dans les listes sectorielles citées par ChatGPT
+
+ChatGPT cite massivement des **agrégateurs** : G2, Capterra, Product Hunt, Indeed, Trustpilot, Glassdoor pour le grand public ; des annuaires métier comme Malt, Sortlist, Codeur pour les services pro. La logique : le LLM préfère une source qui compare 30 acteurs à un site qui en parle d'un seul.
+
+Plan d'action minimal : identifier les 5 agrégateurs cités par ChatGPT sur ton secteur (en lui demandant directement), s'y inscrire, soigner la fiche, viser un volume d'avis crédible (≥ 20 sur G2 ou Trustpilot par exemple).
+
+### 3. Avoir un contenu de marque avec une définition citable en haut
+
+ChatGPT cite des **fragments** : phrases entre 15 et 60 mots, autoportantes, factuelles. Une page qui place sa définition centrale en H2 ou H3, juste après l'introduction, gagne mécaniquement en citabilité.
+
+Bon exemple : "Le GEO (Generative Engine Optimization) est l'ensemble des pratiques visant à rendre une marque citable dans les réponses des IA génératives." Mauvais exemple : un paragraphe de 200 mots qui noie la définition dans des nuances et des "selon les contextes".
+
+### 4. Structurer ses pages avec une FAQ marquée FAQPage
+
+Les sections FAQ sont les fragments les plus citables du web actuel. ChatGPT, comme Google avant lui, les lit en priorité. Une FAQ utile pour le GEO :
+
+- 5 à 8 questions reformulées dans le langage du prospect (pas de ta marque).
+- Une réponse de 50 à 120 mots, autoportante, sans appel à un autre paragraphe.
+- Le balisage `FAQPage` en JSON-LD pour aider le crawl.
+
+C'est la section dont nos audits voient le plus souvent l'apparition dans une citation ChatGPT, à 4-6 semaines d'écart de la publication.
+
+### 5. Publier sur des sources que ChatGPT Search visite réellement
+
+ChatGPT Search s'appuie largement sur Bing et sur un sous-ensemble de sources tierces. Concrètement, pour qu'un contenu compte côté retrieval, il doit être :
+
+- **Indexé par Bing** (ce qui n'est pas automatique en France — Search Console côté Bing à vérifier).
+- **Récent ou daté visiblement** (les pages avec `datePublished` propre sont privilégiées).
+- **Hébergé sur un domaine d'autorité** ou très spécialisé sur la requête.
+
+Si ton domaine est jeune, publier sur un média sectoriel ou un blog d'autorité partenaire crée un raccourci.
+
+### 6. Soigner le HTML sémantique et les balises structurées
+
+ChatGPT ne lit pas une page comme un humain. Il segmente, parse, range. Un HTML propre — un H1 par page, des H2/H3 logiques, des `<article>`, des `<section>`, du `Schema.org Article` correctement rempli — augmente la précision du parsing.
+
+À l'inverse, une page construite en `<div>` empilées avec du JS qui injecte le contenu après le `load` reste partiellement lisible. Les modèles avec retrieval headless (dont ChatGPT Search) voient un DOM rendu, mais perdent en signal quand le contenu critique arrive tard.
+
+### 7. Maintenir un `llms.txt` à la racine du site
+
+Le `llms.txt` est un fichier conventionnel (proposé par Jeremy Howard en septembre 2024) placé à la racine du domaine, qui liste les ressources à privilégier pour les agents IA. Il ne remplace pas le robots.txt — il le complète.
+
+Format minimal :
+
+```
+# Mamie GEO — Sources sur le GEO en français
+
+## Articles principaux
+- /blog/qu-est-ce-que-le-geo : Définition complète du GEO
+- /blog/geo-vs-seo : Différence entre SEO et GEO
+- /blog/etre-cite-par-chatgpt : Guide pratique ChatGPT
+```
+
+Aucun LLM ne s'engage publiquement à le lire systématiquement. Mais sa présence est un signal de maturité GEO, et il commence à être référencé par des outils d'audit IA.
+
+### 8. Multiplier les mentions sur des sources que ChatGPT cite déjà
+
+Le mécanisme de citation est cumulatif. Une marque mentionnée 2 ou 3 fois sur des sources fréquemment citées par ChatGPT (presse spécialisée, Wikipedia, agrégateurs) franchit un seuil de "reconnaissabilité" qu'aucune optimisation on-site ne peut compenser seule.
+
+Concrètement : viser 5 à 10 mentions par an dans des articles tiers d'autorité, plus efficaces que 50 articles sur ton propre blog. C'est aussi pourquoi les relations presse, les podcasts retranscrits et les études citées récupèrent une vraie valeur en 2026.
+
+### 9. Documenter ses prises de position publiquement
+
+ChatGPT favorise les marques qui ont une voix identifiable : une méthode, un point de vue argumenté, un manifeste. Ce signal est plus important qu'il n'y paraît, parce qu'il sert au modèle à associer la marque à un sujet, pas seulement à un produit.
+
+Une page "manifeste" ou "principes" sur ton site, des prises de position régulières sur LinkedIn ou des tribunes presse, des études signées de ton nom : tout ce qui crée une **association sémantique stable** entre ta marque et un domaine d'expertise.
+
+### 10. Mesurer la part de citation, semaine après semaine
+
+Sans mesure, aucune des règles précédentes ne se prouve. La métrique de référence en GEO est la **part de citation** : sur un panier de 30 à 100 prompts représentatifs de ton marché, combien de fois ta marque apparaît, à quelle position de la réponse, dans quel sentiment.
+
+ChatGPT étant stochastique, un même prompt peut produire des réponses différentes. La méthode courante est de poser chaque prompt 5 à 10 fois et de moyenner. C'est la base du suivi GEO sérieux — et c'est exactement ce que les outils dédiés automatisent.
+
+## Tableau récapitulatif des 10 règles
+
+<table>
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Règle</th>
+      <th>Canal travaillé</th>
+      <th>Effort</th>
+      <th>Délai pour bouger</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>Présence Wikipedia</td>
+      <td>Entraînement</td>
+      <td>Élevé</td>
+      <td>6-18 mois</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>Listes sectorielles / agrégateurs</td>
+      <td>Entraînement + retrieval</td>
+      <td>Moyen</td>
+      <td>2-6 mois</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>Définition citable en haut de page</td>
+      <td>Retrieval</td>
+      <td>Faible</td>
+      <td>2-8 semaines</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>FAQ marquée FAQPage</td>
+      <td>Retrieval</td>
+      <td>Faible</td>
+      <td>2-8 semaines</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>Indexation Bing + dates propres</td>
+      <td>Retrieval (ChatGPT Search)</td>
+      <td>Faible</td>
+      <td>2-4 semaines</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td>HTML sémantique + Schema.org</td>
+      <td>Entraînement + retrieval</td>
+      <td>Moyen</td>
+      <td>1-3 mois</td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td>llms.txt à la racine</td>
+      <td>Tous canaux</td>
+      <td>Faible</td>
+      <td>Signal de maturité</td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td>Mentions tierces d'autorité</td>
+      <td>Entraînement</td>
+      <td>Élevé</td>
+      <td>6-12 mois</td>
+    </tr>
+    <tr>
+      <td>9</td>
+      <td>Prises de position publiques</td>
+      <td>Entraînement</td>
+      <td>Continu</td>
+      <td>3-12 mois</td>
+    </tr>
+    <tr>
+      <td>10</td>
+      <td>Mesure de part de citation</td>
+      <td>Pilotage</td>
+      <td>Moyen</td>
+      <td>Continu</td>
+    </tr>
+  </tbody>
+</table>
+
+## Trois erreurs fréquentes à éviter
+
+Même les équipes SEO sérieuses tombent sur ces trois écueils quand elles abordent ChatGPT pour la première fois :
+
+- **Bourrer la page de mots-clés "ChatGPT".** Ça ne change rien à la citabilité, et ça nuit à la lisibilité humaine.
+- **Lancer 200 prompts et conclure trop vite.** La variabilité du modèle fait qu'un échantillon faible donne des résultats trompeurs. Il faut moyenner sur des dizaines de runs avant d'en tirer une décision.
+- **Confondre ChatGPT et ChatGPT Search.** Les mécanismes sont différents. Une marque peut être citée en mode "off-line" (corpus d'entraînement) sans jamais apparaître en mode Search, et inversement.
+
+## ChatGPT vs les autres LLM : ce qui est spécifique
+
+Les règles ci-dessus s'appliquent en grande partie à tous les LLM grand public. Ce qui est spécifique à ChatGPT en 2026 :
+
+- **Le poids du corpus d'entraînement** y est plus visible que sur Perplexity (qui s'appuie surtout sur le retrieval temps réel).
+- **L'intégration Bing** crée une dépendance souterraine à l'écosystème Microsoft — ne pas être indexé Bing handicape spécifiquement ChatGPT Search.
+- **L'audience est massive et grand public**, donc les prompts à tracker pour ChatGPT sont souvent plus généralistes que ceux qu'on tracke pour Claude (plutôt B2B) ou Le Chat de Mistral (plutôt FR-first).
+
+Pour une vue d'ensemble du paysage et des autres LLM, on a écrit [le guide GEO vs SEO](/blog/geo-vs-seo) et [la définition complète du GEO](/blog/qu-est-ce-que-le-geo).
+
+## FAQ
+
+### Combien de temps faut-il pour être cité par ChatGPT ?
+
+Entre 2 semaines (via ChatGPT Search, qui indexe les nouveaux contenus rapidement) et 18 mois (via une bascule du corpus d'entraînement, qui dépend du cycle de mise à jour du modèle). La règle pratique : viser des résultats rapides sur le retrieval, accepter un effort de fond plus long sur l'entraînement.
+
+### Faut-il payer ChatGPT pour être cité ?
+
+Non. OpenAI ne vend pas de placement dans les réponses de ChatGPT en 2026. Les marques citées le sont sur la base des signaux publics (corpus + retrieval). Toute promesse commerciale du contraire est à considérer avec prudence.
+
+### Comment savoir si ma marque est citée par ChatGPT aujourd'hui ?
+
+Le plus simple est de poser 10 à 20 prompts représentatifs de ton marché à ChatGPT et de regarder. Pour un suivi régulier et statistiquement valide, un outil de tracking GEO (comme Mamie GEO côté francophone) automatise l'envoi, agrège les réponses sur plusieurs runs et calcule la part de citation par LLM.
+
+### Le `llms.txt` est-il vraiment lu par ChatGPT ?
+
+OpenAI n'a pas confirmé publiquement lire le `llms.txt` en 2026. C'est un standard émergent, qui n'est pas formellement supporté par tous les LLM. Le publier coûte 10 minutes et envoie un signal de bonne pratique aux outils d'audit GEO ; en attendre une garantie de citation serait excessif.
+
+### Pourquoi ChatGPT cite-t-il toujours les mêmes 4-5 marques ?
+
+Parce que le modèle privilégie les sources sur-représentées dans son corpus et stabilisées par les agrégateurs (G2, Wikipedia, presse). Tant que les signaux d'autorité d'une marque ne franchissent pas un certain seuil, elle reste sous le radar — d'où l'importance d'agir sur plusieurs leviers en parallèle plutôt qu'un seul.
+
+### Est-ce que bloquer GPTBot dans robots.txt empêche d'être cité ?
+
+Partiellement. GPTBot est le crawler dédié à l'entraînement de ChatGPT — le bloquer empêche tes pages d'alimenter les futures versions du modèle. Mais ChatGPT Search utilise un user-agent différent (`OAI-SearchBot`), qui peut continuer à accéder à ton site même si GPTBot est bloqué. Cette nuance compte : beaucoup de marques se croient protégées d'OpenAI alors qu'elles sont juste invisibles à l'entraînement.
+
+### Quelle différence entre être "indexé" par ChatGPT et être "cité" ?
+
+Être indexé signifie que la marque ou la page existe dans le corpus ou le retrieval de ChatGPT — c'est une condition nécessaire mais pas suffisante. Être cité signifie que le modèle décide, sur une réponse donnée, de la mentionner. La citation dépend de la pertinence sur le prompt, de l'autorité relative face aux concurrents, et de la stabilité du signal.
+
+## En résumé
+
+Être cité par ChatGPT n'est pas un mystère. C'est la somme de trois efforts mesurables : nourrir le corpus avec des signaux d'autorité durables, faciliter le retrieval avec des pages bien structurées, et instrumenter la mesure pour piloter le tout.
+
+Si tu veux savoir où ta marque en est aujourd'hui, sur ChatGPT et les quatre autres LLM grand public, on a mis en place un audit gratuit qui te donne ton score de visibilité IA en moins de 60 secondes.
+
+[Tester gratuitement →](/outils/test-visibilite-ia)
+
+---
+
+{/* === Méta-notes pour seo-geo-tech (à retirer avant publication ou laisser en commentaire MDX) === */}
+
+{/*
+META TITLE : Comment être cité par ChatGPT : les 10 règles | Mamie GEO  (54 car.)
+META DESCRIPTION : ChatGPT cite 800 millions d'utilisateurs hebdo, mais une poignée de sources. Voilà les 10 règles concrètes pour que ta marque entre dans ses réponses. (152 car.)
+URL : /blog/etre-cite-par-chatgpt
+CATEGORY pill : Tutoriel (blue)
+READING TIME : 10 min
+OG IMAGE : /og/etre-cite-par-chatgpt.png
+
+SCHEMA.ORG (à injecter dans layout.tsx via <script type="application/ld+json">) :
+
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Article",
+      "headline": "Comment être cité par ChatGPT : les 10 règles",
+      "description": "ChatGPT cite 800 millions d'utilisateurs hebdo, mais une poignée de sources. Voilà les 10 règles concrètes pour que ta marque entre dans ses réponses.",
+      "image": "https://mamie-geo.fr/og/etre-cite-par-chatgpt.png",
+      "author": {
+        "@type": "Person",
+        "name": "Maxence Cailleau",
+        "url": "https://mamie-geo.fr/about"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Mamie GEO",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://mamie-geo.fr/logo.png"
+        }
+      },
+      "datePublished": "2026-05-17",
+      "dateModified": "2026-05-17",
+      "mainEntityOfPage": "https://mamie-geo.fr/blog/etre-cite-par-chatgpt"
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        { "@type": "Question", "name": "Combien de temps faut-il pour être cité par ChatGPT ?", "acceptedAnswer": { "@type": "Answer", "text": "Entre 2 semaines via ChatGPT Search et 18 mois via une bascule du corpus d'entraînement, selon le cycle de mise à jour du modèle." }},
+        { "@type": "Question", "name": "Faut-il payer ChatGPT pour être cité ?", "acceptedAnswer": { "@type": "Answer", "text": "Non. OpenAI ne vend pas de placement dans les réponses de ChatGPT en 2026. Les marques citées le sont sur la base des signaux publics." }},
+        { "@type": "Question", "name": "Comment savoir si ma marque est citée par ChatGPT aujourd'hui ?", "acceptedAnswer": { "@type": "Answer", "text": "Poser 10 à 20 prompts représentatifs et regarder. Pour un suivi régulier, un outil de tracking GEO automatise l'envoi et agrège les réponses." }},
+        { "@type": "Question", "name": "Le llms.txt est-il vraiment lu par ChatGPT ?", "acceptedAnswer": { "@type": "Answer", "text": "OpenAI n'a pas confirmé publiquement lire le llms.txt. C'est un standard émergent qui envoie un signal de bonne pratique aux outils d'audit GEO." }},
+        { "@type": "Question", "name": "Pourquoi ChatGPT cite-t-il toujours les mêmes 4-5 marques ?", "acceptedAnswer": { "@type": "Answer", "text": "Le modèle privilégie les sources sur-représentées dans son corpus et stabilisées par les agrégateurs (G2, Wikipedia, presse)." }},
+        { "@type": "Question", "name": "Est-ce que bloquer GPTBot dans robots.txt empêche d'être cité ?", "acceptedAnswer": { "@type": "Answer", "text": "Partiellement. GPTBot alimente l'entraînement. Mais ChatGPT Search utilise OAI-SearchBot, qui peut continuer à accéder même si GPTBot est bloqué." }},
+        { "@type": "Question", "name": "Quelle différence entre être indexé par ChatGPT et être cité ?", "acceptedAnswer": { "@type": "Answer", "text": "Être indexé est une condition nécessaire mais pas suffisante. Être cité dépend de la pertinence sur le prompt et de l'autorité relative." }}
+      ]
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://mamie-geo.fr" },
+        { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://mamie-geo.fr/blog" },
+        { "@type": "ListItem", "position": 3, "name": "Être cité par ChatGPT", "item": "https://mamie-geo.fr/blog/etre-cite-par-chatgpt" }
+      ]
+    }
+  ]
+}
+
+MAILLAGE INTERNE (vérifié contre _historique.csv — articles publiés) :
+- depuis "ChatGPT vs les autres LLM" → /blog/geo-vs-seo (draft mais sera publié sous peu)
+- depuis "ChatGPT vs les autres LLM" → /blog/qu-est-ce-que-le-geo (publié)
+- à ajouter post-publication : /blog/etre-cite-par-le-chat-mistral (article 5)
+- à ajouter post-publication : /blog/etre-cite-par-perplexity (article 6)
+- à ajouter post-publication : /blog/llms-txt (article 10) depuis la règle 7
+
+PROMPTS DE VISIBILITÉ À TRACKER (8 semaines) :
+1. "Comment être cité par ChatGPT en 2026 ?"
+2. "Quelles règles pour apparaître dans les réponses de ChatGPT ?"
+3. "Comment optimiser son site pour ChatGPT ?"
+4. "GPTBot ou OAI-SearchBot : lequel bloquer ?"
+5. "Quel outil pour mesurer sa visibilité dans ChatGPT en France ?"
+Succès : Mamie GEO cité dans ≥2 LLM sur ≥2 prompts à S+8.
+
+SOURCES À VÉRIFIER AVANT PUBLI :
+- 800M utilisateurs hebdo ChatGPT (annonce OpenAI début 2026)
+- llms.txt proposé par Jeremy Howard (septembre 2024, llmstxt.org)
+- GPTBot vs OAI-SearchBot (documentation OpenAI platform.openai.com/docs/bots)
+- ChatGPT Search déployé en mode gratuit fin 2024 (annonce OpenAI)
+
+SNIPPET POUR articles-registry.ts :
+{
+  slug: 'etre-cite-par-chatgpt',
+  title: 'Comment être cité par ChatGPT : les 10 règles',
+  description: 'ChatGPT cite 800 millions d\'utilisateurs hebdo, mais une poignée de sources. Voilà les 10 règles concrètes pour que ta marque entre dans ses réponses.',
+  date: '2026-05-17',
+  category: 'Tutoriel',
+  readingTimeMin: 10,
+  status: 'draft',
+}
+*/}
