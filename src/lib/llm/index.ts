@@ -4,6 +4,7 @@ import { createAnthropicClient } from "./anthropic";
 import { createGoogleClient } from "./google";
 import { createMistralClient } from "./mistral";
 import { createOpenAIClient } from "./openai";
+import { createPerplexityClient } from "./perplexity";
 import type { LLMClient, LLMValue } from "./types";
 
 // Factory unique des providers LLM. Chaque LLM mappe vers son env var
@@ -26,8 +27,10 @@ const IMPLEMENTED_LLMS: Record<LLMValue, boolean> = {
   claude: true,
   lechat: true, // PR2
   chatgpt: true, // PR3
-  gemini: true, // PR4 — ce commit
-  perplexity: false, // PR5
+  gemini: true, // PR4
+  perplexity: true, // PR5 — ce commit. Activation auto via getConfiguredLLMs
+                   // dès que PERPLEXITY_API_KEY est setté en env (cf. doc 09
+                   // § 2026-05-18 — crédit minimum $50 attendu).
 };
 
 /**
@@ -59,9 +62,7 @@ export function getLLMClient(llm: LLMValue): LLMClient {
     case "gemini":
       return createGoogleClient({ apiKey });
     case "perplexity":
-      // Unreachable : protégé par IMPLEMENTED_LLMS ci-dessus. Garde pour
-      // l'exhaustivité TypeScript du switch.
-      throw new Error(`Provider ${llm} pas encore implémenté (PR5)`);
+      return createPerplexityClient({ apiKey });
   }
 }
 

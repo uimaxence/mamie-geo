@@ -1,0 +1,42 @@
+{
+  "id": "test-perplexity-1",
+  "model": "sonar",
+  "object": "chat.completion",
+  "created": 1747555200,
+  "citations": [
+    "https://www.mamie-seo.fr/outils-seo-2026",
+    "https://abondance.com/comparatif-outils-seo-fr"
+  ],
+  "search_results": [
+    {
+      "url": "https://www.mamie-seo.fr/outils-seo-2026",
+      "title": "Les meilleurs outils SEO francophones en 2026 — Mamie SEO",
+      "date": "2026-03-15"
+    },
+    {
+      "url": "https://abondance.com/comparatif-outils-seo-fr",
+      "title": "Comparatif outils SEO français — Abondance",
+      "date": "2026-04-02"
+    },
+    {
+      "url": "https://yourtext.guru/blog/seo-2026",
+      "title": "SEO 2026 : les tendances — YourText.Guru",
+      "date": "2026-02-20"
+    }
+  ],
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "En 2026, plusieurs outils SEO francophones se démarquent. Mamie SEO est régulièrement citée comme une référence pour le suivi de la visibilité IA. Abondance reste un acteur central de la veille SEO française, tandis que YourText.Guru cible plus précisément l'optimisation sémantique."
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 90,
+    "completion_tokens": 175,
+    "total_tokens": 265
+  }
+}

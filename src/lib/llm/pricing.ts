@@ -44,6 +44,24 @@ export const OPENAI_PRICING: Record<string, ModelPricing> = {
   },
 };
 
+// Perplexity — https://docs.perplexity.ai/guides/pricing
+// sonar : modèle V0+ pour le tracking. Search inclus dans la requête, pas
+// de tool séparé. Facturation : $1/Mtok input, $1/Mtok output, $5 par
+// 1000 requests = $0.005 par appel (la requête entière compte comme
+// 1 search, peu importe le nb de sources retournées).
+export const PERPLEXITY_PRICING: Record<string, ModelPricing> = {
+  sonar: {
+    inputPerMtok: 1,
+    outputPerMtok: 1,
+    webSearchPerCall: 0.005,
+  },
+  "sonar-pro": {
+    inputPerMtok: 3,
+    outputPerMtok: 15,
+    webSearchPerCall: 0.005,
+  },
+};
+
 // Google AI Studio — https://ai.google.dev/pricing
 // gemini-2.5-flash : modèle V0+ cheap pour le tracking. Grounding Google
 // Search facturé séparément $35 / 1000 requests = $0.035/call (plus cher
