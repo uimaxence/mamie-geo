@@ -52,7 +52,7 @@ Module **Tracker** uniquement. Rien d'autre. Pas d'optimization, pas de content,
 | Vue concurrents (qui est cité, à quelle fréquence)              | P0       |                                                        |
 | Évolution dans le temps (graph 30 jours)                        | P0       |                                                        |
 | Email hebdo automatique                                         | P0       | Brevo                                                  |
-| Export CSV                                                      | P0       |                                                        |
+| Export CSV                                                      | P0       | ⚠️ Replanifié V0+ — listé P0 mais code absent au 2026-05-17 |
 | Page facturation Stripe Customer Portal                         | P0       | Livré 2026-05-14                                       |
 | Plans Solo / Starter / Pro avec limitations volumes             | P0       | Solo 9,99 € ajouté 2026-05-14, Agency retiré UI public |
 | Hard-cap LLM 200 % du quota théorique mensuel                   | P0       | Livré 2026-05-16 (`src/lib/hardcap/`)                  |
@@ -125,12 +125,54 @@ Module **Tracker** uniquement. Rien d'autre. Pas d'optimization, pas de content,
 - **Calcul** : produit par Claude Haiku 4.5 en mode `tool_use` forcé (cf. `src/lib/citation/score.ts`), schéma `report_scoring`.
 - **Quand utiliser** : alerter sur un sentiment qui se dégrade, prioriser les prompts à fort impact négatif, segmenter le Score (un score 70 avec sentiment majoritairement négatif est pire qu'un 60 positif).
 
+### Funnel sources (à adopter V0+, cf. § V0+ ci-dessous)
+
+Vocabulaire adopté en miroir du standard marché (Peec AI a popularisé ce funnel, c'est ce qui s'installe comme norme dans le secteur). Évite les « Used % > 100 % » qui prêtaient à confusion.
+
+- **Apparition** — *% de réponses où la source apparaît dans le set de retrieval (avant filtrage par le LLM)*. En anglais : *Retrieved*.
+- **Fréquence** — *nombre moyen d'apparitions par réponse* (1 source peut être citée plusieurs fois dans la même réponse). En anglais : *Retrieval Rate*.
+- **Citation** — *% des apparitions qui deviennent une citation explicite dans la réponse finale* (= apparition convertie en mention publiquement attribuable). En anglais : *Citation Rate*.
+
+Les 3 métriques composent un funnel : `Apparition → Fréquence → Citation`. À surfacer dans le dashboard sources, les exports CSV et le rapport hebdo (cf. doc 03 § Schéma BDD pour les colonnes `retrieved_count`, `retrievals_total`, `citations_count` à ajouter à `citation_metrics_daily`).
+
 ### Termes à NE PAS utiliser (équivalents anglais)
 
 - ❌ « AI Visibility Score » → ✅ **Score de visibilité IA**
 - ❌ « Share of Voice » / « SOV » → ✅ **Part de voix**
 - ❌ « Brand Sentiment » → ✅ **Sentiment** (suffisamment précis en contexte)
 - ❌ « Mentions » seul (ambigu) → ✅ **Citations** (notre vocabulaire standard)
+- ❌ « Retrieved / Retrieval Rate / Citation Rate » → ✅ **Apparition / Fréquence / Citation** (V0+)
+
+---
+
+## V0+ — Optimisation et différenciation (60 jours post-lancement)
+
+> Ajouté 2026-05-17 — issu de la veille concurrence 2026-05-11 (Profound, Peec AI, Goodie, Otterly, Rankscale, AthenaHQ), tri recalibré sur ce qui n'existe pas déjà dans le code et qui n'est pas doublonné. Phasé en V0+ pour land après la complétion Phase C (bascule Haiku → Sonnet 4.6 + providers multi-LLM OpenAI/Mistral/Perplexity/Google).
+
+### Vision
+
+Le V0 a livré la promesse de base (tracker + dashboard + audit gratuit + billing). Le V0+ comble les **trous fonctionnels** identifiés en veille concurrentielle et active les leviers de **rétention** (drill-down sources, regen prompts) et **acquisition** (comparison pages, crawlability bots IA dans le rapport audit).
+
+### Features V0+
+
+| Feature                                                  | Pourquoi                                                                                                       | Où ça vit                                                                              |
+| -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| **Funnel sources 3 métriques (Apparition/Fréquence/Citation)** | Vocabulaire qui s'installe comme standard marché (Peec). Avant qu'on soit perçus comme legacy.                  | Refonte `citation_metrics_daily` (cf. doc 03) + dashboard sources + exports CSV + hebdo |
+| **Per-prompt cadence (`daily \| weekly \| monthly`)**       | Per-plan déjà en V0 (Solo=weekly). Per-prompt = économie de runs sur prompts à faible variance, vente facile Pro/Agency. | Champ `prompts.cadence` (cf. doc 03) + UI `/app/prompts/[id]` + filtre scheduler        |
+| **URL drill-down `/app/sources/[id]`**                   | Passe d'un produit « tableau » à un produit « investigation ». Rétention forte.                                | Nouvelle route + vues SQL (retrievals over time, citation rate, prompts qui retrouvent, marques voisines, runs réels) |
+| **Crawlabilité bots IA dans rapport `/outils/audit-technique`** | Pas un outil séparé (dilue le slug autorité existant). Section dédiée au rapport audit existant : table ChatGPT/Claude/Perplexity/Gemini/PerplexityBot — autorisé/bloqué. | Lib `src/lib/audit/` (étendre) + parse `/robots.txt` cible + table de bots connus      |
+| **Régénérer prompts depuis le profil**                   | Compléter le onboarding et le profil brand : un seul bouton qui re-suggère 10 prompts à partir de la description + concurrents. | `/app/onboarding` + `/app/prompts` (action server)                                     |
+| **Comparison pages industrialisées**                     | 1 article publié (vs Profound). Industrialiser : vs Peec AI, vs Otterly, vs Rankscale (SEO + sales enablement). | `src/content/blog/*.mdx` + section dédiée doc 06                                       |
+| **Multi-select brand filter (Your brand / Competitors)** | UX évidente une fois vue. Filtre groupé sur dashboard + vues détaillées.                                       | Composant `BrandMultiSelect` dans `src/components/app/`                                |
+| **Save-as-PNG sur charts**                               | Drop direct dans Slack/deck client. Effet « felt » côté agence = partage = bouche-à-oreille.                   | Wrapper sur Recharts (LineChart, BarChart, AreaChart) — comptabiliser 1-2 j (pas trivial avec SSR + theming) |
+| **CSV export**                                           | Gap V0 (listé P0 mais code absent). Endpoints `/api/export/runs.csv`, `/api/export/metrics.csv`.               | Cf. doc 03 § Routes                                                                    |
+| **Pause/Resume projects**                                | Agence saisonnière / audit one-shot : pause le tracking sans perdre le setup, credits ne sont plus consommés.  | Champ `brands.paused_at TIMESTAMPTZ NULL` (cf. doc 03) + skip dans scheduler           |
+
+### Hors périmètre V0+
+
+- ❌ **MCP Server Mamie GEO** — cible PME/freelance FR ≠ devs power-users. Estimé « 2-3 jours » par la veille mais valeur faible pour notre cible. À reconsidérer V1 conditionnel à demande client clair.
+- ❌ **Looker Studio connector** — après CSV export validé en V0+, à reconsidérer V1.
+- ❌ **Crawlability comme outil séparé `/crawlability`** — dilue le slug autorité de `/outils/audit-technique`. Intégré comme section au rapport existant à la place.
 
 ---
 
@@ -163,6 +205,15 @@ Une fois que le Tracker tourne et que les clients comprennent leur position, ils
 - Crawler léger (Playwright headless)
 - Parser HTML pour extraction schema (cheerio)
 - LLM scoring pour évaluer la "citabilité" du contenu (Claude Haiku par appel)
+
+### Ajouts V1 issus de la veille concurrence 2026-05-11
+
+| Feature                                                | Pourquoi                                                                                                                       | Notes                                                                  |
+| ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------- |
+| **Programme partenaire + annuaire public**             | Canal accélérateur agence FR (cf. doc 06). Lifetime commission 20-25 % sur l'abonnement référé. Flywheel local que les concurrents anglo levés ne peuvent pas répliquer sans force commerciale FR. | Annuaire CMS-style (page publique listant les agences signées) + tracking Stripe affiliate. Cf. doc 06 § Programme partenaire. |
+| **Query fan-out tracking**                             | Traque les « sub-queries » que ChatGPT/consorts fan-out en interne. Plus profond que « ma marque apparaît-elle ». Vraie valeur démo agence. | Mode « advanced view » réservé tier Pro/Agence.                        |
+| **« État du GEO francophone 2027 » report annuel**     | Lead magnet + autorité de catégorie + relais presse FR. Basé sur la data collectée en V0 / V0+.                                | Cf. doc 06 § Lead magnets. Publication début 2027.                     |
+| **Tier credit-based « Power » (optionnel)**            | Doc 09 a tranché flat-prompts en V0. À reconsidérer V1 si demande client agence claire pour piloter finement engines × prompts × cadence. | Pas un acquis. Validation après 6 mois de data des plans flat actuels. |
 
 ---
 
@@ -208,6 +259,13 @@ Activer le canal agence à pleine puissance avec un module pensé pour eux.
 - **Fine-tuning détection** — détecter si une marque entre dans les datasets d'entraînement ouverts (Common Crawl etc.)
 - **Reverse-prompting** — proposer "voici 10 questions que tes clients pourraient poser à ChatGPT, et voilà comment tu apparais"
 - **Public benchmark anonyme** — montrer la moyenne de visibilité dans son secteur
+
+### Repoussés en V3+ après veille 2026-05-11 (à mentionner pour clore le débat)
+
+- **MCP Server Mamie GEO** — read-only sur les prompts/sources/tendances de l'utilisateur, accessible depuis Claude/Cursor/Windsurf. Sexy mais cible PME/freelance FR ≠ devs power-users (Peec a lancé le sien le 2026-04-20). À reconsidérer V1 conditionnel à demande client.
+- **ACE-like ML citation probability** — modèle qui prédit la probabilité qu'une page soit citée (cf. AthenaHQ Citation Engine). V2 minimum, après 6+ mois de data propre apparitions/citations.
+- **AEO Writer / agents Goodie-style** — générateur de contenu IA-optimisé. Hors scope durable (Tracker pur). Pollue le focus. Potentiellement tier Agence en V2 si pression marché forte.
+- **Verticalisation extrême (33 industries façon AthenaHQ)** — solo founder ne peut pas maintenir 33 pages verticales. Max 3-5 verticales si jamais : e-commerce FR, SaaS B2B FR, agence SEO, services pro, immobilier.
 
 ---
 

@@ -25,16 +25,20 @@
 
 ### Domaine et routes
 
-| Zone          | URL                                      | Layout                              |
-| ------------- | ---------------------------------------- | ----------------------------------- |
-| Marketing     | `mamie-geo.fr/`                          | `(marketing)` route group           |
-| Pricing       | `mamie-geo.fr/pricing`                   | `(marketing)`                       |
-| À propos      | `mamie-geo.fr/about`                     | `(marketing)`                       |
-| Outil gratuit | `mamie-geo.fr/outils/test-visibilite-ia` | `(marketing)`                       |
-| Blog          | `mamie-geo.fr/blog` et `/blog/[slug]`    | `(blog)` route group                |
-| Login         | `mamie-geo.fr/login`                     | layout dédié                        |
-| App SaaS      | `mamie-geo.fr/app/*`                     | `(app)` route group avec auth check |
-| API           | `mamie-geo.fr/api/*`                     | API routes                          |
+| Zone                    | URL                                      | Layout                              |
+| ----------------------- | ---------------------------------------- | ----------------------------------- |
+| Marketing               | `mamie-geo.fr/`                          | `(marketing)` route group           |
+| Pricing                 | `mamie-geo.fr/pricing`                   | `(marketing)`                       |
+| À propos                | `mamie-geo.fr/about`                     | `(marketing)`                       |
+| Outil gratuit           | `mamie-geo.fr/outils/test-visibilite-ia` | `(marketing)`                       |
+| Audit technique gratuit | `mamie-geo.fr/outils/audit-technique`    | `(marketing)` — V0+ ajoute section « Crawlabilité bots IA » |
+| Blog                    | `mamie-geo.fr/blog` et `/blog/[slug]`    | `(blog)` route group                |
+| Comparatifs (V0+)       | `mamie-geo.fr/comparatifs/[slug]`        | `(marketing)` — vs Profound (livré), vs Peec AI / vs Otterly / vs Rankscale (V0+) |
+| Login                   | `mamie-geo.fr/login`                     | layout dédié                        |
+| App SaaS                | `mamie-geo.fr/app/*`                     | `(app)` route group avec auth check |
+| URL drill-down (V0+)    | `mamie-geo.fr/app/sources/[id]`          | `(app)` — retrievals over time, citation rate, prompts qui retrouvent la source, marques voisines, runs réels |
+| API                     | `mamie-geo.fr/api/*`                     | API routes                          |
+| CSV exports (V0+)       | `mamie-geo.fr/api/export/{runs,metrics}.csv` | API routes — auth + filtre workspace |
 
 Pas de subdomain `app.mamie-geo.fr` en V0 — un seul SSL, un seul cookie, simplicité maximale. Migration possible plus tard si besoin via middleware Next.js.
 
@@ -356,9 +360,11 @@ CREATE TABLE brands (
   domain TEXT NOT NULL,
   description TEXT,
   aliases TEXT[] NOT NULL DEFAULT '{}',
+  paused_at TIMESTAMPTZ,                   -- V0+ : si non NULL, scheduler skip cette marque (Pause/Resume sans perte de setup)
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 CREATE INDEX idx_brands_workspace ON brands(workspace_id);
+CREATE INDEX idx_brands_active ON brands(workspace_id) WHERE paused_at IS NULL;
 
 CREATE TABLE competitors (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -381,9 +387,12 @@ CREATE TABLE prompts (
   category TEXT,  -- 'commercial', 'informational', 'comparison', ...
   language TEXT NOT NULL DEFAULT 'fr',
   is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  cadence TEXT NOT NULL DEFAULT 'inherit'
+    CHECK (cadence IN ('inherit','daily','weekly','monthly')),  -- V0+ : override de la cadence per-plan (cf. quotasFor()). 'inherit' = cadence du plan workspace.
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 CREATE INDEX idx_prompts_brand_active ON prompts(brand_id) WHERE is_active = TRUE;
+-- Scheduler V0+ : filtre par cadence effective = COALESCE(prompts.cadence WHERE != 'inherit', workspace_plan.cadence)
 
 -- 1 run = 1 prompt × 1 LLM × 1 date planifiée
 CREATE TABLE runs (
@@ -408,6 +417,8 @@ CREATE INDEX idx_runs_prompt_executed ON runs(prompt_id, executed_at DESC);
 CREATE INDEX idx_runs_scheduled_pending ON runs(scheduled_at) WHERE status = 'pending';
 
 -- Vue matérialisée des dashboards (recalculée par worker journalier)
+-- V0+ 2026-05-17 : ajout du funnel sources 3 métriques (Apparition / Fréquence / Citation),
+-- cf. doc 02 § Glossaire et veille concurrence 2026-05-11 (vocabulaire standard marché).
 CREATE TABLE citation_metrics_daily (
   brand_id UUID NOT NULL REFERENCES brands(id) ON DELETE CASCADE,
   llm TEXT NOT NULL,
@@ -416,6 +427,14 @@ CREATE TABLE citation_metrics_daily (
   brand_cited_count INTEGER NOT NULL,
   visibility_score DECIMAL(5, 2),  -- 0-100
   competitors_data JSONB,          -- { competitor_id: { citations, position_avg } }
+  -- Funnel sources V0+ — calculé par worker recompute_metrics à partir des runs.parsed_citations
+  retrieved_count   INTEGER NOT NULL DEFAULT 0,  -- nb de runs où ≥1 source de la marque apparaît dans le set de retrieval
+  retrievals_total  INTEGER NOT NULL DEFAULT 0,  -- somme des apparitions (une source peut apparaître plusieurs fois dans une réponse)
+  citations_count   INTEGER NOT NULL DEFAULT 0,  -- nb de retrievals convertis en citation explicite finale
+  -- Ratios dérivés (à la lecture, pas stockés) :
+  --   Apparition = retrieved_count / total_runs
+  --   Fréquence  = retrievals_total / retrieved_count  (si retrieved_count > 0, sinon 0)
+  --   Citation   = citations_count / retrievals_total  (si retrievals_total > 0, sinon 0)
   PRIMARY KEY (brand_id, llm, date)
 );
 
@@ -955,6 +974,21 @@ Après analyse coût × scalabilité × testabilité, voici les choix actés pou
 - Lead magnet existant `/outils/test-visibilite-ia`
 - Page interne `/styleguide` (noindex) — référence visuelle complète du design system
 
+### V0+ (60 jours post-lancement) — issu de la veille 2026-05-11
+
+Chantiers planifiés en V0+ qui touchent l'archi (cf. doc 02 § V0+ pour le détail produit et § Glossaire pour le vocabulaire) :
+
+- **Migration schéma `citation_metrics_daily`** — ajout `retrieved_count`, `retrievals_total`, `citations_count` (funnel Apparition/Fréquence/Citation). Worker `recompute_metrics` étendu pour calculer ces 3 colonnes à partir de `runs.parsed_citations`. Backfill par one-shot job sur l'historique.
+- **`prompts.cadence`** (`inherit \| daily \| weekly \| monthly`) — per-prompt override de la cadence per-plan. Scheduler `/api/cron/schedule-runs` filtre par cadence effective.
+- **`brands.paused_at`** — Pause/Resume du tracking sans perte du setup. Scheduler skip les marques pausées. Pas de reset des compteurs Stripe (les credits ne sont juste pas consommés).
+- **`/app/sources/[id]`** — URL drill-down avec vues SQL (retrievals over time, citation rate par modèle, prompts qui retrouvent la source, marques voisines, runs réels). Pas de nouvelle table — vues sur `runs.parsed_citations`.
+- **`/api/export/{runs,metrics}.csv`** — exports auth + filtrés workspace, streaming Node.js pour fichiers > 10K lignes.
+- **Crawlabilité bots IA dans `src/lib/audit/`** — nouveau check `crawlability-ai-bots` : parse `/robots.txt` cible, croise avec table de bots connus (`GPTBot`, `ClaudeBot`, `Claude-Web`, `PerplexityBot`, `Google-Extended`, `Bytespider`, `CCBot`, `Amazonbot`, `meta-externalagent`, etc.), retourne table autorisé/bloqué. Section dédiée du rapport public (pas d'outil séparé `/crawlability`). Liste de bots à maintenir versionnée dans `src/lib/audit/ai-bots.ts`.
+- **Bouton « Régénérer prompts depuis le profil »** sur `/app/onboarding` et `/app/prompts` — server action qui appelle `suggestPrompts(brand)` (Haiku 4.5, cf. mémoire user `feedback_aux_llm_cost`).
+- **`BrandMultiSelect`** dans `src/components/app/` — filtre multi-sélection groupé (Your brand / Competitors) appliqué aux vues dashboard et drill-down.
+- **Save-as-PNG** sur charts Recharts — wrapper `<ChartExport>` autour de `LineChart` / `BarChart` / `AreaChart` (html2canvas ou similaire). 1-2 j de dev, pas trivial avec SSR + theming.
+- **Comparison pages `/comparatifs/[slug]`** — articles MDX dans `src/content/comparatifs/` (vs Peec AI, vs Otterly, vs Rankscale en V0+ ; vs Profound déjà publié blog).
+
 ### V1 (mois 3-6)
 
 - Crawler AI-readiness
@@ -963,6 +997,9 @@ Après analyse coût × scalabilité × testabilité, voici les choix actés pou
 - Vue concurrents avancée
 - Notifications Slack
 - API basic (read-only)
+- **Programme partenaire + annuaire public** (cf. doc 06 § Programme partenaire) — tracking Stripe affiliate, commission lifetime 20-25 %, page CMS-style listant les agences signées
+- **Query fan-out tracking** (mode advanced view tier Pro/Agence) — scraping détaillé des sub-queries que ChatGPT/consorts fan-out en interne, parsing des sources/citations
+- **MCP Server Mamie GEO (conditionnel)** — read-only sur la data utilisateur, accessible depuis Claude/Cursor/Windsurf. Activé seulement si demande client claire émerge (cible PME/freelance FR ≠ devs power-users).
 
 ### V2 (mois 6-12)
 

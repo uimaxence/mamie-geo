@@ -111,10 +111,28 @@ Objectif : devenir LA source FR sur le GEO. Métaphysiquement, ces articles sero
 ### Articles outils et tooling (P2, en continu)
 
 26. "Comparatif : les meilleurs outils GEO en 2026"
-27. "Mamie GEO vs Profound vs Peec AI : lequel choisir ?"
+27. ✅ "Mamie GEO vs Profound : lequel choisir ?" (livré 2026-05-16, `src/content/blog/mamie-geo-vs-profound.mdx`)
 28. "Test gratuit : votre marque est-elle citée par ChatGPT ?"
 29. "Comment configurer un dashboard de visibilité IA"
 30. "Notre roadmap GEO : ce qu'on construit cette année"
+
+### Comparison pages industrialisées (V0+, ajouté 2026-05-17)
+
+> Issu de la veille concurrence 2026-05-11 (cf. doc 02 § V0+). Peec a 3 comparatifs publics (« vs Profound », « vs Semrush », « vs Ahrefs Brand Radar ») — c'est un canal SEO + sales enablement éprouvé. On dispose déjà de l'article vs Profound, on industrialise.
+
+Cibles V0+ (3 nouvelles pages, livraison 60 j post-lancement) :
+
+| Slug                                | Cible                                                                              | Angle                                                              |
+| ----------------------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| `/comparatifs/peec-ai-vs-mamie-geo` | Comparatifs SEO recherchés par early adopters EU                                   | Moat FR, Le Chat en hero, pricing €, garantie 14 j refund vs trial |
+| `/comparatifs/otterly-vs-mamie-geo` | Otterly est distribué via Semrush App Center à $27/mo                              | Suite locale FR vs add-on Semrush US                               |
+| `/comparatifs/rankscale-vs-mamie-geo` | Rankscale credit-based + partner directory                                         | Flat-prompts simplicité vs credits, cible PME/freelance vs agence  |
+
+Cibles V1 :
+
+- `/comparatifs/profound-vs-mamie-geo` (porter l'article blog actuel en landing comparatif dédiée si traction)
+- `/comparatifs/goodie-vs-mamie-geo` (si Goodie progresse en FR)
+- `/comparatifs/athena-hq-vs-mamie-geo` (à arbitrer selon traction)
 
 ---
 
@@ -165,6 +183,19 @@ URL : `mamie-geo.fr/outils/audit-technique` — **livré 2026-05-16**, complète
 
 > **Probablement notre lead magnet le plus scalable** car aucun coût marginal LLM. Multiplie sans contrainte de budget.
 
+#### Renforcement V0+ — Section « Crawlabilité bots IA »
+
+> Ajouté 2026-05-17 — issu veille concurrence 2026-05-11 (Peec a lancé son outil Crawlability le 2026-04-27 et en a fait un aimant SEO massif). Décision : on n'ouvre **pas** un slug séparé `/crawlability` (dilue l'autorité du slug `audit-technique` existant). On intègre une section dédiée au rapport audit actuel.
+
+Nouvelle section du rapport (livraison V0+, cf. doc 03 § V0+) :
+
+- Parse `/robots.txt` de l'URL cible
+- Croise avec une table de bots IA connus maintenue dans `src/lib/audit/ai-bots.ts` : `GPTBot`, `ClaudeBot`, `Claude-Web`, `PerplexityBot`, `Google-Extended`, `Bytespider`, `CCBot`, `Amazonbot`, `meta-externalagent`, etc.
+- Affiche une table « Bot → autorisé / bloqué / non spécifié » avec explication par bot
+- Recommandation contextuelle : « Tu bloques GPTBot mais autorises Google-Extended — voici les conséquences sur ta visibilité ChatGPT »
+
+Effet attendu : maintien du slug `audit-technique` en autorité SEO/GEO unique, +30-50 % de partage social attendu (sujet polarisant en débat dans la communauté SEO FR).
+
 ### Lead magnet n°2 — Newsletter Mamie GEO
 
 #### Format
@@ -203,6 +234,18 @@ URL : `mamie-geo.fr/outils/audit-technique` — **livré 2026-05-16**, complète
 - Score sur 100 + recommandations personnalisées
 - Email collecté pour envoyer le rapport
 - Utile en virailisation LinkedIn
+
+### Lead magnet n°6 — Rapport annuel « État du GEO francophone 2027 » (V1, ajouté 2026-05-17)
+
+> Issu veille concurrence 2026-05-11 (AthenaHQ et Profound publient un *State of AI Search Report* annuel — lead magnet + autorité de catégorie + relais presse). Adapté à notre cible : version FR-first basée sur la data collectée en V0/V0+ par notre propre tracking.
+
+- 30-50 pages PDF, design éditorial soigné
+- Données exclusives : visibilité IA agrégée sur ~50-100 marques FR trackées (anonymisées) × 5 LLMs
+- 5 sections : marché global FR / top sources citées par LLM / sentiment moyen par secteur / Le Chat vs concurrents anglo / prédictions 2027
+- Distribution : LinkedIn massif, presse spécialisée (Le Siècle Digital, BDM, Frenchweb), relais agences partenaires
+- Capture email avant téléchargement
+- Publication début 2027 (12 mois post-lancement, après accumulation de data propre)
+- Coût production : ~2-3 semaines Max + ~500-800 € design freelance
 
 ---
 
@@ -343,6 +386,57 @@ Voilà les 5 leçons que j'ai apprises en 90 jours...
 
 ---
 
+## Programme partenaire et annuaire public (V1, ajouté 2026-05-17)
+
+> Issu veille concurrence 2026-05-11. Rankscale a un annuaire public listant Coalition, Dentsu, Publicis Sapient, WPP Media, Monks, etc. — c'est le canal accélérateur agence FR identifié comme **flywheel local que les concurrents anglo levés ne peuvent pas répliquer sans une force commerciale FR** (cf. doc 02 § V1).
+
+### Vision
+
+Activer le canal agence FR à pleine puissance via un programme partenaire avec deux jambes :
+
+1. **Annuaire public** sur `mamie-geo.fr/partenaires/` — vitrine SEO + bouche-à-oreille agences
+2. **Commission lifetime 20-25 %** sur l'abonnement de chaque client référé — incitation économique forte
+
+### Critères de signature partenaire (V1)
+
+- Agence FR ou francophone
+- ≥ 3 clients sur plan Pro ou Agency référés / mois avant inscription publique annuaire (filtre qualité)
+- Commission Stripe Affiliate trackée via UTM ou code promo unique partenaire
+- Engagement éditorial : au moins 1 mention LinkedIn / mois en échange du badge « Partenaire certifié Mamie GEO »
+
+### Structure de la page annuaire
+
+```
+mamie-geo.fr/partenaires/
+├── Page index : grille des agences (logo + ville + spécialités + lien)
+├── /partenaires/[slug]              # fiche détaillée par agence
+└── /partenaires/devenir-partenaire  # CTA + formulaire signup
+```
+
+### Commission
+
+- **20 %** lifetime sur l'abonnement Solo / Starter
+- **25 %** lifetime sur l'abonnement Pro / Agency (incitation à upseller)
+- Versement mensuel par virement après seuil 100 € atteint
+- Tracking : `subscription_events.metadata.partner_code` + Stripe Affiliate App ou implémentation custom
+
+### Critères de désinscription
+
+- < 1 client référé actif sur 6 mois → retrait silencieux annuaire (pas de retrait commission existante)
+- Atteinte à l'image (cas extrême) → retrait + désactivation commission selon CGV partenaire
+
+### Effet flywheel attendu
+
+| Mois | Partenaires actifs | Clients référés cumul | MRR partenaires |
+| ---- | ------------------ | --------------------- | --------------- |
+| M6   | 3                  | 10                    | 800-1 200 €     |
+| M9   | 8                  | 35                    | 3 000-5 000 €   |
+| M12  | 15                 | 80                    | 7 000-12 000 €  |
+
+> À surveiller : la commission lifetime grève la marge unitaire sur le payback. C'est volontaire — le CAC est sub-zero (l'agence fait l'effort commercial), et la rétention est meilleure (le client a une raison externe de rester via son agence).
+
+---
+
 ## Activation mamie-vege.fr (note)
 
 mamie-vege.fr (le blog vegetarien) reste **secondaire** pour le projet GEO. Deux options :
@@ -385,6 +479,15 @@ mamie-vege.fr (le blog vegetarien) reste **secondaire** pour le projet GEO. Deux
 - Taux d'ouverture
 - Taux de clic
 - Conversion en trial
+
+### Métriques programme partenaire (mensuel, V1)
+
+- Nb d'agences signées (cumul + delta mois)
+- Nb d'agences listées publiquement dans l'annuaire `/partenaires/`
+- Clients référés actifs / partenaire (médiane + outliers)
+- MRR généré via partenaires / MRR total (cible > 25 % à M12)
+- CAC partenaire (commission lifetime cumulée / nb clients acquis via canal)
+- Taux de rétention clients référés vs clients direct (cible : ≥ direct)
 
 ---
 
