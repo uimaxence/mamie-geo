@@ -41,8 +41,7 @@ export default async function RunDetailPage({ params }: { params: Promise<{ id: 
           </span>
         </div>
         <h1 className="type-h2 mt-4">{run.prompt.text}</h1>
-        <dl className="mt-6 grid grid-cols-2 gap-x-8 gap-y-3 sm:grid-cols-4">
-          <Meta label="Coût" value={run.costUsd !== null ? `$${run.costUsd.toFixed(4)}` : "—"} />
+        <dl className="mt-6 grid grid-cols-2 gap-x-8 gap-y-3 sm:grid-cols-3">
           <Meta
             label="Durée"
             value={run.durationMs !== null ? `${(run.durationMs / 1000).toFixed(1)}s` : "—"}
@@ -70,7 +69,7 @@ export default async function RunDetailPage({ params }: { params: Promise<{ id: 
             Citations
             {run.sources.length > 0 && <span className="type-meta">({run.sources.length})</span>}
           </TabsTrigger>
-          <TabsTrigger value="scoring">Scoring & coûts</TabsTrigger>
+          <TabsTrigger value="scoring">Scoring</TabsTrigger>
         </TabsList>
 
         <TabsContent value="response">
@@ -193,7 +192,7 @@ function ScoringSection({
         </p>
         {isSkipped ? (
           <p className="type-body mt-2 text-sm">
-            Scoring sauté ({scoring.reason}) — pas d&apos;appel LLM, économie ~$0.003.
+            Scoring sauté ({scoring.reason}) — pas d&apos;appel LLM nécessaire.
           </p>
         ) : (
           <dl className="mt-3 grid grid-cols-1 gap-x-8 gap-y-3 sm:grid-cols-2">
@@ -213,7 +212,6 @@ function ScoringSection({
                   : "aucun"
               }
             />
-            <Meta label="Coût scoring" value={`$${scoring.costUsd.toFixed(4)}`} />
             <Meta label="Durée scoring" value={`${(scoring.durationMs / 1000).toFixed(1)}s`} />
           </dl>
         )}

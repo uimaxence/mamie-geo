@@ -83,7 +83,6 @@ function HeaderRow({ showPromptColumn }: { showPromptColumn: boolean }) {
       <span className="type-eyebrow w-24">Exécuté</span>
       <span className="type-eyebrow w-32">LLMs</span>
       <span className="type-eyebrow w-16 text-right">Citée</span>
-      <span className="type-eyebrow w-20 text-right">Coût</span>
       <span className="type-eyebrow w-20 text-right">Durée</span>
     </div>
   );
@@ -123,9 +122,6 @@ function BatchRow({
         </div>
         <span className="type-tabular w-16 text-right text-sm">
           {batch.summary.citedCount}/{batch.summary.totalRuns}
-        </span>
-        <span className="type-tabular w-20 text-right text-sm">
-          {batch.summary.costSumUsd > 0 ? `$${batch.summary.costSumUsd.toFixed(4)}` : "—"}
         </span>
         <span className="type-tabular w-20 text-right text-sm">
           {batch.summary.durationAvgMs !== null
@@ -210,7 +206,6 @@ function BatchRunsDetail({ runs }: { runs: RunBatchEntry[] }) {
             <DetailTh>LLM</DetailTh>
             <DetailTh>Statut</DetailTh>
             <DetailTh>Citée</DetailTh>
-            <DetailTh align="right">Coût</DetailTh>
             <DetailTh align="right">Durée</DetailTh>
             <DetailTh align="right" />
           </tr>
@@ -229,11 +224,6 @@ function BatchRunsDetail({ runs }: { runs: RunBatchEntry[] }) {
               </DetailTd>
               <DetailTd>
                 <BrandSignal value={run.brandMentioned} />
-              </DetailTd>
-              <DetailTd align="right">
-                <span className="type-tabular">
-                  {run.costUsd !== null ? `$${run.costUsd.toFixed(4)}` : "—"}
-                </span>
               </DetailTd>
               <DetailTd align="right">
                 <span className="type-tabular">

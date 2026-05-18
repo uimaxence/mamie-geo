@@ -1,6 +1,6 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { Activity, DollarSign, Flame, Users } from "lucide-react";
+import { Activity, Flame, PieChart, Users } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { computeDelta, getDashboardData, getVisibilityTrend } from "@/lib/dashboard/queries";
 import { Card, Stat } from "@/components/ui";
@@ -11,8 +11,9 @@ import { TrendSection } from "./trend-section";
 import { TriggerRunForm } from "./trigger-form";
 
 // Dashboard data dynamique. Direction Airbnb-like (pivot 2026-05-07).
-// Polish 2026-05-12 : 4 stats avec icône pastel + delta vs J-7,
-// chart évolution avec time-range, breakdown par LLM en bars verticales.
+// 4 stats agrégées tous-LLMs (PR6 2026-05-18) : Score de visibilité moyen,
+// Marque citée (somme), Top concurrent (agrégé), Part de voix vs concurrents.
+// Le coût LLM USD a été retiré (donnée technique sans valeur pour le client).
 
 export const dynamic = "force-dynamic";
 
@@ -29,16 +30,27 @@ export default async function DashboardPage() {
   // le filtrage 7d/30d/90d se fait client-side dans <TrendSection>.
   const fullTrend = await getVisibilityTrend(data.brand.id, 90);
 
-  const claudeMetrics = data.metricsToday.find((m) => m.llm === "claude");
-  const visibilityScore = claudeMetrics?.visibilityScore ?? 0;
+  // Stats agrégées tous-LLMs (PR6) — remplace l'ancienne logique Claude-only.
+  const agg = data.metricsAggregated;
+  const visibilityScore = agg.visibilityScore;
+  const hasRunsToday = agg.totalRuns > 0;
 
-  // Deltas vs J-7 (Claude visibilityScore). Si pas d'historique suffisant
-  // → null, et la Stat se rabat sur `hint` au lieu d'afficher le delta.
-  const trendClaude = fullTrend
-    .map((p) => ({ date: p.date as string, value: (p as Record<string, number>).claude ?? 0 }))
-    .filter((p) => Number.isFinite(p.value));
-  const j7 = trendClaude.length >= 8 ? trendClaude[trendClaude.length - 8]?.value : undefined;
-  const scoreDelta = computeDelta(visibilityScore, j7);
+  // Delta vs J-7 : on calcule la moyenne tous-LLMs de J-7 (sur le trend
+  // 90j déjà chargé) pour rester homogène avec le score agrégé du jour.
+  const j7Point = fullTrend.length >= 8 ? fullTrend[fullTrend.length - 8] : undefined;
+  const j7Avg =
+    j7Point !== undefined
+      ? (() => {
+          const values = Object.entries(j7Point)
+            .filter(([k]) => k !== "date")
+            .map(([, v]) => (typeof v === "number" ? v : 0))
+            .filter((v) => v > 0);
+          return values.length === 0
+            ? undefined
+            : Math.round((values.reduce((a, b) => a + b, 0) / values.length) * 10) / 10;
+        })()
+      : undefined;
+  const scoreDelta = computeDelta(visibilityScore, j7Avg);
 
   // Données breakdown : un segment par LLM, valeur = visibilityScore
   // d'aujourd'hui. LLMs sans métrique → value 0 (barre grisée).
@@ -67,50 +79,55 @@ export default async function DashboardPage() {
         <TriggerRunForm />
       </header>
 
-      {/* 4 Stats — chaque stat dans sa Card pour borner visuellement
-       * l'icône (sinon elle flotte ambiguë entre 2 colonnes). */}
+      {/* 4 Stats — agrégées tous-LLMs (cf. PR6 2026-05-18). */}
       <section className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card className="p-5">
           <Stat
             label="Score de visibilité"
-            value={claudeMetrics ? visibilityScore.toFixed(1) : "—"}
+            value={hasRunsToday ? visibilityScore.toFixed(1) : "—"}
             icon={Flame}
             iconTone="orange"
             delta={scoreDelta !== null ? { value: scoreDelta, period: "vs J-7" } : null}
-            hint={!claudeMetrics ? "aucun run aujourd'hui" : "Claude · sur 100"}
+            hint={
+              !hasRunsToday
+                ? "aucun run aujourd'hui"
+                : `moyenne sur ${agg.llmsCount} LLM${agg.llmsCount > 1 ? "s" : ""} · sur 100`
+            }
           />
         </Card>
         <Card className="p-5">
           <Stat
             label="Marque citée"
-            value={
-              claudeMetrics ? `${claudeMetrics.brandCitedCount}/${claudeMetrics.totalRuns}` : "—"
-            }
+            value={hasRunsToday ? `${agg.brandCitedCount}/${agg.totalRuns}` : "—"}
             icon={Activity}
             iconTone="green"
-            hint="runs Claude aujourd'hui"
+            hint="runs tous LLMs aujourd'hui"
           />
         </Card>
         <Card className="p-5">
           <Stat
             label="Top concurrent"
-            value={claudeMetrics?.topCompetitors[0]?.name ?? "—"}
+            value={agg.topCompetitor?.name ?? "—"}
             icon={Users}
             iconTone="purple"
             hint={
-              claudeMetrics?.topCompetitors[0]
-                ? `${claudeMetrics.topCompetitors[0].citationCount} mention(s)`
+              agg.topCompetitor
+                ? `${agg.topCompetitor.citationCount} mention(s)`
                 : "aucune mention"
             }
           />
         </Card>
         <Card className="p-5">
           <Stat
-            label="Coût LLM (mois)"
-            value={`$${data.usage.llmCostUsd.toFixed(2)}`}
-            icon={DollarSign}
+            label="Part de voix"
+            value={hasRunsToday ? `${agg.partDeVoix.toFixed(1)}%` : "—"}
+            icon={PieChart}
             iconTone="blue"
-            hint={`${data.usage.runsCount} run(s) cumulé(s)`}
+            hint={
+              hasRunsToday
+                ? `${agg.brandCitedCount} pour toi · ${agg.topCompetitor?.citationCount ?? 0} top concurrent`
+                : "en attente du premier run"
+            }
           />
         </Card>
       </section>

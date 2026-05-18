@@ -1,4 +1,4 @@
-import { and, eq, gte } from "drizzle-orm";
+import { and, desc, eq, gte, lt } from "drizzle-orm";
 import { db } from "@/db/client";
 import {
   brands,
@@ -13,6 +13,7 @@ import {
 import type { ParsedBrandsPayload } from "@/lib/citation/types";
 import type { LLMValue } from "@/lib/llm";
 import { getRunBatches, type RunBatch } from "@/lib/runs/batches";
+import { computePartDeVoix } from "@/lib/metrics/part-de-voix";
 
 // Server-side queries pour le dashboard. Chargées dans des React Server
 // Components, donc accès direct DB sans surcouche API. La session a déjà
@@ -35,7 +36,10 @@ export interface DashboardData {
   };
   competitorsCount: number;
   promptsCount: number;
+  /** Détail par LLM — alimente le BreakdownBars (Visibilité par LLM) */
   metricsToday: MetricsPerLLM[];
+  /** Agrégat tous LLMs — alimente les 4 stats cards (cf. PR6 2026-05-18) */
+  metricsAggregated: MetricsAggregated;
   recentBatches: RunBatch[];
   usage: UsagePeriod;
 }
@@ -50,10 +54,34 @@ export interface MetricsPerLLM {
   topCompetitors: Array<{ name: string; citationCount: number }>;
 }
 
+/**
+ * Agrégat tous-LLMs du jour pour les 4 stats cards du dashboard.
+ * `visibilityScore` = moyenne arithmétique sur les LLMs ayant ≥1 run aujourd'hui
+ * (les LLMs sans run sont skipés, sinon ils tirent la moyenne vers le bas).
+ * `brandCitedCount` / `totalRuns` = sommes simples tous LLMs.
+ * `topCompetitor` = somme citations par nom agrégée tous LLMs, top 1.
+ * `partDeVoix` = `brand / (brand + Σ concurrents) × 100` sur les runs success
+ * du jour (cf. doc 02 § Glossaire).
+ * `llmsCount` = nb de LLMs distincts ayant tourné aujourd'hui (pour le hint).
+ */
+export interface MetricsAggregated {
+  visibilityScore: number;
+  brandCitedCount: number;
+  totalRuns: number;
+  topCompetitor: { name: string; citationCount: number } | null;
+  partDeVoix: number;
+  llmsCount: number;
+}
+
 export interface UsagePeriod {
   periodStart: string;
-  runsCount: number;
+  /**
+   * @internal Cost en USD du mois courant. Source de vérité pour le hard-cap
+   * quota interne. Plus exposé côté UI client depuis PR6 (cf. 2026-05-18).
+   * Le champ reste dans le type pour l'admin / debug future.
+   */
   llmCostUsd: number;
+  runsCount: number;
 }
 
 /**
@@ -117,11 +145,19 @@ export async function getDashboardData(userId: string): Promise<DashboardData | 
     };
   });
 
-  // 5. 10 derniers batches (groupés prompt × jour, cf. src/lib/runs/batches.ts).
+  // 5. Métriques agrégées tous-LLMs du jour pour les 4 stats cards
+  //    (cf. PR6 2026-05-18 — fini les stats Claude-only de la Phase A).
+  //    - visibilityScore = moyenne arithmétique des LLMs avec ≥ 1 run
+  //    - brandCitedCount / totalRuns = sommes
+  //    - topCompetitor = agrégation des competitorsData JSONB
+  //    - partDeVoix = calculé sur les runs success du jour
+  const metricsAggregated = await computeMetricsAggregated(brand.id, today, metricsToday);
+
+  // 6. 10 derniers batches (groupés prompt × jour, cf. src/lib/runs/batches.ts).
   //    Couvre tous les statuts pour afficher pending/running aussi.
   const recentBatches = await getRunBatches({ brandId: brand.id, limit: 10 });
 
-  // 6. Usage du mois courant
+  // 7. Usage du mois courant
   const periodStart = startOfCurrentMonthUTC();
   const usageRows = await db
     .select()
@@ -157,8 +193,86 @@ export async function getDashboardData(userId: string): Promise<DashboardData | 
     competitorsCount,
     promptsCount,
     metricsToday,
+    metricsAggregated,
     recentBatches,
     usage,
+  };
+}
+
+/**
+ * Calcule l'agrégat tous-LLMs des métriques du jour. Combine :
+ * - `citationMetricsDaily` (1 row par LLM × jour) pour visibility/runs/cited
+ * - `runs` + `parsedBrands` pour la part de voix (formule glossaire)
+ *
+ * @internal — utilisé uniquement par getDashboardData. Exporté pas nécessaire.
+ */
+async function computeMetricsAggregated(
+  brandId: string,
+  today: string,
+  metricsToday: MetricsPerLLM[],
+): Promise<MetricsAggregated> {
+  // visibilityScore moyen sur les LLMs ayant au moins 1 run aujourd'hui.
+  // Skip ceux à 0 run pour ne pas tirer la moyenne vers le bas (un provider
+  // en panne ce jour-là ne doit pas faire chuter le score perçu).
+  const activeMetrics = metricsToday.filter((m) => m.totalRuns > 0);
+  const visibilityScore =
+    activeMetrics.length === 0
+      ? 0
+      : Math.round(
+          (activeMetrics.reduce((sum, m) => sum + m.visibilityScore, 0) / activeMetrics.length) *
+            10,
+        ) / 10;
+
+  const brandCitedCount = metricsToday.reduce((sum, m) => sum + m.brandCitedCount, 0);
+  const totalRuns = metricsToday.reduce((sum, m) => sum + m.totalRuns, 0);
+  const llmsCount = activeMetrics.length;
+
+  // Top concurrent agrégé : on somme citationCount par name sur tous les LLMs
+  const competitorMap = new Map<string, number>();
+  for (const m of metricsToday) {
+    for (const c of m.topCompetitors) {
+      competitorMap.set(c.name, (competitorMap.get(c.name) ?? 0) + c.citationCount);
+    }
+  }
+  const competitorEntries = [...competitorMap.entries()].sort((a, b) => b[1] - a[1]);
+  const topCompetitor =
+    competitorEntries.length > 0 && competitorEntries[0]
+      ? { name: competitorEntries[0][0], citationCount: competitorEntries[0][1] }
+      : null;
+
+  // Part de voix : on doit recharger les runs success du jour pour
+  // compter brand + competitors citations. citationMetricsDaily ne
+  // suffit pas (competitorsData JSONB est tronqué aux top par row).
+  const todayStart = new Date(`${today}T00:00:00Z`);
+  const tomorrowStart = new Date(todayStart);
+  tomorrowStart.setUTCDate(tomorrowStart.getUTCDate() + 1);
+  const runsToday = await db
+    .select({ parsedBrands: runs.parsedBrands })
+    .from(runs)
+    .innerJoin(prompts, eq(prompts.id, runs.promptId))
+    .where(
+      and(
+        eq(prompts.brandId, brandId),
+        eq(runs.status, "success"),
+        gte(runs.executedAt, todayStart),
+        lt(runs.executedAt, tomorrowStart),
+      ),
+    )
+    .orderBy(desc(runs.executedAt))
+    .limit(1000);
+  const partDeVoix = computePartDeVoix(
+    runsToday.map((r) => ({
+      parsedBrands: r.parsedBrands as ParsedBrandsPayload | null,
+    })),
+  ).percentage;
+
+  return {
+    visibilityScore,
+    brandCitedCount,
+    totalRuns,
+    topCompetitor,
+    partDeVoix,
+    llmsCount,
   };
 }
 
