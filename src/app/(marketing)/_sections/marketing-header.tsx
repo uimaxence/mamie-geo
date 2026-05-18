@@ -40,6 +40,12 @@ export function MarketingHeader() {
               Tarif
             </Link>
             <Link
+              href="/blog"
+              className="text-sm font-medium text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]"
+            >
+              Blog
+            </Link>
+            <Link
               href="/#faq"
               className="text-sm font-medium text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]"
             >
