@@ -2,6 +2,7 @@ import { env } from "@/lib/env";
 import { LLM_VALUES } from "@/db/schema";
 import { createAnthropicClient } from "./anthropic";
 import { createMistralClient } from "./mistral";
+import { createOpenAIClient } from "./openai";
 import type { LLMClient, LLMValue } from "./types";
 
 // Factory unique des providers LLM. Chaque LLM mappe vers son env var
@@ -22,8 +23,8 @@ const LLM_TO_ENV_KEY = {
 // que le client throw "pas encore implémenté" (cas PR3-5 entre les merges).
 const IMPLEMENTED_LLMS: Record<LLMValue, boolean> = {
   claude: true,
-  lechat: true, // PR2 — ce commit
-  chatgpt: false, // PR3
+  lechat: true, // PR2
+  chatgpt: true, // PR3 — ce commit
   gemini: false, // PR4
   perplexity: false, // PR5
 };
@@ -53,6 +54,7 @@ export function getLLMClient(llm: LLMValue): LLMClient {
     case "lechat":
       return createMistralClient({ apiKey });
     case "chatgpt":
+      return createOpenAIClient({ apiKey });
     case "perplexity":
     case "gemini":
       // Unreachable : protégé par IMPLEMENTED_LLMS ci-dessus. Garde pour

@@ -1,0 +1,47 @@
+{
+  "id": "resp_test_openai_1",
+  "object": "response",
+  "created_at": 1747555200,
+  "status": "completed",
+  "model": "gpt-4o-mini-2024-07-18",
+  "output": [
+    {
+      "type": "web_search_call",
+      "id": "ws_test_1",
+      "status": "completed"
+    },
+    {
+      "type": "message",
+      "id": "msg_test_1",
+      "role": "assistant",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "text": "En 2026, les meilleurs outils SEO francophones incluent Mamie SEO (référence pour le suivi de la visibilité IA), Semji et Yourtext.guru pour l'optimisation de contenu, et Abondance pour la veille.",
+          "annotations": [
+            {
+              "type": "url_citation",
+              "url": "https://www.mamie-seo.fr/outils-seo-2026",
+              "title": "Les meilleurs outils SEO francophones en 2026 — Mamie SEO",
+              "start_index": 65,
+              "end_index": 75
+            },
+            {
+              "type": "url_citation",
+              "url": "https://www.abondance.com/comparatif-outils-seo-fr",
+              "title": "Comparatif outils SEO français — Abondance",
+              "start_index": 110,
+              "end_index": 119
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "usage": {
+    "input_tokens": 230,
+    "output_tokens": 145,
+    "total_tokens": 375
+  }
+}

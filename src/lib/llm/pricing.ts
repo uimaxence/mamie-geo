@@ -27,6 +27,23 @@ export const ANTHROPIC_PRICING: Record<string, ModelPricing> = {
   },
 };
 
+// OpenAI Platform — https://openai.com/api/pricing/
+// gpt-4o-mini : modèle V0+ pour le tracking. Coût agressif (input
+// $0.15/Mtok), web_search tool natif via Responses API ($10/1000 calls
+// = $0.01/call, identique à Anthropic).
+export const OPENAI_PRICING: Record<string, ModelPricing> = {
+  "gpt-4o-mini": {
+    inputPerMtok: 0.15,
+    outputPerMtok: 0.6,
+    webSearchPerCall: 0.01,
+  },
+  "gpt-4o-mini-2024-07-18": {
+    inputPerMtok: 0.15,
+    outputPerMtok: 0.6,
+    webSearchPerCall: 0.01,
+  },
+};
+
 // Mistral La Plateforme — https://mistral.ai/pricing
 // Tarifs en EUR convertis en USD au taux ~1.10 (date de vérif 2026-05-18).
 // V0+ : on tracke Le Chat sans web_search (Mistral n'expose pas encore de
