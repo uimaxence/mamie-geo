@@ -5,14 +5,15 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Asterisk, ArrowLeft, Mail } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
-import { Button, Field, Input, PatternBlock } from "@/components/ui";
+import { Button, Field, Input } from "@/components/ui";
 import { Logo } from "@/components/marketing/logo";
 
 // Login en split panel asymétrique (cf. doc 09 § PR 11b, ref
-// BrightNest signup ; pattern signature ajouté 2026-05-18) :
-//   - Panel gauche (hidden < md) : fond blanc + bloc pattern bleu primary
-//     en bas-gauche (signature mémorable, cf. doc 10 § Pattern signature)
-//     + logo en haut + tagline éditoriale au centre
+// BrightNest signup) :
+//   - Panel gauche (hidden < md) : fond blanc + dégradé radial bleu
+//     soft en bas-gauche (signature visuelle subtile sans empiéter sur
+//     le texte — pattern damier retiré 2026-05-20 car illisible avec
+//     size xl au-dessus de la tagline)
 //   - Panel droite : form magic-link
 // Sur mobile : seul le panel form est rendu, plein écran.
 //
@@ -96,10 +97,18 @@ function LoginContent() {
 
   return (
     <main className="grid min-h-screen grid-cols-1 md:grid-cols-2">
-      {/* Panel gauche — fond blanc + signature pattern bleu primary en
-          bas-gauche (cf. doc 10). Caché sur mobile. */}
+      {/* Panel gauche — fond blanc + dégradé radial bleu subtil ancré en
+          bas-gauche (signature visuelle qui ne lutte pas avec le texte).
+          Caché sur mobile. */}
       <aside className="relative hidden flex-col justify-between overflow-hidden bg-white p-10 text-[color:var(--color-ink)] md:flex">
-        <PatternBlock corner="bottom-left" tone="primary" size="xl" />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(60% 50% at 0% 100%, color-mix(in oklab, var(--color-primary) 22%, transparent) 0%, transparent 70%)",
+          }}
+        />
 
         <Link
           href="/"
