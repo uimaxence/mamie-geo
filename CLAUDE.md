@@ -263,10 +263,26 @@ la doc devient un cimetière.
 
 ---
 
-## 9. État du projet (snapshot — 2026-05-17)
+## 9. État du projet (snapshot — 2026-05-18)
 
-> Mise à jour 2026-05-17 — PR « Sprint 6 PR B — app /app/audits Premium »
+> Mise à jour 2026-05-18 — PR « Pattern signature blue »
 >
+> - Damier diagonal 80×80 bleu primary `#329cff` ajouté comme signature
+>   graphique de la marque (cf. doc 09 § 2026-05-18 + doc 10 § Pattern
+>   signature). Asset : `/public/pattern.svg`. Composants : `<PatternBlock />`
+>   et `<PatternBand />` dans `src/components/ui/pattern-block.tsx`. Classe
+>   utilitaire bas niveau `.bg-pattern` (tinte via mask-image, variable
+>   `--pattern-color`). Migration V0 : panel login (gradient warm orange
+>   → pattern bleu xl bottom-left + asterisque terracotta → primary),
+>   Hero (pattern soft top-right), AuditTeaser (blob terracotta → pattern
+>   soft bottom-left), templates email `weekly-recap` et `welcome-paid`
+>   (bande pattern 56 px en header, bg-color fallback `#329cff` pour
+>   Outlook desktop). Le terracotta `--color-accent` reste actif sur les
+>   usages non migrés (badges `tone="accent"`, glow ai) — bascule
+>   progressive PR par PR. Règle d'usage : 1-2 placements par page max,
+>   coin ou bande délimitée jamais fond plein.
+>
+> Précédente : Sprint 6 PR B (2026-05-17) — app /app/audits Premium :
 > - PR « charts vivants ». Côté audits : nouvelles tables DB
 >   `technical_audits` (historise tous les audits app) et `audit_counters`
 >   (compteur mensuel par workspace). Quotas par plan ajoutés :

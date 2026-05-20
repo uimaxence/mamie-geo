@@ -5,14 +5,15 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Asterisk, ArrowLeft, Mail } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
-import { Button, Field, Input } from "@/components/ui";
+import { Button, Field, Input, PatternBlock } from "@/components/ui";
 import { Logo } from "@/components/marketing/logo";
 
 // Login en split panel asymétrique (cf. doc 09 § PR 11b, ref
-// BrightNest signup) :
-//   - Panel gauche (hidden < md) : dégradé warm orange + logo en haut
-//     + tagline éditoriale en bas
-//   - Panel droite : asterisque accent + form magic-link
+// BrightNest signup ; pattern signature ajouté 2026-05-18) :
+//   - Panel gauche (hidden < md) : fond blanc + bloc pattern bleu primary
+//     en bas-gauche (signature mémorable, cf. doc 10 § Pattern signature)
+//     + logo en haut + tagline éditoriale au centre
+//   - Panel droite : form magic-link
 // Sur mobile : seul le panel form est rendu, plein écran.
 //
 // Param `?next=/app/...` propagé en callbackURL Better Auth (cf. doc 09
@@ -95,18 +96,21 @@ function LoginContent() {
 
   return (
     <main className="grid min-h-screen grid-cols-1 md:grid-cols-2">
-      {/* Panel gauche — dégradé warm + identité brand. Caché sur mobile. */}
-      <aside className="gradient-warm-panel relative hidden flex-col justify-between p-10 text-[color:var(--color-ink)] md:flex">
+      {/* Panel gauche — fond blanc + signature pattern bleu primary en
+          bas-gauche (cf. doc 10). Caché sur mobile. */}
+      <aside className="relative hidden flex-col justify-between overflow-hidden bg-white p-10 text-[color:var(--color-ink)] md:flex">
+        <PatternBlock corner="bottom-left" tone="primary" size="xl" />
+
         <Link
           href="/"
-          className="flex items-center gap-2 text-base font-bold tracking-tight text-[color:var(--color-ink)]"
+          className="relative flex items-center gap-2 text-base font-bold tracking-tight text-[color:var(--color-ink)]"
         >
           <Logo size={28} />
           <span>Mamie GEO</span>
         </Link>
 
-        <div className="max-w-md">
-          <p className="type-eyebrow text-[color:var(--color-ink)]/70">Tu peux enfin</p>
+        <div className="relative max-w-md">
+          <p className="type-eyebrow">Tu peux enfin</p>
           <h2 className="mt-4 font-semibold text-[2rem] leading-tight tracking-tight text-[color:var(--color-ink)] sm:text-[2.5rem]">
             mesurer ta visibilité dans ChatGPT, Claude et Le Chat — en français, dès 9,99 €/mois.
           </h2>
@@ -163,7 +167,7 @@ function IdleState({
       <Asterisk
         size={28}
         strokeWidth={2.5}
-        className="text-[color:var(--color-accent)]"
+        className="text-[color:var(--color-primary)]"
         aria-hidden
       />
 

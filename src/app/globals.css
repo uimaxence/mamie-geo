@@ -478,6 +478,55 @@
 }
 
 /* ─────────────────────────────────────────────────────────────────────
+ * Pattern signature (acté 2026-05-18, cf. doc 09)
+ *
+ * Damier diagonal 80×80 stocké dans /public/pattern.svg. Servi tinté en
+ * #329cff (--color-primary) côté <img> et emails (couleur bakée dans le
+ * SVG, alpha = 1 dans les zones pleines).
+ *
+ * En CSS la couleur est PROJETÉE via `mask-image` (seul l'alpha compte),
+ * ce qui rend le pattern tintable en bleu, gray, blanc ou même
+ * terracotta sans dupliquer le fichier. Tile par défaut 80px ; surcharger
+ * via `--pattern-size`.
+ *
+ * Utilisation :
+ *   <div class="bg-pattern" />                    → bleu primary 80px
+ *   <div class="bg-pattern bg-pattern-soft" />    → primary + 30% opacity
+ *   <div class="bg-pattern bg-pattern-white" />   → variant inversé
+ *   <div class="bg-pattern" style="--pattern-size: 64px" />
+ *
+ * Règle d'usage (cf. doc 10) : signature mémorable, jamais wash subtil.
+ * 1-2 placements par page maximum, toujours dans un coin / bande
+ * délimitée — pas en fond plein.
+ * ──────────────────────────────────────────────────────────────────── */
+.bg-pattern {
+  --pattern-color: var(--color-primary);
+  --pattern-size: 80px;
+  background-color: var(--pattern-color);
+  -webkit-mask-image: url("/pattern.svg");
+  mask-image: url("/pattern.svg");
+  -webkit-mask-repeat: repeat;
+  mask-repeat: repeat;
+  -webkit-mask-size: var(--pattern-size) var(--pattern-size);
+  mask-size: var(--pattern-size) var(--pattern-size);
+  -webkit-mask-position: 0 0;
+  mask-position: 0 0;
+}
+
+.bg-pattern-soft {
+  --pattern-color: var(--color-primary);
+  opacity: 0.3;
+}
+
+.bg-pattern-white {
+  --pattern-color: #ffffff;
+}
+
+.bg-pattern-ink {
+  --pattern-color: var(--color-ink);
+}
+
+/* ─────────────────────────────────────────────────────────────────────
  * Tactilité visible sur les boutons — inspirations Linear/Vercel.
  *
  * Stratégie 4 couches :

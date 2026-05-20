@@ -161,6 +161,41 @@ haut et l'entrée "2026-05-05 — Réponses aux 10 questions de bootstrap".
 
 ### Décisions enregistrées
 
+#### 2026-05-18 — Pattern signature blue (damier diagonal) remplace progressivement le terracotta
+
+**Contexte** : Max a livré une banner LinkedIn qui utilise un motif damier diagonal 80×80 en bleu primary sur fond blanc, occupant ~20 % du côté gauche. Le rendu est mémorable et distinctif. Il a déposé le pattern dans `src/assets/pattern.svg` et demande qu'il devienne un élément du design system : remplacer le dégradé orange du login, le poser sur 1-2 sections de la home, l'ajouter aux templates email.
+
+**Tension à résoudre** : doc 10 spécifiait *« fond toujours blanc, jamais teinté »* + *« accent terracotta #C5532E seule signature chaleur »*. Ajouter un second élément signature (bleu géométrique) doit être cadré pour ne pas créer un design system schizophrène.
+
+**Options considérées** :
+
+- A : Pattern = **signature graphique additionnelle**. Terracotta reste l'accent ponctuel (badges, asterisque login). Bleu data viz inchangé. Le pattern s'utilise sur 1-2 placements par page max.
+- B : Pattern **remplace progressivement le terracotta**. Le terracotta n'est pas retiré du code en V0 mais ses usages migrent PR par PR vers du pattern bleu ou du neutre. À terme, la marque est portée par le pattern bleu, pas par l'accent orange. ← **retenu**
+- C : Pattern décoratif sans statut signature (touche sur 1-2 endroits sans devenir un élément récurrent).
+
+**Choix (livré 2026-05-18)** :
+
+1. **Pattern asset** : `/public/pattern.svg` (servi statiquement Next), fill baké en `#329cff` pour les usages `<img>` et emails. Pour les usages CSS où on veut tinter, classe utilitaire `.bg-pattern` qui projette la couleur via `mask-image` (seul l'alpha du SVG compte).
+2. **Composants** : `<PatternBlock corner tone size />` dans `src/components/ui/pattern-block.tsx` pour les blocs carrés qui débordent en signature aux coins ; `<PatternBand position tone height tile />` pour les bandes horizontales (headers email, séparateurs section).
+3. **Règles d'usage** (cf. doc 10) : 1-2 placements par page max, toujours coin ou bande délimitée jamais fond plein, tone soft 30 % quand cohabite avec du texte/mockup et tone full en signature isolée, tile 56-104 px côté UI et 24-56 px côté emails.
+4. **Migration progressive** : `--color-accent` (`#C5532E`) reste actif dans `globals.css`. Les usages migrés en V0 : panel login (gradient warm → pattern), asterisque login (terracotta → primary), home Hero (ajout pattern soft top-right), home AuditTeaser (blob terracotta → pattern soft bottom-left), email weekly-recap (header pattern band), email welcome-paid (header pattern band). Les autres usages (badges `tone="accent"`, glow ai, terracotta dans dropdowns) restent en place et seront migrés au fil des PR de refonte.
+5. **Doc** : `geo-project/10-design-direction.md` enrichi d'une section « Pattern signature » qui codifie les règles. CLAUDE.md snapshot mis à jour.
+
+**Justification** :
+
+- Un logo + un wordmark ne suffisent pas à créer une signature mémorable de marque SaaS. Le damier bleu, vu une fois en grand (login, email), devient associatif et reconnaissable hors contexte — c'est ce que la banner LinkedIn de Max démontre déjà.
+- Le terracotta `#C5532E` jouait ce rôle dans doc 10 mais sans forme — il était facile à confondre avec n'importe quel SaaS « accent orange ». Un motif géométrique est intrinsèquement plus distinctif qu'une couleur d'accent.
+- Le bleu primary `#329cff` était déjà la couleur du logo et de la data viz. Le pattern le démultiplie en signature graphique cohérente.
+- Garder le terracotta en transition évite une refonte big-bang et permet de calibrer le dosage du pattern au fur et à mesure.
+
+**Conséquences attendues** :
+
+- Identité visuelle plus distinctive en post-checkout (premier email reçu = premier contact avec la marque hors site).
+- Le login devient un point de signature fort plutôt qu'un panneau marketing tiède (le gradient orange n'apportait pas grand-chose narratif).
+- Risque : si on charge le pattern partout au lieu de respecter la règle « 1-2 par page », le motif devient bruit. À surveiller en revue UI.
+
+**À revisiter** : 2026-06-15 — après 2-3 PR de refonte, décider si le terracotta est entièrement retiré du design system (et passer `--color-accent` en alias de neutre) ou si on garde un dual signature pattern bleu + accent terracotta sur les badges marginaux.
+
 #### 2026-05-17 — Sprint 6 PR B — app /app/audits Premium + charts dashboard vivants
 
 **Contexte** : PR A (2026-05-16) a promu l'audit technique en home + blog. PR B livre la version premium dans l'app : audit on-demand depuis `/app/audits/new`, historique en DB, audit hebdo automatique sur la brand, alerte email si chute ≥ 10 pts, et matrice comparative avec les concurrents (différenciateur Pro/Agency). En parallèle, suppression des EmptyState dashboard pour rendre les charts visibles dès J0 (la première impression du dashboard était mortifère pour un nouveau user qui n'avait pas encore de data).

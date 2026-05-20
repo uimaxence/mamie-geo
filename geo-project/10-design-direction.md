@@ -42,6 +42,37 @@ Inspirations directes : screen 1 du brief (status dot avec glow + cross-hairs Ac
 
 Icônes : **`lucide-react`** ajouté en dépendance (set d'icônes sans-serif léger, tree-shake natif). Imports nommés pour ne pas alourdir le bundle.
 
+### Pattern signature (update 2026-05-18 — banner LinkedIn Max)
+
+Damier diagonal 80×80 stocké dans `/public/pattern.svg`, tinté en bleu primary `#329cff`. Décision actée 2026-05-18 (cf. `09-decisions-journal.md`) : **le pattern devient la signature graphique mémorable de la marque** et remplace progressivement les usages du terracotta `#C5532E` comme accent expressif.
+
+**Pourquoi** : un logo + un mot-clé ne suffisent pas à créer une signature mémorable. Le damier bleu, vu une fois en grand sur le login ou un email, devient associatif (cf. damier Burberry, vagues Mamilove, lignes Hellobank). Le terracotta gardait un fil chaleureux mais n'avait pas de forme — il était facile à confondre avec n'importe quel SaaS « accent orange ».
+
+**Phase de transition** : le terracotta `--color-accent` n'est PAS retiré du code en V0. Il reste actif sur les usages non explicitement migrés (badges `tone="accent"`, certains glow). Migration progressive PR par PR au fil des refontes de sections.
+
+**Patterns d'usage** (composants `<PatternBlock />` et `<PatternBand />` dans `src/components/ui/pattern-block.tsx`, classe utilitaire `.bg-pattern` dans `globals.css`) :
+
+1. **`<PatternBlock corner="bottom-left" tone="primary" size="xl" />`** — bloc carré qui déborde hors du parent (offset 1/3 hors-cadre, ref banner LinkedIn). Quatre coins disponibles, quatre tailles (`sm 160` / `md 240` / `lg 360` / `xl 520` px). À utiliser en signature forte (panel login, hero, section audit).
+2. **`<PatternBand position="top" />`** — bande horizontale fine (24-56 px) qui court sur toute la largeur. À utiliser en header d'email ou de section neutre. Plus discret qu'un bloc, plus signature qu'un trait.
+3. **`.bg-pattern`** — classe utilitaire bas niveau. Tinte via `mask-image` donc la couleur se contrôle par `background-color` (variable `--pattern-color`). Variants `.bg-pattern-soft` (30 % opacity), `.bg-pattern-white`, `.bg-pattern-ink`.
+
+**Règles d'usage** :
+
+- **1 à 2 placements par page maximum**. Le pattern doit rester un événement visuel, pas une texture omniprésente.
+- Toujours en **coin ou bande délimitée**, jamais en fond plein d'une section. Si un fond pattern plein devient nécessaire un jour, créer un variant `tinted-pattern` dans `<Section />` mais l'éviter par défaut.
+- **Tone soft (30 %)** quand le pattern partage l'espace avec du texte ou un mockup (hero, sections content). **Tone full** quand il est seul en signature (panel login, header email).
+- **Tile size** : 56-104 px côté UI desktop, 24-56 px côté emails. Au-delà de 120 px la trame devient trop chunky et perd son côté motif ; en dessous de 24 px elle devient illisible et ressemble à du bruit.
+- **Couleur** : bleu primary `#329cff` par défaut. Variants `white` (sur fond sombre) et `ink` (signature super-discrète). Pas de version terracotta (le bleu reste la couleur signature).
+- Toujours `aria-hidden` + `pointer-events-none` : décoratif uniquement, jamais cliquable, jamais lu par les screen readers.
+
+**Implémentations V0** (à étendre PR par PR) :
+
+- `/login` — panel gauche en signature pleine (bottom-left size xl).
+- Home `<Hero>` — soft top-right size lg.
+- Home `<AuditTeaser>` — soft bottom-left size lg (remplace l'ancien blob radial terracotta).
+- Email `weekly-recap` — bande horizontale 56 px en header.
+- Email `welcome-paid` — bande horizontale 56 px en header (à l'intérieur du conteneur card).
+
 ### Patterns dashboard (update 2026-05-12 — refs screens partagés par Max)
 
 Quatre patterns visuels supplémentaires entrés dans le design system pour les pages applicatives (post-connexion). Sources d'inspiration : dashboards SaaS contemporains type Linear / Stripe Sigma / Posthog.

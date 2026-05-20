@@ -1,4 +1,4 @@
-import { Badge, CornerFrame, LinkButton, Section, StatusDot } from "@/components/ui";
+import { Badge, CornerFrame, LinkButton, PatternBlock, Section, StatusDot } from "@/components/ui";
 import { HeroDataShowcase } from "./hero-data-showcase";
 import { HeroLLMRotator } from "./hero-llm-rotator";
 
@@ -6,11 +6,15 @@ import { HeroLLMRotator } from "./hero-llm-rotator";
 // PR 2026-05-13 : le mot en gras dans le headline cycle entre les 5
 // LLMs trackés via <HeroLLMRotator>. <HeroDataShowcase> ajoute 4 cartes
 // data tiltées sous les CTAs (mini-charts + tooltips) — desktop only.
+// PR 2026-05-18 : signature pattern bleu primary ajoutée en haut-droite
+// (soft 30 %), ancre l'identité visuelle sans dominer le headline.
 
 export function Hero() {
   return (
-    <Section pad="xl">
-      <CornerFrame className="mx-auto max-w-3xl">
+    <Section pad="xl" className="relative overflow-hidden">
+      <PatternBlock corner="top-right" tone="primary-soft" size="lg" />
+
+      <CornerFrame className="relative mx-auto max-w-3xl">
         <div className="flex flex-col items-center px-2 text-center sm:px-6">
           <Badge tone="accent" icon={<StatusDot tone="accent" pulse />} className="mb-8">
             Beta · Generative Engine Optimization
