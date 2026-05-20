@@ -5,15 +5,15 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Asterisk, ArrowLeft, Mail } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
-import { Button, Field, Input, PatternBlock } from "@/components/ui";
+import { Button, Field, Input } from "@/components/ui";
 import { Logo } from "@/components/marketing/logo";
 
 // Login en split panel asymétrique (cf. doc 09 § PR 11b, ref
 // BrightNest signup) :
-//   - Panel gauche (hidden < md) : fond gris-50 + pattern damier ink
-//     opacity 8% (nuance de gris très subtile, signature visuelle qui
-//     n'écrase pas le titre — itération 2026-05-20 après tests
-//     successifs primary 100%, gradient bleu, gradient renforcé)
+//   - Panel gauche (hidden < md) : fond gris-50 + pattern damier bleu
+//     primary à pleine largeur opacity 5% (signature visuelle ancrée
+//     sur tout le panel — itération 2026-05-20 finale après tests
+//     successifs : primary 100%, gradient bleu, ink coin)
 //   - Panel droite : form magic-link (fond blanc, border-r entre les 2)
 // Sur mobile : seul le panel form est rendu, plein écran.
 //
@@ -97,15 +97,14 @@ function LoginContent() {
 
   return (
     <main className="grid min-h-screen grid-cols-1 md:grid-cols-2">
-      {/* Panel gauche, fond gris-50 + pattern damier ink opacity 8%
-          (nuance de gris subtile) + border verticale fine. Le pattern
-          remplace le dégradé bleu (itération 2026-05-20). */}
+      {/* Panel gauche, fond gris-50 + pattern damier bleu primary à
+          pleine largeur, opacity 5% (signature ancrée sans écraser le
+          titre). Border verticale fine entre les 2 panels. */}
       <aside className="relative hidden flex-col justify-between overflow-hidden border-r border-[color:var(--color-border)] bg-[color:var(--color-gray-50)] p-10 text-[color:var(--color-ink)] md:flex">
-        <PatternBlock
-          corner="bottom-left"
-          tone="ink"
-          size="xl"
-          style={{ opacity: 0.08 }}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 bg-pattern"
+          style={{ opacity: 0.05 }}
         />
 
         <Link
