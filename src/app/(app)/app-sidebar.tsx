@@ -3,13 +3,10 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  Check,
-  ChevronsUpDown,
   Cog,
   LayoutDashboard,
   ListChecks,
   LogOut,
-  Menu,
   MessageSquareQuote,
   Receipt,
   Users,
@@ -27,18 +24,19 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-  Sheet,
-  SheetContent,
-  SheetTrigger,
 } from "@/components/ui";
 import { Logo } from "@/components/marketing/logo";
 import type { SidebarData } from "./app-sidebar-data";
 
-// Sidebar app : logo + brand switcher (top), nav sections (middle),
-// user menu (bottom). État actif via usePathname() + barre verticale 2px
-// noir à gauche du lien actif.
+// Sidebar app : logo Mamie GEO (top), nav sections (middle), user menu
+// (bottom). Le sélecteur workspace + brand est sorti dans la top bar
+// horizontale (cf. AppTopBar, itération 2026-05-20 pattern Vercel).
 //
-// Mobile : drawer via <Sheet> (slide-in left), trigger hamburger en top.
+// État actif via usePathname() + barre verticale 2px noir à gauche du
+// lien actif.
+//
+// Mobile : la sidebar est rendue dans un Sheet drawer déclenché par
+// AppTopBar (mode="drawer"). En desktop, sidebar latérale fixed.
 
 interface NavItem {
   href: string;
@@ -55,50 +53,50 @@ const NAV: NavItem[] = [
   { href: "/app/settings", label: "Réglages", icon: Cog },
 ];
 
-export function AppSidebar({ data }: { data: SidebarData }) {
-  return (
-    <>
-      {/* Desktop : sidebar fixed left ≥ md */}
-      <aside className="hidden md:flex md:flex-col md:w-60 md:shrink-0 md:border-r md:border-[color:var(--color-border)] md:bg-white md:h-screen md:sticky md:top-0">
-        <SidebarInner data={data} />
-      </aside>
+export interface AppSidebarProps {
+  data: SidebarData;
+  /**
+   * `desktop` (default), rend l'aside latérale visible ≥ md.
+   * `drawer`, rend uniquement le contenu interne (pour utilisation dans
+   * un Sheet mobile depuis AppTopBar).
+   */
+  mode?: "desktop" | "drawer";
+  onNavigate?: () => void;
+}
 
-      {/* Mobile : hamburger en haut, drawer Sheet */}
-      <MobileSidebar data={data} />
-    </>
+export function AppSidebar({ data, mode = "desktop", onNavigate }: AppSidebarProps) {
+  if (mode === "drawer") {
+    return <SidebarInner data={data} onNavigate={onNavigate} />;
+  }
+  return (
+    <aside className="hidden md:flex md:flex-col md:w-56 md:shrink-0 md:border-r md:border-[color:var(--color-border)] md:bg-white md:h-screen md:sticky md:top-0">
+      <SidebarInner data={data} onNavigate={onNavigate} />
+    </aside>
   );
 }
 
 function SidebarInner({ data, onNavigate }: { data: SidebarData; onNavigate?: () => void }) {
   return (
     <div className="flex h-full flex-col">
-      {/* Brand mark Mamie GEO, discret, icon-only (pas de wordmark
-       * pour rester aligné avec « moins de texte Mamie GEO dans l'app »).
-       * Clic → /app/dashboard. */}
-      <div className="flex items-center px-3 pt-3 pb-1.5">
+      {/* Top, logo Mamie GEO icon-only, clic dashboard. Le wordmark
+       *  et le sélecteur workspace/brand vivent dans AppTopBar. */}
+      <div className="flex items-center px-3 py-3">
         <Link
           href="/app/dashboard"
           onClick={onNavigate}
           aria-label="Mamie GEO, accueil"
-          className="flex size-7 items-center justify-center rounded-[var(--radius-sm)] transition hover:opacity-80 focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-ink)]"
+          className="flex size-8 items-center justify-center rounded-[var(--radius-sm)] transition hover:opacity-80 focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-ink)]"
         >
           <Logo size={26} />
         </Link>
       </div>
 
-      {/* Top : workspace pill + brand pill (pattern Vercel). Pas de
-       * mention du nom produit ici, l'utilisateur sait où il est. */}
-      <div className="flex flex-col gap-1.5 border-b border-[color:var(--color-border)] p-3">
-        <WorkspacePill workspace={data.workspace} onNavigate={onNavigate} />
-        <BrandSwitcher brands={data.brands} currentBrandId={data.currentBrandId} />
-      </div>
-
-      {/* Middle : nav sections */}
-      <nav className="flex-1 overflow-y-auto px-2 py-3">
+      {/* Middle, nav sections */}
+      <nav className="flex-1 overflow-y-auto px-2 py-2">
         <SidebarNav onNavigate={onNavigate} />
       </nav>
 
-      {/* Bottom : user menu */}
+      {/* Bottom, user menu */}
       <div className="border-t border-[color:var(--color-border)] p-3">
         <UserMenu email={data.user.email} plan={data.workspace.plan} />
       </div>
@@ -147,117 +145,6 @@ function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
   );
 }
 
-// Initiale de fallback (1ʳᵉ lettre alpha trouvée, sinon "?").
-function getInitial(label: string): string {
-  const match = label.match(/[\p{L}\p{N}]/u);
-  return (match?.[0] ?? "?").toUpperCase();
-}
-
-// Pill workspace, pattern Vercel : avatar coloré + nom + badge plan.
-// V0 : un seul workspace par user → pas de switcher (pas de chevron).
-// Quand le multi-workspace arrivera, on greffera un DropdownMenu ici.
-function WorkspacePill({
-  workspace,
-  onNavigate,
-}: {
-  workspace: SidebarData["workspace"];
-  onNavigate?: () => void;
-}) {
-  return (
-    <Link
-      href="/app/dashboard"
-      onClick={onNavigate}
-      title={workspace.name}
-      className="flex items-center gap-2.5 rounded-[var(--radius-md)] px-2 py-1.5 transition hover:bg-[color:var(--color-gray-50)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-ink)]"
-    >
-      <span
-        aria-hidden
-        className="flex size-6 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[color:var(--color-accent)] to-[color:var(--color-accent-dim)] text-[10px] font-semibold text-white"
-      >
-        {getInitial(workspace.name)}
-      </span>
-      <span className="flex-1 min-w-0 truncate text-sm font-medium text-[color:var(--color-ink)]">
-        {workspace.name}
-      </span>
-      <Badge tone={workspace.plan === "trialing" ? "accent" : "neutral"} className="shrink-0">
-        {workspace.plan}
-      </Badge>
-    </Link>
-  );
-}
-
-// Pill brand, square noir avec initiale + domaine + chevron switcher.
-// Le label affiche le DOMAINE (pas le nom de marque), c'est ce qui
-// identifie la marque trackée de manière non ambiguë côté GEO.
-function BrandSwitcher({
-  brands,
-  currentBrandId,
-  className,
-}: {
-  brands: SidebarData["brands"];
-  currentBrandId: string;
-  className?: string;
-}) {
-  const current = brands.find((b) => b.id === currentBrandId) ?? brands[0];
-  if (!current) return null;
-
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger
-        className={cn(
-          "flex w-full items-center gap-2.5 rounded-[var(--radius-md)] px-2 py-1.5 text-left transition hover:bg-[color:var(--color-gray-50)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-ink)]",
-          className,
-        )}
-        title={`${current.name} · ${current.domain}`}
-      >
-        <span
-          aria-hidden
-          className="flex size-6 shrink-0 items-center justify-center rounded-[var(--radius-sm)] bg-[color:var(--color-ink)] text-[10px] font-semibold text-white"
-        >
-          {getInitial(current.name)}
-        </span>
-        <span className="flex-1 min-w-0 truncate text-sm font-medium text-[color:var(--color-ink)]">
-          {current.domain}
-        </span>
-        <ChevronsUpDown
-          size={14}
-          strokeWidth={2}
-          className="shrink-0 text-[color:var(--color-muted)]"
-        />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-60">
-        <DropdownMenuLabel>Marques trackées</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        {brands.map((b) => (
-          <DropdownMenuItem key={b.id} className="justify-between gap-3">
-            <div className="flex flex-1 min-w-0 items-center gap-2.5">
-              <span
-                aria-hidden
-                className="flex size-6 shrink-0 items-center justify-center rounded-[var(--radius-sm)] bg-[color:var(--color-ink)] text-[10px] font-semibold text-white"
-              >
-                {getInitial(b.name)}
-              </span>
-              <div className="flex-1 min-w-0">
-                <p className="truncate text-sm font-medium text-[color:var(--color-ink)]">
-                  {b.name}
-                </p>
-                <p className="type-meta truncate">{b.domain}</p>
-              </div>
-            </div>
-            {b.id === currentBrandId && (
-              <Check
-                size={14}
-                strokeWidth={2.5}
-                className="shrink-0 text-[color:var(--color-ink)]"
-              />
-            )}
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-}
-
 function UserMenu({ email, plan }: { email: string; plan: string }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
@@ -303,33 +190,5 @@ function UserMenu({ email, plan }: { email: string; plan: string }) {
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
-  );
-}
-
-function MobileSidebar({ data }: { data: SidebarData }) {
-  const [open, setOpen] = useState(false);
-  return (
-    <div className="md:hidden">
-      <div className="sticky top-0 z-30 flex items-center gap-3 border-b border-[color:var(--color-border)] bg-white px-4 py-3">
-        <Sheet open={open} onOpenChange={setOpen}>
-          <SheetTrigger
-            aria-label="Ouvrir le menu"
-            className="inline-flex size-9 shrink-0 items-center justify-center rounded-[var(--radius-md)] border border-[color:var(--color-border)] bg-white text-[color:var(--color-ink)] transition hover:bg-[color:var(--color-gray-50)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-ink)]"
-          >
-            <Menu size={16} strokeWidth={2} />
-          </SheetTrigger>
-          <SheetContent>
-            <SidebarInner data={data} onNavigate={() => setOpen(false)} />
-          </SheetContent>
-        </Sheet>
-        <Link
-          href="/app/dashboard"
-          className="min-w-0 truncate text-sm font-semibold text-[color:var(--color-ink)]"
-          title={data.workspace.name}
-        >
-          {data.workspace.name}
-        </Link>
-      </div>
-    </div>
   );
 }
