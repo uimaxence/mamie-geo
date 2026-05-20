@@ -27,7 +27,7 @@ export default function BlogIndexPage() {
           <h1 className="type-display mt-3">Dernières actualités.</h1>
           <p className="type-body-lg mt-6">
             Méthodes, études et tutoriels pour piloter ta visibilité dans ChatGPT, Claude,
-            Perplexity, Gemini et Le Chat. Écrit à la main, pas généré.
+            Perplexity, Gemini et Le Chat.
           </p>
           <BlogNewsletterForm />
         </div>
