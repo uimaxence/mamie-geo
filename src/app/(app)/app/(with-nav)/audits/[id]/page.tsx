@@ -1,16 +1,19 @@
 import { headers } from "next/headers";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { ArrowLeft, CheckCircle2, OctagonAlert, TriangleAlert } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { auth } from "@/lib/auth";
-import { Badge, Card, CardBody, CardHeader } from "@/components/ui";
+import { Badge, Card } from "@/components/ui";
 import { getDashboardData } from "@/lib/dashboard/queries";
-import { getRecommendation } from "@/lib/audit/recommendations";
 import type { CheckResult, SubScore } from "@/lib/audit/types";
 import { getAuditDetail } from "../actions";
+import { ChecksBySeverity } from "./checks-by-severity";
 
 // /app/audits/[id], détail full d'un audit (rapport persisté en DB).
 // Pas de teaser ni de gate email : tu es payant, tu vois tout.
+//
+// Refonte UX 2026-05-20 : groupement par sévérité (critical/warning/info)
+// au lieu du précédent status (fail/warn/pass), via <ChecksBySeverity>.
 
 export const dynamic = "force-dynamic";
 
@@ -37,9 +40,19 @@ export default async function AuditDetailPage({ params }: PageProps) {
 
   const subScores = audit.subScores as SubScore[];
   const checks = audit.checks as CheckResult[];
-  const failures = checks.filter((c) => c.status === "fail");
-  const warnings = checks.filter((c) => c.status === "warn");
-  const passed = checks.filter((c) => c.status === "pass");
+
+  // Groupement par sévérité (refonte 2026-05-20). Logique :
+  // - Critique : severity=critical ET le check échoue (status=fail)
+  // - Avertissement : severity=warning ET le check warn/fail
+  // - Info & bons points : tout le reste (severity=info, ou check qui
+  //   pass quelle que soit sa sévérité = bon point)
+  const critical = checks.filter((c) => c.severity === "critical" && c.status === "fail");
+  const warnings = checks.filter(
+    (c) => c.severity === "warning" && (c.status === "warn" || c.status === "fail"),
+  );
+  const info = checks.filter(
+    (c) => !critical.includes(c) && !warnings.includes(c),
+  );
 
   return (
     <div className="mx-auto max-w-5xl px-6 py-12 lg:px-10">
@@ -73,16 +86,16 @@ export default async function AuditDetailPage({ params }: PageProps) {
           </div>
           <div className="text-right">
             <p className="text-sm text-[color:var(--color-ink-soft)]">
-              <strong className="text-[color:var(--color-error)]">{failures.length}</strong> à
-              corriger
+              <strong className="text-[color:var(--color-error)]">{critical.length}</strong>{" "}
+              critique{critical.length > 1 ? "s" : ""}
             </p>
             <p className="mt-1 text-sm text-[color:var(--color-ink-soft)]">
-              <strong className="text-[color:var(--color-warning)]">{warnings.length}</strong> à
-              surveiller
+              <strong className="text-[color:var(--color-warning)]">{warnings.length}</strong>{" "}
+              avertissement{warnings.length > 1 ? "s" : ""}
             </p>
             <p className="mt-1 text-sm text-[color:var(--color-ink-soft)]">
-              <strong className="text-[color:var(--color-success)]">{passed.length}</strong> bons
-              points
+              <strong className="text-[color:var(--color-success)]">{info.length}</strong> info
+              & bons points
             </p>
           </div>
         </div>
@@ -105,119 +118,8 @@ export default async function AuditDetailPage({ params }: PageProps) {
         </div>
       </Card>
 
-      {/* Issues à corriger */}
-      {failures.length > 0 && (
-        <section className="mt-12">
-          <h2 className="type-h2">À corriger ({failures.length})</h2>
-          <ul className="mt-6 flex flex-col gap-4">
-            {failures.map((check) => (
-              <CheckCard key={check.id} check={check} />
-            ))}
-          </ul>
-        </section>
-      )}
-
-      {warnings.length > 0 && (
-        <section className="mt-12">
-          <h2 className="type-h2">À surveiller ({warnings.length})</h2>
-          <ul className="mt-6 flex flex-col gap-4">
-            {warnings.map((check) => (
-              <CheckCard key={check.id} check={check} />
-            ))}
-          </ul>
-        </section>
-      )}
-
-      {passed.length > 0 && (
-        <section className="mt-12">
-          <h2 className="type-h2">Bons points ({passed.length})</h2>
-          <ul className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
-            {passed.map((check) => (
-              <li
-                key={check.id}
-                className="flex items-start gap-2.5 rounded-[var(--radius-lg)] border border-[color:var(--color-border)] bg-white p-3"
-              >
-                <CheckCircle2
-                  size={16}
-                  className="mt-0.5 shrink-0 text-[color:var(--color-success)]"
-                />
-                <p className="text-sm text-[color:var(--color-ink-soft)]">{check.label}</p>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
+      <ChecksBySeverity critical={critical} warnings={warnings} info={info} />
     </div>
-  );
-}
-
-function CheckCard({ check }: { check: CheckResult }) {
-  const reco = getRecommendation(check.id);
-  const Icon = check.status === "fail" ? OctagonAlert : TriangleAlert;
-  const iconColor = check.status === "fail" ? "var(--color-error)" : "var(--color-warning)";
-
-  return (
-    <li>
-      <Card>
-        <CardHeader>
-          <div className="flex items-start gap-3">
-            <Icon size={20} className="mt-1 shrink-0" style={{ color: iconColor }} />
-            <div className="flex-1">
-              <h3 className="type-h3">{check.label}</h3>
-              <p className="type-meta mt-1 font-mono">{check.id}</p>
-            </div>
-            {reco.geoImpact && (
-              <Badge
-                tone={
-                  reco.geoImpact === "high"
-                    ? "accent"
-                    : reco.geoImpact === "medium"
-                      ? "blue"
-                      : "neutral"
-                }
-              >
-                Impact GEO {reco.geoImpact}
-              </Badge>
-            )}
-          </div>
-        </CardHeader>
-        <CardBody>
-          {check.found && (
-            <div className="mb-3 rounded-[var(--radius-md)] border border-[color:var(--color-border)] bg-[color:var(--color-gray-50)] p-3">
-              <p className="type-eyebrow">Trouvé sur la page</p>
-              <p className="mt-1 font-mono text-xs text-[color:var(--color-ink)]">{check.found}</p>
-            </div>
-          )}
-          {check.expected && (
-            <p className="text-sm text-[color:var(--color-ink-soft)]">
-              <strong className="text-[color:var(--color-ink)]">Attendu :</strong> {check.expected}
-            </p>
-          )}
-          <div className="mt-4">
-            <p className="type-eyebrow">Pourquoi</p>
-            <p className="mt-1 text-sm text-[color:var(--color-ink-soft)]">{reco.why}</p>
-          </div>
-          <div className="mt-4">
-            <p className="type-eyebrow">Comment fixer · ~{reco.estimatedEffort}</p>
-            <pre className="mt-2 overflow-x-auto rounded-[var(--radius-md)] border border-[color:var(--color-border)] bg-[color:var(--color-gray-50)] p-3 text-xs leading-relaxed text-[color:var(--color-ink)] whitespace-pre-wrap">
-              {reco.howToFix}
-            </pre>
-            {reco.externalDoc && (
-              <p className="mt-2">
-                <a
-                  href={reco.externalDoc}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-[color:var(--color-ink-soft)] underline-offset-2 hover:underline"
-                >
-                  Doc officielle →
-                </a>
-              </p>
-            )}
-          </div>
-        </CardBody>
-      </Card>
-    </li>
   );
 }
 

@@ -1,9 +1,10 @@
 import { cache } from "react";
 import { headers } from "next/headers";
-import { eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { db } from "@/db/client";
-import { brands, workspaceMembers, workspaces } from "@/db/schema";
+import { brands, technicalAudits, workspaceMembers, workspaces } from "@/db/schema";
 import { auth } from "@/lib/auth";
+import type { CheckResult } from "@/lib/audit/types";
 
 // Données passées à la sidebar (user + workspace + brands).
 // `cache()` mémoïse par requête HTTP, appelé par le layout (sidebar)
@@ -28,6 +29,11 @@ export interface SidebarData {
   /** Nombre de brands du workspace (= brands.length), exposé pour
    *  l'AddBrandDialog qui en a besoin pour le quota check côté UI. */
   currentBrandsCount: number;
+  /** Nombre de checks `severity=critical AND status=fail` sur le dernier
+   *  audit par URL (owned, pas concurrents). Alimente la bulle de notif
+   *  rouge sur l'item "Audits techniques" de la sidebar. 0 = pas de
+   *  bulle affichée. */
+  criticalIssuesCount: number;
 }
 
 export const loadSidebarData = cache(async (): Promise<SidebarData | null> => {
@@ -59,6 +65,8 @@ export const loadSidebarData = cache(async (): Promise<SidebarData | null> => {
 
   if (brandsRows.length === 0) return null;
 
+  const criticalIssuesCount = await countCriticalIssues(ws.workspaceId);
+
   return {
     user: { id: session.user.id, email: session.user.email },
     workspace: {
@@ -73,5 +81,52 @@ export const loadSidebarData = cache(async (): Promise<SidebarData | null> => {
     // mémorisera le choix dans cookie ou URL param.
     currentBrandId: brandsRows[0]!.id,
     currentBrandsCount: brandsRows.length,
+    criticalIssuesCount,
   };
 });
+
+/**
+ * Compte les checks `severity=critical && status=fail` sur le dernier
+ * audit par URL distincte (owned, pas concurrents) du workspace.
+ *
+ * Implémentation V0 : on fetch les 50 audits récents triés par
+ * `createdAt DESC` + on dédupe par URL côté JS (garde le plus récent
+ * par URL). Volume attendu : un workspace tracke ~5-20 URLs au max
+ * sur Pro/Agency, donc largement sous le limit 50.
+ *
+ * Si on passe sous tension > 50 audits, basculer sur une vue
+ * matérialisée ou colonne dénormalisée (`failedCriticalCount` sur la
+ * table technical_audits, mise à jour à l'insert).
+ */
+async function countCriticalIssues(workspaceId: string): Promise<number> {
+  const audits = await db
+    .select({
+      url: technicalAudits.url,
+      checks: technicalAudits.checks,
+      createdAt: technicalAudits.createdAt,
+    })
+    .from(technicalAudits)
+    .where(
+      and(
+        eq(technicalAudits.workspaceId, workspaceId),
+        eq(technicalAudits.isCompetitor, false),
+      ),
+    )
+    .orderBy(desc(technicalAudits.createdAt))
+    .limit(50);
+
+  // Dédup par URL : on garde le premier (le plus récent grâce au ORDER BY).
+  const latestByUrl = new Map<string, typeof audits[number]>();
+  for (const audit of audits) {
+    if (!latestByUrl.has(audit.url)) latestByUrl.set(audit.url, audit);
+  }
+
+  let total = 0;
+  for (const audit of latestByUrl.values()) {
+    const checks = (audit.checks ?? []) as CheckResult[];
+    for (const check of checks) {
+      if (check.severity === "critical" && check.status === "fail") total += 1;
+    }
+  }
+  return total;
+}

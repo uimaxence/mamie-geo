@@ -93,7 +93,10 @@ function SidebarInner({ data, onNavigate }: { data: SidebarData; onNavigate?: ()
 
       {/* Middle, nav sections */}
       <nav className="flex-1 overflow-y-auto px-2 py-2">
-        <SidebarNav onNavigate={onNavigate} />
+        <SidebarNav
+          onNavigate={onNavigate}
+          criticalIssuesCount={data.criticalIssuesCount}
+        />
       </nav>
 
       {/* Bottom, user menu */}
@@ -104,12 +107,20 @@ function SidebarInner({ data, onNavigate }: { data: SidebarData; onNavigate?: ()
   );
 }
 
-function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
+function SidebarNav({
+  onNavigate,
+  criticalIssuesCount,
+}: {
+  onNavigate?: () => void;
+  criticalIssuesCount: number;
+}) {
   const pathname = usePathname();
   return (
     <ul className="flex flex-col gap-0.5">
       {NAV.map((item) => {
         const active = pathname === item.href || (pathname?.startsWith(item.href + "/") ?? false);
+        const showCriticalBadge =
+          item.href === "/app/audits" && criticalIssuesCount > 0;
         return (
           <li key={item.href}>
             <Link
@@ -136,7 +147,15 @@ function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
                   active ? "text-[color:var(--color-ink)]" : "text-[color:var(--color-muted)]"
                 }
               />
-              {item.label}
+              <span className="flex-1">{item.label}</span>
+              {showCriticalBadge && (
+                <Badge
+                  tone="error"
+                  aria-label={`${criticalIssuesCount} problème${criticalIssuesCount > 1 ? "s" : ""} critique${criticalIssuesCount > 1 ? "s" : ""} à corriger`}
+                >
+                  {criticalIssuesCount}
+                </Badge>
+              )}
             </Link>
           </li>
         );
