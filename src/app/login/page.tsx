@@ -10,11 +10,9 @@ import { Logo } from "@/components/marketing/logo";
 
 // Login en split panel asymétrique (cf. doc 09 § PR 11b, ref
 // BrightNest signup) :
-//   - Panel gauche (hidden < md) : fond gris-50 + pattern damier bleu
-//     primary à pleine largeur opacity 5% (signature visuelle ancrée
-//     sur tout le panel — itération 2026-05-20 finale après tests
-//     successifs : primary 100%, gradient bleu, ink coin)
-//   - Panel droite : form magic-link (fond blanc, border-r entre les 2)
+//   - Panel gauche (hidden < md) : fond gris-50 + border-r vs panel
+//     droite (séparation visuelle minimaliste, sans pattern décoratif).
+//   - Panel droite : form magic-link (fond blanc).
 // Sur mobile : seul le panel form est rendu, plein écran.
 //
 // Param `?next=/app/...` propagé en callbackURL Better Auth (cf. doc 09
@@ -97,16 +95,9 @@ function LoginContent() {
 
   return (
     <main className="grid min-h-screen grid-cols-1 md:grid-cols-2">
-      {/* Panel gauche, fond gris-50 + pattern damier bleu primary à
-          pleine largeur, opacity 5% (signature ancrée sans écraser le
-          titre). Border verticale fine entre les 2 panels. */}
+      {/* Panel gauche, fond gris-50 + border verticale fine. Pattern
+          retiré (PR 2026-05-20) après 4 itérations infructueuses. */}
       <aside className="relative hidden flex-col justify-between overflow-hidden border-r border-[color:var(--color-border)] bg-[color:var(--color-gray-50)] p-10 text-[color:var(--color-ink)] md:flex">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 bg-pattern"
-          style={{ opacity: 0.05 }}
-        />
-
         <Link
           href="/"
           className="relative flex items-center gap-2 text-base font-bold tracking-tight text-[color:var(--color-ink)]"

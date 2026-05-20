@@ -23,6 +23,11 @@ export type PlanKey =
 export type PlanCadence = "daily" | "weekly";
 
 export interface PlanQuotas {
+  /** Nombre max de marques (brands) trackées par workspace.
+   *  Doc 03 standard : Solo/Starter 1, Pro 3, Agency 10, Enterprise illimité.
+   *  Trialing et états dégradés : 1 (la brand créée à l'onboarding reste,
+   *  mais pas d'ajout possible). */
+  brands: number;
   prompts: number; // Infinity si illimité
   competitors: number;
   cadence: PlanCadence;
@@ -37,18 +42,41 @@ export interface PlanQuotas {
 const QUOTAS: Record<PlanKey, PlanQuotas> = {
   // Compte créé sans paiement — aucun run lancé tant que pas de subscription.
   // Pivot 2026-05-14 : remplace l'ancien "trial 7j sans carte" (cf. doc 09).
-  trialing: { prompts: 0, competitors: 0, cadence: "weekly", audits: 0, comparisonCompetitors: 0 },
+  trialing: {
+    brands: 1,
+    prompts: 0,
+    competitors: 0,
+    cadence: "weekly",
+    audits: 0,
+    comparisonCompetitors: 0,
+  },
   // Plan d'entrée 9,99 € — 1 run par semaine sur 5 LLMs, marge ~75 % en Phase A
-  solo: { prompts: 5, competitors: 3, cadence: "weekly", audits: 5, comparisonCompetitors: 0 },
+  solo: {
+    brands: 1,
+    prompts: 5,
+    competitors: 3,
+    cadence: "weekly",
+    audits: 5,
+    comparisonCompetitors: 0,
+  },
   starter: {
+    brands: 1,
     prompts: 25,
     competitors: 5,
     cadence: "daily",
     audits: 30,
     comparisonCompetitors: 3,
   },
-  pro: { prompts: 100, competitors: 10, cadence: "daily", audits: 100, comparisonCompetitors: 10 },
+  pro: {
+    brands: 3,
+    prompts: 100,
+    competitors: 10,
+    cadence: "daily",
+    audits: 100,
+    comparisonCompetitors: 10,
+  },
   agency: {
+    brands: 10,
     prompts: 300,
     competitors: Number.POSITIVE_INFINITY,
     cadence: "daily",
@@ -56,16 +84,38 @@ const QUOTAS: Record<PlanKey, PlanQuotas> = {
     comparisonCompetitors: Number.POSITIVE_INFINITY,
   },
   enterprise: {
+    brands: Number.POSITIVE_INFINITY,
     prompts: Number.POSITIVE_INFINITY,
     competitors: Number.POSITIVE_INFINITY,
     cadence: "daily",
     audits: Number.POSITIVE_INFINITY,
     comparisonCompetitors: Number.POSITIVE_INFINITY,
   },
-  // États dégradés : lecture seule, pas de runs ni d'audits.
-  past_due: { prompts: 0, competitors: 0, cadence: "weekly", audits: 0, comparisonCompetitors: 0 },
-  expired: { prompts: 0, competitors: 0, cadence: "weekly", audits: 0, comparisonCompetitors: 0 },
-  canceled: { prompts: 0, competitors: 0, cadence: "weekly", audits: 0, comparisonCompetitors: 0 },
+  // États dégradés : lecture seule, pas de runs ni d'audits ni d'ajout brand.
+  past_due: {
+    brands: 1,
+    prompts: 0,
+    competitors: 0,
+    cadence: "weekly",
+    audits: 0,
+    comparisonCompetitors: 0,
+  },
+  expired: {
+    brands: 1,
+    prompts: 0,
+    competitors: 0,
+    cadence: "weekly",
+    audits: 0,
+    comparisonCompetitors: 0,
+  },
+  canceled: {
+    brands: 1,
+    prompts: 0,
+    competitors: 0,
+    cadence: "weekly",
+    audits: 0,
+    comparisonCompetitors: 0,
+  },
 };
 
 export function quotasFor(plan: string): PlanQuotas {
@@ -90,7 +140,7 @@ export function isActivePlan(plan: string): boolean {
 export interface QuotaReachedError {
   ok: false;
   error: "quota_reached";
-  resource: "prompts" | "competitors" | "audits" | "comparison_competitors";
+  resource: "brands" | "prompts" | "competitors" | "audits" | "comparison_competitors";
   current: number;
   max: number; // Number si fini, "illimité" jamais (pas de quota_reached si illimité)
   plan: PlanKey;

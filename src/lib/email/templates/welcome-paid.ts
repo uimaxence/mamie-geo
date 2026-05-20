@@ -60,21 +60,10 @@ Garantie remboursement 14 jours : si Mamie GEO ne te convient pas, envoie-nous u
 À bientôt,
 Mamie GEO`;
 
-  // Signature pattern bleu primary en bande top (cf. doc 10). Couleur
-  // fallback solide pour Outlook desktop. URL absolue dérivée de
-  // l'origine du dashboardUrl pour éviter d'ajouter un paramètre dédié.
-  let patternUrl = "https://mamie-geo.fr/pattern.svg";
-  try {
-    patternUrl = `${new URL(data.dashboardUrl).origin}/pattern.svg`;
-  } catch {
-    // garde le fallback hard-codé
-  }
-
   const html = `<!doctype html>
 <html lang="fr">
   <body style="margin:0;padding:0;background:#fafafa;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;color:#191919;">
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;margin:0 auto;background:#fff;border-radius:12px;border:1px solid #e6e6e6;overflow:hidden;margin-top:24px;">
-      <tr><td style="height:56px;background-color:#329cff;background-image:url('${escapeAttr(patternUrl)}');background-repeat:repeat;background-size:56px 56px;" aria-hidden="true"></td></tr>
       <tr><td style="padding:32px;">
         <h1 style="margin:0 0 16px;font-size:20px;font-weight:600;">Bienvenue dans Mamie GEO ${planLabel}</h1>
         <p style="margin:0 0 16px;font-size:15px;line-height:1.6;">Ton abonnement pour <strong>${escapeHtml(data.workspaceName)}</strong> est actif.</p>

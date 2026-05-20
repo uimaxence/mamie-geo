@@ -25,6 +25,9 @@ export interface SidebarData {
   };
   brands: Array<{ id: string; name: string; domain: string }>;
   currentBrandId: string;
+  /** Nombre de brands du workspace (= brands.length), exposé pour
+   *  l'AddBrandDialog qui en a besoin pour le quota check côté UI. */
+  currentBrandsCount: number;
 }
 
 export const loadSidebarData = cache(async (): Promise<SidebarData | null> => {
@@ -69,5 +72,6 @@ export const loadSidebarData = cache(async (): Promise<SidebarData | null> => {
     // V0 : 1 seule brand par workspace, on prend la plus ancienne. V1
     // mémorisera le choix dans cookie ou URL param.
     currentBrandId: brandsRows[0]!.id,
+    currentBrandsCount: brandsRows.length,
   };
 });

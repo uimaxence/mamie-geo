@@ -1,4 +1,4 @@
-import { LinkButton, PatternBlock, Section } from "@/components/ui";
+import { LinkButton, Section } from "@/components/ui";
 import { MockupAudit } from "./mockups/mockup-audit";
 
 // Promo audit technique sur la home, PR 2026-05-16 (cf. doc 09).
@@ -8,15 +8,12 @@ import { MockupAudit } from "./mockups/mockup-audit";
 // (le problème : les IA citent les concurrents pas toi) → solution
 // actionnable immédiate gratuite.
 //
-// PR 2026-05-18 : ambient blob terracotta remplacé par le pattern
-// signature bleu primary (bottom-left). Cohérence avec la nouvelle
-// signature graphique en remplacement progressif du terracotta.
+// PR 2026-05-20 : pattern signature retiré (fausse bonne idée),
+// section reste sobre.
 
 export function AuditTeaser() {
   return (
     <Section pad="xl" id="audit-teaser" className="relative overflow-hidden">
-      <PatternBlock corner="bottom-left" tone="primary-soft" size="lg" />
-
       <div className="relative grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-16">
         {/* Colonne gauche, copy + CTA */}
         <div>

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Check, ChevronDown, Menu } from "lucide-react";
+import { Check, ChevronDown, Menu, Plus } from "lucide-react";
 import { useState } from "react";
 import {
   Badge,
@@ -17,6 +17,7 @@ import {
 } from "@/components/ui";
 import { BrandFavicon } from "@/components/app/brand-favicon";
 import { cn } from "@/lib/utils";
+import { AddBrandDialog } from "./add-brand-dialog";
 import { AppSidebar } from "./app-sidebar";
 import type { SidebarData } from "./app-sidebar-data";
 
@@ -42,7 +43,12 @@ export function AppTopBar({ data }: { data: SidebarData }) {
 
       <Separator />
 
-      <BrandSwitcher brands={data.brands} currentBrandId={data.currentBrandId} />
+      <BrandSwitcher
+        brands={data.brands}
+        currentBrandId={data.currentBrandId}
+        currentBrandsCount={data.currentBrandsCount}
+        plan={data.workspace.plan}
+      />
     </header>
   );
 }
@@ -84,9 +90,13 @@ function WorkspacePill({ workspace }: { workspace: SidebarData["workspace"] }) {
 function BrandSwitcher({
   brands,
   currentBrandId,
+  currentBrandsCount,
+  plan,
 }: {
   brands: SidebarData["brands"];
   currentBrandId: string;
+  currentBrandsCount: number;
+  plan: string;
 }) {
   const current = brands.find((b) => b.id === currentBrandId) ?? brands[0];
   if (!current) return null;
@@ -132,6 +142,19 @@ function BrandSwitcher({
             )}
           </DropdownMenuItem>
         ))}
+        <DropdownMenuSeparator />
+        <AddBrandDialog currentBrandsCount={currentBrandsCount} plan={plan}>
+          <DropdownMenuItem
+            // Empêche Radix de fermer le menu avant que la dialog
+            // s'ouvre, sinon le focus est perdu et la dialog peut ne
+            // pas s'afficher correctement.
+            onSelect={(e) => e.preventDefault()}
+            className="text-[color:var(--color-ink-soft)]"
+          >
+            <Plus size={14} strokeWidth={2} />
+            Ajouter une marque
+          </DropdownMenuItem>
+        </AddBrandDialog>
       </DropdownMenuContent>
     </DropdownMenu>
   );

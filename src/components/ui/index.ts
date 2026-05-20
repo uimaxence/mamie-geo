@@ -11,8 +11,6 @@ export { Section } from "./section";
 export { StatusDot } from "./status-dot";
 export { CornerFrame } from "./corner-frame";
 export { BottomFade } from "./bottom-fade";
-export { PatternBlock, PatternBand } from "./pattern-block";
-export type { PatternBlockProps, PatternBandProps } from "./pattern-block";
 
 // Primitifs shadcn/Radix (foundation post-login)
 export {

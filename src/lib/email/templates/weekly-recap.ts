@@ -55,26 +55,7 @@ export function renderWeeklyRecap(data: WeeklyRecapData): RenderedEmail {
   };
 }
 
-/**
- * Construit l'URL absolue du pattern signature depuis l'origine de
- * `dashboardUrl`. Évite d'ajouter un paramètre dédié à la fonction,
- * tous les appelants passent déjà une URL absolue (cf. weekly-recap.test).
- *
- * Le pattern est tinté en bleu primary directement dans /public/pattern.svg
- * pour que les clients mail qui chargent le SVG voient la bonne couleur.
- * Fallback bg color sur la bande pour les clients qui strippent les SVGs
- * (Outlook desktop notamment).
- */
-function deriveOrigin(absoluteUrl: string): string {
-  try {
-    return new URL(absoluteUrl).origin;
-  } catch {
-    return "https://mamie-geo.fr";
-  }
-}
-
 function renderHtml(data: WeeklyRecapData): string {
-  const patternUrl = `${deriveOrigin(data.dashboardUrl)}/pattern.svg`;
   return `<!doctype html>
 <html lang="fr">
 <head>
@@ -85,9 +66,8 @@ function renderHtml(data: WeeklyRecapData): string {
   body { margin: 0; padding: 0; background: #fafafa; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; color: #0a0a0a; }
   a { color: #0a0a0a; }
   table { border-collapse: collapse; }
-  .container { max-width: 560px; margin: 0 auto; padding: 0 16px 32px; }
-  .pattern-band { height: 56px; background-color: #329cff; background-image: url("${escapeHtmlAttr(patternUrl)}"); background-repeat: repeat; background-size: 56px 56px; }
-  .header { padding: 28px 0 0; }
+  .container { max-width: 560px; margin: 0 auto; padding: 32px 16px; }
+  .header { padding: 0; }
   .card { background: #ffffff; border: 1px solid #e5e5e5; border-radius: 16px; padding: 24px; }
   .eyebrow { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #737373; }
   .h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.015em; color: #0a0a0a; margin: 4px 0 0 0; }
@@ -104,10 +84,6 @@ function renderHtml(data: WeeklyRecapData): string {
 </style>
 </head>
 <body>
-<!-- Signature pattern bleu primary (cf. doc 10 § Pattern signature).
-     Bande horizontale 56px en haut de l'email ; couleur fallback solide
-     pour Outlook desktop qui strippe parfois les SVG bg-image. -->
-<div class="pattern-band" role="presentation" aria-hidden="true"></div>
 <div class="container">
   <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
     <tr>
