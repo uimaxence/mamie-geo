@@ -6,7 +6,7 @@ import { Button, Input } from "@/components/ui";
 import { sendFullReportEmail } from "./actions";
 
 // Form lead capture pour recevoir le rapport complet (30+ checks +
-// recommandations détaillées) par email. Bloquant aucunement — le
+// recommandations détaillées) par email. Bloquant aucunement, le
 // teaser reste affiché si le user ne renseigne pas son email.
 
 export function EmailGate({ token }: { token: string }) {

@@ -4,7 +4,7 @@ import * as TooltipPrimitive from "@radix-ui/react-tooltip";
 import { forwardRef, type ComponentPropsWithoutRef, type ElementRef } from "react";
 import { cn } from "@/lib/utils";
 
-// Tooltip Radix — fond ink (gray-950) blanc, radius-md, fade. Wrap
+// Tooltip Radix, fond ink (gray-950) blanc, radius-md, fade. Wrap
 // l'app dans <TooltipProvider> au niveau du layout.
 
 export const TooltipProvider = TooltipPrimitive.Provider;

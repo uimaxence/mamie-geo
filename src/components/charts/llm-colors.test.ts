@@ -21,7 +21,7 @@ describe("llm-colors", () => {
     }
   });
 
-  it("aucune couleur dupliquée — chaque LLM a sa teinte propre", () => {
+  it("aucune couleur dupliquée, chaque LLM a sa teinte propre", () => {
     const colors = TRACKED_LLMS.map((llm) => LLM_COLORS[llm]);
     expect(new Set(colors).size).toBe(TRACKED_LLMS.length);
   });

@@ -114,6 +114,6 @@ export async function sendFullReportEmail(
       to: parsed.data.email,
       error: message,
     });
-    return { ok: false, error: "Erreur d'envoi email — réessaye dans quelques minutes." };
+    return { ok: false, error: "Erreur d'envoi email, réessaye dans quelques minutes." };
   }
 }

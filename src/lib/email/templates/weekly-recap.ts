@@ -4,7 +4,7 @@
 // brute en fallback.
 //
 // La data du template est extraite par le worker (Drizzle queries) puis
-// passée ici — la fonction render() est pure et synchrone, testable
+// passée ici, la fonction render() est pure et synchrone, testable
 // sans DB ni env.
 
 export interface WeeklyRecapStat {
@@ -32,7 +32,7 @@ export interface WeeklyRecapData {
   stats: WeeklyRecapStat[];
   /** Top concurrents cités cette semaine (max 3) */
   topCompetitors: WeeklyRecapTopCompetitor[];
-  /** URL absolue vers le dashboard (CTA) — typiquement `${NEXT_PUBLIC_APP_URL}/app/dashboard` */
+  /** URL absolue vers le dashboard (CTA), typiquement `${NEXT_PUBLIC_APP_URL}/app/dashboard` */
   dashboardUrl: string;
   /** URL absolue vers settings (lien désinscription footer) */
   settingsUrl: string;
@@ -46,7 +46,7 @@ export interface RenderedEmail {
 
 export function renderWeeklyRecap(data: WeeklyRecapData): RenderedEmail {
   const [yearStr, weekStr] = data.isoWeek.split("-W");
-  const subject = `Récap visibilité IA — semaine ${weekStr} / ${yearStr}`;
+  const subject = `Récap visibilité IA, semaine ${weekStr} / ${yearStr}`;
 
   return {
     subject,
@@ -57,7 +57,7 @@ export function renderWeeklyRecap(data: WeeklyRecapData): RenderedEmail {
 
 /**
  * Construit l'URL absolue du pattern signature depuis l'origine de
- * `dashboardUrl`. Évite d'ajouter un paramètre dédié à la fonction —
+ * `dashboardUrl`. Évite d'ajouter un paramètre dédié à la fonction,
  * tous les appelants passent déjà une URL absolue (cf. weekly-recap.test).
  *
  * Le pattern est tinté en bleu primary directement dans /public/pattern.svg
@@ -80,7 +80,7 @@ function renderHtml(data: WeeklyRecapData): string {
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>${escapeHtml(data.brandName)} — récap visibilité IA</title>
+<title>${escapeHtml(data.brandName)}, récap visibilité IA</title>
 <style>
   body { margin: 0; padding: 0; background: #fafafa; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; color: #0a0a0a; }
   a { color: #0a0a0a; }
@@ -215,17 +215,17 @@ function renderCompetitorsBlock(competitors: WeeklyRecapTopCompetitor[]): string
 
 function renderText(data: WeeklyRecapData): string {
   const lines: string[] = [];
-  lines.push(`${data.brandName} — récap visibilité IA (semaine ${data.isoWeek})`);
+  lines.push(`${data.brandName}, récap visibilité IA (semaine ${data.isoWeek})`);
   lines.push(`${data.brandDomain} · ${data.workspaceName}`);
   lines.push("");
-  lines.push("— Stats —");
+  lines.push("Stats");
   for (const stat of data.stats) {
     const delta = formatDeltaText(stat);
     lines.push(`  ${stat.label}: ${stat.value}${delta}`);
   }
   if (data.topCompetitors.length > 0) {
     lines.push("");
-    lines.push("— Top concurrents cités —");
+    lines.push("Top concurrents cités");
     data.topCompetitors.forEach((c, i) => {
       lines.push(
         `  #${i + 1} ${c.name} (${c.citationCount} mention${c.citationCount > 1 ? "s" : ""})`,

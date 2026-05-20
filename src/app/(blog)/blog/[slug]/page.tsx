@@ -11,7 +11,7 @@ import { getArticleBySlug, listArticleSlugs } from "@/lib/blog/registry";
 import { CATEGORY_TONE } from "@/lib/blog/schemas";
 import { env } from "@/lib/env";
 
-// Page détail article — un seul template paramétré, remplace l'ancien
+// Page détail article, un seul template paramétré, remplace l'ancien
 // pattern 1 layout + 1 page.mdx PAR slug (cf. doc 09 § 2026-05-16).
 // Charge dynamiquement le module MDX depuis `src/content/blog/[slug].mdx`
 // (le frontmatter est lu séparément via registry, le composant React
@@ -66,7 +66,7 @@ export default async function ArticlePage({ params }: { params: Promise<Params> 
   const article = getArticleBySlug(slug);
   if (!article) notFound();
 
-  // Dynamic import — Next.js compile chaque .mdx en module React.
+  // Dynamic import, Next.js compile chaque .mdx en module React.
   // Le frontmatter est ignoré au render (remark-frontmatter le retire).
   const mod = await import(`@/content/blog/${slug}.mdx`);
   const ArticleBody = mod.default as React.ComponentType;
@@ -97,7 +97,7 @@ export default async function ArticlePage({ params }: { params: Promise<Params> 
         ]}
       />
 
-      {/* Header — titre + métadonnées */}
+      {/* Header, titre + métadonnées */}
       <Section pad="lg">
         <div className="mx-auto max-w-3xl">
           <Link
@@ -119,7 +119,7 @@ export default async function ArticlePage({ params }: { params: Promise<Params> 
         </div>
       </Section>
 
-      {/* Contenu — TOC sticky desktop + corps article */}
+      {/* Contenu, TOC sticky desktop + corps article */}
       <Section pad="md">
         <div className="mx-auto grid max-w-6xl grid-cols-1 gap-12 lg:grid-cols-[1fr_240px]">
           <div data-blog-content className="min-w-0 max-w-3xl">

@@ -5,7 +5,7 @@ import { forwardRef, type ComponentPropsWithoutRef, type ElementRef } from "reac
 import { cn } from "@/lib/utils";
 
 // Switch Radix : on = accent terracotta, off = gray-300. Taille standard
-// 36×20 px (track) + 16 px (thumb) — pour rester discret en formulaire.
+// 36×20 px (track) + 16 px (thumb), pour rester discret en formulaire.
 
 export const Switch = forwardRef<
   ElementRef<typeof SwitchPrimitive.Root>,

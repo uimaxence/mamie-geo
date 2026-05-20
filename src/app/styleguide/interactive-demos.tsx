@@ -6,7 +6,7 @@ import { Pagination, SegmentedControl, Switch } from "@/components/ui";
 // Pagination prend `hrefFor` (server-friendly) plutôt qu'un callback.
 // Pour la démo on rend un href anchor # qui ne navigue pas.
 
-// Demos interactives extraites dans un fichier client — les composants
+// Demos interactives extraites dans un fichier client, les composants
 // qui exposent des callbacks (onValueChange, onCheckedChange, etc.) ne
 // peuvent pas recevoir de fonctions depuis un Server Component.
 
@@ -31,7 +31,7 @@ export function SwitchDemo() {
     <div className="flex items-center gap-4">
       <Switch checked={on} onCheckedChange={setOn} />
       <span className="text-sm text-[color:var(--color-ink-soft)]">
-        Switch interactif — clique pour toggler ({on ? "on" : "off"})
+        Switch interactif, clique pour toggler ({on ? "on" : "off"})
       </span>
     </div>
   );

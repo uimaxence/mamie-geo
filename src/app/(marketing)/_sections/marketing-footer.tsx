@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { Logo } from "@/components/marketing/logo";
 
-// Footer enrichi PR 8b — 4 colonnes (Mamie GEO / Produit / Ressources
+// Footer enrichi PR 8b, 4 colonnes (Mamie GEO / Produit / Ressources
 // / Légal) + barre de copyright en bas avec liens socials.
 //
-// Routes pricing / outils / blog / legal n'existent pas encore — les
+// Routes pricing / outils / blog / legal n'existent pas encore, les
 // liens pointent vers des ancres ou vers des pages que PR 8c+
 // fabriquera. Les liens externes (mamie-seo, GitHub, LinkedIn, X)
 // vont vers leurs domaines respectifs.

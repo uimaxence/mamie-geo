@@ -6,12 +6,12 @@ import { LLM_COLORS, LLM_LABELS } from "@/components/charts/llm-colors";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui";
 import { cn } from "@/lib/utils";
 
-// "Hero data showcase" — 4 cartes data tiltées sous le hero.
+// "Hero data showcase", 4 cartes data tiltées sous le hero.
 //
 // Pattern visuel : cartes hautes (~440 px) profondément enfouies dans
 // la section sombre <PourquoiMaintenant> (~280 px masqués). Au repos,
 // ~160 px du haut visibles dans le hero blanc. Au hover, la carte se
-// lève de 80 px et redresse à 0° — son haut s'étend, son bas RESTE
+// lève de 80 px et redresse à 0°, son haut s'étend, son bas RESTE
 // masqué par la section sombre (la coupe ne disparaît jamais).
 //
 // Fixes 2026-05-13 (7ᵉ itération polish UX) :
@@ -185,7 +185,7 @@ export function HeroDataShowcase() {
         className="relative mx-auto mt-20 mb-[-200px] hidden max-w-[1900px] items-stretch justify-center gap-4 px-6 md:flex"
         aria-hidden="false"
       >
-        {/* Card 1 — Évolution LineChart */}
+        {/* Card 1, Évolution LineChart */}
         <DataCard
           rotation={-3}
           tooltip="Suis l'évolution de ta visibilité dans chaque IA, sur 7, 30 ou 90 jours."
@@ -203,7 +203,7 @@ export function HeroDataShowcase() {
           </p>
         </DataCard>
 
-        {/* Card 2 — Stat score */}
+        {/* Card 2, Stat score */}
         <DataCard
           rotation={2}
           tooltip="Une note de 0 à 100 par IA, mise à jour quotidiennement. Combine taux de citation, position et sentiment."
@@ -223,7 +223,7 @@ export function HeroDataShowcase() {
           <p className="mt-3 text-xs text-[color:var(--color-muted)]">Claude · sur 100</p>
         </DataCard>
 
-        {/* Card 3 — BarChart par LLM */}
+        {/* Card 3, BarChart par LLM */}
         <DataCard
           rotation={-2}
           tooltip="Compare ta visibilité dans les 5 IA grand public (ChatGPT, Claude, Perplexity, Gemini, Le Chat)."
@@ -248,7 +248,7 @@ export function HeroDataShowcase() {
           </div>
         </DataCard>
 
-        {/* Card 4 — Part de voix */}
+        {/* Card 4, Part de voix */}
         <DataCard
           rotation={3}
           tooltip="Le pourcentage de citations qui vont à ta marque vs tes concurrents sur tes prompts."

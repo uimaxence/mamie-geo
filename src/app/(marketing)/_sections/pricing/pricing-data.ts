@@ -1,4 +1,4 @@
-// Source de vérité pour les plans pricing publics — un seul endroit à
+// Source de vérité pour les plans pricing publics, un seul endroit à
 // toucher quand les tarifs bougent. cf. doc 04-pricing-business-model.md
 // + doc 09 § 2026-05-14 (ajout Solo + retrait Agency public).
 //
@@ -81,7 +81,7 @@ export const PLANS: Plan[] = [
   },
 ];
 
-// Tableau comparatif — 1 ligne par feature, valeur par plan. Valeurs
+// Tableau comparatif, 1 ligne par feature, valeur par plan. Valeurs
 // `true/false` rendues en check/cross, valeurs string rendues telles
 // quelles.
 export interface ComparisonRow {

@@ -8,7 +8,7 @@ import { LLMPill } from "@/components/marketing/llm-pill";
 
 gsap.registerPlugin(ScrollTrigger);
 
-// "Pourquoi maintenant ?" — section narrative data sur fond sombre,
+// "Pourquoi maintenant ?", section narrative data sur fond sombre,
 // révélation **mot par mot** au scroll via GSAP ScrollTrigger.
 //
 // Chaque mot du paragraphe est wrappé dans un <span.reveal-word>.
@@ -61,7 +61,7 @@ export function PourquoiMaintenant() {
       className="relative bg-[color:var(--color-ink)] text-white"
       style={{ minHeight: "180vh" }}
     >
-      {/* Radial warm subtile — touche de couleur, ~0,22 opacité max. */}
+      {/* Radial warm subtile, touche de couleur, ~0,22 opacité max. */}
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
         <div
           className="absolute -top-32 -right-32 size-[640px] rounded-full"
@@ -138,7 +138,7 @@ export function PourquoiMaintenant() {
 }
 
 // Split du texte en spans-mots. Les whitespaces sont rendus comme
-// text nodes (pas dans des spans) — ils ne participent pas à
+// text nodes (pas dans des spans), ils ne participent pas à
 // l'animation et permettent un line-wrap naturel.
 function Words({ children }: { children: string }): ReactNode {
   const parts = children.split(/(\s+)/);
@@ -157,7 +157,7 @@ function Words({ children }: { children: string }): ReactNode {
   );
 }
 
-// Footnote toujours visible (couleur fixe gray-500) — pas wrappée dans
+// Footnote toujours visible (couleur fixe gray-500), pas wrappée dans
 // un mot animé, sert d'ancrage pour lire la source en bas.
 function Footnote({ n, href }: { n: string; href: string }) {
   return (

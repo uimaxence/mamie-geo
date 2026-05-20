@@ -4,7 +4,7 @@ import { TrendingUp } from "lucide-react";
 import { Area, AreaChart, ResponsiveContainer } from "recharts";
 
 // Mockup utilisé en étape 3 de HowItWorks : « Reçois ton premier rapport ».
-// Refonte 2026-05-13 (9ᵉ itération polish UX) — l'ancien mini-barchart en
+// Refonte 2026-05-13 (9ᵉ itération polish UX), l'ancien mini-barchart en
 // CSS pur est remplacé par un vrai AreaChart Recharts avec gradient bleu
 // primaire (couleur de marque logo). Donne plus de vie + cohérence avec
 // la même bibliothèque que les cartes hero showcase.

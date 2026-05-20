@@ -11,7 +11,7 @@ import {
   YAxis,
 } from "recharts";
 
-// AreaChart simple série avec gradient bleu doux — pattern écran 2.
+// AreaChart simple série avec gradient bleu doux, pattern écran 2.
 // Optionnel : ligne de référence dashée orange (moyenne, seuil…).
 // Couleur par défaut bleu pastel (--color-blue). Bascule via prop.
 

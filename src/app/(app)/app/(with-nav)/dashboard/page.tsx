@@ -30,7 +30,7 @@ export default async function DashboardPage() {
   // le filtrage 7d/30d/90d se fait client-side dans <TrendSection>.
   const fullTrend = await getVisibilityTrend(data.brand.id, 90);
 
-  // Stats agrégées tous-LLMs (PR6) — remplace l'ancienne logique Claude-only.
+  // Stats agrégées tous-LLMs (PR6), remplace l'ancienne logique Claude-only.
   const agg = data.metricsAggregated;
   const visibilityScore = agg.visibilityScore;
   const hasRunsToday = agg.totalRuns > 0;
@@ -73,13 +73,13 @@ export default async function DashboardPage() {
     <div className="mx-auto max-w-6xl px-6 py-12 lg:px-10">
       {/* Header simple : titre de page + action principale.
        * L'identité (workspace, brand, plan, domaine) est portée par la
-       * sidebar — pas la peine de la répéter ici. */}
+       * sidebar, pas la peine de la répéter ici. */}
       <header className="flex flex-wrap items-center justify-between gap-6">
         <h1 className="type-h1">Vue d&apos;ensemble</h1>
         <TriggerRunForm />
       </header>
 
-      {/* 4 Stats — agrégées tous-LLMs (cf. PR6 2026-05-18). */}
+      {/* 4 Stats, agrégées tous-LLMs (cf. PR6 2026-05-18). */}
       <section className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card className="p-5">
           <Stat
@@ -138,7 +138,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Breakdown par LLM (bars verticales + légende + liste).
-       * Toujours rendu, même quand tous les scores sont à 0 — les 5 LLMs
+       * Toujours rendu, même quand tous les scores sont à 0, les 5 LLMs
        * trackés restent visibles avec leur couleur et leur label, ce qui
        * fait pédagogie sur la dimension du tracking dès J0. Les barres à 0
        * ont déjà un rendu fantôme (opacity 0.18 + hauteur min 8%) côté
@@ -149,7 +149,7 @@ export default async function DashboardPage() {
             <h2 className="type-h2">Visibilité par LLM</h2>
             <p className="type-meta mt-1">
               {breakdownSegments.every((s) => s.value === 0)
-                ? "Snapshot du jour — en attente du premier run"
+                ? "Snapshot du jour, en attente du premier run"
                 : "Snapshot du jour, score 0–100 par moteur"}
             </p>
           </div>
@@ -159,7 +159,7 @@ export default async function DashboardPage() {
         </div>
       </section>
 
-      {/* Runs récents — groupés par batch (prompt × jour) */}
+      {/* Runs récents, groupés par batch (prompt × jour) */}
       <section className="mt-14">
         <div className="flex items-baseline justify-between">
           <h2 className="type-h2">10 derniers batches</h2>
@@ -177,7 +177,7 @@ export default async function DashboardPage() {
 
       <footer className="mt-20">
         <p className="type-meta">
-          Phase A — moteur sur Claude Haiku 4.5 uniquement. Bascule Sonnet 4.6 et 4 autres LLMs en
+          Phase A, moteur sur Claude Haiku 4.5 uniquement. Bascule Sonnet 4.6 et 4 autres LLMs en
           Phase C. Détail dans <code>geo-project/09-decisions-journal.md</code> § 2026-05-07.
         </p>
       </footer>

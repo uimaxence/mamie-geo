@@ -14,7 +14,7 @@ import Link from "next/link";
 
 interface UpgradeBannerProps {
   plan: string;
-  /** Date hardCapHitAt depuis workspaces — si posé, on affiche la bannière hardcap (priorité). */
+  /** Date hardCapHitAt depuis workspaces, si posé, on affiche la bannière hardcap (priorité). */
   hardCapHitAt?: Date | string | null;
 }
 
@@ -31,7 +31,7 @@ const COPY: Record<string, BannerCopy> = {
     tone: "neutral",
   },
   past_due: {
-    message: "Paiement refusé — mets à jour ta carte sous 7 jours.",
+    message: "Paiement refusé, mets à jour ta carte sous 7 jours.",
     cta: "Mettre à jour",
     tone: "error",
   },
@@ -49,7 +49,7 @@ const COPY: Record<string, BannerCopy> = {
 
 const HARDCAP_COPY: BannerCopy = {
   message:
-    "Usage anormal détecté — runs suspendus. Contacte hello@mamie-geo.fr ou passe à un plan supérieur.",
+    "Usage anormal détecté, runs suspendus. Contacte hello@mamie-geo.fr ou passe à un plan supérieur.",
   cta: "Gérer mon plan",
   tone: "error",
 };

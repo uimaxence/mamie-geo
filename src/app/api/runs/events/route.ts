@@ -6,7 +6,7 @@ import { brands, prompts, runs } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { getUserContext } from "@/lib/auth/user-context";
 
-// GET /api/runs/events — Server-Sent Events stream pour le dashboard.
+// GET /api/runs/events, Server-Sent Events stream pour le dashboard.
 // Push en temps réel les transitions de runs (pending → running →
 // success/failed) pour afficher bannière "premier run en cours" +
 // toasts à chaque finish.
@@ -120,7 +120,7 @@ export async function GET(_request: NextRequest) {
             last = current;
           }
         } catch {
-          // ignore poll error — on retry au prochain tick
+          // ignore poll error, on retry au prochain tick
         }
       };
 

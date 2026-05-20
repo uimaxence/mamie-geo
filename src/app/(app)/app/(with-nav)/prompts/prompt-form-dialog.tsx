@@ -86,7 +86,7 @@ export function PromptFormDialog({
               onChange={(e) => setCategory(e.target.value)}
               className="w-full rounded-[var(--radius-md)] border border-[color:var(--color-border-strong)] bg-white px-3 py-2 text-sm text-[color:var(--color-ink)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-ink)] focus-visible:ring-offset-1"
             >
-              <option value="">— Aucune —</option>
+              <option value="">Aucune</option>
               <option value="commercial">Commercial</option>
               <option value="informational">Informationnel</option>
               <option value="comparison">Comparaison</option>

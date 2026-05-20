@@ -1,7 +1,7 @@
 import { LinkButton, PatternBlock, Section } from "@/components/ui";
 import { MockupAudit } from "./mockups/mockup-audit";
 
-// Promo audit technique sur la home — PR 2026-05-16 (cf. doc 09).
+// Promo audit technique sur la home, PR 2026-05-16 (cf. doc 09).
 // Logique : on tient un lead magnet à coût marginal 0 € (pas d'appel
 // LLM), donc on l'expose comme « première action concrète » avant de
 // parler de tracking quotidien. Placé après <TesConcurrentsPasToi />
@@ -18,7 +18,7 @@ export function AuditTeaser() {
       <PatternBlock corner="bottom-left" tone="primary-soft" size="lg" />
 
       <div className="relative grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-16">
-        {/* Colonne gauche — copy + CTA */}
+        {/* Colonne gauche, copy + CTA */}
         <div>
           <span className="type-eyebrow">Première action concrète</span>
           <h2 className="type-h1 mt-3">
@@ -41,7 +41,7 @@ export function AuditTeaser() {
           </p>
         </div>
 
-        {/* Colonne droite — mockup rapport stylisé */}
+        {/* Colonne droite, mockup rapport stylisé */}
         <div className="relative">
           <MockupAudit />
         </div>

@@ -11,7 +11,7 @@ import { useRunEvents, type RunEventSnapshot } from "./use-run-events";
 // l'état des runs en temps réel via SSE. 3 états :
 //   1. running : "Premier run en cours sur Claude…" + spinner pulsé
 //   2. some done : "1/5 runs terminés (Claude ✓, ChatGPT en cours…)"
-//   3. all done : "Tracking actif ✓" — auto-fade après 5s
+//   3. all done : "Tracking actif ✓", auto-fade après 5s
 //
 // + à chaque transition success, déclenche un toast informatif.
 //
@@ -140,7 +140,7 @@ function DoneState({ total }: { total: number }) {
     >
       <CheckCircle2 size={14} />
       <span className="font-medium">
-        {total} run{total > 1 ? "s" : ""} terminé{total > 1 ? "s" : ""} ✓ — voir les résultats
+        {total} run{total > 1 ? "s" : ""} terminé{total > 1 ? "s" : ""} ✓, voir les résultats
       </span>
     </Link>
   );

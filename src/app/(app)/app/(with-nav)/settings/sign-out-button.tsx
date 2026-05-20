@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { LogOut } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 
-// Bouton de déconnexion — appelle Better Auth signOut côté client,
+// Bouton de déconnexion, appelle Better Auth signOut côté client,
 // puis redirige vers /. useTransition pour l'état pending.
 
 export function SignOutButton() {

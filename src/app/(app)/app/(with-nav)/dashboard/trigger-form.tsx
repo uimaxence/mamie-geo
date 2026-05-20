@@ -16,7 +16,7 @@ import {
 } from "@/components/ui";
 import { triggerRunNow, type TriggerResult } from "./actions";
 
-// Bouton "Lancer un run maintenant" — dialog de confirmation puis
+// Bouton "Lancer un run maintenant", dialog de confirmation puis
 // server action. Feedback via toast sonner (au lieu d'un texte inline).
 
 export function TriggerRunForm() {

@@ -32,7 +32,7 @@ import {
 import { RunStatusBadge } from "@/components/app/run-status-badge";
 import { PaginationDemo, SegmentedControlDemo, SwitchDemo } from "./interactive-demos";
 
-// Page interne /styleguide — montre tous les composants UI + tokens
+// Page interne /styleguide, montre tous les composants UI + tokens
 // design d'un coup. Non-indexée (`noindex` via metadata) pour rester
 // invisible publique tout en étant accessible directement par URL.
 //
@@ -40,7 +40,7 @@ import { PaginationDemo, SegmentedControlDemo, SwitchDemo } from "./interactive-
 // repérer ce qui cloche, pointer du doigt avant ajustement.
 
 export const metadata: Metadata = {
-  title: "Design system — Mamie GEO",
+  title: "Design system, Mamie GEO",
   robots: { index: false, follow: false },
 };
 
@@ -63,7 +63,7 @@ export default function StyleguidePage() {
         {/* ── COULEURS ─────────────────────────────────────────────── */}
         <SubSection
           title="Couleurs"
-          subtitle="Palette tokens — ink, accent, primary, status, pastels"
+          subtitle="Palette tokens, ink, accent, primary, status, pastels"
         >
           <ColorSwatchGroup
             title="Encres & gris"
@@ -116,11 +116,11 @@ export default function StyleguidePage() {
         <SubSection title="Radii" subtitle="--radius-{sm,md,lg,xl,pill}">
           <div className="flex flex-wrap gap-6">
             {[
-              { name: "sm — 6px", radius: "var(--radius-sm)" },
-              { name: "md — 10px", radius: "var(--radius-md)" },
-              { name: "lg — 16px", radius: "var(--radius-lg)" },
-              { name: "xl — 20px", radius: "var(--radius-xl)" },
-              { name: "pill — 9999px", radius: "var(--radius-pill)" },
+              { name: "sm, 6px", radius: "var(--radius-sm)" },
+              { name: "md, 10px", radius: "var(--radius-md)" },
+              { name: "lg, 16px", radius: "var(--radius-lg)" },
+              { name: "xl, 20px", radius: "var(--radius-xl)" },
+              { name: "pill, 9999px", radius: "var(--radius-pill)" },
             ].map((r) => (
               <div key={r.name} className="flex flex-col items-center gap-2">
                 <div
@@ -134,7 +134,7 @@ export default function StyleguidePage() {
         </SubSection>
 
         {/* ── SHADOWS ──────────────────────────────────────────────── */}
-        <SubSection title="Ombres" subtitle="--shadow-{sm,md,lg} — multi-couches subtiles">
+        <SubSection title="Ombres" subtitle="--shadow-{sm,md,lg}, multi-couches subtiles">
           <div className="flex flex-wrap gap-8">
             {(["sm", "md", "lg"] as const).map((s) => (
               <div key={s} className="flex flex-col items-center gap-3">
@@ -151,7 +151,7 @@ export default function StyleguidePage() {
         {/* ── BUTTONS ──────────────────────────────────────────────── */}
         <SubSection
           title="Boutons"
-          subtitle="5 variants × 3 sizes — variant `ai` réservé aux actions IA"
+          subtitle="5 variants × 3 sizes, variant `ai` réservé aux actions IA"
         >
           <Row label="Primary">
             <Button size="sm">Action sm</Button>
@@ -204,7 +204,7 @@ export default function StyleguidePage() {
           title="Badges"
           subtitle="2 variants : soft (fond pastel) et solid (fond blanc + icône container coloré)"
         >
-          <Row label="Soft — défaut">
+          <Row label="Soft, défaut">
             <Badge tone="neutral">neutral</Badge>
             <Badge tone="success">success</Badge>
             <Badge tone="warning">warning</Badge>

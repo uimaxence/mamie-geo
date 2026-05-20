@@ -5,7 +5,7 @@ import { listPrompts } from "@/lib/prompts/queries";
 import { quotasFor } from "@/lib/plans/quotas";
 import { PromptsList } from "./prompts-list";
 
-// Page /app/prompts — liste + CRUD des prompts trackés.
+// Page /app/prompts, liste + CRUD des prompts trackés.
 // Server component qui charge la liste + délègue à un client wrapper
 // pour la partie interactive (filtre, dialogs, actions).
 

@@ -7,7 +7,7 @@ import { getRunDetail, type RunDetail } from "@/lib/dashboard/queries";
 import { Badge, Banner, Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui";
 import { RunStatusBadge } from "@/components/app/run-status-badge";
 
-// Page détail d'un run /app/runs/[id] — réponse brute, citations
+// Page détail d'un run /app/runs/[id], réponse brute, citations
 // détectées (sources web + brands), scoring & coûts. Organisée en
 // onglets (PR design foundation) pour réduire le scroll.
 
@@ -31,7 +31,7 @@ export default async function RunDetailPage({ params }: { params: Promise<{ id: 
         Retour au dashboard
       </Link>
 
-      {/* Header — prompt + métadonnées */}
+      {/* Header, prompt + métadonnées */}
       <header className="mt-6">
         <div className="flex flex-wrap items-center gap-2">
           <Badge tone="neutral">{run.llm}</Badge>
@@ -54,7 +54,7 @@ export default async function RunDetailPage({ params }: { params: Promise<{ id: 
         </dl>
       </header>
 
-      {/* Erreur si run failed — sortie du Tabs pour rester visible */}
+      {/* Erreur si run failed, sortie du Tabs pour rester visible */}
       {run.status === "failed" && run.error && (
         <Banner tone="error" title="Erreur d'exécution" className="mt-8">
           <pre className="mt-1 overflow-x-auto whitespace-pre-wrap text-sm">{run.error}</pre>
@@ -127,7 +127,7 @@ export default async function RunDetailPage({ params }: { params: Promise<{ id: 
           ) : (
             <p className="type-body text-sm">
               Pas encore de scoring (run pending ou échec en amont). Le scoring tourne après le run
-              principal — environ +5s.
+              principal, environ +5s.
             </p>
           )}
         </TabsContent>
@@ -192,7 +192,7 @@ function ScoringSection({
         </p>
         {isSkipped ? (
           <p className="type-body mt-2 text-sm">
-            Scoring sauté ({scoring.reason}) — pas d&apos;appel LLM nécessaire.
+            Scoring sauté ({scoring.reason}), pas d&apos;appel LLM nécessaire.
           </p>
         ) : (
           <dl className="mt-3 grid grid-cols-1 gap-x-8 gap-y-3 sm:grid-cols-2">

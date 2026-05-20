@@ -84,7 +84,7 @@ export async function submitOnboarding(raw: OnboardingInput): Promise<Onboarding
   // 1. Create workspace + membership owner
   const workspaceId = randomUUID();
   const baseSlug = slugify(data.workspaceName);
-  // Slug doit être unique global — on suffixe avec premières chars de
+  // Slug doit être unique global, on suffixe avec premières chars de
   // l'UUID pour garantir l'unicité sans coût d'une boucle de probe.
   const slug = `${baseSlug}-${workspaceId.slice(0, 6)}`;
 
@@ -123,7 +123,7 @@ export async function submitOnboarding(raw: OnboardingInput): Promise<Onboarding
     );
   }
 
-  // 4. Create prompts (tous actifs, langue FR par défaut) — on récupère
+  // 4. Create prompts (tous actifs, langue FR par défaut), on récupère
   //    les IDs pour pouvoir enqueue un one-shot run sur le premier.
   const createdPrompts = await db
     .insert(prompts)
@@ -137,7 +137,7 @@ export async function submitOnboarding(raw: OnboardingInput): Promise<Onboarding
     )
     .returning({ id: prompts.id });
 
-  // 5. One-shot run gratuit post-onboarding — premier wow moment.
+  // 5. One-shot run gratuit post-onboarding, premier wow moment.
   //    Coût : ~$0,04 par signup (1 prompt × Claude Haiku). Cf. doc 09
   //    § 2026-05-16 « premier wow moment ». Le scheduler ne touche pas
   //    les workspaces trialing donc ce run reste unique jusqu'au
@@ -170,7 +170,7 @@ export async function submitOnboarding(raw: OnboardingInput): Promise<Onboarding
 }
 
 // ─────────────────────────────────────────────────────────────────────
-// Quick setup — workspace + brand minimal, pas de competitors/prompts.
+// Quick setup, workspace + brand minimal, pas de competitors/prompts.
 // Utilisé par le bouton "Configurer plus tard" du wizard pour les user
 // qui veulent aller directement à /app/settings#billing (ex: payer).
 // Pas de one-shot run (pas de prompt à exécuter).
@@ -243,7 +243,7 @@ export async function quickSetup(raw: QuickSetupInput): Promise<OnboardingResult
 
 // ─────────────────────────────────────────────────────────────────────
 // Server action séparée : suggestion de prompts via Claude Haiku 4.5
-// Pas de DB write, pas de side effect — juste un appel LLM.
+// Pas de DB write, pas de side effect, juste un appel LLM.
 // ─────────────────────────────────────────────────────────────────────
 
 const suggestSchema = z.object({
@@ -275,7 +275,7 @@ export async function suggestPrompts(raw: SuggestPromptsInput): Promise<SuggestP
   const data = parsed.data;
 
   if (!env.ANTHROPIC_API_KEY) {
-    throw new Error("ANTHROPIC_API_KEY manquant — suggestion indisponible");
+    throw new Error("ANTHROPIC_API_KEY manquant, suggestion indisponible");
   }
 
   const generator = createAnthropicPromptGenerator({ apiKey: env.ANTHROPIC_API_KEY });

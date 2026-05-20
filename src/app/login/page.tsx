@@ -12,7 +12,7 @@ import { Logo } from "@/components/marketing/logo";
 // BrightNest signup) :
 //   - Panel gauche (hidden < md) : fond blanc + dégradé radial bleu
 //     soft en bas-gauche (signature visuelle subtile sans empiéter sur
-//     le texte — pattern damier retiré 2026-05-20 car illisible avec
+//     le texte, pattern damier retiré 2026-05-20 car illisible avec
 //     size xl au-dessus de la tagline)
 //   - Panel droite : form magic-link
 // Sur mobile : seul le panel form est rendu, plein écran.
@@ -97,16 +97,17 @@ function LoginContent() {
 
   return (
     <main className="grid min-h-screen grid-cols-1 md:grid-cols-2">
-      {/* Panel gauche — fond blanc + dégradé radial bleu subtil ancré en
-          bas-gauche (signature visuelle qui ne lutte pas avec le texte).
+      {/* Panel gauche, fond gris très léger (vs blanc droite) + dégradé
+          radial bleu marqué en bas-gauche + border verticale fine. Triple
+          séparation pour distinguer clairement la zone éditoriale du form.
           Caché sur mobile. */}
-      <aside className="relative hidden flex-col justify-between overflow-hidden bg-white p-10 text-[color:var(--color-ink)] md:flex">
+      <aside className="relative hidden flex-col justify-between overflow-hidden border-r border-[color:var(--color-border)] bg-[color:var(--color-gray-50)] p-10 text-[color:var(--color-ink)] md:flex">
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0"
           style={{
             background:
-              "radial-gradient(60% 50% at 0% 100%, color-mix(in oklab, var(--color-primary) 22%, transparent) 0%, transparent 70%)",
+              "radial-gradient(70% 60% at 0% 100%, color-mix(in oklab, var(--color-primary) 45%, transparent) 0%, transparent 75%)",
           }}
         />
 
@@ -121,12 +122,12 @@ function LoginContent() {
         <div className="relative max-w-md">
           <p className="type-eyebrow">Tu peux enfin</p>
           <h2 className="mt-4 font-semibold text-[2rem] leading-tight tracking-tight text-[color:var(--color-ink)] sm:text-[2.5rem]">
-            mesurer ta visibilité dans ChatGPT, Claude et Le Chat — en français, dès 9,99 €/mois.
+            mesurer ta visibilité dans ChatGPT, Claude et Le Chat, en français, dès 9,99 €/mois.
           </h2>
         </div>
       </aside>
 
-      {/* Panel droite — form login */}
+      {/* Panel droite, form login */}
       <section className="flex min-h-screen flex-col justify-center px-6 py-12 md:px-12 lg:px-20">
         <div className="mx-auto w-full max-w-md">
           <Link
@@ -247,7 +248,7 @@ function SentState({
       <div className="mt-6 rounded-[var(--radius-lg)] bg-[color:var(--color-gray-50)] p-4 text-sm text-[color:var(--color-ink-soft)]">
         <p className="font-medium text-[color:var(--color-ink)]">Si tu utilises ton téléphone</p>
         <p className="mt-1">
-          Le lien s&apos;ouvrira dans ton navigateur — pas dans l&apos;app email. Tu peux fermer
+          Le lien s&apos;ouvrira dans ton navigateur, pas dans l&apos;app email. Tu peux fermer
           cette page et revenir y plus tard, ta session sera active partout.
         </p>
       </div>

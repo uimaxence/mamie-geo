@@ -12,7 +12,7 @@ import { enqueue } from "@/lib/queue";
 
 // Server Action pour le bouton "Lancer un run" du dashboard. Même logique
 // que /api/runs/trigger mais auth via session Better Auth (et pas
-// CRON_SECRET) — c'est le chemin user-initié, pas le chemin cron.
+// CRON_SECRET), c'est le chemin user-initié, pas le chemin cron.
 //
 // Phase A : seul le LLM "claude" est tracké, ajout des autres en
 // Phase C derrière l'interface LLMClient existante.

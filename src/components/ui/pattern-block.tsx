@@ -1,6 +1,6 @@
 import type { HTMLAttributes } from "react";
 
-// PatternBlock — bloc décoratif posant le pattern signature damier
+// PatternBlock, bloc décoratif posant le pattern signature damier
 // diagonal (cf. doc 10 § Pattern signature). Wrapper léger autour de la
 // classe utilitaire `.bg-pattern` avec une API de placement aux coins.
 //
@@ -8,14 +8,14 @@ import type { HTMLAttributes } from "react";
 // jamais cliquable, jamais lu par les screen readers.
 //
 // Règle d'usage (cf. doc 10) : 1-2 placements par page maximum, ancré
-// dans un coin ou une bande — pas en fond plein.
+// dans un coin ou une bande, pas en fond plein.
 
 type Corner = "top-left" | "top-right" | "bottom-left" | "bottom-right";
 type Tone = "primary" | "primary-soft" | "white" | "ink";
 type Size = "sm" | "md" | "lg" | "xl";
 
 // Largeurs en px par taille. Le carré déborde toujours hors du conteneur
-// (offset négatif) pour un effet "signature qui sort du cadre" — ref
+// (offset négatif) pour un effet "signature qui sort du cadre", ref
 // banner LinkedIn fournie par Max.
 const SIZE_PX: Record<Size, number> = {
   sm: 160,
@@ -24,7 +24,7 @@ const SIZE_PX: Record<Size, number> = {
   xl: 520,
 };
 
-// Taille de tile selon le bloc — proportionné pour qu'on voie 2-4 tiles
+// Taille de tile selon le bloc, proportionné pour qu'on voie 2-4 tiles
 // par côté (lisibilité du motif).
 const TILE_PX: Record<Size, number> = {
   sm: 56,
@@ -78,7 +78,7 @@ export function PatternBlock({
   );
 }
 
-// PatternBand — variante bande horizontale (en haut ou en bas d'une
+// PatternBand, variante bande horizontale (en haut ou en bas d'une
 // section). Utile pour les hero / headers où on veut une signature qui
 // court sur toute la largeur sans dominer.
 

@@ -2,13 +2,13 @@ import { getRecommendation } from "@/lib/audit/recommendations";
 import type { AuditReport, CheckResult } from "@/lib/audit/types";
 import type { RenderedEmail } from "./weekly-recap";
 
-// Template email "Rapport audit technique complet" — envoyé après que
+// Template email "Rapport audit technique complet", envoyé après que
 // l'utilisateur ait soumis son email sur /outils/audit-technique. HTML
 // inline pour compat Gmail/Outlook + text fallback. Pure et synchrone,
 // testable sans DB ni env.
 
 export function renderTechnicalAuditEmail(report: AuditReport): RenderedEmail {
-  const subject = `Audit technique ${shortDomain(report.url)} — score ${report.scoreGlobal}/100`;
+  const subject = `Audit technique ${shortDomain(report.url)}, score ${report.scoreGlobal}/100`;
 
   const failedChecks = report.checks
     .filter((c) => c.status === "fail" || c.status === "warn")
@@ -39,7 +39,7 @@ function sevWeight(c: CheckResult): number {
 
 function renderText(report: AuditReport, failed: CheckResult[], passed: CheckResult[]): string {
   const parts: string[] = [];
-  parts.push(`Audit technique — ${report.url}`);
+  parts.push(`Audit technique, ${report.url}`);
   parts.push("");
   parts.push(`Score global : ${report.scoreGlobal}/100`);
   parts.push("");
@@ -64,7 +64,7 @@ function renderText(report: AuditReport, failed: CheckResult[], passed: CheckRes
   parts.push("");
   parts.push("─── Tu veux qu'on tracke ta visibilité IA en continu ? ───");
   parts.push("Mamie GEO mesure quotidiennement si ta marque apparaît dans ChatGPT, Claude,");
-  parts.push("Perplexity, Gemini et Le Chat — dès 9,99 €/mois.");
+  parts.push("Perplexity, Gemini et Le Chat, dès 9,99 €/mois.");
   parts.push("https://mamie-geo.fr/pricing");
   parts.push("");
   return parts.join("\n");

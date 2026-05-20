@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-// Table of Contents sticky desktop — extraction des h2/h3 directement
+// Table of Contents sticky desktop, extraction des h2/h3 directement
 // depuis le DOM rendu (les ids sont posés par `rehype-slug`).
 //
 // Le scan DOM se fait via un useState lazy initializer (pas via useEffect)

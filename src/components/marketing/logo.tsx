@@ -1,4 +1,4 @@
-// Logo Mamie GEO — SVG inline (zéro HTTP roundtrip, color customisable
+// Logo Mamie GEO, SVG inline (zéro HTTP roundtrip, color customisable
 // via prop, pas de CLS au load).
 //
 // Forme stylisée bleue `#329CFF` (couleur de marque actée 2026-05-13).

@@ -1,7 +1,7 @@
 import { Activity, Mail, MessageCircle, PieChart, Users, type LucideIcon } from "lucide-react";
 import { Section } from "@/components/ui";
 
-// "Tes outils" — 5 features nommées (cf. doc 09 § 2026-05-13). Refresh
+// "Tes outils", 5 features nommées (cf. doc 09 § 2026-05-13). Refresh
 // inspiré Semrush qui nomme 12 features ; nous en gardons 5 (V0 honnête,
 // vocabulaire FR ownable). Position : après HowItWorks, avant PourQui.
 //
@@ -68,7 +68,7 @@ const TONE_BG: Record<Tone, string> = {
 export function TesOutils() {
   return (
     <Section pad="xl" id="tes-outils" className="relative overflow-hidden">
-      {/* Ambient blue blob — touche de couleur primaire bleu logo,
+      {/* Ambient blue blob, touche de couleur primaire bleu logo,
        * radial gradient très faible dans le coin haut-droit. Cf. doc 09
        * § 2026-05-13 (9ᵉ itération : injection couleur dans sections plates). */}
       <div aria-hidden className="pointer-events-none absolute inset-0">

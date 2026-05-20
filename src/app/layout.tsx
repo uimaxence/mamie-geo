@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 
-// Une seule police chargée — Inter (Google Font classique SaaS, cf.
+// Une seule police chargée, Inter (Google Font classique SaaS, cf.
 // doc 09 § 2026-05-11 update polices). Remplace Geist Sans (variable
 // CSS `--font-geist-sans` qui ne matchait pas notre code).
 
@@ -18,8 +18,8 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default: "Mamie GEO — Mesurer la visibilité de ta marque dans les IA",
-    template: "%s — Mamie GEO",
+    default: "Mamie GEO, Mesurer la visibilité de ta marque dans les IA",
+    template: "%s, Mamie GEO",
   },
   description:
     "Le premier outil francophone de tracking et d'optimisation GEO. ChatGPT, Claude, Perplexity, Gemini et Le Chat. Hébergement EU, RGPD natif.",

@@ -13,7 +13,7 @@ import { runAudit } from "@/lib/audit/run";
 import { enqueue } from "@/lib/queue";
 import { quotaReached, quotasFor, type PlanKey, type QuotaReachedError } from "@/lib/plans/quotas";
 
-// Server actions /app/audits — Sprint 6 PR B (cf. doc 09 § 2026-05-17).
+// Server actions /app/audits, Sprint 6 PR B (cf. doc 09 § 2026-05-17).
 //
 // runWorkspaceAudit : on-demand synchrone (~5-15s) sur 1 URL.
 // runCompetitorsBatch : enqueue N jobs `audit_workspace_url` async pour
@@ -87,7 +87,7 @@ export async function runWorkspaceAudit(raw: RunWorkspaceAuditInput): Promise<Ac
     // L'incrément a déjà eu lieu : on choisit de le laisser (le user a
     // consommé une "tentative", même ratée). Évite d'inciter à spammer
     // des URLs invalides pour grappiller du quota.
-    return { ok: false, error: `Audit échoué : ${result.code} — ${result.message}` };
+    return { ok: false, error: `Audit échoué : ${result.code}, ${result.message}` };
   }
 
   const report = result.report;
@@ -207,7 +207,7 @@ export interface AuditListItem {
   latestId: string;
   latestScore: number;
   latestFetchedAt: Date;
-  /** Audit précédent pour calculer le delta — null si premier audit. */
+  /** Audit précédent pour calculer le delta, null si premier audit. */
   previousScore: number | null;
   /** Nb total d'audits historiques sur cette URL (badge "5 audits"). */
   historyCount: number;

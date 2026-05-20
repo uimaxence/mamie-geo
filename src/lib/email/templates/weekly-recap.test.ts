@@ -41,9 +41,9 @@ const baseData: WeeklyRecapData = {
 };
 
 describe("renderWeeklyRecap", () => {
-  it("génère un sujet structuré au format `Récap visibilité IA — semaine NN / YYYY`", () => {
+  it("génère un sujet structuré au format `Récap visibilité IA, semaine NN / YYYY`", () => {
     const { subject } = renderWeeklyRecap(baseData);
-    expect(subject).toBe("Récap visibilité IA — semaine 19 / 2026");
+    expect(subject).toBe("Récap visibilité IA, semaine 19 / 2026");
   });
 
   it("inclut le nom de la marque + le domaine dans HTML et text", () => {

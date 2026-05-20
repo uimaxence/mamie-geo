@@ -6,12 +6,12 @@ import { MarketingHeader } from "../../_sections/marketing-header";
 import { AuditForm } from "./audit-form";
 
 export const metadata: Metadata = {
-  title: "Audit technique gratuit — SEO + GEO sans IA",
+  title: "Audit technique gratuit, SEO + GEO sans IA",
   description:
     "Audit technique de ton site en 10 secondes : 30+ checks SEO classique + signaux GEO (FAQPage, llms.txt, E-E-A-T) + Core Web Vitals. Gratuit, sans inscription, sans IA.",
 };
 
-// Lead magnet additionnel — audit technique sans LLM. Différenciateur
+// Lead magnet additionnel, audit technique sans LLM. Différenciateur
 // vs Screaming Frog / Lighthouse seul : checks GEO-specific (FAQPage
 // JSON-LD, llms.txt, E-E-A-T signals) + recommandations actionnables
 // rédigées à la main pour chaque finding.
@@ -106,7 +106,7 @@ export default function AuditTechniquePage() {
             parfois faux.
           </p>
           <p className="type-body-lg mt-4 max-w-prose">
-            Chez Mamie GEO, chaque recommandation est écrite par un humain — du HTML exact à coller,
+            Chez Mamie GEO, chaque recommandation est écrite par un humain, du HTML exact à coller,
             l&apos;impact réel sur ton ranking GEO, l&apos;effort estimé. Pas de coût LLM = audit
             100 % gratuit pour toujours.
           </p>

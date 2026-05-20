@@ -15,7 +15,7 @@ import {
   type UpdatePromptInput,
 } from "@/lib/prompts/schemas";
 
-// Server actions /app/prompts — CRUD + toggle + suggestion IA.
+// Server actions /app/prompts, CRUD + toggle + suggestion IA.
 // Toutes les actions vérifient l'auth user → workspace → brand pour
 // éviter les data leaks. Les actions write `revalidatePath` pour que
 // la liste se rafraîchisse sans hard reload.
@@ -168,7 +168,7 @@ export interface SuggestResult {
 /**
  * Wrapper sur `suggestPrompts()` de l'onboarding : charge le contexte
  * workspace/brand de l'user et passe à l'helper Haiku. Les prompts
- * suggérés ne sont PAS insérés en BDD — l'UI doit afficher les
+ * suggérés ne sont PAS insérés en BDD, l'UI doit afficher les
  * suggestions et l'user valide avant insertion (via createPrompt).
  */
 export async function suggestMorePrompts(): Promise<SuggestResult | ActionError> {

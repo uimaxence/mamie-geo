@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { Button, Field, Input } from "@/components/ui";
 import { submitAuditRequest } from "./actions";
 
-// Form lead magnet — 3 champs minimum (email + marque + domaine) + notes
+// Form lead magnet, 3 champs minimum (email + marque + domaine) + notes
 // optionnelles. Sur submit, server action qui envoie 2 emails Brevo.
 
 export function AuditRequestForm() {

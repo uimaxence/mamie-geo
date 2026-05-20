@@ -2,13 +2,13 @@
 
 import { cn } from "@/lib/utils";
 
-// SegmentedControl — pill group horizontal, actif = fond blanc + shadow,
+// SegmentedControl, pill group horizontal, actif = fond blanc + shadow,
 // inactifs = transparent dans un container gray-100. Pattern courant pour
 // les sélecteurs de fenêtre temporelle ("7D / 30D / 90D / 1Y / All") et
 // les toggles d'agrégation ("Day / Week / Month").
 //
 // API contrôlée : passer `value` + `onValueChange`. Les options sont
-// définies par l'appelant. Le composant ne dépend pas de Radix —
+// définies par l'appelant. Le composant ne dépend pas de Radix,
 // boutons HTML standard avec `aria-pressed`.
 
 export interface SegmentedControlOption<T extends string> {

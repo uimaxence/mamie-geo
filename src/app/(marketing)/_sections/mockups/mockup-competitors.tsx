@@ -4,7 +4,7 @@ import { TrendingUp } from "lucide-react";
 import { Bar, BarChart, Cell, ResponsiveContainer, YAxis } from "recharts";
 
 // Mockup utilisé en card 4 de SansAvec : « Tes concurrents en miroir ».
-// Refonte 2026-05-13 (9ᵉ itération polish UX) — passage du bar-list CSS
+// Refonte 2026-05-13 (9ᵉ itération polish UX), passage du bar-list CSS
 // statique à un vrai BarChart Recharts. La barre de la marque user
 // (« Toi ») est en bleu primaire, les concurrents en gray-300.
 

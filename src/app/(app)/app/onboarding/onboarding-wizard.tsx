@@ -6,7 +6,7 @@ import { Plus, Sparkles, X } from "lucide-react";
 import { Badge, Button, Field, Input } from "@/components/ui";
 import { quickSetup, submitOnboarding, suggestPrompts, type OnboardingInput } from "./actions";
 
-// Wizard onboarding 3 étapes — client component avec state local.
+// Wizard onboarding 3 étapes, client component avec state local.
 // PR 13 : step 3 a maintenant un bouton "Suggérer 5 prompts via IA"
 // qui appelle Claude Haiku 4.5 avec brand + domain + competitors et
 // pré-remplit les prompts. Coût ~$0.003 par appel.
@@ -132,7 +132,7 @@ export function OnboardingWizard({
         <Badge tone="neutral">Étape {step} / 3</Badge>
       </header>
 
-      {/* Progress bar 3 segments — repère visuel d'avancement. Segments
+      {/* Progress bar 3 segments, repère visuel d'avancement. Segments
        * passent en noir au fur et à mesure. */}
       <div className="mb-10 flex items-center gap-2" aria-hidden>
         {([1, 2, 3] as const).map((s) => (
@@ -170,7 +170,7 @@ export function OnboardingWizard({
         </Button>
       </div>
 
-      {/* Skip — visible dès que l'étape 1 est valide. Le user peut
+      {/* Skip, visible dès que l'étape 1 est valide. Le user peut
        * passer direct au dashboard / paiement avec un workspace minimal.
        * Pratique pour les conversions impulsives via /pricing. */}
       {step < 3 && canSkip() && (
@@ -199,7 +199,7 @@ function Step1({ state, setState }: { state: WizardState; setState: (s: WizardSt
         </p>
       </div>
 
-      <Field label="Nom du workspace" hint="Ex: « Ma société » — visible uniquement par toi.">
+      <Field label="Nom du workspace" hint="Ex: « Ma société », visible uniquement par toi.">
         <Input
           type="text"
           value={state.workspaceName}
@@ -364,7 +364,7 @@ function Step3({ state, setState }: { state: WizardState; setState: (s: WizardSt
         </p>
       </div>
 
-      {/* CTA "Suggérer via IA" — variant secondary pour rester sobre */}
+      {/* CTA "Suggérer via IA", variant secondary pour rester sobre */}
       <div className="flex flex-col gap-2">
         <button
           type="button"

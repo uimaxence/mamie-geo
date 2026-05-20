@@ -6,7 +6,7 @@ import { getAuditUsage } from "@/lib/audits/counters";
 import { quotasFor } from "@/lib/plans/quotas";
 import { NewAuditForm } from "./new-audit-form";
 
-// /app/audits/new — formulaire de lancement d'un audit on-demand.
+// /app/audits/new, formulaire de lancement d'un audit on-demand.
 
 export const dynamic = "force-dynamic";
 

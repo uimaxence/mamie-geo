@@ -2,10 +2,10 @@ import { Badge, CornerFrame, LinkButton, PatternBlock, Section, StatusDot } from
 import { HeroDataShowcase } from "./hero-data-showcase";
 import { HeroLLMRotator } from "./hero-llm-rotator";
 
-// Hero — wrappé dans <CornerFrame> pour signature print subtile.
+// Hero, wrappé dans <CornerFrame> pour signature print subtile.
 // PR 2026-05-13 : le mot en gras dans le headline cycle entre les 5
 // LLMs trackés via <HeroLLMRotator>. <HeroDataShowcase> ajoute 4 cartes
-// data tiltées sous les CTAs (mini-charts + tooltips) — desktop only.
+// data tiltées sous les CTAs (mini-charts + tooltips), desktop only.
 // PR 2026-05-18 : signature pattern bleu primary ajoutée en haut-droite
 // (soft 30 %), ancre l'identité visuelle sans dominer le headline.
 
@@ -46,7 +46,7 @@ export function Hero() {
         </div>
       </CornerFrame>
 
-      {/* Aperçu data — 4 cartes tiltées avec mini-charts. Desktop only. */}
+      {/* Aperçu data, 4 cartes tiltées avec mini-charts. Desktop only. */}
       <HeroDataShowcase />
     </Section>
   );

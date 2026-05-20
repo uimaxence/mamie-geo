@@ -8,7 +8,7 @@ import { LineChart, type LineChartDatum } from "@/components/charts/line-chart";
 // Section "Évolution" du dashboard, avec un SegmentedControl pour
 // changer la fenêtre temporelle (7D / 30D / 90D). On reçoit l'intégral
 // de l'historique côté serveur (jusqu'à 90 jours pour V0) et on filtre
-// côté client — instant, pas de re-fetch.
+// côté client, instant, pas de re-fetch.
 //
 // Comportement chart "vivant" (PR 2026-05-17) : on rend toujours la grille
 // et l'axe temporel, même quand l'historique est vide ou sparse. On pad
@@ -38,7 +38,7 @@ function todayIsoDate(): string {
 
 // Construit la fenêtre temporelle complète sur N jours en mergeant les
 // vraies données reçues. Les jours sans donnée prennent 0 pour tous les
-// LLMs — visuellement la ligne "monte du sol" à mesure que des runs
+// LLMs, visuellement la ligne "monte du sol" à mesure que des runs
 // arrivent, ce qui donne l'impression d'un outil vivant dès J0.
 function buildScaffold(
   days: number,
@@ -103,7 +103,7 @@ export function TrendSection({
             <div className="flex items-center gap-2 rounded-full border border-[color:var(--color-border)] bg-white/85 px-4 py-2 text-sm text-[color:var(--color-ink-soft)] shadow-[var(--shadow-sm)] backdrop-blur-sm">
               <Sparkles size={14} className="text-[color:var(--color-accent)]" />
               <span>
-                Données en cours de collecte —{" "}
+                Données en cours de collecte,{" "}
                 <span className="font-medium text-[color:var(--color-ink)]">
                   {fullTrend.length === 0
                     ? "le premier run remplit la courbe"

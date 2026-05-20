@@ -2,7 +2,7 @@ import type { LucideIcon } from "lucide-react";
 import type { HTMLAttributes, ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
-// EmptyState — pattern icône + titre + description + CTA optionnel,
+// EmptyState, pattern icône + titre + description + CTA optionnel,
 // centré sur un fond gris-50 doux. Pour la 1ère visite d'une section
 // avant qu'il y ait de la donnée (pas de runs, pas de prompts, etc.).
 

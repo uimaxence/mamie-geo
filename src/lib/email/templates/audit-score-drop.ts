@@ -16,7 +16,7 @@ export interface AuditScoreDropData {
 }
 
 export function renderAuditScoreDrop(data: AuditScoreDropData): RenderedEmail {
-  const subject = `Alerte — score d'audit en baisse sur ${data.brandName} (${data.delta} pts)`;
+  const subject = `Alerte, score d'audit en baisse sur ${data.brandName} (${data.delta} pts)`;
   const absDelta = Math.abs(data.delta);
 
   const text = `Bonjour,

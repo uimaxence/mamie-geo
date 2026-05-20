@@ -9,7 +9,7 @@ import { getRecommendation } from "@/lib/audit/recommendations";
 import type { CheckResult, SubScore } from "@/lib/audit/types";
 import { getAuditDetail } from "../actions";
 
-// /app/audits/[id] — détail full d'un audit (rapport persisté en DB).
+// /app/audits/[id], détail full d'un audit (rapport persisté en DB).
 // Pas de teaser ni de gate email : tu es payant, tu vois tout.
 
 export const dynamic = "force-dynamic";

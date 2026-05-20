@@ -2,13 +2,13 @@ import { Bot, Cat, Check, MessageCircle, Search, Sparkles, type LucideIcon } fro
 import { Badge, Section } from "@/components/ui";
 import { MockupReport } from "./mockups/mockup-report";
 
-// "Comment ça marche" — 3 étapes (cf. doc 10 § Composants obligatoires).
+// "Comment ça marche", 3 étapes (cf. doc 10 § Composants obligatoires).
 // PR 11c : chaque card a maintenant un mini-mockup illustré au-dessus
-// du texte (cf. screen 3 Max — Outreach services). La card centrale
+// du texte (cf. screen 3 Max, Outreach services). La card centrale
 // est "featured" avec un gradient warm comme dans le screen 2 (Tanj
 // testimonials).
 //
-// Illustrations 100 % CSS/JSX, pas d'images binaires — chaque mockup
+// Illustrations 100 % CSS/JSX, pas d'images binaires, chaque mockup
 // est un mini-bout d'UI Mamie GEO miniaturisé.
 
 export function HowItWorks() {
@@ -70,7 +70,7 @@ function StepCard({ eyebrow, tone, title, description, illustration }: StepCardP
 }
 
 // ─────────────────────────────────────────────────────────────────────
-// Mini-mockups — chaque illustration est un bout d'UI miniaturisé
+// Mini-mockups, chaque illustration est un bout d'UI miniaturisé
 // ─────────────────────────────────────────────────────────────────────
 
 // Étape 01 : 3 inputs empilés (workspace, marque, domaine) + check
@@ -117,7 +117,7 @@ function MockupIA() {
 
   return (
     <div className="absolute inset-0 flex items-center justify-center px-6">
-      {/* Cercle central — la "question" envoyée aux 5 IA */}
+      {/* Cercle central, la "question" envoyée aux 5 IA */}
       <div className="relative flex size-16 items-center justify-center rounded-full bg-[color:var(--color-ink)] text-white shadow-[var(--shadow-lg)]">
         <Sparkles size={22} strokeWidth={2.2} />
       </div>

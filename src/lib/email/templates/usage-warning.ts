@@ -1,4 +1,4 @@
-// Emails de garde-fou usage LLM — 3 niveaux :
+// Emails de garde-fou usage LLM, 3 niveaux :
 //   60 %   info bienveillante "tu approches de ta limite"
 //   100 %  warning "tu as atteint ta limite théorique"
 //   200 %  hard-cap (block) "on a coupé, contacte-nous"
@@ -35,10 +35,10 @@ export function renderUsageWarning(level: UsageLevel, data: UsageWarningData): R
 // ─── 60 % ────────────────────────────────────────────────────────────
 
 function renderWarn60(d: UsageWarningData): RenderedEmail {
-  const subject = `Mamie GEO ${d.workspaceName} — tu as atteint 60 % de ta limite mensuelle`;
+  const subject = `Mamie GEO ${d.workspaceName}, tu as atteint 60 % de ta limite mensuelle`;
   const text = `Bonjour,
 
-Ton workspace ${d.workspaceName} (plan ${d.plan}) a effectué ${d.runsCount} runs sur les ${d.theoreticalMonthly} théoriques mensuels — soit ~60 %.
+Ton workspace ${d.workspaceName} (plan ${d.plan}) a effectué ${d.runsCount} runs sur les ${d.theoreticalMonthly} théoriques mensuels, soit ~60 %.
 
 Pas d'inquiétude, tu es encore largement dans les clous. Mais si tu prévois d'ajouter beaucoup de prompts ou de concurrents, jette un œil aux plans supérieurs avant de saturer :
 
@@ -50,7 +50,7 @@ Mamie GEO`;
   const html = baseHtml({
     accent: "#329cff",
     title: "Tu as atteint 60 % de ta limite",
-    intro: `Ton workspace <strong>${escapeHtml(d.workspaceName)}</strong> (plan ${escapeHtml(d.plan)}) a effectué <strong>${d.runsCount}</strong> runs sur les <strong>${d.theoreticalMonthly}</strong> théoriques mensuels — soit ~60 %.`,
+    intro: `Ton workspace <strong>${escapeHtml(d.workspaceName)}</strong> (plan ${escapeHtml(d.plan)}) a effectué <strong>${d.runsCount}</strong> runs sur les <strong>${d.theoreticalMonthly}</strong> théoriques mensuels, soit ~60 %.`,
     body: `Pas d'inquiétude, tu es encore largement dans les clous. Mais si tu prévois d'ajouter beaucoup de prompts ou de concurrents, jette un œil aux plans supérieurs avant de saturer.`,
     ctaUrl: d.settingsUrl,
     ctaLabel: "Gérer mon plan",
@@ -62,10 +62,10 @@ Mamie GEO`;
 // ─── 100 % ───────────────────────────────────────────────────────────
 
 function renderWarn100(d: UsageWarningData): RenderedEmail {
-  const subject = `Mamie GEO ${d.workspaceName} — tu as atteint ta limite théorique mensuelle`;
+  const subject = `Mamie GEO ${d.workspaceName}, tu as atteint ta limite théorique mensuelle`;
   const text = `Bonjour,
 
-Ton workspace ${d.workspaceName} (plan ${d.plan}) a effectué ${d.runsCount} runs sur les ${d.theoreticalMonthly} théoriques mensuels — soit 100 %.
+Ton workspace ${d.workspaceName} (plan ${d.plan}) a effectué ${d.runsCount} runs sur les ${d.theoreticalMonthly} théoriques mensuels, soit 100 %.
 
 On continue à exécuter tes runs (jusqu'à 200 % du théorique, soit ${d.hardCap}). Au-delà, on coupe automatiquement pour éviter une surconsommation involontaire (bot, fuite token, etc.).
 
@@ -78,7 +78,7 @@ Mamie GEO`;
   const html = baseHtml({
     accent: "#b45309",
     title: "Tu as atteint ta limite théorique mensuelle",
-    intro: `Ton workspace <strong>${escapeHtml(d.workspaceName)}</strong> (plan ${escapeHtml(d.plan)}) a effectué <strong>${d.runsCount}</strong> runs sur les <strong>${d.theoreticalMonthly}</strong> théoriques mensuels — soit 100 %.`,
+    intro: `Ton workspace <strong>${escapeHtml(d.workspaceName)}</strong> (plan ${escapeHtml(d.plan)}) a effectué <strong>${d.runsCount}</strong> runs sur les <strong>${d.theoreticalMonthly}</strong> théoriques mensuels, soit 100 %.`,
     body: `On continue à exécuter tes runs (jusqu'à 200 % du théorique, soit ${d.hardCap}). Au-delà, on coupe automatiquement pour éviter une surconsommation involontaire (bot, fuite token, etc.). Pour étendre ta limite, passe à un plan supérieur.`,
     ctaUrl: d.settingsUrl,
     ctaLabel: "Passer à un plan supérieur",
@@ -90,7 +90,7 @@ Mamie GEO`;
 // ─── Hard-cap ────────────────────────────────────────────────────────
 
 function renderHardcap(d: UsageWarningData): RenderedEmail {
-  const subject = `Mamie GEO ${d.workspaceName} — usage anormal détecté, runs suspendus`;
+  const subject = `Mamie GEO ${d.workspaceName}, usage anormal détecté, runs suspendus`;
   const text = `Bonjour,
 
 Ton workspace ${d.workspaceName} (plan ${d.plan}) a effectué ${d.runsCount} runs, soit plus de 200 % de ta limite théorique mensuelle (${d.hardCap}).
@@ -111,7 +111,7 @@ Mamie GEO`;
 
   const html = baseHtml({
     accent: "#b91c1c",
-    title: "Usage anormal détecté — runs suspendus",
+    title: "Usage anormal détecté, runs suspendus",
     intro: `Ton workspace <strong>${escapeHtml(d.workspaceName)}</strong> (plan ${escapeHtml(d.plan)}) a effectué <strong>${d.runsCount}</strong> runs, soit plus de 200 % de ta limite théorique (${d.hardCap}).`,
     body: `On a suspendu l'exécution des nouveaux runs pour éviter une facture LLM imprévue. C'est une mesure de sécurité, pas une sanction.<br /><br /><strong>Causes possibles</strong> : bot qui interroge ton API, fuite de credentials, script automatique qui spamme, ou utilisation légitime intense (auquel cas → upgrade en plan supérieur).<br /><br />Pour reprendre les runs, contacte-nous à <a href="mailto:${escapeAttr(d.contactEmail)}">${escapeHtml(d.contactEmail)}</a> ou passe à un plan supérieur.`,
     ctaUrl: d.settingsUrl,

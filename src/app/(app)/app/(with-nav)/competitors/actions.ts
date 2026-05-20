@@ -15,7 +15,7 @@ import {
   type UpdateCompetitorInput,
 } from "@/lib/competitors/schemas";
 
-// Server actions /app/competitors — CRUD.
+// Server actions /app/competitors, CRUD.
 // Toutes les actions vérifient l'auth user → brand. Le quota concurrents
 // est enforced par plan (5 Starter / 10 Pro / illimité Agency).
 

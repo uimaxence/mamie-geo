@@ -1,7 +1,7 @@
 import type { HTMLAttributes } from "react";
 
 // Section pleine largeur avec variant `tinted` (fond gris-50) pour
-// alterner avec les sections fond blanc — pattern designme.agency /
+// alterner avec les sections fond blanc, pattern designme.agency /
 // taap.it qui crée un rythme visuel sans avoir besoin de cards.
 //
 // `inner` cale automatiquement la largeur max et le padding standard.

@@ -8,7 +8,7 @@ import { runCompetitorsBatch } from "../actions";
 
 // Bouton lance-batch concurrents. Affiche un loading state puis refresh
 // la page (les jobs enqueués apparaîtront dès qu'ils auront tourné via
-// le dispatcher cron — ~5 min max).
+// le dispatcher cron, ~5 min max).
 
 export function CompetitorsBatchButton() {
   const router = useRouter();

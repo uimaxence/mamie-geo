@@ -4,7 +4,7 @@ import { COMPARISON_GROUPS, PLANS, type ComparisonRow } from "./pricing-data";
 
 // Tableau comparatif détaillé (cf. doc 10 § Pricing). 3 groupes
 // (Tracking / Reporting / Compte) avec 4 colonnes plans. Toujours
-// visible — pas de toggle "Voir tous les détails" en V0 pour rester
+// visible, pas de toggle "Voir tous les détails" en V0 pour rester
 // simple. On le ré-introduira si la page devient trop longue.
 
 const PLAN_HEADERS = PLANS.map((p) => ({ id: p.id, name: p.name }));

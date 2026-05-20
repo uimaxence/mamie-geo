@@ -1,14 +1,14 @@
 import { Plus } from "lucide-react";
 import { Section } from "@/components/ui";
 
-// FAQ — 12 questions du doc 10 § Composants obligatoires. Implémenté
+// FAQ, 12 questions du doc 10 § Composants obligatoires. Implémenté
 // avec <details> natif HTML : accessible, fonctionne sans JS, et tient
 // dans la direction minimaliste (pas de framework accordeon).
 
 const QUESTIONS = [
   {
     q: "Quels LLMs sont trackés ?",
-    a: "ChatGPT, Claude, Perplexity, Gemini et Le Chat de Mistral — les 5 IA grand public francophones. On utilise les APIs natives de chaque fournisseur, pas un proxy comme OpenRouter, pour mesurer ce que les utilisateurs voient réellement.",
+    a: "ChatGPT, Claude, Perplexity, Gemini et Le Chat de Mistral, les 5 IA grand public francophones. On utilise les APIs natives de chaque fournisseur, pas un proxy comme OpenRouter, pour mesurer ce que les utilisateurs voient réellement.",
   },
   {
     q: "Le Chat de Mistral est inclus dans tous les plans ?",
@@ -20,7 +20,7 @@ const QUESTIONS = [
   },
   {
     q: "Comment vous comparez aux outils américains comme Profound ?",
-    a: "Profound vise les grandes entreprises US à 500 $/mois avec SOC 2 et 8 LLMs. Mamie GEO vise les freelances et PME francophones à 49 €/mois avec 5 LLMs dont Le Chat. On n'est pas concurrents directs — on cible deux marchés différents.",
+    a: "Profound vise les grandes entreprises US à 500 $/mois avec SOC 2 et 8 LLMs. Mamie GEO vise les freelances et PME francophones à 49 €/mois avec 5 LLMs dont Le Chat. On n'est pas concurrents directs, on cible deux marchés différents.",
   },
   {
     q: "Mes données sont stockées où ?",
@@ -36,7 +36,7 @@ const QUESTIONS = [
   },
   {
     q: "Vous proposez de la marque blanche ?",
-    a: "Pas dans nos plans publics. Si tu es une agence avec un besoin de rapports en marque blanche ou de plusieurs marques, écris-nous à hello@mamie-geo.fr — on monte un devis sur-mesure.",
+    a: "Pas dans nos plans publics. Si tu es une agence avec un besoin de rapports en marque blanche ou de plusieurs marques, écris-nous à hello@mamie-geo.fr, on monte un devis sur-mesure.",
   },
   {
     q: "Et si je ne suis pas satisfait ?",

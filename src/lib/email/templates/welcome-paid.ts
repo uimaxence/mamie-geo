@@ -1,4 +1,4 @@
-// Email envoyé après `checkout.session.completed` — confirme le démarrage
+// Email envoyé après `checkout.session.completed`, confirme le démarrage
 // du tracking. HTML inline pour compat Gmail/Outlook + text fallback.
 // Pure et synchrone, testable sans DB ni env (cf. weekly-recap.ts).
 
@@ -35,7 +35,7 @@ const PLAN_CADENCE_LABEL: Record<string, string> = {
 export function renderWelcomePaid(data: WelcomePaidData): RenderedEmail {
   const planLabel = PLAN_LABEL[data.plan] ?? data.plan;
   const cadenceLabel = PLAN_CADENCE_LABEL[data.plan] ?? "selon ta cadence";
-  const subject = `Bienvenue dans Mamie GEO ${planLabel} — ton tracking démarre`;
+  const subject = `Bienvenue dans Mamie GEO ${planLabel}, ton tracking démarre`;
   const hasImmediate = data.immediateRuns > 0;
 
   const trackingLine = hasImmediate

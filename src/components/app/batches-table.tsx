@@ -36,7 +36,7 @@ interface BatchesTableProps {
   batches: RunBatch[];
   /** Affiche la colonne "Prompt" (dashboard). False sur la page détail prompt. */
   showPromptColumn?: boolean;
-  /** Empty state custom — par défaut un message générique */
+  /** Empty state custom, par défaut un message générique */
   emptyState?: {
     title: string;
     description: string;

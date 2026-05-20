@@ -1,7 +1,7 @@
 import { Briefcase, Building2, Users, type LucideIcon } from "lucide-react";
 import { Section } from "@/components/ui";
 
-// "Pour qui c'est" — 3 personas (cf. doc 10 § Composants obligatoires).
+// "Pour qui c'est", 3 personas (cf. doc 10 § Composants obligatoires).
 // PR 12a : suppression du featured permanent. Chaque card a un hover
 // warm gradient + lift subtil pour le dynamisme, sans crash de texte
 // au repos. Pattern uniforme = plus pro (l'œil n'est pas attiré sur

@@ -9,7 +9,7 @@ import { getAuditUsage } from "@/lib/audits/counters";
 import { quotasFor } from "@/lib/plans/quotas";
 import { listAudits } from "./actions";
 
-// /app/audits — historique des audits techniques de la workspace.
+// /app/audits, historique des audits techniques de la workspace.
 // Sprint 6 PR B (cf. doc 09 § 2026-05-17).
 
 export const dynamic = "force-dynamic";

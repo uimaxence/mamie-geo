@@ -1,5 +1,5 @@
-// JSON-LD structured data components — Schema.org Article, FAQPage,
-// BreadcrumbList. Server components — rendent un <script
+// JSON-LD structured data components, Schema.org Article, FAQPage,
+// BreadcrumbList. Server components, rendent un <script
 // type="application/ld+json"> inline. Le boost GEO majeur vient de
 // FAQPage : Google et les LLM citent en priorité les contenus avec
 // cette structure (cf. Schema.org docs + doc 09 § 2026-05-16).

@@ -14,7 +14,7 @@ import {
   type UpdateWorkspaceNameInput,
 } from "@/lib/settings/schemas";
 
-// Server actions /app/settings — édition workspace.name + brand.aliases.
+// Server actions /app/settings, édition workspace.name + brand.aliases.
 // V0 : seuls les champs réversibles sont éditables. `brand.name` et
 // `brand.domain` changent l'identité tracking → recréer le workspace.
 

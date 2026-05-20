@@ -10,7 +10,7 @@ import {
 } from "react";
 import { cn } from "@/lib/utils";
 
-// Radix DropdownMenu — items hover gray-50, séparateurs `rule`,
+// Radix DropdownMenu, items hover gray-50, séparateurs `rule`,
 // active state via accent ponctuel.
 
 export const DropdownMenu = DropdownMenuPrimitive.Root;

@@ -6,7 +6,7 @@ import { workspaceMembers } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { OnboardingWizard } from "./onboarding-wizard";
 
-// Page d'onboarding — accessible aux user authentifiés qui n'ont pas
+// Page d'onboarding, accessible aux user authentifiés qui n'ont pas
 // encore de workspace. Si le user a déjà un workspace, redirect direct
 // vers /app/dashboard pour éviter de re-créer.
 //

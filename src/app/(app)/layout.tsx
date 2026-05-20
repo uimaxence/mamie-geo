@@ -3,7 +3,7 @@ import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { Toaster, TooltipProvider } from "@/components/ui";
 
-// Layout du route group (app). Vérifie l'auth — toute route /app/*
+// Layout du route group (app). Vérifie l'auth, toute route /app/*
 // est protégée. Pas de session → redirect /login. Le chrome (sidebar)
 // est rendu dans (with-nav)/layout.tsx pour permettre à /app/onboarding
 // d'être full-screen sans nav (pattern route group Next 15).

@@ -2,7 +2,7 @@ import { Bot, Cat, Globe2, MessageCircle, Search, Sparkles, type LucideIcon } fr
 import { Section } from "@/components/ui";
 import { MockupCompetitors } from "./mockups/mockup-competitors";
 
-// Section "Avant Mamie GEO, après Mamie GEO" — refonte PR 12c en
+// Section "Avant Mamie GEO, après Mamie GEO", refonte PR 12c en
 // bento 2×2 (cf. screenshot Max BrightNest/style services). On garde
 // la dichotomie Sans/Avec mais on l'exprime en 4 cards visuelles
 // plutôt qu'une liste de 12 puces. La douleur "Sans" est résumée
@@ -24,7 +24,7 @@ export function SansAvec() {
       <div className="mt-14 grid grid-cols-1 gap-5 md:grid-cols-2">
         <BentoCard
           title="Les 5 IA grand public, sous contrôle."
-          description="ChatGPT, Claude, Perplexity, Gemini et Le Chat — interrogées chaque jour avec tes prompts, sans que tu lèves le petit doigt."
+          description="ChatGPT, Claude, Perplexity, Gemini et Le Chat, interrogées chaque jour avec tes prompts, sans que tu lèves le petit doigt."
           illustration={<MockupLLMs />}
         />
         <BentoCard
@@ -66,7 +66,7 @@ function BentoCard({ title, description, illustration }: BentoCardProps) {
 }
 
 // ─────────────────────────────────────────────────────────────────────
-// Mini-mockups — 4 illustrations 100 % CSS/JSX
+// Mini-mockups, 4 illustrations 100 % CSS/JSX
 // ─────────────────────────────────────────────────────────────────────
 
 // Card 1 : 5 LLM badges flottants disposés en cluster, fond gris-50

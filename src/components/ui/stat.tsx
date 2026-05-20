@@ -2,7 +2,7 @@ import { TrendingDown, TrendingUp, type LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
-// Stat enrichie — pattern inspiré des dashboards modernes :
+// Stat enrichie, pattern inspiré des dashboards modernes :
 //   ┌────────────────────────────────────┐
 //   │ Label              [icon pastel]   │
 //   │ 1.39K                              │

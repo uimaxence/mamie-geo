@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     "Méthodes, études et tutoriels pour mesurer et améliorer la visibilité de ta marque dans ChatGPT, Claude, Perplexity, Gemini et Le Chat de Mistral.",
 };
 
-// Index blog — liste les articles publiés via le registry filesystem
+// Index blog, liste les articles publiés via le registry filesystem
 // (cf. doc 09 § 2026-05-16). Plus de registry TS manuel ; tout vient
 // du scan de `src/content/blog/*.mdx`. Pas de pagination en V0
 // (< 10 articles).

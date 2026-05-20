@@ -18,7 +18,7 @@ keywords:
 
 ## Ce que ChatGPT lit, retient et finit par citer
 
-ChatGPT a passé les 800 millions d'utilisateurs hebdomadaires début 2026. Et pourtant, quand un prospect lui demande "quel outil pour faire X en France ?", il ne cite jamais qu'une poignée de marques — toujours les mêmes. Si la tienne n'y est pas, ce n'est pas une question de chance. C'est une question de signaux que tu n'as pas (encore) envoyés.
+ChatGPT a passé les 800 millions d'utilisateurs hebdomadaires début 2026. Et pourtant, quand un prospect lui demande "quel outil pour faire X en France ?", il ne cite jamais qu'une poignée de marques, toujours les mêmes. Si la tienne n'y est pas, ce n'est pas une question de chance. C'est une question de signaux que tu n'as pas (encore) envoyés.
 
 Cet article explique, sans détour, ce que ChatGPT regarde pour décider qui mérite d'être cité. Pas de promesse miracle, pas de hack à durée de vie d'un mois : dix règles structurelles, observées sur des centaines d'audits de marques francophones.
 
@@ -26,7 +26,7 @@ Cet article explique, sans détour, ce que ChatGPT regarde pour décider qui mé
 
 > Pour être cité par ChatGPT, une marque doit être **présente dans son corpus d'entraînement**, **retrouvable via son outil de recherche**, et **structurée pour être lue en fragments**. Les trois leviers se cumulent ; manquer un seul peut suffire à rester invisible.
 
-Cette phrase résume l'essentiel : il n'y a pas un seul mécanisme, mais trois canaux d'entrée — et chacun a ses propres signaux.
+Cette phrase résume l'essentiel : il n'y a pas un seul mécanisme, mais trois canaux d'entrée, et chacun a ses propres signaux.
 
 ## Comment ChatGPT décide qui citer
 
@@ -42,7 +42,7 @@ Les règles ci-dessous travaillent les deux premiers canaux. Le troisième écha
 
 ### 1. Être présent sur Wikipedia (ou les sources que Wikipedia cite)
 
-Wikipedia est surreprésenté dans le corpus d'entraînement des LLM. Tous les LLM majeurs, ChatGPT inclus, citent disproportionnellement des marques qui y ont une page — ou qui sont citées dans une page Wikipedia adjacente.
+Wikipedia est surreprésenté dans le corpus d'entraînement des LLM. Tous les LLM majeurs, ChatGPT inclus, citent disproportionnellement des marques qui y ont une page, ou qui sont citées dans une page Wikipedia adjacente.
 
 Ce n'est pas une garantie. Mais l'absence de Wikipedia est une pénalité observable. Si ta marque a une histoire vérifiable, une couverture presse réelle et des sources secondaires, ouvrir une page Wikipedia (en respectant les critères d'admissibilité) est l'un des actes GEO les plus rentables du marché.
 
@@ -72,7 +72,7 @@ C'est la section dont nos audits voient le plus souvent l'apparition dans une ci
 
 ChatGPT Search s'appuie largement sur Bing et sur un sous-ensemble de sources tierces. Concrètement, pour qu'un contenu compte côté retrieval, il doit être :
 
-- **Indexé par Bing** (ce qui n'est pas automatique en France — Search Console côté Bing à vérifier).
+- **Indexé par Bing** (ce qui n'est pas automatique en France, Search Console côté Bing à vérifier).
 - **Récent ou daté visiblement** (les pages avec `datePublished` propre sont privilégiées).
 - **Hébergé sur un domaine d'autorité** ou très spécialisé sur la requête.
 
@@ -80,18 +80,18 @@ Si ton domaine est jeune, publier sur un média sectoriel ou un blog d'autorité
 
 ### 6. Soigner le HTML sémantique et les balises structurées
 
-ChatGPT ne lit pas une page comme un humain. Il segmente, parse, range. Un HTML propre — un H1 par page, des H2/H3 logiques, des `<article>`, des `<section>`, du `Schema.org Article` correctement rempli — augmente la précision du parsing.
+ChatGPT ne lit pas une page comme un humain. Il segmente, parse, range. Un HTML propre, un H1 par page, des H2/H3 logiques, des `<article>`, des `<section>`, du `Schema.org Article` correctement rempli, augmente la précision du parsing.
 
 À l'inverse, une page construite en `<div>` empilées avec du JS qui injecte le contenu après le `load` reste partiellement lisible. Les modèles avec retrieval headless (dont ChatGPT Search) voient un DOM rendu, mais perdent en signal quand le contenu critique arrive tard.
 
 ### 7. Maintenir un `llms.txt` à la racine du site
 
-Le `llms.txt` est un fichier conventionnel (proposé par Jeremy Howard en septembre 2024) placé à la racine du domaine, qui liste les ressources à privilégier pour les agents IA. Il ne remplace pas le robots.txt — il le complète.
+Le `llms.txt` est un fichier conventionnel (proposé par Jeremy Howard en septembre 2024) placé à la racine du domaine, qui liste les ressources à privilégier pour les agents IA. Il ne remplace pas le robots.txt, il le complète.
 
 Format minimal :
 
 ```
-# Mamie GEO — Sources sur le GEO en français
+# Mamie GEO, Sources sur le GEO en français
 
 ## Articles principaux
 - /blog/qu-est-ce-que-le-geo : Définition complète du GEO
@@ -117,7 +117,7 @@ Une page "manifeste" ou "principes" sur ton site, des prises de position réguli
 
 Sans mesure, aucune des règles précédentes ne se prouve. La métrique de référence en GEO est la **part de citation** : sur un panier de 30 à 100 prompts représentatifs de ton marché, combien de fois ta marque apparaît, à quelle position de la réponse, dans quel sentiment.
 
-ChatGPT étant stochastique, un même prompt peut produire des réponses différentes. La méthode courante est de poser chaque prompt 5 à 10 fois et de moyenner. C'est la base du suivi GEO sérieux — et c'est exactement ce que les outils dédiés automatisent.
+ChatGPT étant stochastique, un même prompt peut produire des réponses différentes. La méthode courante est de poser chaque prompt 5 à 10 fois et de moyenner. C'est la base du suivi GEO sérieux, et c'est exactement ce que les outils dédiés automatisent.
 
 ## Tableau récapitulatif des 10 règles
 
@@ -218,7 +218,7 @@ Même les équipes SEO sérieuses tombent sur ces trois écueils quand elles abo
 Les règles ci-dessus s'appliquent en grande partie à tous les LLM grand public. Ce qui est spécifique à ChatGPT en 2026 :
 
 - **Le poids du corpus d'entraînement** y est plus visible que sur Perplexity (qui s'appuie surtout sur le retrieval temps réel).
-- **L'intégration Bing** crée une dépendance souterraine à l'écosystème Microsoft — ne pas être indexé Bing handicape spécifiquement ChatGPT Search.
+- **L'intégration Bing** crée une dépendance souterraine à l'écosystème Microsoft, ne pas être indexé Bing handicape spécifiquement ChatGPT Search.
 - **L'audience est massive et grand public**, donc les prompts à tracker pour ChatGPT sont souvent plus généralistes que ceux qu'on tracke pour Claude (plutôt B2B) ou Le Chat de Mistral (plutôt FR-first).
 
 Pour une vue d'ensemble du paysage et des autres LLM, on a écrit [le guide GEO vs SEO](/blog/geo-vs-seo) et [la définition complète du GEO](/blog/qu-est-ce-que-le-geo).
@@ -243,15 +243,15 @@ OpenAI n'a pas confirmé publiquement lire le `llms.txt` en 2026. C'est un stand
 
 ### Pourquoi ChatGPT cite-t-il toujours les mêmes 4-5 marques ?
 
-Parce que le modèle privilégie les sources sur-représentées dans son corpus et stabilisées par les agrégateurs (G2, Wikipedia, presse). Tant que les signaux d'autorité d'une marque ne franchissent pas un certain seuil, elle reste sous le radar — d'où l'importance d'agir sur plusieurs leviers en parallèle plutôt qu'un seul.
+Parce que le modèle privilégie les sources sur-représentées dans son corpus et stabilisées par les agrégateurs (G2, Wikipedia, presse). Tant que les signaux d'autorité d'une marque ne franchissent pas un certain seuil, elle reste sous le radar, d'où l'importance d'agir sur plusieurs leviers en parallèle plutôt qu'un seul.
 
 ### Est-ce que bloquer GPTBot dans robots.txt empêche d'être cité ?
 
-Partiellement. GPTBot est le crawler dédié à l'entraînement de ChatGPT — le bloquer empêche tes pages d'alimenter les futures versions du modèle. Mais ChatGPT Search utilise un user-agent différent (`OAI-SearchBot`), qui peut continuer à accéder à ton site même si GPTBot est bloqué. Cette nuance compte : beaucoup de marques se croient protégées d'OpenAI alors qu'elles sont juste invisibles à l'entraînement.
+Partiellement. GPTBot est le crawler dédié à l'entraînement de ChatGPT, le bloquer empêche tes pages d'alimenter les futures versions du modèle. Mais ChatGPT Search utilise un user-agent différent (`OAI-SearchBot`), qui peut continuer à accéder à ton site même si GPTBot est bloqué. Cette nuance compte : beaucoup de marques se croient protégées d'OpenAI alors qu'elles sont juste invisibles à l'entraînement.
 
 ### Quelle différence entre être "indexé" par ChatGPT et être "cité" ?
 
-Être indexé signifie que la marque ou la page existe dans le corpus ou le retrieval de ChatGPT — c'est une condition nécessaire mais pas suffisante. Être cité signifie que le modèle décide, sur une réponse donnée, de la mentionner. La citation dépend de la pertinence sur le prompt, de l'autorité relative face aux concurrents, et de la stabilité du signal.
+Être indexé signifie que la marque ou la page existe dans le corpus ou le retrieval de ChatGPT, c'est une condition nécessaire mais pas suffisante. Être cité signifie que le modèle décide, sur une réponse donnée, de la mentionner. La citation dépend de la pertinence sur le prompt, de l'autorité relative face aux concurrents, et de la stabilité du signal.
 
 ## En résumé
 
@@ -323,7 +323,7 @@ SCHEMA.ORG (à injecter dans layout.tsx via <script type="application/ld+json">)
   ]
 }
 
-MAILLAGE INTERNE (vérifié contre _historique.csv — articles publiés) :
+MAILLAGE INTERNE (vérifié contre _historique.csv, articles publiés) :
 - depuis "ChatGPT vs les autres LLM" → /blog/geo-vs-seo (draft mais sera publié sous peu)
 - depuis "ChatGPT vs les autres LLM" → /blog/qu-est-ce-que-le-geo (publié)
 - à ajouter post-publication : /blog/etre-cite-par-le-chat-mistral (article 5)

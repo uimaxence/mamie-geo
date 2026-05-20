@@ -8,7 +8,7 @@ import { eq } from "drizzle-orm";
 import { env } from "@/lib/env";
 import { getStripe } from "@/lib/stripe/client";
 
-// POST /api/portal — crée une session Stripe Billing Portal pour
+// POST /api/portal, crée une session Stripe Billing Portal pour
 // que le user puisse gérer son abonnement (changement de plan,
 // annulation, mise à jour CB, factures).
 
@@ -34,7 +34,7 @@ export async function POST() {
   const ws = wsRows[0];
   if (!ws?.stripeCustomerId) {
     return NextResponse.json(
-      { error: "Aucun abonnement actif — souscris d'abord à un plan." },
+      { error: "Aucun abonnement actif, souscris d'abord à un plan." },
       { status: 400 },
     );
   }

@@ -1,6 +1,6 @@
 import { Section } from "@/components/ui";
 
-// "Mamie GEO n'est pas..." — section de différentiation concurrentielle
+// "Mamie GEO n'est pas...", section de différentiation concurrentielle
 // (cf. doc 10 § Composants obligatoires). 3 blocs sobres, chacun pose
 // une frontière claire avec un concurrent ou un type d'outil voisin.
 // Honnêteté commerciale revendiquée : on dit ce qu'on n'est PAS.

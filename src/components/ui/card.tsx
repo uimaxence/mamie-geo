@@ -1,6 +1,6 @@
 import type { HTMLAttributes } from "react";
 
-// Card minimaliste — fond blanc, bordure gris-200, radius xl (20px,
+// Card minimaliste, fond blanc, bordure gris-200, radius xl (20px,
 // langage designme.agency / taap.it). Pas d'ombre par défaut.
 // Variant `flat` = pas de bordure, juste filet haut pour listes
 // éditoriales sans cadre fermé.

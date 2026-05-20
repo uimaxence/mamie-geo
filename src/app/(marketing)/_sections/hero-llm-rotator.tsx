@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { LLM_KEYS_ORDER, LLMPill, type LLMKey } from "@/components/marketing/llm-pill";
 
-// Rotateur LLM pour le headline hero — pattern slot-machine.
+// Rotateur LLM pour le headline hero, pattern slot-machine.
 //
 // Deux pastilles co-existent pendant la transition :
 //   - la sortante glisse vers le haut (`slide-up-out` 500 ms)

@@ -1,6 +1,6 @@
 import type { HTMLAttributes } from "react";
 
-// Status dot avec glow doux — inspiration screen 1 "Active Node".
+// Status dot avec glow doux, inspiration screen 1 "Active Node".
 // Petit cercle coloré (8px) avec halo de la même couleur pour signaler
 // l'état en cours. À utiliser à côté d'un label ("Active Node",
 // "Run en cours…", "Provider live").

@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     "3 plans à partir de 9,99 €/mois pour tracker la visibilité de ta marque dans ChatGPT, Claude, Perplexity, Gemini et Le Chat. Garantie remboursement 14 jours.",
 };
 
-// Page /pricing — assemble PricingPlans (toggle + 3 cards Solo/Starter/Pro) +
+// Page /pricing, assemble PricingPlans (toggle + 3 cards Solo/Starter/Pro) +
 // PricingComparison (tableau détaillé) + PricingFAQ (questions dédiées billing).
 // Agency / Enterprise sont sur devis (mailto hello@mamie-geo.fr).
 

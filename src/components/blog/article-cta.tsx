@@ -2,7 +2,7 @@ import { LinkButton } from "@/components/ui";
 import type { BlogCta } from "@/lib/blog/schemas";
 
 // CTA produit injecté automatiquement en fin de chaque article. Le
-// frontmatter `cta:` détermine quelle variante afficher — pas de logique
+// frontmatter `cta:` détermine quelle variante afficher, pas de logique
 // par-catégorie ni par-tag pour rester simple. L'auteur choisit.
 //
 // 5 variantes :

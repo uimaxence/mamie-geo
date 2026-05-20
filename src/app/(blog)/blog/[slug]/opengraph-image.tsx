@@ -3,18 +3,18 @@ import { getArticleBySlug, listArticleSlugs } from "@/lib/blog/registry";
 import { CATEGORY_TONE } from "@/lib/blog/schemas";
 
 // OG image dynamique générée au build pour chaque article. Format
-// Twitter/OG standard 1200×630. Pas de webfont (charge longue) — on
+// Twitter/OG standard 1200×630. Pas de webfont (charge longue), on
 // utilise system-ui pour rester rapide et lisible.
 //
 // Next.js gère le caching et la génération via le pattern conventionnel
 // `opengraph-image.tsx` colocalisé avec la route paramétrée.
 
-export const alt = "Mamie GEO — article du blog";
+export const alt = "Mamie GEO, article du blog";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
 export function generateImageMetadata() {
-  return listArticleSlugs().map((slug) => ({ id: slug, alt: `Mamie GEO — ${slug}` }));
+  return listArticleSlugs().map((slug) => ({ id: slug, alt: `Mamie GEO, ${slug}` }));
 }
 
 const CATEGORY_COLOR_HEX: Record<keyof typeof CATEGORY_TONE, string> = {

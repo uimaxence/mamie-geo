@@ -13,15 +13,15 @@ import { SansAvec } from "./_sections/sans-avec";
 import { TesConcurrentsPasToi } from "./_sections/tes-concurrents-pas-toi";
 import { TesOutils } from "./_sections/tes-outils";
 
-// Home — orchestrateur. Chaque section vit dans _sections/.
+// Home, orchestrateur. Chaque section vit dans _sections/.
 // PR 12b : BottomFade ajouté (effet d'ambiance fixed bottom).
 // PR 2026-05-13 : ajout de PourquoiMaintenant (data) et TesOutils
-// (features nommées) — cf. doc 09 § 2026-05-13 (refresh inspiré Semrush).
+// (features nommées), cf. doc 09 § 2026-05-13 (refresh inspiré Semrush).
 // PR 2026-05-16 : ajout TesConcurrentsPasToi (démo LLM live), placée
 // juste après PourquoiMaintenant (section noire) pour ne pas casser
 // le rythme cards-sous-section-noire qui structure le scroll.
 // PR 2026-05-16 (promo audit) : ajout AuditTeaser après
-// TesConcurrentsPasToi — solution actionnable gratuite juste après
+// TesConcurrentsPasToi, solution actionnable gratuite juste après
 // la mise en scène du problème.
 
 export default function HomePage() {

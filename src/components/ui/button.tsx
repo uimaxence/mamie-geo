@@ -6,10 +6,10 @@ import {
   type ReactNode,
 } from "react";
 
-// Bouton primitif — direction designme.agency / taap.it (cf. doc 10
+// Bouton primitif, direction designme.agency / taap.it (cf. doc 10
 // § Direction actée 2026-05-11). CTA principal = noir plein arrondi
 // pill, secondaire = outline gris, ghost = transparent. Le terracotta
-// ne sert plus pour les CTAs — il reste disponible via `accent` pour
+// ne sert plus pour les CTAs, il reste disponible via `accent` pour
 // les cas marginaux mais doit rester rare.
 //
 // Variant `ai` (ajouté 2026-05-16, refs Kree8) : dégradé rose→indigo +
@@ -31,7 +31,7 @@ const variantClass: Record<Variant, string> = {
     "bg-transparent text-[color:var(--color-ink)] border-transparent hover:bg-[color:var(--color-gray-100)] no-underline",
   accent:
     "button-shape bg-[color:var(--color-accent)] text-white hover:bg-[color:var(--color-accent-dim)] border-[color:var(--color-accent)] no-underline",
-  // AI — utilise sa propre classe `button-ai-shape` (cf. globals.css)
+  // AI, utilise sa propre classe `button-ai-shape` (cf. globals.css)
   // qui pose le dégradé, le glow externe et le hover. Pas de button-shape
   // ici (sinon les inset shadows neutres écrasent le rendu doux).
   ai: "button-ai-shape no-underline",
@@ -48,7 +48,7 @@ const baseClass =
 
 function buildContent(variant: Variant, children: ReactNode): ReactNode {
   if (variant !== "ai") return children;
-  // Inject Sparkles icône à gauche pour le variant `ai` — pas besoin
+  // Inject Sparkles icône à gauche pour le variant `ai`, pas besoin
   // que l'appelant le pense. La taille suit la baseline du texte.
   return (
     <>

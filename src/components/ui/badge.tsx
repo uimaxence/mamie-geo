@@ -2,10 +2,10 @@ import type { HTMLAttributes, ReactNode } from "react";
 
 // Badge minimaliste avec slot icône optionnel. 2 styles :
 //
-//   variant="soft" (défaut) — fond pastel + texte coloré, look Linear/
+//   variant="soft" (défaut), fond pastel + texte coloré, look Linear/
 //     Vercel. Bon pour catégoriser (LLMs, types de prompt, blog tags).
 //
-//   variant="solid" (refs Kree8 2026-05-16) — fond blanc + ombre douce
+//   variant="solid" (refs Kree8 2026-05-16), fond blanc + ombre douce
 //     + icône dans un petit container coloré à gauche. Bon pour les
 //     status (Pending / Submitted / Success / Failed / Expired).
 //
@@ -57,7 +57,7 @@ const solidToneText: Record<Tone, string> = {
 };
 
 // Container icône coloré gauche (variant solid). Fond = pastel, icône
-// elle-même reste blanche/transparente — l'appelant pose son <Icon />.
+// elle-même reste blanche/transparente, l'appelant pose son <Icon />.
 const solidIconContainer: Record<Tone, string> = {
   neutral: "bg-[color:var(--color-gray-200)] text-[color:var(--color-gray-600)]",
   success: "bg-[color:var(--color-success)] text-white",

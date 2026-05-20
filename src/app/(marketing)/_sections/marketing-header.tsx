@@ -2,7 +2,7 @@ import Link from "next/link";
 import { LinkButton } from "@/components/ui";
 import { Logo } from "@/components/marketing/logo";
 
-// Header marketing — logo à gauche, à droite : nav items + séparateur
+// Header marketing, logo à gauche, à droite : nav items + séparateur
 // vertical fin + auth buttons. Réorganisé 2026-05-13 suite retour Max
 // (avant : nav au centre, séparé).
 //

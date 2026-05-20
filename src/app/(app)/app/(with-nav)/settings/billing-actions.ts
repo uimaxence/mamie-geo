@@ -11,7 +11,7 @@ import { getStripe } from "@/lib/stripe/client";
 import { isPurchasablePlan, type PurchasablePlan } from "@/lib/stripe/plan-catalog";
 import { priceIdForPlan } from "@/lib/stripe/products";
 
-// Server actions billing — appelées depuis `<BillingSection>` côté client.
+// Server actions billing, appelées depuis `<BillingSection>` côté client.
 // Centralisent la création des sessions Stripe pour éviter de dupliquer
 // la logique customer/checkout/portal dans les API routes ET dans des
 // onClick handlers. Les API routes restent dispo pour les clients hors-app
@@ -100,7 +100,7 @@ export async function openPortal(): Promise<BillingActionResult> {
     .limit(1);
   const ws = wsRows[0];
   if (!ws?.stripeCustomerId) {
-    return { ok: false, error: "Aucun abonnement actif — souscris d'abord à un plan." };
+    return { ok: false, error: "Aucun abonnement actif, souscris d'abord à un plan." };
   }
 
   const portal = await getStripe().billingPortal.sessions.create({

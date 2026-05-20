@@ -7,7 +7,7 @@ import { getRecommendation } from "@/lib/audit/recommendations";
 import type { AuditReport, CheckResult, SubScore } from "@/lib/audit/types";
 import { EmailGate } from "./email-gate";
 
-// Affichage teaser des résultats — score global + 4 sub-scores + 3-5
+// Affichage teaser des résultats, score global + 4 sub-scores + 3-5
 // issues prioritaires. Le rapport complet (toutes les issues + recos
 // détaillées) est envoyé par email après que le user ait soumis son
 // email via <EmailGate>.
@@ -32,7 +32,7 @@ export function AuditResults({ report, onReset }: { report: AuditReport; onReset
       {report.jsRendered && (
         <Banner tone="info" className="mb-4">
           Cette page semble nécessiter JavaScript pour rendre son contenu. Certains checks reflètent
-          ce que les crawlers (Google, ChatGPT) voient sans JS — qui est aussi ce qui compte le plus
+          ce que les crawlers (Google, ChatGPT) voient sans JS, qui est aussi ce qui compte le plus
           pour le GEO.
         </Banner>
       )}
@@ -87,7 +87,7 @@ export function AuditResults({ report, onReset }: { report: AuditReport; onReset
         <header className="mb-4">
           <h2 className="type-h2">À corriger en priorité</h2>
           <p className="type-meta mt-1">
-            {topIssues.length} issue(s) prioritaire(s) affichée(s) — reçois le rapport complet (30+
+            {topIssues.length} issue(s) prioritaire(s) affichée(s), reçois le rapport complet (30+
             checks) par email.
           </p>
         </header>

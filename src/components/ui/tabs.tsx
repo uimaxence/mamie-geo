@@ -5,7 +5,7 @@ import { forwardRef, type ComponentPropsWithoutRef, type ElementRef } from "reac
 import { cn } from "@/lib/utils";
 
 // Radix Tabs avec indicator underline 2px noir sur l'onglet actif.
-// Style éditorial sobre — pas de pill bg, juste une barre sous l'onglet.
+// Style éditorial sobre, pas de pill bg, juste une barre sous l'onglet.
 
 export const Tabs = TabsPrimitive.Root;
 

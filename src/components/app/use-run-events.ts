@@ -10,7 +10,7 @@ import { useEffect, useRef, useState } from "react";
 //   const { runs, hasNewSuccess } = useRunEvents();
 //
 // hasNewSuccess est un callback ref qui notifie quand un nouveau run
-// passe en `success` — utilisé pour déclencher un toast.
+// passe en `success`, utilisé pour déclencher un toast.
 
 export interface RunEventSnapshot {
   id: string;

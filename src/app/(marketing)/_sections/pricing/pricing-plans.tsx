@@ -51,7 +51,7 @@ export function PricingPlans() {
       <p className="mt-10 text-center type-meta">
         Plus de volume ou besoins agence ?{" "}
         <a
-          href="mailto:hello@mamie-geo.fr?subject=Mamie%20GEO%20—%20devis%20agence"
+          href="mailto:hello@mamie-geo.fr?subject=Mamie%20GEO%20devis%20agence"
           className="font-medium text-[color:var(--color-ink)] underline-offset-2 hover:underline"
         >
           Écris-nous
@@ -93,7 +93,7 @@ function PlanCard({ plan, period }: { plan: Plan; period: "monthly" | "annual" }
   const monthly = plan.monthlyEur;
   const monthlyDisplay = period === "monthly" ? monthly : annualMonthly(monthly);
 
-  // Bordure et fond différents pour le plan populaire — ressort sans
+  // Bordure et fond différents pour le plan populaire, ressort sans
   // utiliser un fond coloré (règle DA : pas de fond coloré).
   const cardClass = isPopular
     ? "border-[color:var(--color-ink)] border-2 relative"

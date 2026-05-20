@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils";
 
-// BreakdownBars — pattern « Lead Source Breakdown » : N segments
+// BreakdownBars, pattern « Lead Source Breakdown » : N segments
 // catégoriels, chacun avec :
 //   - une couleur (token pastel)
 //   - une valeur (poids relatif → largeur de la barre dans la rangée)

@@ -1,4 +1,4 @@
-// Email envoyé après `invoice.payment_failed` — alerte le user que sa
+// Email envoyé après `invoice.payment_failed`, alerte le user que sa
 // carte a été refusée et qu'il a J+7 pour régulariser avant expired.
 
 import type { RenderedEmail } from "@/lib/email/templates/weekly-recap";
@@ -9,7 +9,7 @@ export interface PaymentFailedData {
 }
 
 export function renderPaymentFailed(data: PaymentFailedData): RenderedEmail {
-  const subject = "Paiement Mamie GEO refusé — action requise";
+  const subject = "Paiement Mamie GEO refusé, action requise";
 
   const text = `Bonjour,
 

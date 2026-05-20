@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 import { listArticles } from "@/lib/blog/registry";
 import { env } from "@/lib/env";
 
-// Sitemap dynamique — généré au build à partir du registry blog +
+// Sitemap dynamique, généré au build à partir du registry blog +
 // routes statiques connues. Génère `/sitemap.xml` auto via la
 // convention Next.js App Router.
 //

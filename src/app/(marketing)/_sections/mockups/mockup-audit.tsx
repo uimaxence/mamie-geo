@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 // (SEO / GEO / A11y / Perf) avec progress bars qui s'animent au mount,
 // et une issue critique avec sa recommandation en aperçu.
 //
-// Pas de logique métier — visuel pur. Le vrai rapport est plus riche.
+// Pas de logique métier, visuel pur. Le vrai rapport est plus riche.
 
 interface SubScore {
   label: string;
@@ -85,7 +85,7 @@ export function MockupAudit() {
         ))}
       </div>
 
-      {/* Issue critique en aperçu — la valeur du rapport */}
+      {/* Issue critique en aperçu, la valeur du rapport */}
       <div className="mt-6 rounded-[var(--radius-lg)] border border-[color:var(--color-red-200,#fecaca)] bg-[color:var(--color-red-50,#fef2f2)] p-3">
         <div className="flex items-start gap-2">
           <AlertTriangle size={14} className="mt-0.5 shrink-0 text-[#dc2626]" />

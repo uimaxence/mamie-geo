@@ -8,7 +8,7 @@ import { env } from "@/lib/env";
 import { enqueue } from "@/lib/queue";
 import type { LLMValue } from "@/lib/llm";
 
-// POST /api/runs/trigger — déclenche un round complet de runs pour un
+// POST /api/runs/trigger, déclenche un round complet de runs pour un
 // workspace en dehors du cron quotidien. Utile pour :
 //   1) tester le worker en dev sans attendre 06:00 UTC
 //   2) brancher un bouton "Lancer un run" sur le dashboard (PR 5)

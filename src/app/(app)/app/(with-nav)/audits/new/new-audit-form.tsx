@@ -43,11 +43,11 @@ export function NewAuditForm({
       }
 
       // Si l'option batch concurrents est cochée, on déclenche l'enqueue
-      // async — l'utilisateur sera redirigé vers la page compare.
+      // async, l'utilisateur sera redirigé vers la page compare.
       if (alsoBatch && canBatchCompetitors) {
         const batch = await runCompetitorsBatch();
         if (!batch.ok) {
-          // Audit owned a réussi, mais le batch a échoué — on redirige
+          // Audit owned a réussi, mais le batch a échoué, on redirige
           // quand même vers le détail + on note l'erreur.
           router.push(`/app/audits/${result.id}?batchError=${encodeURIComponent(batch.error)}`);
           return;

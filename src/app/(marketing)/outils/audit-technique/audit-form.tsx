@@ -6,7 +6,7 @@ import type { AuditResult } from "@/lib/audit/types";
 import { runAuditAction } from "./actions";
 import { AuditResults } from "./audit-results";
 
-// Form principal /outils/audit-technique — input URL + soumission.
+// Form principal /outils/audit-technique, input URL + soumission.
 // Switche entre 3 états : idle (form visible) / loading (skeleton) /
 // results (résultats teaser).
 

@@ -12,7 +12,7 @@ import { FaqJsonLd, type FaqItem } from "./json-ld";
 // (2) le JSON-LD FAQPage inline juste à côté. Boost GEO majeur :
 // Google et les LLM citent en priorité les FAQ structured data.
 //
-// Server component — pas d'état interactif (HTML <details> natif gère
+// Server component, pas d'état interactif (HTML <details> natif gère
 // l'ouverture/fermeture, clavier-friendly out-of-the-box).
 
 export interface BlogFAQProps {

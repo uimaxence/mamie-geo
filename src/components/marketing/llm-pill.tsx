@@ -1,6 +1,6 @@
 import { Bot, Cat, MessageCircle, Search, Sparkles, type LucideIcon } from "lucide-react";
 
-// Pastille LLM réutilisable — source de vérité unique pour le badge
+// Pastille LLM réutilisable, source de vérité unique pour le badge
 // nommé d'un LLM. Utilisée dans :
 //   - <LLMBadges /> (section home « Les 5 IA »)
 //   - <PourquoiMaintenant /> (section scroll-fill, inline dans le texte)

@@ -4,7 +4,7 @@ import { env } from "@/lib/env";
 import { sendNewArticleNewsletter } from "@/lib/email";
 import { BLOG_CATEGORIES } from "@/lib/blog/schemas";
 
-// POST /api/blog/notify-publish — déclenche une campagne Brevo annonçant
+// POST /api/blog/notify-publish, déclenche une campagne Brevo annonçant
 // un nouvel article à la liste BREVO_BLOG_LIST_ID. Appelé en fin du
 // workflow de publication launchd (cf. .claude-code/publication-articles-prompt.md)
 // juste après le `git push origin main` qui rend l'article live.
@@ -13,7 +13,7 @@ import { BLOG_CATEGORIES } from "@/lib/blog/schemas";
 // d'orchestration). On veut éviter qu'un attaquant puisse spam la liste
 // avec des emails arbitraires.
 //
-// Idempotence : si l'agent retry, on enverra 2 campagnes — pas de
+// Idempotence : si l'agent retry, on enverra 2 campagnes, pas de
 // déduplication côté serveur en V0. Le prompt agent doit ne pas
 // re-appeler en cas d'échec (le log/flag suffit).
 
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const result = await sendNewArticleNewsletter(parsed.data);
     if (result === null) {
       // Skip silencieux (env Brevo manquant). On retourne ok=true pour
-      // que le caller (launchd agent) ne lève pas de flag — l'admin
+      // que le caller (launchd agent) ne lève pas de flag, l'admin
       // verra le warn dans les logs Vercel s'il regarde.
       return NextResponse.json({ ok: true, sent: false, reason: "brevo not configured" });
     }

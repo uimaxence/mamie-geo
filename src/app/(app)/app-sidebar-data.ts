@@ -6,10 +6,10 @@ import { brands, workspaceMembers, workspaces } from "@/db/schema";
 import { auth } from "@/lib/auth";
 
 // Données passées à la sidebar (user + workspace + brands).
-// `cache()` mémoïse par requête HTTP — appelé par le layout (sidebar)
+// `cache()` mémoïse par requête HTTP, appelé par le layout (sidebar)
 // ET potentiellement par des pages enfants sans coût supplémentaire.
 //
-// Retourne null si pas de workspace (cas pré-onboarding) — l'appelant
+// Retourne null si pas de workspace (cas pré-onboarding), l'appelant
 // (layout) doit alors rediriger vers /app/onboarding.
 
 export interface SidebarData {
@@ -19,7 +19,7 @@ export interface SidebarData {
     name: string;
     plan: string;
     slug: string;
-    /** Timestamp du hard-cap LLM hit — non null = workspace gelé,
+    /** Timestamp du hard-cap LLM hit, non null = workspace gelé,
      *  utilisé par UpgradeBanner pour afficher le statut. */
     hardCapHitAt: Date | null;
   };

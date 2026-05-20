@@ -11,7 +11,7 @@ import { BrandAliasesForm } from "./brand-aliases-form";
 import { SignOutButton } from "./sign-out-button";
 import { WorkspaceForm } from "./workspace-form";
 
-// Page Réglages — édition workspace.name + brand.aliases activée
+// Page Réglages, édition workspace.name + brand.aliases activée
 // (cf. PR App CRUD 2026-05-13). Le reste reste read-only en V0 :
 //   - brand.name + brand.domain : changent l'identité = recréer
 //   - email + role : changent l'auth = invitations system
@@ -66,10 +66,10 @@ export default async function SettingsPage({ searchParams }: PageProps) {
       {checkout === "success" && (
         <div className="mt-6 rounded-[var(--radius-xl)] border border-[color:var(--color-success)]/20 bg-[color:var(--color-success-bg)] px-5 py-4">
           <p className="font-semibold text-[color:var(--color-success)]">
-            ✓ Paiement validé — bienvenue !
+            ✓ Paiement validé, bienvenue !
           </p>
           <p className="type-body mt-1 text-sm text-[color:var(--color-ink-soft)]">
-            Ton abonnement est actif. Le premier run est lancé sur les IA suivies — tu verras les
+            Ton abonnement est actif. Le premier run est lancé sur les IA suivies, tu verras les
             résultats sur ton dashboard d&apos;ici quelques minutes.
           </p>
         </div>
@@ -96,7 +96,7 @@ export default async function SettingsPage({ searchParams }: PageProps) {
           </dl>
         </SectionCard>
 
-        {/* Workspace — nom éditable, plan + slug read-only */}
+        {/* Workspace, nom éditable, plan + slug read-only */}
         <SectionCard title="Workspace" subtitle="Espace de travail">
           <dl className="grid grid-cols-2 gap-x-8 gap-y-4 sm:grid-cols-3">
             <div>
@@ -117,7 +117,7 @@ export default async function SettingsPage({ searchParams }: PageProps) {
           </dl>
         </SectionCard>
 
-        {/* Brand — aliases éditables, nom + domaine read-only */}
+        {/* Brand, aliases éditables, nom + domaine read-only */}
         <SectionCard
           title="Marque trackée"
           subtitle="Nom + domaine non éditables (changent l'identité). Aliases modifiables."
@@ -134,7 +134,7 @@ export default async function SettingsPage({ searchParams }: PageProps) {
           </dl>
         </SectionCard>
 
-        {/* Facturation — choix de plan + portal Stripe */}
+        {/* Facturation, choix de plan + portal Stripe */}
         <section id="billing">
           <SectionCard
             title="Facturation"
@@ -157,7 +157,7 @@ export default async function SettingsPage({ searchParams }: PageProps) {
           </dl>
         </SectionCard>
 
-        {/* Danger zone — pas dans une Card pour ne pas la "normaliser" */}
+        {/* Danger zone, pas dans une Card pour ne pas la "normaliser" */}
         <section className="mt-4 rounded-[var(--radius-xl)] border border-[color:var(--color-error)]/20 bg-[color:var(--color-error-bg)] p-6">
           <h2 className="type-h3 text-[color:var(--color-error)]">Zone sensible</h2>
           <p className="type-body mt-2 text-sm">

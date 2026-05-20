@@ -1,6 +1,6 @@
 // Mapping LLM → couleur pastel. Aligné sur la palette tokens
 // (--color-blue, --color-green, --color-orange, --color-purple,
-// --color-pink) — recopié en hex parce que Recharts veut un string
+// --color-pink), recopié en hex parce que Recharts veut un string
 // stable côté serveur/client.
 
 export const LLM_COLORS: Record<string, string> = {

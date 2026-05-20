@@ -5,7 +5,7 @@ import { listCompetitors } from "@/lib/competitors/queries";
 import { quotasFor } from "@/lib/plans/quotas";
 import { CompetitorsList } from "./competitors-list";
 
-// Page /app/competitors — liste + CRUD des concurrents trackés.
+// Page /app/competitors, liste + CRUD des concurrents trackés.
 
 export const dynamic = "force-dynamic";
 

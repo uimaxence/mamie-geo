@@ -160,7 +160,7 @@ async function runWorker(job: ClaimedJob): Promise<void> {
 }
 
 // ─────────────────────────────────────────────────────────────────────
-// Inspect mode — retourne l'état de la queue sans exécuter de jobs.
+// Inspect mode, retourne l'état de la queue sans exécuter de jobs.
 // Utile en debug prod : `curl -H "Authorization: Bearer ..."
 // "https://.../api/cron/dispatch?inspect=1"`.
 // ─────────────────────────────────────────────────────────────────────
@@ -200,7 +200,7 @@ async function collectInspectData() {
     lastError: r.last_error,
   }));
 
-  // Présence (booléen) des env vars critiques — jamais leur valeur.
+  // Présence (booléen) des env vars critiques, jamais leur valeur.
   // Vérifie que la prod a bien les vars posées.
   const envPresence = {
     CRON_SECRET: Boolean(env.CRON_SECRET),

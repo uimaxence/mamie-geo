@@ -9,9 +9,9 @@ import { loadSidebarData } from "../../app-sidebar-data";
 // /app/onboarding reste en dehors → full-screen wizard sans nav.
 //
 // Bandes top stack :
-//   1. <UpgradeBanner> — plan inactif (trialing/past_due/expired) ou
+//   1. <UpgradeBanner>, plan inactif (trialing/past_due/expired) ou
 //      hard-cap LLM hit.
-//   2. <RunActivityBar> — SSE temps réel de l'état des runs (premier
+//   2. <RunActivityBar>, SSE temps réel de l'état des runs (premier
 //      run en cours, X/N terminés, all done). Notifications toast à
 //      chaque transition success/failed.
 

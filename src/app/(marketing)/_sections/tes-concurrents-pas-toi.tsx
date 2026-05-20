@@ -9,7 +9,7 @@ import { LinkButton, Section } from "@/components/ui";
 
 gsap.registerPlugin(ScrollTrigger);
 
-// "Tes concurrents, pas toi" — section démo concrète où on simule en
+// "Tes concurrents, pas toi", section démo concrète où on simule en
 // live une conversation LLM dans laquelle la marque du visiteur N'EST
 // PAS citée, mais des concurrents le sont. Effet émotionnel fort :
 // l'utilisateur visualise instantanément le problème que Mamie GEO
@@ -22,13 +22,13 @@ gsap.registerPlugin(ScrollTrigger);
 //   4. La réponse se révèle token par token (chunks de 1-2 mots)
 //   5. Les noms de concurrents sont highlight (fade-in bg)
 //
-// Le texte de la réponse est un exemple plausible — outils GEO du
+// Le texte de la réponse est un exemple plausible, outils GEO du
 // marché qui apparaissent souvent dans les vraies réponses ChatGPT
 // pour ce genre de prompt.
 
 const USER_PROMPT = "Quels outils de monitoring de visibilité GEO me recommandes-tu ?";
 
-// Tokens de réponse — chaque entrée = un "token" qui s'affiche en bloc.
+// Tokens de réponse, chaque entrée = un "token" qui s'affiche en bloc.
 // Les `competitor` sont highlight rouge (= concurrent qui rafle la mise).
 // Mamie GEO apparaît en 4ᵉ avec un highlight terracotta (= notre marque
 // est citée mais pas en tête, ce qui légitime le pitch « il y a de la
@@ -50,24 +50,24 @@ const RESPONSE_TOKENS: Token[] = [
   { type: "newline" },
   { type: "text", value: "• " },
   { type: "competitor", value: "Profound" },
-  { type: "text", value: " — la " },
+  { type: "text", value: ", la " },
   { type: "text", value: "référence US, " },
   { type: "text", value: "très complète" },
   { type: "newline" },
   { type: "text", value: "• " },
   { type: "competitor", value: "AthenaHQ" },
-  { type: "text", value: " — " },
+  { type: "text", value: ", " },
   { type: "text", value: "orientée " },
   { type: "text", value: "agences" },
   { type: "newline" },
   { type: "text", value: "• " },
   { type: "competitor", value: "Otterly.AI" },
-  { type: "text", value: " — " },
+  { type: "text", value: ", " },
   { type: "text", value: "plus accessible" },
   { type: "newline" },
   { type: "text", value: "• " },
   { type: "self", value: "Mamie GEO" },
-  { type: "text", value: " — " },
+  { type: "text", value: ", " },
   { type: "text", value: "le concurrent " },
   { type: "text", value: "francophone, " },
   { type: "text", value: "pensé PME" },
@@ -98,7 +98,7 @@ export function TesConcurrentsPasToi() {
       const responseEl = responseRef.current;
       const tokens = gsap.utils.toArray<HTMLElement>(".response-token", responseEl);
 
-      // État initial — tout caché / vide.
+      // État initial, tout caché / vide.
       promptEl.textContent = "";
       gsap.set(tokens, { opacity: 0, y: 4 });
       gsap.set(thinkingRef.current, { opacity: 0 });
@@ -113,7 +113,7 @@ export function TesConcurrentsPasToi() {
         },
       });
 
-      // 1. Typewriter du prompt user — caractère par caractère.
+      // 1. Typewriter du prompt user, caractère par caractère.
       tl.to(promptEl, {
         duration: USER_PROMPT.length * 0.028, // ~28ms/char
         ease: "none",
@@ -152,7 +152,7 @@ export function TesConcurrentsPasToi() {
         stagger: 0.07,
       });
 
-      // 6a. Highlight des concurrents (background rouge clair) — "ils
+      // 6a. Highlight des concurrents (background rouge clair), "ils
       //     prennent les premières places".
       tl.to(
         ".competitor-highlight",
@@ -165,7 +165,7 @@ export function TesConcurrentsPasToi() {
         "+=0.3",
       );
 
-      // 6b. Highlight Mamie GEO (terracotta faint) — "tu y es, mais en
+      // 6b. Highlight Mamie GEO (terracotta faint), "tu y es, mais en
       //     queue de peloton". L'effet finit après les concurrents pour
       //     ramener l'œil vers la marque.
       tl.to(
@@ -187,7 +187,7 @@ export function TesConcurrentsPasToi() {
         ref={containerRef}
         className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-16 lg:items-center"
       >
-        {/* Colonne gauche — texte + CTA */}
+        {/* Colonne gauche, texte + CTA */}
         <div className="max-w-xl">
           <span className="type-eyebrow">Le vrai problème</span>
           <h2 className="type-display mt-3">
@@ -200,7 +200,7 @@ export function TesConcurrentsPasToi() {
           </p>
           <p className="type-body mt-4 text-sm text-[color:var(--color-ink-soft)]">
             Le SEO te dit qui te dépasse sur Google. Mamie GEO te dit qui te dépasse dans ChatGPT,
-            Claude, Perplexity, Gemini et Le Chat — et te livre les actions pour rentrer dans la
+            Claude, Perplexity, Gemini et Le Chat, et te livre les actions pour rentrer dans la
             réponse.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
@@ -213,7 +213,7 @@ export function TesConcurrentsPasToi() {
           </div>
         </div>
 
-        {/* Colonne droite — mockup conversation LLM */}
+        {/* Colonne droite, mockup conversation LLM */}
         <div className="relative">
           <LLMMockup
             promptRef={promptRef}

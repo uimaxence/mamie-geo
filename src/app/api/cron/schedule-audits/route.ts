@@ -46,7 +46,7 @@ async function handle(request: NextRequest): Promise<NextResponse> {
     .where(inArray(workspaces.plan, ACTIVE_PLANS as readonly string[]));
 
   // On exclut les hard-capés (l'audit ne consomme pas de LLM mais on
-  // applique la même logique de gel pour cohérence — review possible).
+  // applique la même logique de gel pour cohérence, review possible).
   const eligibleWs = wsRows.filter((w) => !w.hardCapHitAt);
   const wsIds = eligibleWs.map((w) => w.id);
 

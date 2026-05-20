@@ -31,7 +31,7 @@ export function BlogNewsletterForm() {
           tone: result.created ? "success" : "info",
           message: result.created
             ? "Inscrit. Tu recevras un email à chaque nouveau papier."
-            : "Tu étais déjà dans la liste — pas de doublon créé.",
+            : "Tu étais déjà dans la liste, pas de doublon créé.",
         });
         setEmail("");
       } else {

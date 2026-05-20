@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     "Reçois un audit personnalisé gratuit de la visibilité de ta marque dans ChatGPT, Claude, Perplexity, Gemini et Le Chat de Mistral. Sous 24h, par email, sans carte bancaire.",
 };
 
-// Lead magnet "Test ma visibilité IA" — formulaire de capture
+// Lead magnet "Test ma visibilité IA", formulaire de capture
 // d'audit gratuit. V0 : pas de génération temps réel pour éviter les
 // abus publics ($0.15+ par audit). Le rapport est généré manuellement
 // par l'équipe ops puis envoyé par email sous 24h.
@@ -98,7 +98,7 @@ export default function TestVisibiliteIAPage() {
             On veut que tu puisses voir le niveau de qualité de Mamie GEO avant de t&apos;abonner.
             Le rapport est limité à 1 audit par marque pour qu&apos;on puisse le faire à la main
             avec soin. Si après l&apos;audit tu veux un suivi régulier, tu créeras un compte à
-            partir de 9,99 €/mois — sans engagement, garantie remboursement 14 jours.
+            partir de 9,99 €/mois, sans engagement, garantie remboursement 14 jours.
           </p>
         </div>
       </Section>

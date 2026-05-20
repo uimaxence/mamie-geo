@@ -12,7 +12,7 @@ import {
   recordSubscriptionEvent,
 } from "@/lib/stripe/webhook-handlers";
 
-// POST /api/webhooks/stripe — endpoint de réception des webhooks Stripe.
+// POST /api/webhooks/stripe, endpoint de réception des webhooks Stripe.
 // Vérifie la signature, dispatch vers le bon handler, écrit une ligne
 // dans `subscription_events` (idempotent via stripeEventId UNIQUE).
 //
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
 
   if (!HANDLED_EVENTS.has(event.type)) {
     // Stripe envoie beaucoup d'events qu'on n'utilise pas (charge.*, etc.).
-    // On accuse réception 200 sans traitement — Stripe ne re-retry pas.
+    // On accuse réception 200 sans traitement, Stripe ne re-retry pas.
     return NextResponse.json({ received: true, handled: false });
   }
 

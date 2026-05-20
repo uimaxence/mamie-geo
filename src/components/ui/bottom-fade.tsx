@@ -1,4 +1,4 @@
-// Effet d'ambiance — flou subtile en bas du viewport, sans tint coloré.
+// Effet d'ambiance, flou subtile en bas du viewport, sans tint coloré.
 //
 // Update 2026-05-13 : retrait du gradient blanc 90→0% qui peignait
 // activement le strip et créait une bande blanche moche sur les

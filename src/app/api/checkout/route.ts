@@ -10,13 +10,13 @@ import { isPurchasablePlan } from "@/lib/stripe/plan-catalog";
 import { priceIdForPlan } from "@/lib/stripe/products";
 import { getStripe } from "@/lib/stripe/client";
 
-// POST /api/checkout — crée une session Stripe Checkout pour le user
+// POST /api/checkout, crée une session Stripe Checkout pour le user
 // authentifié et retourne l'URL de redirection.
 //
 // Body : `{ plan: "solo" | "starter" | "pro" }`
 // Réponse : `{ url: string }` ou `{ error: string }`.
 //
-// Le `customer` Stripe est créé à la volée si absent — l'ID est
+// Le `customer` Stripe est créé à la volée si absent, l'ID est
 // stocké sur `workspaces.stripeCustomerId` pour réutilisation
 // (portal + future renew).
 

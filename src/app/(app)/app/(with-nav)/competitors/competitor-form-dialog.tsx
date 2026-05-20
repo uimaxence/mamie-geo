@@ -103,7 +103,7 @@ export function CompetitorFormDialog({
             />
           </Field>
 
-          <Field label="Domaine" hint="Optionnel — utilisé pour le matching dans les sources web.">
+          <Field label="Domaine" hint="Optionnel, utilisé pour le matching dans les sources web.">
             <Input
               type="text"
               value={domain}

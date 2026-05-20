@@ -72,14 +72,14 @@ export function AppSidebar({ data }: { data: SidebarData }) {
 function SidebarInner({ data, onNavigate }: { data: SidebarData; onNavigate?: () => void }) {
   return (
     <div className="flex h-full flex-col">
-      {/* Brand mark Mamie GEO — discret, icon-only (pas de wordmark
+      {/* Brand mark Mamie GEO, discret, icon-only (pas de wordmark
        * pour rester aligné avec « moins de texte Mamie GEO dans l'app »).
        * Clic → /app/dashboard. */}
       <div className="flex items-center px-3 pt-3 pb-1.5">
         <Link
           href="/app/dashboard"
           onClick={onNavigate}
-          aria-label="Mamie GEO — accueil"
+          aria-label="Mamie GEO, accueil"
           className="flex size-7 items-center justify-center rounded-[var(--radius-sm)] transition hover:opacity-80 focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-ink)]"
         >
           <Logo size={26} />
@@ -87,7 +87,7 @@ function SidebarInner({ data, onNavigate }: { data: SidebarData; onNavigate?: ()
       </div>
 
       {/* Top : workspace pill + brand pill (pattern Vercel). Pas de
-       * mention du nom produit ici — l'utilisateur sait où il est. */}
+       * mention du nom produit ici, l'utilisateur sait où il est. */}
       <div className="flex flex-col gap-1.5 border-b border-[color:var(--color-border)] p-3">
         <WorkspacePill workspace={data.workspace} onNavigate={onNavigate} />
         <BrandSwitcher brands={data.brands} currentBrandId={data.currentBrandId} />
@@ -153,7 +153,7 @@ function getInitial(label: string): string {
   return (match?.[0] ?? "?").toUpperCase();
 }
 
-// Pill workspace — pattern Vercel : avatar coloré + nom + badge plan.
+// Pill workspace, pattern Vercel : avatar coloré + nom + badge plan.
 // V0 : un seul workspace par user → pas de switcher (pas de chevron).
 // Quand le multi-workspace arrivera, on greffera un DropdownMenu ici.
 function WorkspacePill({
@@ -186,8 +186,8 @@ function WorkspacePill({
   );
 }
 
-// Pill brand — square noir avec initiale + domaine + chevron switcher.
-// Le label affiche le DOMAINE (pas le nom de marque) — c'est ce qui
+// Pill brand, square noir avec initiale + domaine + chevron switcher.
+// Le label affiche le DOMAINE (pas le nom de marque), c'est ce qui
 // identifie la marque trackée de manière non ambiguë côté GEO.
 function BrandSwitcher({
   brands,

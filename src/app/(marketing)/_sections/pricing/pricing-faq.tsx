@@ -1,7 +1,7 @@
 import { Plus } from "lucide-react";
 import { Section } from "@/components/ui";
 
-// FAQ dédiée pricing — questions spécifiques au paiement / abonnement /
+// FAQ dédiée pricing, questions spécifiques au paiement / abonnement /
 // changements de plan. cf. doc 10 § Pricing.
 
 const QUESTIONS = [
@@ -19,7 +19,7 @@ const QUESTIONS = [
   },
   {
     q: "Quels moyens de paiement acceptés ?",
-    a: "Cartes bancaires (Visa, Mastercard, Amex) via Stripe. Pour les besoins agence ou enterprise, on accepte aussi le virement SEPA — écris-nous.",
+    a: "Cartes bancaires (Visa, Mastercard, Amex) via Stripe. Pour les besoins agence ou enterprise, on accepte aussi le virement SEPA, écris-nous.",
   },
   {
     q: "Garantie remboursement 14 jours, comment ça marche ?",
@@ -39,7 +39,7 @@ const QUESTIONS = [
   },
   {
     q: "Besoin de volumes ou d'options agence ?",
-    a: "Écris-nous à hello@mamie-geo.fr — on construit un plan sur-mesure (marques illimitées, rapports en marque blanche, sièges, SSO, etc.).",
+    a: "Écris-nous à hello@mamie-geo.fr, on construit un plan sur-mesure (marques illimitées, rapports en marque blanche, sièges, SSO, etc.).",
   },
 ];
 

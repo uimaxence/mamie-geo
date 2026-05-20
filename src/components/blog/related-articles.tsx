@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui";
 import { getRelatedArticles } from "@/lib/blog/registry";
 import { CATEGORY_TONE } from "@/lib/blog/schemas";
 
-// 3 articles liés en fin d'article — fait le maillage interne SEO
+// 3 articles liés en fin d'article, fait le maillage interne SEO
 // + propose une lecture suite sans nécessiter d'écrire les liens à la
 // main. Le scoring (même catégorie + keywords overlap) vit dans le
 // registry (cf. getRelatedArticles).

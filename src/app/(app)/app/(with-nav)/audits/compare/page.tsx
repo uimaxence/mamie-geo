@@ -13,7 +13,7 @@ import type { SubScore } from "@/lib/audit/types";
 import { listAudits } from "../actions";
 import { CompetitorsBatchButton } from "./competitors-batch-button";
 
-// /app/audits/compare — matrice URL × catégorie (concurrents inclus).
+// /app/audits/compare, matrice URL × catégorie (concurrents inclus).
 // Sprint 6 PR B (cf. doc 09 § 2026-05-17).
 //
 // Réservé aux plans avec `comparisonCompetitors > 0` (Starter+).
