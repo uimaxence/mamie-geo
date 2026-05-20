@@ -5,16 +5,16 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Asterisk, ArrowLeft, Mail } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
-import { Button, Field, Input } from "@/components/ui";
+import { Button, Field, Input, PatternBlock } from "@/components/ui";
 import { Logo } from "@/components/marketing/logo";
 
 // Login en split panel asymétrique (cf. doc 09 § PR 11b, ref
 // BrightNest signup) :
-//   - Panel gauche (hidden < md) : fond blanc + dégradé radial bleu
-//     soft en bas-gauche (signature visuelle subtile sans empiéter sur
-//     le texte, pattern damier retiré 2026-05-20 car illisible avec
-//     size xl au-dessus de la tagline)
-//   - Panel droite : form magic-link
+//   - Panel gauche (hidden < md) : fond gris-50 + pattern damier ink
+//     opacity 8% (nuance de gris très subtile, signature visuelle qui
+//     n'écrase pas le titre — itération 2026-05-20 après tests
+//     successifs primary 100%, gradient bleu, gradient renforcé)
+//   - Panel droite : form magic-link (fond blanc, border-r entre les 2)
 // Sur mobile : seul le panel form est rendu, plein écran.
 //
 // Param `?next=/app/...` propagé en callbackURL Better Auth (cf. doc 09
@@ -97,18 +97,15 @@ function LoginContent() {
 
   return (
     <main className="grid min-h-screen grid-cols-1 md:grid-cols-2">
-      {/* Panel gauche, fond gris très léger (vs blanc droite) + dégradé
-          radial bleu marqué en bas-gauche + border verticale fine. Triple
-          séparation pour distinguer clairement la zone éditoriale du form.
-          Caché sur mobile. */}
+      {/* Panel gauche, fond gris-50 + pattern damier ink opacity 8%
+          (nuance de gris subtile) + border verticale fine. Le pattern
+          remplace le dégradé bleu (itération 2026-05-20). */}
       <aside className="relative hidden flex-col justify-between overflow-hidden border-r border-[color:var(--color-border)] bg-[color:var(--color-gray-50)] p-10 text-[color:var(--color-ink)] md:flex">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0"
-          style={{
-            background:
-              "radial-gradient(70% 60% at 0% 100%, color-mix(in oklab, var(--color-primary) 45%, transparent) 0%, transparent 75%)",
-          }}
+        <PatternBlock
+          corner="bottom-left"
+          tone="ink"
+          size="xl"
+          style={{ opacity: 0.08 }}
         />
 
         <Link
