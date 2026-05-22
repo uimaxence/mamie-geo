@@ -263,24 +263,90 @@ la doc devient un cimetière.
 
 ---
 
-## 9. État du projet (snapshot — 2026-05-18)
+## 9. État du projet (snapshot — 2026-05-22)
 
-> Mise à jour 2026-05-18 — PR « Pattern signature blue »
+> Mise à jour 2026-05-22 — Phase C livrée + polish UI + pattern retiré
 >
-> - Damier diagonal 80×80 bleu primary `#329cff` ajouté comme signature
->   graphique de la marque (cf. doc 09 § 2026-05-18 + doc 10 § Pattern
->   signature). Asset : `/public/pattern.svg`. Composants : `<PatternBlock />`
->   et `<PatternBand />` dans `src/components/ui/pattern-block.tsx`. Classe
->   utilitaire bas niveau `.bg-pattern` (tinte via mask-image, variable
->   `--pattern-color`). Migration V0 : panel login (gradient warm orange
->   → pattern bleu xl bottom-left + asterisque terracotta → primary),
->   Hero (pattern soft top-right), AuditTeaser (blob terracotta → pattern
->   soft bottom-left), templates email `weekly-recap` et `welcome-paid`
->   (bande pattern 56 px en header, bg-color fallback `#329cff` pour
->   Outlook desktop). Le terracotta `--color-accent` reste actif sur les
->   usages non migrés (badges `tone="accent"`, glow ai) — bascule
->   progressive PR par PR. Règle d'usage : 1-2 placements par page max,
->   coin ou bande délimitée jamais fond plein.
+> **Phase C livrée** : tous les 5 providers LLM sont en place via la
+> séquence PR1-5 multi-LLM. Le tracker peut désormais tourner sur
+> Claude Haiku 4.5, Mistral Le Chat (`mistral-large-latest`), OpenAI
+> ChatGPT (`gpt-4o-mini` + web_search Responses API), Google Gemini
+> (`gemini-2.5-flash` + grounding Search), Perplexity (`sonar`, code
+> prêt en attente de la clé). Source de vérité : `getConfiguredLLMs()`
+> dans `src/lib/llm/index.ts` qui détecte automatiquement les
+> providers configurés (env var présente + IMPLEMENTED_LLMS true). Le
+> scheduler `/api/cron/schedule-runs` enqueue uniquement pour ces
+> LLMs. Smoke tests live validés sur 4 providers (Mistral ~$0.02,
+> OpenAI ~$0.01 avec 16 sources, Gemini ~$0.035 avec 14 sources).
+>
+> **PR6 KPI dashboard** : retrait du coût USD côté client (donnée
+> technique sans valeur métier), agrégat tous-LLMs des 3 stats
+> principales (au lieu de Claude only — bug d'héritage Phase A), 4e
+> stat = nouveau KPI **Part de voix** (terme glossaire officiel,
+> jamais calculé avant). Fonction pure `computePartDeVoix()` dans
+> `src/lib/metrics/part-de-voix.ts` (8 tests).
+>
+> **AppTopBar horizontale (pattern Vercel)** : workspace pill +
+> brand switcher + favicon en ligne en haut de l'app, sortis de la
+> sidebar verticale qui ne contient plus que logo + nav + user menu.
+> Composant `<BrandFavicon>` charge via Google s2 favicons avec
+> fallback gracieux (carré ink + initiale).
+>
+> **Refonte tableau runs en batches dépliables** (PR1 multi-LLM) :
+> 1 ligne = 1 batch (prompt × jour) au lieu de 1 ligne = 1 run.
+> Évite l'illisibilité 50 lignes avec 5 LLMs. Composant
+> `<BatchesTable>` réutilisable (dashboard + prompts/[id]), logique
+> de grouping pure dans `src/lib/runs/batches-grouping.ts` (12 tests).
+> Dots colorées par LLM dans l'ordre canonique + tooltip + dépliage
+> sur mini-table détail par LLM.
+>
+> **Newsletter blog Brevo** : form d'inscription `<BlogNewsletterForm>`
+> sur `/blog` + helpers `subscribeContactToBlogList` / 
+> `sendNewArticleNewsletter` dans `src/lib/email.ts` (API Brevo
+> /v3/contacts + /v3/emailCampaigns). Endpoint
+> `/api/blog/notify-publish` protégé `CRON_SECRET` appelé par le
+> launchd publication-mamie-geo.sh après chaque push d'article.
+> Nécessite `BREVO_BLOG_LIST_ID` en env (sinon skip gracieux).
+>
+> **Refonte audit by severity** (2026-05-22) : `/app/audits/[id]`
+> groupe désormais les checks par **sévérité** (critical / warning
+> / info) au lieu de status (fail / warn / pass). Composant
+> `<ChecksBySeverity>` à 3 sections dépliables fusionnées (trigger
+> et items dans la MÊME card, pas de cassure visuelle). Critical
+> + warning ouverts par défaut, info fermé (focus actionnable).
+> Empty state vert « Aucun problème critique 🎉 » si 0 critical.
+>
+> **Bulle notif sidebar audits** : compteur de checks `critical+fail`
+> non résolus sur le dernier audit par URL owned, affiché en
+> `<Badge tone="error">` à droite de l'item "Audits techniques" si
+> > 0. Calculé inline dans `loadSidebarData()`.
+>
+> **Background app gris #fafafa** (2026-05-22) : `body` utilise
+> `var(--color-surface)` (#fafafa) au lieu de `--color-bg` (#fff).
+> Cards / sidebar / topbar / tables restent en `bg-white` → émergent
+> visuellement, sensation "premium SaaS" type Linear/Vercel.
+>
+> **Pattern signature retiré** (2026-05-22) : après 4 itérations
+> (login xl primary, gradient bleu, ink coin 8%, primary full 5%),
+> validé comme fausse bonne idée. Suppression radicale du composant
+> `<PatternBlock>`, classes `bg-pattern*` du globals.css, asset
+> `pattern.svg`, 3 usages site (hero, audit-teaser, login) + 2
+> usages emails (welcome-paid bande top, weekly-recap pattern-band).
+> L'identité visuelle s'appuie sur logo + couleur primary +
+> CornerFrame + favicon.
+>
+> **Brand creation depuis BrandSwitcher** : `+ Ajouter une marque`
+> dans la modal dropdown du switcher. Server action `createBrand`
+> avec auth + rôle + quota check. Quota `brands` ajouté à
+> `quotasFor()` : Solo/Starter 1, Pro 3, Agency 10, Enterprise ∞.
+> Dialog UI à 2 modes (form ou CTA upgrade selon quota).
+>
+> **Em dashes `—` retirés** côté site (~130 fichiers touchés par
+> sed `s/ —/,/g`). Placeholders `"—"` (no value) préservés.
+>
+> Précédente (2026-05-18) : Pattern signature blue ajouté en
+> migration progressive du terracotta — **annulé 2026-05-22**, voir
+> entrée doc 09 du 2026-05-22.
 >
 > Précédente : Sprint 6 PR B (2026-05-17) — app /app/audits Premium :
 > - PR « charts vivants ». Côté audits : nouvelles tables DB
@@ -312,13 +378,14 @@ la doc devient un cimetière.
 
 ### Phase actuelle
 
-**Phases A et B livrées. Phase C entamée (dual backend Brevo).**
+**Phases A, B et C livrées. V0+ entamé.**
 
 Phasage acté le 2026-05-07 (cf. `09-decisions-journal.md` § 2026-05-07) :
 
 - **Phase A — Moteur sur Haiku 4.5 cheap** ✅
 - **Phase B — Design system + UI complète + marketing + blog SEO + onboarding + pages légales** ✅
-- **Phase C — Multi-LLM + Stripe + send_weekly_email + bascule Haiku → Sonnet 4.6** ⏳ entamée
+- **Phase C — Multi-LLM + Stripe + send_weekly_email** ✅ (livré 2026-05-18)
+- **V0+ — Polish UX + items veille concurrence + lancement public** ⏳ (entamé 2026-05-20)
 
 ### Livré
 
@@ -361,23 +428,36 @@ Phasage acté le 2026-05-07 (cf. `09-decisions-journal.md` § 2026-05-07) :
 
 ### Reste à faire
 
-**Court terme** :
+**Court terme — V0+ / pré-lancement** :
 
-1. **DNS Brevo** finalisé : DKIM/SPF/DMARC sur `mamie-geo.fr` pour pouvoir envoyer depuis `hello@mamie-geo.fr` validé.
-2. **Setup Stripe Dashboard prod** : créer products + prices LIVE, configurer webhook URL `https://mamie-geo.fr/api/webhooks/stripe`, activer Stripe Tax, configurer Customer Portal (autoriser switch entre Solo/Starter/Pro + cancellation).
+1. **Achat crédit Perplexity** ($50 minimum) puis ajout `PERPLEXITY_API_KEY` à Vercel env vars → 5e provider auto-activé via `getConfiguredLLMs()`, pas de redeploy nécessaire.
+2. **Setup `BREVO_BLOG_LIST_ID`** : créer la liste "Newsletter blog" dans Brevo dashboard puis copier l'ID dans Vercel env vars → form inscription `/blog` actif + notification auto à chaque article publié.
+3. **Hard launch public** : DNS Brevo (DKIM/SPF/DMARC) + Stripe LIVE déjà configurés selon user. Reste communication (LinkedIn, communautés FR).
+4. **Drip d'éducation post-signup** (remplace ancien trial nurture J+3/J+10 — plus de trial auto en V0).
+5. **Items V0+ veille concurrence** (cf. doc 02 § V0+) : URL drill-down `/app/sources/[id]`, per-prompt cadence, sources funnel 3 métriques (Apparition/Fréquence/Citation), pause/resume projects, save-as-PNG charts, CSV export, multi-select brand filter, comparison pages industrialisées, crawlabilité bots IA dans audit-technique, régénérer prompts depuis profil.
 
-**Phase C** (à entamer) :
+**Phase C livrée** (~~barré~~) :
 
-3. **Hard-cap enforcement worker** : `checkQuotaOrBlock()` dans `execute-prompt.ts` + email 60/100/200 %. PR dédiée.
-4. Providers OpenAI / Mistral / Perplexity / Google (1 PR par provider, slot derrière l'interface `LLMClient` existante)
-5. Bascule tracking par plan (Starter reste Haiku, Pro en Sonnet 4.6 quand prêt)
-6. **Drip d'éducation post-signup** (remplace ancien trial nurture J+3/J+10 — plus de trial auto en V0)
-7. ~~Stripe checkout + customer portal + webhook~~ — livré 2026-05-14 (128 tests verts, idempotence via `subscription_events.stripeEventId UNIQUE`)
-8. ~~Plan Solo + cadence per-plan + retrait Agency public~~ — livré 2026-05-14
-9. ~~Charts évolution dashboard~~ — livré 2026-05-12
-10. ~~Worker `send_weekly_email`~~ — livré 2026-05-13
-11. ~~Cron prod stuck~~ — résolu 2026-05-13
-12. ~~Pages CRUD app + Settings édition~~ — livré 2026-05-13
+- ~~Providers OpenAI / Mistral / Perplexity / Google~~ — livré 2026-05-18 (PR2-5 multi-LLM)
+- ~~Hard-cap enforcement worker~~ — livré 2026-05-16
+- ~~Stripe checkout + customer portal + webhook~~ — livré 2026-05-14
+- ~~Plan Solo + cadence per-plan + retrait Agency public~~ — livré 2026-05-14
+- ~~Charts évolution dashboard~~ — livré 2026-05-12
+- ~~Worker `send_weekly_email`~~ — livré 2026-05-13
+- ~~Cron prod stuck~~ — résolu 2026-05-13
+- ~~Pages CRUD app + Settings édition~~ — livré 2026-05-13
+
+**Polish UX 2026-05-20/22 livré** (~~barré~~) :
+
+- ~~Refonte tableau runs en batches dépliables (PR1)~~ — livré 2026-05-20
+- ~~PR6 KPI dashboard agrégat tous-LLMs + Part de voix + retrait coût USD~~ — livré 2026-05-20
+- ~~AppTopBar horizontale + favicon brand (pattern Vercel)~~ — livré 2026-05-20
+- ~~Newsletter blog Brevo + UX header /blog~~ — livré 2026-05-20
+- ~~Brand creation depuis BrandSwitcher + quotas brand~~ — livré 2026-05-20
+- ~~Refonte audit `/app/audits/[id]` par sévérité + bulle notif sidebar~~ — livré 2026-05-22
+- ~~Background app gris #fafafa~~ — livré 2026-05-22
+- ~~Retrait pattern signature blue (faux bonne idée)~~ — livré 2026-05-22
+- ~~Em dashes retirés côté site~~ — livré 2026-05-20
 
 ### Décisions Sprint 0 verrouillées (rappel)
 

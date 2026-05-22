@@ -161,7 +161,48 @@ haut et l'entrée "2026-05-05 — Réponses aux 10 questions de bootstrap".
 
 ### Décisions enregistrées
 
+#### 2026-05-22 — Phase C livrée + polish UX V0+ + retrait pattern signature (rollback 2026-05-18)
+
+**Contexte** : Période intense du 2026-05-18 au 2026-05-22 — clôture de la Phase C (multi-LLM + Stripe + emails) + démarrage V0+ (polish UX + items veille). Plusieurs décisions structurantes prises rapidement, à formaliser ensemble.
+
+**Décisions actées** :
+
+1. **Multi-LLM livré** (PR1-5 2026-05-18). Tous les 5 providers en place via `getConfiguredLLMs()` :
+   - Anthropic Claude Haiku 4.5 (Phase A, déjà en place)
+   - Mistral `mistral-large-latest` (PR2, sans web_search natif — à upgrader vers Mistral Agents API plus tard)
+   - OpenAI `gpt-4o-mini` + web_search Responses API (PR3)
+   - Google `gemini-2.5-flash` + grounding Search (PR4)
+   - Perplexity `sonar` (PR5, code prêt, activation à chaud dès `PERPLEXITY_API_KEY` settée — crédit min $50 en attente)
+   - Source de vérité : `src/lib/llm/index.ts` `getConfiguredLLMs()` + `IMPLEMENTED_LLMS` flags.
+   - Scheduler `/api/cron/schedule-runs` auto-détecte → enqueue runs pour les LLMs configurés uniquement.
+
+2. **PR6 KPI dashboard repensé** (2026-05-20). Le coût USD affiché aux 4 endroits client était de la donnée technique sans valeur métier (l'user paie un abonnement Stripe en €). Retiré partout côté client. Les 3 stats principales (Score, Marque citée, Top concurrent) étaient toujours Claude-only (héritage Phase A) → élargies à l'agrégat tous-LLMs. 4e stat = nouveau KPI **Part de voix** (terme glossaire officiel, jamais calculé jusque-là). Formule `brand / (brand + Σ concurrents) × 100`, fonction pure `computePartDeVoix()` dans `src/lib/metrics/part-de-voix.ts` (8 tests).
+
+3. **AppTopBar horizontale pattern Vercel** (2026-05-20). Sortie du workspace + brand pill de la sidebar verticale vers une top bar sticky horizontale. Composant `<BrandFavicon>` charge l'icône du domaine via Google s2 favicons API avec fallback (carré ink + initiale). Sidebar simplifiée : logo + nav + user menu uniquement.
+
+4. **Pattern signature blue RETIRÉ** (rollback de la décision 2026-05-18). Après 4 itérations sur `/login` (xl primary 100%, gradient bleu radial, ink coin opacity 8%, primary full-width 5%), aucune n'a convaincu sur l'équilibre lisibilité × signature. Conclusion : faux bonne idée. Suppression radicale : composant `<PatternBlock>`, classes CSS `.bg-pattern*`, assets `/public/pattern.svg` + `/src/assets/pattern.svg`, 3 usages site (hero, audit-teaser, login) + 2 usages emails (welcome-paid bande top, weekly-recap pattern-band). L'identité visuelle s'appuie désormais sur logo + couleur primary + CornerFrame + favicon brand dans la top bar. Le terracotta `--color-accent` reste actif sur badges/CTAs comme avant 2026-05-18.
+
+5. **Background app gris `#fafafa`** (2026-05-22). `body` utilise `var(--color-surface)` (#fafafa) au lieu de `--color-bg` (#fff). Cards / sidebar / topbar / tables restent en `bg-white` → émergent visuellement, sensation "premium SaaS" type Linear/Vercel. Aligné avec doc 10 mais corrige la règle « fond toujours blanc » qui devient « cards toujours blanches sur fond gris ».
+
+6. **Refonte audit by severity** (2026-05-22). `/app/audits/[id]` groupe les checks par **sévérité** (critical/warning/info) au lieu de status (fail/warn/pass). Composant `<ChecksBySeverity>` : 3 sections dépliables FUSIONNÉES (le trigger header et les items checks vivent dans la même card, pas de cassure visuelle entre "Critique 3" et les 3 cards critiques). Critical + warning ouverts par défaut, info fermé. Bulle de notification rouge sur l'item sidebar "Audits techniques" si checks `critical+fail` non résolus > 0 (somme sur dernier audit par URL owned).
+
+7. **Brand creation depuis BrandSwitcher** (2026-05-20). Server action `createBrand` dans `src/lib/brands/actions.ts` avec auth + rôle owner/admin + quota check. Nouveau champ `brands` dans `PlanQuotas` : Solo/Starter 1, Pro 3, Agency 10, Enterprise illimité. Dialog UI à 2 modes (form ou CTA upgrade).
+
+8. **Newsletter blog Brevo** (2026-05-20). Form inscription sur `/blog` + helpers `subscribeContactToBlogList` / `sendNewArticleNewsletter` dans `src/lib/email.ts`. Endpoint `/api/blog/notify-publish` (protégé `CRON_SECRET`) appelé par le launchd publication-mamie-geo.sh après chaque push d'article → broadcast Brevo à la liste `BREVO_BLOG_LIST_ID`.
+
+9. **Em dashes `—` retirés côté site** (2026-05-20). Sed `s/ —/,/g` global sur src/app, src/components, src/content, src/lib/email. Placeholders `"—"` (no value) préservés.
+
+**Conséquences** :
+- doc 10 § Pattern signature à retirer (devenu obsolète).
+- doc 10 règle « fond toujours blanc » à reformuler : « cards toujours blanches sur fond gris #fafafa ».
+- doc 03 § Quotas par plan à updater avec le champ `brands`.
+- Phase C marquée livrée dans CLAUDE.md § 9, V0+ entamé.
+
+**À revisiter** : si traction user / feedback signale un manque de signature visuelle distinctive après le retrait pattern, ouvrir un nouveau ticket design (mais pas de damier — autre piste type ligne diagonale, gradient subtil, ou pictogramme).
+
 #### 2026-05-18 — Pattern signature blue (damier diagonal) remplace progressivement le terracotta
+
+> ⚠️ **ROLLBACK 2026-05-22** : cette décision a été annulée 4 jours après. Voir entrée 2026-05-22 ci-dessus pour la décision finale (suppression complète du pattern). Conservé en historique.
 
 **Contexte** : Max a livré une banner LinkedIn qui utilise un motif damier diagonal 80×80 en bleu primary sur fond blanc, occupant ~20 % du côté gauche. Le rendu est mémorable et distinctif. Il a déposé le pattern dans `src/assets/pattern.svg` et demande qu'il devienne un élément du design system : remplacer le dégradé orange du login, le poser sur 1-2 sections de la home, l'ajouter aux templates email.
 

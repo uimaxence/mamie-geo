@@ -12,7 +12,7 @@
 
 **Règles dures** :
 
-- Fond **toujours blanc** `#FFFFFF`, jamais teinté (pas de crème, pas de bleu, pas de gradient).
+- Fond **gris doux `#fafafa`** sur `body` (mise à jour 2026-05-22, cf. doc 09). Les surfaces qui doivent émerger (cards, sidebar, topbar, tables, items, dialogs) restent en `bg-white` `#FFFFFF`. Jamais d'autre teinte que ce gris/blanc (pas de crème, pas de bleu, pas de gradient pour le fond global).
 - Couleurs principales : **nuances de gris uniquement** (gray-50 → gray-950, alignées Tailwind v4).
 - **Une seule police** : **Inter** via `next/font/google` (weights 400/500/600/700 chargés). Pas de serif, pas de mono, pas de seconde famille typographique. Inter est le standard de fait des SaaS modernes — neutre, lisible, glyphs alternatifs activés via `font-feature-settings: "cv11", "ss01", "tnum"`.
 - **Pas d'italique** (ni en CSS, ni dans les balises `<em>` qui sont neutralisées en `font-style: normal`).
@@ -42,36 +42,19 @@ Inspirations directes : screen 1 du brief (status dot avec glow + cross-hairs Ac
 
 Icônes : **`lucide-react`** ajouté en dépendance (set d'icônes sans-serif léger, tree-shake natif). Imports nommés pour ne pas alourdir le bundle.
 
-### Pattern signature (update 2026-05-18 — banner LinkedIn Max)
+### ~~Pattern signature damier~~ — RETIRÉ 2026-05-22
 
-Damier diagonal 80×80 stocké dans `/public/pattern.svg`, tinté en bleu primary `#329cff`. Décision actée 2026-05-18 (cf. `09-decisions-journal.md`) : **le pattern devient la signature graphique mémorable de la marque** et remplace progressivement les usages du terracotta `#C5532E` comme accent expressif.
-
-**Pourquoi** : un logo + un mot-clé ne suffisent pas à créer une signature mémorable. Le damier bleu, vu une fois en grand sur le login ou un email, devient associatif (cf. damier Burberry, vagues Mamilove, lignes Hellobank). Le terracotta gardait un fil chaleureux mais n'avait pas de forme — il était facile à confondre avec n'importe quel SaaS « accent orange ».
-
-**Phase de transition** : le terracotta `--color-accent` n'est PAS retiré du code en V0. Il reste actif sur les usages non explicitement migrés (badges `tone="accent"`, certains glow). Migration progressive PR par PR au fil des refontes de sections.
-
-**Patterns d'usage** (composants `<PatternBlock />` et `<PatternBand />` dans `src/components/ui/pattern-block.tsx`, classe utilitaire `.bg-pattern` dans `globals.css`) :
-
-1. **`<PatternBlock corner="bottom-left" tone="primary" size="xl" />`** — bloc carré qui déborde hors du parent (offset 1/3 hors-cadre, ref banner LinkedIn). Quatre coins disponibles, quatre tailles (`sm 160` / `md 240` / `lg 360` / `xl 520` px). À utiliser en signature forte (panel login, hero, section audit).
-2. **`<PatternBand position="top" />`** — bande horizontale fine (24-56 px) qui court sur toute la largeur. À utiliser en header d'email ou de section neutre. Plus discret qu'un bloc, plus signature qu'un trait.
-3. **`.bg-pattern`** — classe utilitaire bas niveau. Tinte via `mask-image` donc la couleur se contrôle par `background-color` (variable `--pattern-color`). Variants `.bg-pattern-soft` (30 % opacity), `.bg-pattern-white`, `.bg-pattern-ink`.
-
-**Règles d'usage** :
-
-- **1 à 2 placements par page maximum**. Le pattern doit rester un événement visuel, pas une texture omniprésente.
-- Toujours en **coin ou bande délimitée**, jamais en fond plein d'une section. Si un fond pattern plein devient nécessaire un jour, créer un variant `tinted-pattern` dans `<Section />` mais l'éviter par défaut.
-- **Tone soft (30 %)** quand le pattern partage l'espace avec du texte ou un mockup (hero, sections content). **Tone full** quand il est seul en signature (panel login, header email).
-- **Tile size** : 56-104 px côté UI desktop, 24-56 px côté emails. Au-delà de 120 px la trame devient trop chunky et perd son côté motif ; en dessous de 24 px elle devient illisible et ressemble à du bruit.
-- **Couleur** : bleu primary `#329cff` par défaut. Variants `white` (sur fond sombre) et `ink` (signature super-discrète). Pas de version terracotta (le bleu reste la couleur signature).
-- Toujours `aria-hidden` + `pointer-events-none` : décoratif uniquement, jamais cliquable, jamais lu par les screen readers.
-
-**Implémentations V0** (à étendre PR par PR) :
-
-- `/login` — panel gauche en signature pleine (bottom-left size xl).
-- Home `<Hero>` — soft top-right size lg.
-- Home `<AuditTeaser>` — soft bottom-left size lg (remplace l'ancien blob radial terracotta).
-- Email `weekly-recap` — bande horizontale 56 px en header.
-- Email `welcome-paid` — bande horizontale 56 px en header (à l'intérieur du conteneur card).
+> ⚠️ **Section archivée**. Le pattern damier signature actée le 2026-05-18 a été **complètement retiré** le 2026-05-22 après 4 itérations infructueuses sur `/login` (xl primary, gradient bleu, ink coin 8%, primary full 5%). Aucune n'a convaincu sur l'équilibre lisibilité × signature visuelle. Cf. doc 09 § 2026-05-22 (rollback).
+>
+> Conséquences :
+> - Composant `<PatternBlock>` + `<PatternBand>` supprimés.
+> - Classes CSS `.bg-pattern*` retirées de `globals.css`.
+> - Assets `/public/pattern.svg` + `src/assets/pattern.svg` supprimés.
+> - 3 usages site retirés (hero, audit-teaser, login) + 2 usages emails (welcome-paid, weekly-recap).
+>
+> L'identité visuelle s'appuie désormais sur : logo + couleur primary `#329cff` (boutons, accents) + `<CornerFrame>` (signature print subtile autour du hero) + favicon brand dans la top bar app. Le terracotta `--color-accent` reste actif sur badges `tone="accent"` et CTAs comme avant la décision 2026-05-18.
+>
+> **À ne pas ré-introduire** sans validation explicite + démonstration que le problème de lisibilité × signature trouvé pendant les 4 itérations 2026-05-18→22 est résolu.
 
 ### Patterns dashboard (update 2026-05-12 — refs screens partagés par Max)
 
