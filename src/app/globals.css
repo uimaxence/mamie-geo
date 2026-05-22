@@ -269,7 +269,10 @@
 
   html,
   body {
-    background-color: var(--color-bg);
+    /* Fond global gris doux #fafafa (2026-05-22) : les cards/sidebar/
+     * topbar/tables restent en `bg-white` (--color-bg) pour contraster
+     * et émerger sur ce fond. */
+    background-color: var(--color-surface);
     color: var(--color-ink);
     font-family: var(--font-sans);
     font-feature-settings:
