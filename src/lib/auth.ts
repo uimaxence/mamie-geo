@@ -36,9 +36,11 @@ const trustedOrigins = [
 // sont présentes. Pattern défensif identique aux providers LLM
 // (cf. `getConfiguredLLMs()`) : code en place, activation par env.
 //
-// Quand les vars manquent → seul magic-link reste actif, pas de crash,
-// le bouton "Continuer avec Google" côté login détecte l'absence via
-// `NEXT_PUBLIC_GOOGLE_OAUTH_ENABLED` et se hide gracieusement.
+// Quand les vars manquent → seul magic-link reste actif, pas de crash.
+// Côté UI, `/login` est un server component qui lit la même condition
+// et passe `googleEnabled: boolean` en prop au client `<LoginContent>`
+// (cf. src/app/login/page.tsx) — pas d'env var NEXT_PUBLIC_ exposée
+// au browser pour rester source-of-truth côté serveur.
 const socialProviders =
   env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET
     ? {

@@ -43,6 +43,19 @@ function citedPayload(brandMentioned = true) {
   };
 }
 
+/**
+ * Payload avec sentiment custom — utilisé pour tester
+ * `dominantBrandSentiment` et `brandSentiment` par run.
+ */
+function payloadWithSentiment(
+  brandMentioned: boolean,
+  brandSentiment: "positive" | "neutral" | "negative",
+) {
+  return {
+    scoring: { brandMentioned, brandSentiment, competitorsMentioned: [] },
+  };
+}
+
 function skippedPayload() {
   return { scoring: { skipped: true as const } };
 }
@@ -250,5 +263,91 @@ describe("groupRunsIntoBatches", () => {
 
     const batches = groupRunsIntoBatches(runs, 10);
     expect(batches[0]!.latestExecutedAt?.toISOString()).toBe("2026-05-18T06:00:30.000Z");
+  });
+
+  // ───────────────────────────────────────────────────────────────────
+  // Tests sentiment (KPI business introduit 2026-05-26 en remplacement
+  // de la colonne "Durée" dans <BatchesTable>).
+  // Cf. computeDominantSentiment dans batches-grouping.ts.
+  // ───────────────────────────────────────────────────────────────────
+
+  it("brandSentiment par run : extrait du payload ou skipped/unscored", () => {
+    const runs: RawRunRow[] = [
+      makeRun({
+        id: "r1",
+        llm: "chatgpt",
+        parsedBrands: payloadWithSentiment(true, "positive"),
+      }),
+      makeRun({
+        id: "r2",
+        llm: "claude",
+        parsedBrands: payloadWithSentiment(false, "neutral"),
+      }),
+      makeRun({ id: "r3", llm: "perplexity", parsedBrands: skippedPayload() }),
+      makeRun({ id: "r4", llm: "gemini", parsedBrands: null }),
+    ];
+
+    const batches = groupRunsIntoBatches(runs, 10);
+    const byId = new Map(batches[0]!.runs.map((r) => [r.id, r]));
+
+    expect(byId.get("r1")?.brandSentiment).toBe("positive");
+    expect(byId.get("r2")?.brandSentiment).toBe("neutral");
+    expect(byId.get("r3")?.brandSentiment).toBe("skipped");
+    expect(byId.get("r4")?.brandSentiment).toBe("unscored");
+  });
+
+  it("dominantBrandSentiment = 'positive' avec majorité stricte (3/4)", () => {
+    const runs: RawRunRow[] = [
+      makeRun({ id: "r1", llm: "chatgpt", parsedBrands: payloadWithSentiment(true, "positive") }),
+      makeRun({ id: "r2", llm: "claude", parsedBrands: payloadWithSentiment(true, "positive") }),
+      makeRun({ id: "r3", llm: "perplexity", parsedBrands: payloadWithSentiment(true, "positive") }),
+      makeRun({ id: "r4", llm: "gemini", parsedBrands: payloadWithSentiment(true, "neutral") }),
+    ];
+
+    const batches = groupRunsIntoBatches(runs, 10);
+    expect(batches[0]!.summary.dominantBrandSentiment).toBe("positive");
+  });
+
+  it("dominantBrandSentiment = 'mixed' sur égalité 2-2 (pas de majorité stricte)", () => {
+    const runs: RawRunRow[] = [
+      makeRun({ id: "r1", llm: "chatgpt", parsedBrands: payloadWithSentiment(true, "positive") }),
+      makeRun({ id: "r2", llm: "claude", parsedBrands: payloadWithSentiment(true, "positive") }),
+      makeRun({ id: "r3", llm: "perplexity", parsedBrands: payloadWithSentiment(true, "negative") }),
+      makeRun({ id: "r4", llm: "gemini", parsedBrands: payloadWithSentiment(true, "negative") }),
+    ];
+
+    const batches = groupRunsIntoBatches(runs, 10);
+    expect(batches[0]!.summary.dominantBrandSentiment).toBe("mixed");
+  });
+
+  it("dominantBrandSentiment = 'absent' quand scoring abouti mais aucune mention", () => {
+    const runs: RawRunRow[] = [
+      makeRun({ id: "r1", llm: "chatgpt", parsedBrands: citedPayload(false) }),
+      makeRun({ id: "r2", llm: "claude", parsedBrands: citedPayload(false) }),
+    ];
+
+    const batches = groupRunsIntoBatches(runs, 10);
+    expect(batches[0]!.summary.dominantBrandSentiment).toBe("absent");
+  });
+
+  it("dominantBrandSentiment = null si aucun run scoré (tous skipped/unscored)", () => {
+    const runs: RawRunRow[] = [
+      makeRun({ id: "r1", llm: "chatgpt", parsedBrands: skippedPayload() }),
+      makeRun({ id: "r2", llm: "claude", parsedBrands: null }),
+    ];
+
+    const batches = groupRunsIntoBatches(runs, 10);
+    expect(batches[0]!.summary.dominantBrandSentiment).toBeNull();
+  });
+
+  it("dominantBrandSentiment = 'negative' avec majorité stricte (2/3)", () => {
+    const runs: RawRunRow[] = [
+      makeRun({ id: "r1", llm: "chatgpt", parsedBrands: payloadWithSentiment(true, "negative") }),
+      makeRun({ id: "r2", llm: "claude", parsedBrands: payloadWithSentiment(true, "negative") }),
+      makeRun({ id: "r3", llm: "perplexity", parsedBrands: payloadWithSentiment(true, "positive") }),
+    ];
+
+    const batches = groupRunsIntoBatches(runs, 10);
+    expect(batches[0]!.summary.dominantBrandSentiment).toBe("negative");
   });
 });
