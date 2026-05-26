@@ -6,6 +6,7 @@ import { brands, workspaceMembers, workspaces } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { getDashboardData } from "@/lib/dashboard/queries";
 import { Badge, Card, CardBody, CardHeader } from "@/components/ui";
+import { AccountDangerZone } from "./account-danger-zone";
 import { BillingSection } from "./billing-section";
 import { BrandAliasesForm } from "./brand-aliases-form";
 import { SignOutButton } from "./sign-out-button";
@@ -157,16 +158,28 @@ export default async function SettingsPage({ searchParams }: PageProps) {
           </dl>
         </SectionCard>
 
-        {/* Danger zone, pas dans une Card pour ne pas la "normaliser" */}
-        <section className="mt-4 rounded-[var(--radius-xl)] border border-[color:var(--color-error)]/20 bg-[color:var(--color-error-bg)] p-6">
-          <h2 className="type-h3 text-[color:var(--color-error)]">Zone sensible</h2>
+        {/* Déconnexion : action douce, pas de Card pour rester distinct
+         * de la danger zone RGPD (suppression / export). */}
+        <section className="mt-4 rounded-[var(--radius-xl)] border border-[color:var(--color-border)] bg-white p-6">
+          <h2 className="type-h3">Déconnexion</h2>
           <p className="type-body mt-2 text-sm">
-            La déconnexion ne supprime rien. Tu pourras te reconnecter à tout moment via le
+            Te déconnecter ne supprime rien. Tu pourras te reconnecter à tout moment via le
             magic-link envoyé sur <strong>{session.user.email}</strong>.
           </p>
           <div className="mt-5">
             <SignOutButton />
           </div>
+        </section>
+
+        {/* Danger zone RGPD : export (article 20) + suppression (article 17).
+         * Pas dans une Card pour ne pas la « normaliser », bordure error
+         * et fond rouge clair pour signaler la sensibilité. */}
+        <section className="mt-4 rounded-[var(--radius-xl)] border border-[color:var(--color-error)]/20 bg-[color:var(--color-error-bg)] p-6">
+          <h2 className="type-h3 text-[color:var(--color-error)]">Zone sensible — RGPD</h2>
+          <p className="type-body mt-2 mb-6 text-sm">
+            Tes droits sur tes données personnelles. Export et suppression définitive.
+          </p>
+          <AccountDangerZone userEmail={session.user.email} />
         </section>
       </div>
     </main>
