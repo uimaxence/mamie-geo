@@ -35,7 +35,7 @@ export default async function RunsPage() {
   const batches = await getRunBatches({ brandId: brand.id, limit: 50 });
 
   return (
-    <div>
+    <div className="mx-auto max-w-6xl px-6 py-12 lg:px-10">
       <header className="mb-8">
         <h1 className="type-h1">Runs</h1>
         <p className="type-body mt-2 text-[color:var(--color-ink-soft)]">
