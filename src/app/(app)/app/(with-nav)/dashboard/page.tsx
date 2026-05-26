@@ -175,12 +175,6 @@ export default async function DashboardPage() {
         />
       </section>
 
-      <footer className="mt-20">
-        <p className="type-meta">
-          Phase A, moteur sur Claude Haiku 4.5 uniquement. Bascule Sonnet 4.6 et 4 autres LLMs en
-          Phase C. Détail dans <code>geo-project/09-decisions-journal.md</code> § 2026-05-07.
-        </p>
-      </footer>
     </div>
   );
 }

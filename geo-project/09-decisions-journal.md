@@ -161,6 +161,34 @@ haut et l'entrée "2026-05-05 — Réponses aux 10 questions de bootstrap".
 
 ### Décisions enregistrées
 
+#### 2026-05-26 — Polish "belle V0" pré-lancement + CTA prix dans le bouton + stats honnêtes
+
+**Contexte** : Avant hard launch public, audit comparatif vs getmint.ai (concurrent FR direct). Trois piliers conversion manquaient à la home : preuve produit visible (que des mockups CSS, zéro screenshot dashboard réel), garanties affichées (la garantie 14j enterrée en FAQ pricing, jamais surfacée hero), différenciation concurrentielle prouvée (aucune page comparative dédiée).
+
+**Décisions actées** :
+
+1. **CTA hero : prix dans le bouton** (pattern Linear/Vercel). Avant : "Voir les plans →". Après : **"Démarrer — 9,99 €/mois"** + microcopy "Garantie remboursement 14 jours · Sans engagement · Hébergé EU". Idem sur le nouveau `<FinalCTA>` avant footer et sur la page `/vs/profound`. Justification : anti-friction maximum, l'utilisateur sait à quoi s'attendre, la garantie 14j fait disparaître le risque psychologique sur 9,99 €/mois.
+
+2. **Pas de testimonials inventés** (rejet du pattern Mint "200+ marques nous font confiance"). À la place : composant `<ProofStrip>` avec 3 stats produit factuelles ("5 IA trackées · 30+ checks gratuits · 10 min pour le 1ᵉʳ rapport"). Justification : intégrité > preuve sociale faible. Bascule en `<Testimonials>` quand 3+ vrais clients pilote acceptent d'apparaître nommément.
+
+3. **TrustStrip placé après PourquoiMaintenant** (et non sous Hero comme initialement prévu). Le `mb-[-200px]` du `<HeroDataShowcase>` desktop fait plonger les 4 cartes tiltées dans la section noire ; mettre TrustStrip (fond tinted gris) entre Hero et PourquoiMaintenant aurait cassé cette coupe signature. Trade-off accepté : trust apparaît juste après le 1ᵉʳ chapitre noir du narratif, toujours haut dans le scroll.
+
+4. **Mobile hero data showcase ajouté** : variante `md:hidden` avec 2 cards simplifiées (Score + Évolution) dans `<HeroDataShowcase>`. Avant : `hidden md:flex` → invisible sur 60%+ du trafic. Pas de tilt ni hover-lift sur mobile.
+
+5. **Page `/vs/profound` créée** : landing comparative single-route recyclant 80% du contenu de l'article blog `mamie-geo-vs-profound.mdx`. Table 3 colonnes (Critère / Profound / Mamie GEO) + cards face-à-face + FAQ + CTA. SEO cible "alternative Profound" en FR (zéro compétition). Mêmes templates `/vs/mint` et `/vs/peec` à venir en P1.
+
+6. **Section product tour préparée mais en attente** : composant `<ProductTour>` créé + script `pnpm seed:demo` (marque fictive "La Maison Verte" + 30j de citation_metrics_daily déterministes). Captures réelles à produire par Max — composant pas inclus dans `page.tsx` tant que les `.webp` n'existent pas dans `public/marketing/dashboard/`.
+
+7. **Footer nettoyé** : retrait du lien mort `/docs`, ajout colonne "Comparatifs" (`/vs/profound`), ajout bloc trust RGPD (icône bouclier + "Hébergement EU · RGPD natif · DPA disponible · 0 tracker publicitaire") au-dessus du copyright.
+
+**Conséquences attendues** : conversion home améliorée par 2-3 leviers cumulatifs (prix transparent, garantie immédiate, démo visuelle bientôt). SEO "alternative Profound FR" capturé. Crédibilité compliance vs concurrents US renforcée.
+
+**Reste à faire pour la "belle V0" complète** : captures dashboard + activation `<ProductTour>` ; décision export CSV (implémenter endpoint `/api/export/runs.csv` ou afficher "Bientôt" dans la future section intégrations P1.3) ; pages comparatives `/vs/mint` et `/vs/peec` (P1) ; section intégrations & exports (P1).
+
+**À revisiter** : sous 3 mois après lancement public, ou dès 3 vrais clients pilote acceptent un testimonial → bascule `<ProofStrip>` en `<Testimonials>` côté hero.
+
+---
+
 #### 2026-05-22 — Phase C livrée + polish UX V0+ + retrait pattern signature (rollback 2026-05-18)
 
 **Contexte** : Période intense du 2026-05-18 au 2026-05-22 — clôture de la Phase C (multi-LLM + Stripe + emails) + démarrage V0+ (polish UX + items veille). Plusieurs décisions structurantes prises rapidement, à formaliser ensemble.

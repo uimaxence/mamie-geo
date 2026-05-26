@@ -32,6 +32,23 @@ const trustedOrigins = [
   process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null,
 ].filter((o): o is string => Boolean(o));
 
+// Social providers : actifs uniquement si les deux env vars Google
+// sont présentes. Pattern défensif identique aux providers LLM
+// (cf. `getConfiguredLLMs()`) : code en place, activation par env.
+//
+// Quand les vars manquent → seul magic-link reste actif, pas de crash,
+// le bouton "Continuer avec Google" côté login détecte l'absence via
+// `NEXT_PUBLIC_GOOGLE_OAUTH_ENABLED` et se hide gracieusement.
+const socialProviders =
+  env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET
+    ? {
+        google: {
+          clientId: env.GOOGLE_CLIENT_ID,
+          clientSecret: env.GOOGLE_CLIENT_SECRET,
+        },
+      }
+    : undefined;
+
 export const auth = betterAuth({
   baseURL: env.BETTER_AUTH_URL,
   secret: env.BETTER_AUTH_SECRET,
@@ -41,6 +58,7 @@ export const auth = betterAuth({
     schema: { user, session, account, verification },
   }),
   emailAndPassword: { enabled: false },
+  socialProviders,
   plugins: [
     magicLink({
       expiresIn: 60 * 10, // 10 minutes

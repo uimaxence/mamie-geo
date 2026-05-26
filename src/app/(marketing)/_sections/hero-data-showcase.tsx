@@ -177,7 +177,46 @@ function MiniShareBars() {
 export function HeroDataShowcase() {
   return (
     <TooltipProvider delayDuration={150}>
-      {/* mb-[-280px] : 280 px cachés dans la section sombre (carte
+      {/* Variante mobile (< md). Ajoutée 2026-05-26 (P0.3 plan V0) :
+       * avant cette date, le bloc desktop était `hidden md:flex` →
+       * invisible sur mobile, perte de preuve visuelle sur 60%+ du
+       * trafic. Ici : 2 cards seulement (Score + Évolution suffisent),
+       * stack vertical, pas de tilt, pas de hover-lift, pas de coupe
+       * (TrustStrip qui suit est sur fond tinted, pas noir → pas de
+       * coupe possible).
+       *
+       * Pas dans TooltipProvider hors-effet sur mobile (tooltips Radix
+       * non-déclenchables au tap pur). Cards rendues telles quelles. */}
+      <div className="mx-auto mt-12 grid max-w-md grid-cols-1 gap-4 px-6 md:hidden">
+        <div className="rounded-[var(--radius-xl)] border border-[color:var(--color-border)] bg-white p-6 shadow-[var(--shadow-md)]">
+          <CardHeading icon={Sparkles} label="Score visibilité" />
+          <div className="flex items-baseline gap-2">
+            <span className="font-semibold text-6xl leading-none tracking-tighter text-[color:var(--color-ink)]">
+              67
+            </span>
+            <span className="text-base text-[color:var(--color-muted)]">/ 100</span>
+          </div>
+          <div className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-[color:var(--color-success-bg)] px-2.5 py-1 text-xs font-semibold text-[color:var(--color-success)]">
+            <ArrowUpRight size={13} strokeWidth={2.5} />
+            +12 % vs J-7
+          </div>
+          <p className="mt-3 text-xs text-[color:var(--color-muted)]">Claude · sur 100</p>
+        </div>
+
+        <div className="rounded-[var(--radius-xl)] border border-[color:var(--color-border)] bg-white p-6 shadow-[var(--shadow-md)]">
+          <CardHeading icon={Activity} label="Évolution 7 j" />
+          <MiniLineChart />
+          <div className="mt-3 flex items-baseline gap-2">
+            <span className="font-semibold text-2xl leading-none tracking-tight text-[color:var(--color-ink)]">
+              +28 %
+            </span>
+            <span className="text-xs text-[color:var(--color-muted)]">sur 7 jours · 3 IA</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Desktop : 4 cartes tiltées avec coupe par section sombre.
+       * mb-[-280px] : 280 px cachés dans la section sombre (carte
        * ~440 px, ~160 px visibles dans le hero blanc). Au hover, +80 px
        * remontent → 240 px visibles, 200 px restent cachés. La coupe
        * reste active pendant tout le hover. */}

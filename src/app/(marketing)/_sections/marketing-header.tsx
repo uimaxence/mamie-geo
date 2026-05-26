@@ -1,10 +1,13 @@
 import Link from "next/link";
 import { LinkButton } from "@/components/ui";
 import { Logo } from "@/components/marketing/logo";
+import { MarketingMobileNav } from "./marketing-mobile-nav";
 
 // Header marketing, logo à gauche, à droite : nav items + séparateur
 // vertical fin + auth buttons. Réorganisé 2026-05-13 suite retour Max
-// (avant : nav au centre, séparé).
+// (avant : nav au centre, séparé). Burger mobile ajouté 2026-05-23
+// (avant : nav `hidden sm:flex` sans alternative → pages inaccessibles
+// depuis mobile).
 //
 // Tous les liens internes via next/link (exigence ESLint
 // @next/next/no-html-link-for-pages).
@@ -58,7 +61,10 @@ export function MarketingHeader() {
            * à séparer). */}
           <span aria-hidden className="hidden h-5 w-px bg-[color:var(--color-border)] sm:block" />
 
-          <div className="flex items-center gap-3">
+          {/* Desktop : Connexion + CTA. Mobile : tout dans le burger
+           * (cf. MarketingMobileNav) pour éviter d'avoir 3 éléments
+           * tassés à droite sur petits écrans. */}
+          <div className="hidden items-center gap-3 sm:flex">
             <Link
               href="/login"
               className="text-sm font-medium text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]"
@@ -69,6 +75,8 @@ export function MarketingHeader() {
               Se connecter
             </LinkButton>
           </div>
+
+          <MarketingMobileNav />
         </div>
       </div>
     </header>

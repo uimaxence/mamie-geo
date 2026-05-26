@@ -20,6 +20,7 @@
     "test:e2e": "playwright test",
     "llm:record": "node --import tsx scripts/record-llm-cassette.ts",
     "seed:dev": "node --import tsx scripts/seed-dev.ts",
+    "seed:demo": "node --import tsx scripts/seed-demo.ts",
     "smoke:pipeline": "node --import tsx scripts/smoke-test-pipeline.ts",
     "check:metrics": "node --import tsx scripts/check-metrics.ts",
     "test:smtp": "node --import tsx scripts/test-smtp.ts",

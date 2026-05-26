@@ -1,6 +1,7 @@
 import { BottomFade } from "@/components/ui";
 import { AuditTeaser } from "./_sections/audit-teaser";
 import { FAQ } from "./_sections/faq";
+import { FinalCTA } from "./_sections/final-cta";
 import { Hero } from "./_sections/hero";
 import { HowItWorks } from "./_sections/how-it-works";
 import { LLMBadges } from "./_sections/llm-badges";
@@ -9,9 +10,11 @@ import { MarketingHeader } from "./_sections/marketing-header";
 import { NEstPas } from "./_sections/nest-pas";
 import { PourQui } from "./_sections/pour-qui";
 import { PourquoiMaintenant } from "./_sections/pourquoi-maintenant";
+import { ProofStrip } from "./_sections/proof-strip";
 import { SansAvec } from "./_sections/sans-avec";
 import { TesConcurrentsPasToi } from "./_sections/tes-concurrents-pas-toi";
 import { TesOutils } from "./_sections/tes-outils";
+import { TrustStrip } from "./_sections/trust-strip";
 
 // Home, orchestrateur. Chaque section vit dans _sections/.
 // PR 12b : BottomFade ajouté (effet d'ambiance fixed bottom).
@@ -30,15 +33,24 @@ export default function HomePage() {
       <MarketingHeader />
       <Hero />
       <PourquoiMaintenant />
+      {/* TrustStrip placé après PourquoiMaintenant et non sous Hero :
+       * sinon le `mb-[-200px]` du <HeroDataShowcase> desktop ferait
+       * plonger les 4 cartes tiltées dans un fond gris (tinted) au
+       * lieu de la section noire — coupe désign cassée. Ici les
+       * garanties apparaissent juste après le 1ᵉʳ chapitre noir du
+       * narratif et avant la démo LLM live. */}
+      <TrustStrip />
       <TesConcurrentsPasToi />
       <AuditTeaser />
       <LLMBadges />
+      <ProofStrip />
       <SansAvec />
       <HowItWorks />
       <TesOutils />
       <PourQui />
       <NEstPas />
       <FAQ />
+      <FinalCTA />
       <MarketingFooter />
       <BottomFade />
     </>

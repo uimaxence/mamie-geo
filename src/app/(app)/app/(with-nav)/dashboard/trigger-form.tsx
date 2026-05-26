@@ -53,9 +53,8 @@ export function TriggerRunForm() {
         <DialogHeader>
           <DialogTitle>Lancer un run maintenant ?</DialogTitle>
           <DialogDescription>
-            Tous les prompts actifs seront exécutés sur les LLMs trackés (Phase A : Claude
-            uniquement). Coût estimé ~$0,01 par prompt. Les jobs idempotents déjà en cours seront
-            ignorés.
+            Tous tes prompts actifs seront exécutés sur les IA trackées. Les jobs déjà en cours sur
+            la même journée seront ignorés (idempotence).
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>

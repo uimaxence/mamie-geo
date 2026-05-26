@@ -1,13 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronRight } from "lucide-react";
+import { Bot, Cat, ChevronRight, MessageCircle, Search, Sparkles, type LucideIcon } from "lucide-react";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
   EmptyState,
-  StatusDot,
   Tooltip,
   TooltipContent,
   TooltipProvider,
@@ -15,13 +14,27 @@ import {
   Badge,
 } from "@/components/ui";
 import { RunStatusBadge } from "@/components/app/run-status-badge";
-import { LLM_LABELS } from "@/components/charts/llm-colors";
+import { LLM_COLORS, LLM_LABELS } from "@/components/charts/llm-colors";
 import { cn } from "@/lib/utils";
 import {
   LLM_ORDER,
+  type BatchDominantSentiment,
   type RunBatch,
   type RunBatchEntry,
 } from "@/lib/runs/batches-grouping";
+import type { LLMValue } from "@/lib/llm";
+
+// Map LLM → icône Lucide identifiée (même mapping que <LLMPill>).
+// Choix sémantique : MessageCircle (chat) pour ChatGPT, Bot pour Claude
+// (Anthropic), Search pour Perplexity (search engine), Sparkles pour
+// Gemini (magic), Cat pour Le Chat (référence directe au nom Mistral).
+const LLM_ICONS: Record<LLMValue, LucideIcon> = {
+  chatgpt: MessageCircle,
+  claude: Bot,
+  perplexity: Search,
+  gemini: Sparkles,
+  lechat: Cat,
+};
 
 // Tableau « derniers runs » version V0+ (refonte 2026-05-18 issu veille
 // concurrence 2026-05-11). 1 ligne = 1 batch (prompt × jour, regroupe les
@@ -81,9 +94,9 @@ function HeaderRow({ showPromptColumn }: { showPromptColumn: boolean }) {
       <span className="size-4" aria-hidden />
       {showPromptColumn && <span className="type-eyebrow flex-1">Prompt</span>}
       <span className="type-eyebrow w-24">Exécuté</span>
-      <span className="type-eyebrow w-32">LLMs</span>
+      <span className="type-eyebrow w-32">IA</span>
       <span className="type-eyebrow w-16 text-right">Citée</span>
-      <span className="type-eyebrow w-20 text-right">Durée</span>
+      <span className="type-eyebrow w-24 text-right">Sentiment</span>
     </div>
   );
 }
@@ -118,15 +131,13 @@ function BatchRow({
         )}
         <span className="type-meta w-24">{formatRelative(batch.latestScheduledAt)}</span>
         <div className="w-32">
-          <LlmDots runs={batch.runs} />
+          <LlmIcons runs={batch.runs} />
         </div>
         <span className="type-tabular w-16 text-right text-sm">
           {batch.summary.citedCount}/{batch.summary.totalRuns}
         </span>
-        <span className="type-tabular w-20 text-right text-sm">
-          {batch.summary.durationAvgMs !== null
-            ? `${(batch.summary.durationAvgMs / 1000).toFixed(1)}s`
-            : "—"}
+        <span className="flex w-24 justify-end">
+          <SentimentBadge sentiment={batch.summary.dominantBrandSentiment} />
         </span>
       </CollapsibleTrigger>
       <CollapsibleContent className="border-b border-[color:var(--color-border)] bg-[color:var(--color-gray-50)]">
@@ -137,26 +148,27 @@ function BatchRow({
 }
 
 /**
- * 5 dots dans l'ordre canonique (ChatGPT, Claude, Perplexity, Gemini,
- * Le Chat). Tooltip au survol pour le détail par LLM.
- * Tones :
- *   - success (vert) : run réussi ET marque citée
- *   - warning (jaune) : run réussi mais marque pas citée
- *   - error (rouge) : run failed
- *   - neutral (gris) : skipped / pending / running / absent du batch
+ * 5 avatars LLM dans l'ordre canonique (ChatGPT, Claude, Perplexity,
+ * Gemini, Le Chat). Refonte 2026-05-26 : remplace les <StatusDot> par
+ * des avatars colorés à logo Lucide (cohérent avec <LLMPill> mais
+ * compact, sans label). Le statut du run est encodé via opacité +
+ * ring de couleur :
+ *   - cité (marque mentionnée) : avatar plein, ring vert subtil
+ *   - run réussi non-cité : avatar plein (couleur LLM), pas de ring
+ *   - run failed : avatar plein + ring rouge
+ *   - pas exécuté / pending / skipped : avatar grisé (gray-100), faible opacité
  */
-function LlmDots({ runs }: { runs: RunBatchEntry[] }) {
+function LlmIcons({ runs }: { runs: RunBatchEntry[] }) {
   const byLlm = new Map(runs.map((r) => [r.llm, r]));
   return (
     <div className="flex items-center gap-1.5">
       {LLM_ORDER.map((llm) => {
         const run = byLlm.get(llm);
-        const tone = dotToneFor(run);
         return (
           <Tooltip key={llm}>
             <TooltipTrigger asChild>
               <span className="inline-flex">
-                <StatusDot tone={tone} />
+                <LlmAvatar llm={llm} run={run} />
               </span>
             </TooltipTrigger>
             <TooltipContent>
@@ -170,15 +182,50 @@ function LlmDots({ runs }: { runs: RunBatchEntry[] }) {
   );
 }
 
-function dotToneFor(
+function LlmAvatar({ llm, run }: { llm: LLMValue; run: RunBatchEntry | undefined }) {
+  const Icon = LLM_ICONS[llm];
+  const tone = avatarToneFor(run);
+
+  if (tone === "muted") {
+    // Pas exécuté / pending / skipped : cercle gris clair, icône
+    // grise. Ne pas masquer complètement pour garder le compte visuel
+    // « 5 IA trackées » même quand certaines sont en attente.
+    return (
+      <span className="inline-flex size-5 items-center justify-center rounded-full bg-[color:var(--color-gray-100)] text-[color:var(--color-gray-400)]">
+        <Icon size={11} strokeWidth={2} />
+      </span>
+    );
+  }
+
+  const ringClass =
+    tone === "cited"
+      ? "ring-2 ring-[color:var(--color-success)]/30"
+      : tone === "failed"
+        ? "ring-2 ring-[color:var(--color-error)]/40"
+        : ""; // "neutral" (réussi non-cité) : pas de ring
+
+  return (
+    <span
+      className={cn(
+        "inline-flex size-5 items-center justify-center rounded-full text-white",
+        ringClass,
+      )}
+      style={{ backgroundColor: LLM_COLORS[llm] }}
+    >
+      <Icon size={11} strokeWidth={2.5} />
+    </span>
+  );
+}
+
+function avatarToneFor(
   run: RunBatchEntry | undefined,
-): "success" | "warning" | "error" | "neutral" {
-  if (!run) return "neutral";
-  if (run.status === "failed") return "error";
-  if (run.status !== "success") return "neutral";
+): "cited" | "neutral" | "failed" | "muted" {
+  if (!run) return "muted";
+  if (run.status === "failed") return "failed";
+  if (run.status !== "success") return "muted";
   // success
-  if (run.brandMentioned === true) return "success";
-  return "warning";
+  if (run.brandMentioned === true) return "cited";
+  return "neutral";
 }
 
 function dotTooltipFor(run: RunBatchEntry): string {
@@ -194,6 +241,21 @@ function dotTooltipFor(run: RunBatchEntry): string {
 }
 
 /**
+ * Badge sentiment dominant du batch — KPI business introduit
+ * 2026-05-26 en remplacement de la colonne "Durée" (jugée technique
+ * sans valeur métier).
+ */
+function SentimentBadge({ sentiment }: { sentiment: BatchDominantSentiment }) {
+  if (sentiment === "positive") return <Badge tone="success">Positif</Badge>;
+  if (sentiment === "negative") return <Badge tone="error">Négatif</Badge>;
+  if (sentiment === "neutral") return <Badge tone="warning">Neutre</Badge>;
+  if (sentiment === "mixed") return <Badge tone="neutral">Mixte</Badge>;
+  // "absent" ou null : marque non citée ou pas encore scorée → pas
+  // de signal sentiment exploitable
+  return <span className="type-meta">—</span>;
+}
+
+/**
  * Mini-table dépliée : 5 lignes (LLM × statut × citée × coût × durée).
  * Chaque ligne pointe vers /app/runs/[id] pour le détail complet.
  */
@@ -203,10 +265,10 @@ function BatchRunsDetail({ runs }: { runs: RunBatchEntry[] }) {
       <table className="w-full text-sm">
         <thead>
           <tr className="text-[color:var(--color-muted)]">
-            <DetailTh>LLM</DetailTh>
+            <DetailTh>IA</DetailTh>
             <DetailTh>Statut</DetailTh>
             <DetailTh>Citée</DetailTh>
-            <DetailTh align="right">Durée</DetailTh>
+            <DetailTh>Sentiment</DetailTh>
             <DetailTh align="right" />
           </tr>
         </thead>
@@ -225,12 +287,8 @@ function BatchRunsDetail({ runs }: { runs: RunBatchEntry[] }) {
               <DetailTd>
                 <BrandSignal value={run.brandMentioned} />
               </DetailTd>
-              <DetailTd align="right">
-                <span className="type-tabular">
-                  {run.durationMs !== null
-                    ? `${(run.durationMs / 1000).toFixed(1)}s`
-                    : "—"}
-                </span>
+              <DetailTd>
+                <EntrySentimentBadge sentiment={run.brandSentiment} />
               </DetailTd>
               <DetailTd align="right">
                 <Link
@@ -288,6 +346,18 @@ function BrandSignal({ value }: { value: RunBatchEntry["brandMentioned"] }) {
   if (value === true) return <Badge tone="success">citée</Badge>;
   if (value === false) return <span className="type-meta">non</span>;
   if (value === "skipped") return <span className="type-meta">regex 0</span>;
+  return <span className="type-meta">—</span>;
+}
+
+/**
+ * Sentiment d'un run individuel (LLM unique) — utilisé dans la
+ * mini-table dépliée. Plus granulaire que <SentimentBadge> qui agrège
+ * sur tout le batch.
+ */
+function EntrySentimentBadge({ sentiment }: { sentiment: RunBatchEntry["brandSentiment"] }) {
+  if (sentiment === "positive") return <Badge tone="success">Positif</Badge>;
+  if (sentiment === "negative") return <Badge tone="error">Négatif</Badge>;
+  if (sentiment === "neutral") return <Badge tone="warning">Neutre</Badge>;
   return <span className="type-meta">—</span>;
 }
 

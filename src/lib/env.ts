@@ -67,6 +67,19 @@ const schema = z.object({
   // est limitée à 25K req/jour partagés par IP, ce qui suffit pour V0.
   // Avec clé gratuite, illimité. cf. /outils/audit-technique.
   GOOGLE_PAGESPEED_API_KEY: z.string().min(1).optional(),
+
+  // Google OAuth 2.0 — Sign-in social via Better Auth (cf. doc 09 §
+  // 2026-05-26, login via Google). Optionnels : si l'une des deux
+  // manque, on skip gracieusement le branchement social provider et
+  // seul le magic-link reste actif (cf. src/lib/auth.ts).
+  //
+  // Setup : Google Cloud Console → APIs & Services → Credentials →
+  // OAuth 2.0 Client ID (Web application). Redirect URIs à autoriser :
+  //   - https://mamie-geo.fr/api/auth/callback/google
+  //   - http://localhost:3000/api/auth/callback/google
+  //   - <preview-vercel-url>/api/auth/callback/google (au cas par cas)
+  GOOGLE_CLIENT_ID: z.string().min(1).optional(),
+  GOOGLE_CLIENT_SECRET: z.string().min(1).optional(),
 });
 
 export type Env = z.infer<typeof schema>;
@@ -113,6 +126,8 @@ const buildPlaceholders: Env = {
   BREVO_SMTP_FROM: undefined,
   CRON_SECRET: "placeholder-cron-secret-build-only",
   ADMIN_ALERT_EMAIL: "placeholder@placeholder.invalid",
+  GOOGLE_CLIENT_ID: undefined,
+  GOOGLE_CLIENT_SECRET: undefined,
 };
 
 export const env = parsed.success

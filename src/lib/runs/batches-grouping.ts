@@ -1,9 +1,27 @@
 import type { LLMValue } from "@/lib/llm";
 import type { ParsedBrandsPayload } from "@/lib/citation/types";
+import type { ScoringSentiment } from "@/lib/citation/score";
 
 // Logique pure de groupement runs → batches. Pas d'import DB ici pour
 // rester testable sans `DATABASE_URL` (cf. batches.test.ts).
 // La query DB elle-même vit dans batches.ts, qui appelle cette fonction.
+
+/**
+ * Sentiment normalisé pour la couche UI :
+ * - "positive" | "neutral" | "negative" : scoring abouti, marque citée
+ * - "absent" : scoring abouti mais marque non citée par ce LLM
+ * - "skipped" : pre-screening regex 0 → on n'a pas appelé le scoring
+ * - "unscored" : pas de payload parsedBrands en DB (run pas encore scoré)
+ */
+export type BatchEntrySentiment = ScoringSentiment | "absent" | "skipped" | "unscored";
+
+/**
+ * Sentiment agrégé d'un batch (majorité simple parmi les runs success cités).
+ * - "mixed" : aucune majorité stricte (>50%)
+ * - "absent" : marque non citée par aucun LLM scoré du batch
+ * - null : aucun scoring exploitable
+ */
+export type BatchDominantSentiment = ScoringSentiment | "absent" | "mixed" | null;
 
 export interface RunBatchEntry {
   id: string;
@@ -14,6 +32,7 @@ export interface RunBatchEntry {
   executedAt: Date | null;
   scheduledAt: Date;
   brandMentioned: boolean | "skipped" | "unscored";
+  brandSentiment: BatchEntrySentiment;
   cacheHit: boolean;
 }
 
@@ -39,6 +58,11 @@ export interface RunBatch {
     costSumUsd: number;
     /** Moyenne sur les runs avec durationMs non null, null si aucun */
     durationAvgMs: number | null;
+    /**
+     * Sentiment dominant des LLMs ayant cité la marque dans ce batch.
+     * Calculé en post-aggregation (cf. computeDominantSentiment).
+     */
+    dominantBrandSentiment: BatchDominantSentiment;
   };
   /** Détail par LLM, ordre fixe selon LLM_ORDER */
   runs: RunBatchEntry[];
@@ -104,6 +128,7 @@ export function groupRunsIntoBatches(rawRuns: RawRunRow[], limit: number): RunBa
           citedCount: 0,
           costSumUsd: 0,
           durationAvgMs: null,
+          dominantBrandSentiment: null,
         },
         runs: [],
       };
@@ -119,12 +144,16 @@ export function groupRunsIntoBatches(rawRuns: RawRunRow[], limit: number): RunBa
 
     const parsed = r.parsedBrands as ParsedBrandsPayload | null;
     let brandMentioned: RunBatchEntry["brandMentioned"];
+    let brandSentiment: BatchEntrySentiment;
     if (!parsed) {
       brandMentioned = "unscored";
+      brandSentiment = "unscored";
     } else if ("skipped" in parsed.scoring) {
       brandMentioned = "skipped";
+      brandSentiment = "skipped";
     } else {
       brandMentioned = parsed.scoring.brandMentioned;
+      brandSentiment = parsed.scoring.brandSentiment;
     }
 
     batch.runs.push({
@@ -136,6 +165,7 @@ export function groupRunsIntoBatches(rawRuns: RawRunRow[], limit: number): RunBa
       executedAt: r.executedAt,
       scheduledAt: r.scheduledAt,
       brandMentioned,
+      brandSentiment,
       cacheHit: r.cacheHit,
     });
 
@@ -157,6 +187,8 @@ export function groupRunsIntoBatches(rawRuns: RawRunRow[], limit: number): RunBa
         ? Math.round(durations.reduce((a, b) => a + b, 0) / durations.length)
         : null;
 
+    batch.summary.dominantBrandSentiment = computeDominantSentiment(batch.runs);
+
     batch.runs.sort(
       (a, b) => (LLM_ORDER_INDEX[a.llm] ?? 999) - (LLM_ORDER_INDEX[b.llm] ?? 999),
     );
@@ -174,4 +206,36 @@ export function groupRunsIntoBatches(rawRuns: RawRunRow[], limit: number): RunBa
  */
 function toUtcDate(d: Date): string {
   return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")}`;
+}
+
+/**
+ * Calcule le sentiment dominant parmi les runs où la marque est citée.
+ * Majorité stricte (>50%) requise sinon "mixed". Si aucun run cité
+ * avec sentiment exploitable → "absent" (ou null si zéro scoring).
+ */
+function computeDominantSentiment(runs: RunBatchEntry[]): BatchDominantSentiment {
+  const scoredSentiments = runs
+    .filter((r) => r.brandMentioned === true)
+    .map((r) => r.brandSentiment)
+    .filter((s): s is ScoringSentiment => s === "positive" || s === "neutral" || s === "negative");
+
+  // Vérifie qu'il y a au moins un scoring abouti (cité ou non) pour
+  // distinguer "absent" (scored, pas cité) de null (aucun scoring).
+  const hasAnyScoring = runs.some(
+    (r) => r.brandMentioned === true || r.brandMentioned === false,
+  );
+  if (!hasAnyScoring) return null;
+
+  if (scoredSentiments.length === 0) return "absent";
+
+  const counts = { positive: 0, neutral: 0, negative: 0 };
+  for (const s of scoredSentiments) counts[s]++;
+  const max = Math.max(counts.positive, counts.neutral, counts.negative);
+
+  // Majorité stricte requise (>50%) — sinon mixed pour rester honnête.
+  if (max <= scoredSentiments.length / 2) return "mixed";
+
+  if (counts.positive === max) return "positive";
+  if (counts.neutral === max) return "neutral";
+  return "negative";
 }
