@@ -61,9 +61,10 @@ export function MarketingHeader() {
            * à séparer). */}
           <span aria-hidden className="hidden h-5 w-px bg-[color:var(--color-border)] sm:block" />
 
-          {/* Desktop : Connexion + CTA. Mobile : tout dans le burger
-           * (cf. MarketingMobileNav) pour éviter d'avoir 3 éléments
-           * tassés à droite sur petits écrans. */}
+          {/* Desktop : Connexion + Inscription. Mobile : dans le burger
+           * (cf. MarketingMobileNav). Note : magic-link crée le user à
+           * la 1ʳᵉ connexion donc /login gère les deux cas, mais on
+           * dissocie l'intention UX (?mode=signup côté Inscription). */}
           <div className="hidden items-center gap-3 sm:flex">
             <Link
               href="/login"
@@ -71,8 +72,8 @@ export function MarketingHeader() {
             >
               Connexion
             </Link>
-            <LinkButton href="/login" variant="primary" size="sm">
-              Se connecter
+            <LinkButton href="/login?mode=signup" variant="primary" size="sm">
+              Inscription
             </LinkButton>
           </div>
 

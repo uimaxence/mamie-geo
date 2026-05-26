@@ -29,11 +29,17 @@ export function FinalCTA() {
       </div>
 
       <div className="relative mx-auto flex max-w-3xl flex-col items-center px-6 py-20 text-center sm:py-24">
-        <span className="type-eyebrow text-[color:var(--color-gray-500)]">Prêt à voir ?</span>
+        {/* Hiérarchie de contrastes sur fond noir (2026-05-26 fix) :
+         *  - eyebrow gray-400 (label discret mais lisible)
+         *  - h2 white (focal)
+         *  - sous-titre gray-100 (lisible, presque blanc avec un léger
+         *    ton chaud)
+         *  - microcopy gray-300 (réassurance discrète mais lisible) */}
+        <span className="type-eyebrow text-[color:var(--color-gray-400)]">Prêt à voir ?</span>
         <h2 className="type-display mt-4 text-white">
           Sache enfin si les IA parlent de toi.
         </h2>
-        <p className="type-body-lg mt-6 max-w-xl text-[color:var(--color-gray-300)]">
+        <p className="type-body-lg mt-6 max-w-xl text-[color:var(--color-gray-100)]">
           Mesure ta visibilité dans les 5 IA grand public en moins de 10 minutes. En français,
           hébergé en Europe.
         </p>
@@ -45,7 +51,7 @@ export function FinalCTA() {
             Audit gratuit
           </LinkButton>
         </div>
-        <p className="type-meta mt-6 text-[color:var(--color-gray-500)]">
+        <p className="type-meta mt-6 text-[color:var(--color-gray-300)]">
           Garantie remboursement 14&nbsp;jours · Sans engagement · Hébergé EU
         </p>
       </div>

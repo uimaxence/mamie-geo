@@ -61,8 +61,8 @@ export function MarketingMobileNav() {
             >
               Connexion
             </Link>
-            <LinkButton href="/login" variant="primary" size="md" onClick={close}>
-              Se connecter
+            <LinkButton href="/login?mode=signup" variant="primary" size="md" onClick={close}>
+              Inscription
             </LinkButton>
           </div>
         </SheetContent>

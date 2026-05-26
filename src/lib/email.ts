@@ -178,8 +178,15 @@ Tu n'as pas demandé ce lien ? Ignore cet email, il ne se passera rien.
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;margin:0 auto;background:#fff;border-radius:12px;border:1px solid #e6e6e6;">
       <tr><td style="padding:32px;">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:24px;">
-          <span style="display:inline-flex;width:32px;height:32px;border-radius:10px;background:#329cff;color:#fff;align-items:center;justify-content:center;font-size:20px;font-weight:700;">M</span>
-          <span style="font-size:17px;font-weight:600;letter-spacing:-0.01em;">Mamie GEO</span>
+          <!-- Logo Mamie GEO inline SVG (path identique à src/components/marketing/logo.tsx).
+               Rendu correct sur Apple Mail / Outlook desktop. Gmail Web strip les <svg>
+               inline → le wordmark à droite porte le branding seul dans ce cas.
+               Pour un rendu pixel-perfect sur Gmail, héberger un PNG dans /public et
+               passer en <img src> absolue. -->
+          <svg width="32" height="32" viewBox="0 0 541 524" xmlns="http://www.w3.org/2000/svg" aria-label="Mamie GEO" role="img" style="display:inline-block;vertical-align:middle;">
+            <path d="M507.944 18.6203L460.634 141.219C458.596 146.499 453.52 149.981 447.861 149.981H269.31C237.156 149.981 169.239 167.095 154.801 235.551C142.532 293.726 174.786 332.8 200.347 350.863C206.857 355.464 215.508 352.141 218.46 344.736L282.364 184.429C284.44 179.223 289.478 175.808 295.082 175.808H527.264C534.826 175.808 540.956 181.937 540.956 189.499V510.309C540.956 517.87 534.826 524 527.264 524H401.243C393.682 524 387.552 517.87 387.552 510.309V409.912C387.552 394.802 366.672 390.831 361.125 404.886L317.537 515.335C315.473 520.564 310.423 524 304.801 524H238.193C135.198 520.577 -35.9424 407.936 6.68714 196.656C44.0268 48.8527 181.146 1.24466 238.193 0H495.17C504.785 0 511.405 9.65028 507.944 18.6203Z" fill="#329CFF"/>
+          </svg>
+          <span style="font-size:17px;font-weight:600;letter-spacing:-0.01em;vertical-align:middle;">Mamie GEO</span>
         </div>
 
         <h1 style="margin:0 0 16px;font-size:22px;font-weight:700;letter-spacing:-0.01em;">Voici ton lien de connexion</h1>

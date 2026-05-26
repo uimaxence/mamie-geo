@@ -25,6 +25,11 @@ export function LoginContent({ googleEnabled }: { googleEnabled: boolean }) {
   const next = rawNext && rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : null;
   const callbackURL = next ?? "/app/dashboard";
 
+  // ?mode=signup → copywriting "Inscription" (mais flow identique :
+  // Better Auth magic-link crée le user à la 1ʳᵉ connexion auto).
+  // Cf. 2026-05-27 : séparation CTA header Connexion vs Inscription.
+  const isSignup = params.get("mode") === "signup";
+
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -142,6 +147,7 @@ export function LoginContent({ googleEnabled }: { googleEnabled: boolean }) {
               errorMessage={errorMessage}
               onSubmit={handleSubmit}
               next={next}
+              isSignup={isSignup}
               googleEnabled={googleEnabled}
               googleStatus={googleStatus}
               onGoogleSignIn={handleGoogleSignIn}
@@ -160,6 +166,7 @@ function IdleState({
   errorMessage,
   onSubmit,
   next,
+  isSignup,
   googleEnabled,
   googleStatus,
   onGoogleSignIn,
@@ -170,6 +177,7 @@ function IdleState({
   errorMessage: string | null;
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
   next: string | null;
+  isSignup: boolean;
   googleEnabled: boolean;
   googleStatus: "idle" | "sending";
   onGoogleSignIn: () => void;
@@ -183,9 +191,13 @@ function IdleState({
         aria-hidden
       />
 
-      <h1 className="type-h1 mt-4">On t&apos;envoie un lien magique.</h1>
+      <h1 className="type-h1 mt-4">
+        {isSignup ? "Crée ton compte en 30 secondes." : "On t'envoie un lien magique."}
+      </h1>
       <p className="type-body-lg mt-3">
-        Pas de mot de passe à retenir. Un lien valable 10 minutes arrive dans ta boîte.
+        {isSignup
+          ? "Pas de carte bancaire à cette étape. Pas de mot de passe à choisir. Tape ton email, reçois un lien, t'es dedans."
+          : "Pas de mot de passe à retenir. Un lien valable 10 minutes arrive dans ta boîte."}
       </p>
 
       {next && (
@@ -246,9 +258,37 @@ function IdleState({
         </div>
       )}
 
-      <p className="type-meta mt-12">
-        Pas encore de compte ? Il sera créé automatiquement à la 1<sup>re</sup> connexion. Garantie
-        remboursement 14 jours sur toute première souscription.
+      {/* Switch login ↔ signup : flow technique identique (magic-link
+       * crée le user à la 1ʳᵉ), mais on dissocie l'intention pour la
+       * clarté UX. */}
+      <p className="type-meta mt-10">
+        {isSignup ? (
+          <>
+            Déjà un compte ?{" "}
+            <Link
+              href="/login"
+              className="font-medium text-[color:var(--color-ink)] underline decoration-[color:var(--color-ink-soft)]/40 underline-offset-2 hover:decoration-[color:var(--color-ink)]"
+            >
+              Se connecter
+            </Link>
+          </>
+        ) : (
+          <>
+            Pas encore de compte ?{" "}
+            <Link
+              href="/login?mode=signup"
+              className="font-medium text-[color:var(--color-ink)] underline decoration-[color:var(--color-ink-soft)]/40 underline-offset-2 hover:decoration-[color:var(--color-ink)]"
+            >
+              S&apos;inscrire
+            </Link>
+          </>
+        )}
+      </p>
+
+      <p className="type-meta mt-3">
+        {isSignup
+          ? "Garantie remboursement 14 jours sur toute première souscription. Annulation en 1 clic."
+          : "On crée ton compte automatiquement si c'est ta 1ʳᵉ connexion."}
       </p>
     </>
   );
