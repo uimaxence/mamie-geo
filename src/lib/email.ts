@@ -356,7 +356,12 @@ export async function sendNewArticleNewsletter(article: {
       sender: { name: env.BREVO_FROM_NAME ?? "Mamie GEO", email: env.BREVO_FROM_EMAIL },
       htmlContent,
       recipients: { listIds: [env.BREVO_BLOG_LIST_ID] },
-      tag: "blog-new-article",
+      // Champ `tag` retiré 2026-05-30 : refusé HTTP 405 par le plan
+      // Brevo Free (feature payante). Cause de l'échec des 2 newsletters
+      // du run 2026-05-22. Le classement interne dans le dashboard
+      // Brevo se fait alors via le `name` "Blog: <slug>". Si le plan
+      // est upgradé un jour, réintroduire `tag: "blog-new-article"`
+      // pour filtrer plus finement.
     }),
   });
   if (!createRes.ok) {
