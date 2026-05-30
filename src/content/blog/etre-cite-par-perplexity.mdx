@@ -1,0 +1,318 @@
+---
+title: "Comment être cité par Perplexity : guide GEO complet 2026"
+description: "Perplexity est le LLM le plus orienté sources du marché. Voici comment construire les signaux qui font qu'il cite ta marque dans ses réponses."
+date: "2026-05-26"
+author: "Maxence Cailleau"
+category: "Tutoriel"
+readingTimeMin: 10
+keywords:
+  - "etre cite par perplexity"
+  - "visibilite perplexity"
+  - "perplexity geo"
+  - "optimiser pour perplexity"
+  - "perplexity citation"
+  - "perplexitybot"
+---
+
+{/* H1 rendu via layout.tsx, ne pas dupliquer ici */}
+
+## Le LLM qui montre ses sources, et pourquoi ça change le jeu
+
+Quand un acheteur B2B veut comparer trois logiciels avant un appel commercial, il pose souvent la question à Perplexity. La raison est simple : chaque réponse est suivie d'une liste de sources cliquables, ce qu'aucun autre LLM grand public ne fait avec autant de constance. Pour un décideur pressé, c'est rassurant — et donc adopté.
+
+Pour une marque, cette transparence change tout. Sur ChatGPT, on devine pourquoi on est cité. Sur Perplexity, on le voit. Cela rend le travail GEO mesurable, mais aussi impitoyable : si ton domaine n'apparaît pas dans la liste des sources, tu n'existes pas pour ce prompt.
+
+## La règle en une phrase
+
+> Pour être cité par Perplexity, une marque doit être correctement indexée par Bing, produire des pages claires et sourcées, et apparaître dans les ressources que Perplexity privilégie pour son retrieval : Wikipédia, Reddit, GitHub, presse établie et contenus académiques.
+
+Trois mots-clés à retenir : **indexation Bing**, **contenu sourçable**, **présence sur les corpus privilégiés**. Tout l'article décline ces trois axes.
+
+## Pourquoi Perplexity mérite son propre playbook
+
+Travailler la visibilité dans Perplexity n'est pas un sous-cas du "GEO ChatGPT". Trois différences structurelles le justifient.
+
+D'abord, Perplexity affiche systématiquement ses sources avec des liens cliquables. Le moteur est conçu autour du retrieval, pas autour du modèle. Une réponse Perplexity sans citation est l'exception, là où c'est encore la règle chez ses concurrents.
+
+Ensuite, Perplexity utilise principalement Bing comme index de retrieval, complété par son propre crawler (`PerplexityBot`). Cela aligne ses choix sur ceux de ChatGPT côté retrieval — mais avec une différence : Perplexity fait remonter plus de domaines secondaires et de sources techniques (GitHub, Stack Overflow, arXiv, Reddit) que ChatGPT, qui filtre plus serré sur l'autorité.
+
+Enfin, Perplexity est resté sur un positionnement "moteur de recherche conversationnel" et non "assistant général". Ses utilisateurs viennent pour **se renseigner**, rarement pour rédiger ou bavarder. Les prompts y sont plus commerciaux et plus recherchés que sur ChatGPT — exactement le type de requêtes que tu veux capter quand tu travailles ton GEO.
+
+## Comment Perplexity construit une réponse
+
+Comme tous les LLM grand public, Perplexity mobilise plusieurs sources, mais dans un ordre inversé par rapport à ChatGPT.
+
+1. **Le module de recherche web** est activé par défaut sur quasiment chaque requête. C'est l'élément central, pas un complément.
+2. **Le modèle de langage** (GPT, Claude, ou les modèles Sonar maison de Perplexity selon le plan) sert principalement à reformuler et synthétiser les sources retrouvées.
+3. **Le corpus d'entraînement** des modèles sous-jacents intervient en arrière-plan, pour cadrer le ton et combler les trous.
+4. **Le contexte fourni par l'utilisateur** (fichiers, Spaces) reste secondaire et hors levier marketing.
+
+La conséquence est nette : sur Perplexity, **le travail GEO porte d'abord sur le retrieval**. Si Bing ne te connaît pas, Perplexity ne te citera pas, même si ton domaine est massivement présent dans les corpus d'entraînement des modèles qu'il utilise.
+
+## Les 9 tactiques pour entrer dans Perplexity
+
+### 1. S'assurer que Bing indexe correctement ton site
+
+C'est la fondation absolue. Perplexity utilise Bing comme partenaire principal de retrieval web. Sans présence Bing, pas de citation Perplexity, point final. Vérifications minimales : ton site est-il dans Bing Webmaster Tools ? Combien de pages sont indexées vs déclarées dans ton sitemap ? Y a-t-il des erreurs de crawl ? Un sitemap XML soumis explicitement dans Bing Webmaster Tools accélère la prise en compte de chaque nouvelle publication de 2 à 4 semaines à 24-72 heures sur les sites récents.
+
+### 2. Laisser passer le crawler PerplexityBot
+
+Perplexity opère ses propres bots, en plus du retrieval Bing. Les principaux à connaître : `PerplexityBot` (crawl général, alimente l'index interne), `Perplexity-User` (fetch en temps réel d'une URL au moment d'une question utilisateur). Bloquer ces user-agents dans le `robots.txt` rend ton contenu inaccessible aux deux mécanismes, même si Bing te connaît parfaitement. Un audit rapide : ouvre ton `robots.txt`, cherche "Perplexity" — si tu trouves un `Disallow`, c'est une perte sèche de visibilité.
+
+### 3. Soigner ses citations internes et sa bibliographie
+
+Perplexity privilégie les sources qui en citent d'autres. Un article qui s'appuie sur 5 références liées, datées, accessibles, vaut plus pour son moteur qu'un article isolé deux fois plus long. La logique est mécanique : un contenu sourcé est plus facile à recouper, donc plus crédible aux yeux du modèle de re-ranking. Concrètement, sur chaque page de fond, on vise 3 à 8 références externes claires, avec leur date, et autant de liens internes propres vers d'autres pages de ton site.
+
+### 4. Apparaître dans Wikipédia et les corpus académiques
+
+Perplexity cite Wikipédia de façon récurrente, particulièrement sur les requêtes de définition, de contexte historique ou réglementaire. Pour une entreprise, viser une fiche Wikipédia est un investissement long mais durable. À cela s'ajoutent les sources académiques (arXiv, HAL, ResearchGate) qui pèsent disproportionnellement sur les requêtes techniques, scientifiques ou médicales. Si ton secteur permet de publier un livre blanc en mode "papier" (méthodologie, échantillon, références), pose-le sur ces plateformes en plus de ton site.
+
+### 5. Investir Reddit et les communautés citées
+
+Reddit est l'une des sources les plus citées par Perplexity sur les requêtes "avis", "comparatif" et "expérience utilisateur". Sur des prompts du type "meilleur CRM pour PME française avis", il n'est pas rare d'observer 4 à 6 URLs Reddit dans les sources retournées. Cela ne veut pas dire qu'il faut spammer — ça ne marche pas — mais qu'il faut être présent organiquement dans les subreddits pertinents. Côté FR, les équivalents (forums sectoriels, groupes LinkedIn publics indexés) jouent un rôle similaire, plus modeste.
+
+### 6. Publier en HTML structuré et accessible
+
+Perplexity lit le HTML comme tous les LLM, mais son re-ranking favorise les pages dont la structure permet d'extraire des fragments citables. Concrètement : H2/H3 sémantiquement clairs, paragraphes courts, listes structurées, tableaux natifs (pas en image), Schema.org `Article` et `FAQPage` propres. On a détaillé ces signaux côté ChatGPT dans [notre guide ChatGPT](/blog/etre-cite-par-chatgpt) — le constat est identique pour Perplexity. À ajouter spécifiquement pour Perplexity : une bibliographie ou liste de références en bas de page, balisée si possible avec Schema `citation`.
+
+### 7. Travailler la fraîcheur et les dates explicites
+
+Perplexity surpondère les sources récentes sur les requêtes d'actualité, de marché, de prix, de réglementation. Plus que ChatGPT et Claude, son moteur va chercher du contenu daté du mois en cours. Pour en bénéficier : afficher une date de publication ET une date de mise à jour visible sur chaque article, balisées en Schema (`datePublished`, `dateModified`), et mettre à jour régulièrement les pages stratégiques avec un changelog visible. Une mise à jour mensuelle d'un article pilier suffit à le faire ressortir dans le retrieval Perplexity, on l'observe en pratique.
+
+### 8. Cibler les sources techniques quand c'est pertinent
+
+GitHub, Stack Overflow, MDN, devdocs : Perplexity cite massivement ces domaines sur les requêtes techniques. Une marque B2B SaaS gagne à publier sa documentation publique en HTML accessible (pas seulement dans un PDF derrière login), à ouvrir un dépôt GitHub propre avec un README riche, et à répondre quand son nom de produit apparaît sur Stack Overflow. Ces signaux entrent en boucle dans le retrieval Perplexity et alimentent ses réponses sur les requêtes "comment intégrer X", "X vs Y", "documentation X".
+
+### 9. Mesurer la part de citation spécifiquement sur Perplexity
+
+Comme pour Le Chat, aucune des huit règles précédentes ne se prouve sans mesure. La métrique de référence en GEO est la **part de citation** : sur un panier de prompts représentatifs, combien de fois ta marque apparaît dans les sources affichées par Perplexity, à quel rang, dans quel sentiment. Perplexity ajoute un avantage : ses sources sont visibles, donc la mesure est moins ambiguë que sur ChatGPT où il faut parfois interpréter un texte pour savoir si une marque est "citée" ou juste "évoquée". Un suivi sérieux pose chaque prompt 5 à 10 fois et regarde la liste des sources, pas seulement le texte. C'est ce que Mamie GEO automatise pour Perplexity.
+
+## Tableau récapitulatif des 9 tactiques
+
+<table>
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Tactique</th>
+      <th>Canal travaillé</th>
+      <th>Effort</th>
+      <th>Délai pour bouger</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>Indexation propre dans Bing Webmaster Tools</td>
+      <td>Retrieval</td>
+      <td>Faible</td>
+      <td>2-4 semaines</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>Crawlers PerplexityBot et Perplexity-User autorisés</td>
+      <td>Retrieval</td>
+      <td>Très faible</td>
+      <td>1-2 semaines</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>Citations internes et bibliographie soignée</td>
+      <td>Re-ranking</td>
+      <td>Moyen</td>
+      <td>4-8 semaines</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>Présence Wikipédia + corpus académiques</td>
+      <td>Entraînement + retrieval</td>
+      <td>Élevé</td>
+      <td>6-18 mois</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>Présence organique Reddit + forums sectoriels</td>
+      <td>Retrieval</td>
+      <td>Moyen</td>
+      <td>3-12 mois</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td>HTML structuré, Schema.org, bibliographie balisée</td>
+      <td>Re-ranking</td>
+      <td>Faible</td>
+      <td>2-8 semaines</td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td>Fraîcheur + dates explicites + changelog</td>
+      <td>Retrieval</td>
+      <td>Continu</td>
+      <td>2-6 semaines</td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td>Présence GitHub, Stack Overflow, docs publiques</td>
+      <td>Retrieval + entraînement</td>
+      <td>Moyen</td>
+      <td>4-12 semaines</td>
+    </tr>
+    <tr>
+      <td>9</td>
+      <td>Mesure dédiée part de citation Perplexity</td>
+      <td>Pilotage</td>
+      <td>Moyen</td>
+      <td>Continu</td>
+    </tr>
+  </tbody>
+</table>
+
+## Trois erreurs qui sabotent une stratégie Perplexity
+
+La première : **se concentrer sur Google et négliger Bing**. C'est la perte sèche numéro un sur Perplexity. Quand on demande aux équipes marketing FR si elles ont ouvert un compte Bing Webmaster Tools, la réponse est non dans environ 8 cas sur 10. Sans Bing, pas de Perplexity.
+
+La deuxième : **bloquer les bots IA dans le `robots.txt` par précaution**. Une partie des équipes tech a réagi à la vague IA en bloquant `GPTBot`, `ClaudeBot`, `PerplexityBot`, etc., sans mesurer le coût en visibilité. C'est un choix qui peut se défendre éthiquement, mais qui rend toute stratégie GEO sur Perplexity impossible. À arbitrer en conscience, pas par défaut.
+
+La troisième : **publier sans bibliographie**. Sur Perplexity plus que sur n'importe quel autre LLM, le re-ranking favorise les pages qui citent d'autres sources. Un article de 2 000 mots sans une seule référence externe est mécaniquement défavorisé. Ajouter 3 à 5 références datées avec liens accessibles est l'optimisation à plus haut ROI sur Perplexity.
+
+## Perplexity vs les autres LLM : ce qui est spécifique
+
+Quelques différences à garder en tête pour calibrer ses efforts : Perplexity affiche **ses sources de façon systématique**, ce qui rend la mesure GEO plus directe mais aussi plus exigeante (si tu n'es pas dans la liste, tu n'existes pas). Son retrieval s'appuie sur **Bing** et son propre index `PerplexityBot`, donc les leviers techniques d'indexation Bing y pèsent davantage que sur Le Chat (qui passe par Brave). Sa pondération forte de **Reddit, GitHub, Stack Overflow, arXiv** le différencie nettement de ChatGPT, qui filtre plus serré sur ces sources. Enfin, son **audience est plus B2B et plus décisionnaire** qu'un ChatGPT grand public — les prompts y sont plus commerciaux et donc plus précieux à capter.
+
+Pour replacer Perplexity dans le paysage GEO global, on a écrit le panorama complet dans [GEO vs SEO : ce qui change vraiment en 2026](/blog/geo-vs-seo) et l'article de fond [Qu'est-ce que le GEO](/blog/qu-est-ce-que-le-geo).
+
+## FAQ
+
+### Comment savoir si Perplexity cite déjà mon site ?
+
+Le test direct est gratuit. Ouvre Perplexity, pose 10 à 20 prompts représentatifs de tes requêtes commerciales, et regarde la liste des sources affichées sous chaque réponse. Un site cité plus d'une fois sur 20 prompts est déjà bien positionné. Sous 1 sur 20, il y a un travail d'indexation ou de structuration à mener avant d'aller plus loin.
+
+### Faut-il bloquer PerplexityBot pour protéger son contenu ?
+
+C'est un arbitrage éthique et commercial, pas une réponse unique. Bloquer `PerplexityBot` interdit à Perplexity d'indexer tes pages et donc de te citer. Si ta priorité est la visibilité dans les LLM, il faut le laisser passer. Si ta priorité est de monétiser ton contenu sur un modèle paywall sans contribuer à un index IA gratuit, le bloquer se défend. Le pire choix est de le bloquer "par défaut" sans avoir mesuré ce qu'on y perd.
+
+### Perplexity utilise-t-il vraiment Bing comme moteur de recherche ?
+
+Oui, c'est le partenaire principal documenté. Perplexity combine son propre crawl (`PerplexityBot`, `Perplexity-User`) avec un retrieval Bing pour les requêtes web grand public. Concrètement : si ton site n'est pas dans Bing, tes chances d'apparaître dans les sources Perplexity baissent fortement, même si ton domaine est par ailleurs indexé par Google.
+
+### Reddit pèse-t-il vraiment dans les citations Perplexity ?
+
+Oui, particulièrement sur les requêtes "avis", "expérience" et "comparatif". On observe régulièrement 3 à 6 URLs Reddit dans la liste des sources d'une réponse Perplexity sur ces prompts. Cela ne signifie pas que créer des comptes pour publier des posts auto-promo va marcher (ça ne marche pas, le subreddit le détectera). Cela signifie qu'être réellement présent et utile dans les subreddits de ton secteur est un investissement GEO mesurable.
+
+### Mon site est très bien référencé sur Google mais invisible sur Perplexity, pourquoi ?
+
+C'est le cas le plus fréquent. Google et Bing ont des index distincts. Un site optimisé pour Google peut être quasi-absent de Bing. Perplexity utilisant Bing, l'écart se voit immédiatement. La première vérification est donc côté Bing Webmaster Tools : combien de pages indexées, quelles erreurs de crawl. La deuxième vérification est `robots.txt` : `PerplexityBot` et `Perplexity-User` sont-ils autorisés ?
+
+### Combien de temps pour voir un effet sur les citations Perplexity ?
+
+Les leviers retrieval les plus rapides — Bing Webmaster Tools, `robots.txt`, Schema, fraîcheur — peuvent bouger la part de citation en 2 à 6 semaines. Les leviers de fond — Wikipédia, présence Reddit organique, livres blancs académiques — demandent 3 à 18 mois selon le canal. Une stratégie sérieuse joue les deux temporalités en parallèle, en commençant par les leviers rapides pour confirmer la mesure.
+
+### Y a-t-il un "Perplexity Ads" pour payer la citation ?
+
+Non. Perplexity ne vend pas de placement publicitaire qui force la citation dans une réponse organique. L'entreprise a lancé un programme "Sponsored Questions" en 2024-2025, qui affiche des questions sponsorisées en marge de l'interface, mais cela ne change pas la liste des sources citées dans les réponses organiques. Toute promesse commerciale "garantissant" une citation Perplexity organique est à considérer avec prudence.
+
+## En résumé
+
+Perplexity est la cible GEO la plus mesurable du marché : ses sources sont affichées, donc on sait exactement si on est cité ou non. Cette transparence est une chance pour les marques qui font le travail, et une sanction immédiate pour celles qui ne le font pas. Les neuf tactiques ci-dessus se cumulent — l'indexation Bing et la libération du crawler sont les deux préalables, le reste est de l'amplification.
+
+Si tu veux savoir où ta marque en est aujourd'hui sur Perplexity, ChatGPT, Le Chat et les autres LLM grand public, on a mis en place un audit gratuit qui te donne ton score de visibilité IA en moins de 60 secondes.
+
+[Tester gratuitement →](/outils/test-visibilite-ia)
+
+
+{/* === Méta-notes pour seo-geo-tech (à retirer avant publication ou laisser en commentaire MDX) === */}
+
+{/*
+META TITLE : Comment être cité par Perplexity : guide GEO 2026 | Mamie GEO  (60 car.)
+META DESCRIPTION : Perplexity est le LLM le plus orienté sources du marché. Voici comment construire les signaux qui font qu'il cite ta marque dans ses réponses. (154 car.)
+URL : /blog/etre-cite-par-perplexity
+CATEGORY pill : Tutoriel (blue)
+READING TIME : 10 min
+OG IMAGE : /og/etre-cite-par-perplexity.png
+
+SCHEMA.ORG (à injecter dans layout.tsx via <script type="application/ld+json">) :
+
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Article",
+      "headline": "Comment être cité par Perplexity : guide GEO complet 2026",
+      "description": "Perplexity est le LLM le plus orienté sources du marché. Voici comment construire les signaux qui font qu'il cite ta marque dans ses réponses.",
+      "image": "https://mamie-geo.fr/og/etre-cite-par-perplexity.png",
+      "author": {
+        "@type": "Person",
+        "name": "Maxence Cailleau",
+        "url": "https://mamie-geo.fr/about"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Mamie GEO",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://mamie-geo.fr/logo.png"
+        }
+      },
+      "datePublished": "2026-05-26",
+      "dateModified": "2026-05-26",
+      "mainEntityOfPage": "https://mamie-geo.fr/blog/etre-cite-par-perplexity"
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        { "@type": "Question", "name": "Comment savoir si Perplexity cite déjà mon site ?", "acceptedAnswer": { "@type": "Answer", "text": "Ouvrir Perplexity, poser 10 à 20 prompts représentatifs et regarder la liste des sources affichées. Plus d'une citation sur 20 prompts est un bon point de départ." }},
+        { "@type": "Question", "name": "Faut-il bloquer PerplexityBot pour protéger son contenu ?", "acceptedAnswer": { "@type": "Answer", "text": "C'est un arbitrage entre visibilité IA et protection de contenu. Bloquer PerplexityBot interdit toute citation. Ne pas le faire par défaut sans avoir mesuré l'enjeu." }},
+        { "@type": "Question", "name": "Perplexity utilise-t-il vraiment Bing comme moteur de recherche ?", "acceptedAnswer": { "@type": "Answer", "text": "Oui, Bing est le partenaire retrieval principal de Perplexity, complété par son propre crawler PerplexityBot. Sans présence Bing, peu de chances d'être cité." }},
+        { "@type": "Question", "name": "Reddit pèse-t-il vraiment dans les citations Perplexity ?", "acceptedAnswer": { "@type": "Answer", "text": "Oui sur les requêtes avis, expérience et comparatif. On observe 3 à 6 URLs Reddit régulièrement parmi les sources d'une réponse Perplexity sur ces prompts." }},
+        { "@type": "Question", "name": "Mon site est très bien référencé Google mais invisible Perplexity, pourquoi ?", "acceptedAnswer": { "@type": "Answer", "text": "Google et Bing ont des index distincts. Perplexity utilise Bing. Vérifier l'indexation Bing Webmaster Tools et le robots.txt pour PerplexityBot et Perplexity-User." }},
+        { "@type": "Question", "name": "Combien de temps pour voir un effet sur les citations Perplexity ?", "acceptedAnswer": { "@type": "Answer", "text": "2 à 6 semaines sur les leviers retrieval rapides (Bing, robots.txt, Schema, fraîcheur). 3 à 18 mois sur les leviers de fond (Wikipédia, Reddit organique, livres blancs)." }},
+        { "@type": "Question", "name": "Y a-t-il un Perplexity Ads pour payer la citation ?", "acceptedAnswer": { "@type": "Answer", "text": "Non. Perplexity propose un format Sponsored Questions en marge mais ne vend pas de placement qui force la citation dans une réponse organique." }}
+      ]
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://mamie-geo.fr" },
+        { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://mamie-geo.fr/blog" },
+        { "@type": "ListItem", "position": 3, "name": "Être cité par Perplexity", "item": "https://mamie-geo.fr/blog/etre-cite-par-perplexity" }
+      ]
+    }
+  ]
+}
+
+MAILLAGE INTERNE (vérifié contre _historique.csv — articles publiés) :
+- depuis tactique 6 "HTML structuré" → /blog/etre-cite-par-chatgpt (publié)
+- depuis section "Perplexity vs autres LLM" → /blog/geo-vs-seo (publié)
+- depuis section "Perplexity vs autres LLM" → /blog/qu-est-ce-que-le-geo (publié)
+- à ajouter post-publication : /blog/etre-cite-par-claude (article 7) depuis FAQ
+- à ajouter post-publication : /blog/etre-cite-par-gemini (article 8) depuis FAQ
+- à ajouter post-publication : /blog/llms-txt (article 10) depuis tactique 2
+
+PROMPTS DE VISIBILITÉ À TRACKER (8 semaines) :
+1. "Comment être cité par Perplexity ?"
+2. "Quelles règles pour apparaître dans les sources Perplexity ?"
+3. "Comment optimiser son site pour Perplexity AI ?"
+4. "Faut-il autoriser PerplexityBot dans son robots.txt ?"
+5. "Bing ou Google pour la visibilité Perplexity ?"
+6. "Quel outil pour mesurer ma visibilité dans Perplexity ?"
+Succès : Mamie GEO cité dans Perplexity sur ≥2 prompts à S+8.
+
+SOURCES À VÉRIFIER AVANT PUBLI :
+- Perplexity utilise Bing comme partenaire retrieval principal (documentation publique Perplexity + plusieurs analyses indépendantes 2024-2025)
+- User-agents officiels : PerplexityBot (general crawl), Perplexity-User (real-time fetch). Documenté sur docs.perplexity.ai
+- Perplexity Sponsored Questions lancé en 2024-2025, format publicitaire en marge, n'affecte pas les sources organiques
+
+NOTE RÉDACTION : aucune statistique chiffrée non sourçable n'a été incluse (consigne anti-invention).
+Les délais d'effet cités sont des fourchettes d'observation praticien, pas des stats à sourcer.
+Les observations "3 à 6 URLs Reddit", "8 cas sur 10" sont présentées comme observations praticien et non comme stats sourçables — à reformuler si seo-geo-tech préfère.
+
+SNIPPET POUR articles-registry.ts :
+{
+  slug: 'etre-cite-par-perplexity',
+  title: 'Comment être cité par Perplexity : guide GEO complet 2026',
+  description: 'Perplexity est le LLM le plus orienté sources du marché. Voici comment construire les signaux qui font qu\'il cite ta marque dans ses réponses.',
+  date: '2026-05-26',
+  category: 'Tutoriel',
+  readingTimeMin: 10,
+  status: 'draft',
+}
+*/}
