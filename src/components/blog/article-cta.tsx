@@ -6,7 +6,7 @@ import type { BlogCta } from "@/lib/blog/schemas";
 // par-catégorie ni par-tag pour rester simple. L'auteur choisit.
 //
 // 5 variantes :
-//   solo            → "Commencer avec Solo 9,99 €/mois" + accent terracotta
+//   solo            → "Commencer avec Solo 9,99 €/mois" + accent bleu brand
 //   starter         → "Commencer avec Starter 49 €/mois"
 //   pro             → "Découvrir Pro"
 //   audit-gratuit   → "Audit IA gratuit" (humain, 24 h ouvrées) + variant ai

@@ -16,16 +16,16 @@
 - Couleurs principales : **nuances de gris uniquement** (gray-50 → gray-950, alignées Tailwind v4).
 - **Une seule police** : **Inter** via `next/font/google` (weights 400/500/600/700 chargés). Pas de serif, pas de mono, pas de seconde famille typographique. Inter est le standard de fait des SaaS modernes — neutre, lisible, glyphs alternatifs activés via `font-feature-settings: "cv11", "ss01", "tnum"`.
 - **Pas d'italique** (ni en CSS, ni dans les balises `<em>` qui sont neutralisées en `font-style: normal`).
-- **Accent terracotta `#C5532E`** réservé aux CTAs (boutons "Recevoir le lien", "Lancer un run") et aux liens — jamais en fond, jamais en surface large.
+- **Accent bleu brand `#329CFF`** (couleur du logo, actée 2026-06-03 en remplacement du terracotta `#C5532E`) — utilisé pour les liens, les badges ponctuels, les highlights data dans les charts. Le CTA principal reste **noir plein** (langage designme/taap). Jamais en fond large.
 
 **Hiérarchie typographique** (cf. `src/app/globals.css` classes `.type-*`) : portée par taille + weight + letter-spacing, sans recourir à un serif. Display 600 / -0.03em, h1 600 / -0.025em, body 1rem leading 1.55.
 
 **Composants** (raffinement 2026-05-11 sur refs designme/taap) :
 
-- **Boutons** : tous en **`rounded-pill`** (full radius). Variant `primary` (**noir plein**, CTA principal — c'est ça le langage designme/taap, pas le terracotta), `secondary` (blanc + bordure gris-300, hover gris-50), `ghost` (transparent, hover gris-100). Le variant `accent` (terracotta plein) est conservé pour des **cas marginaux décoratifs** mais ne doit jamais être le CTA principal.
+- **Boutons** : tous en **`rounded-pill`** (full radius). Variant `primary` (**noir plein**, CTA principal — c'est ça le langage designme/taap, pas le bleu), `secondary` (blanc + bordure gris-300, hover gris-50), `ghost` (transparent, hover gris-100). Le variant `accent` (bleu plein) est conservé pour des **cas marginaux décoratifs** mais ne doit jamais être le CTA principal.
 - **Cards** : fond blanc, bordure 1px `gray-200`, **radius `xl` (20px)**, pas d'ombre par défaut. Padding interne généreux (`px-6 py-6`).
 - **Sections** : composant `<Section variant="default" | "tinted">` pour alterner fond blanc et fond `gray-50`. Pattern central des deux refs — crée le rythme visuel sans cards inutiles.
-- **Badges** : fond `gray-100` neutre par défaut. Variants light bg pour status (success/warning/error). Variant `accent` (terracotta très faible) gardé pour ponctuel (badge plan, badge beta) — comme le badge vert pastel "Fonctionnalités" de taap.
+- **Badges** : fond `gray-100` neutre par défaut. Variants light bg pour status (success/warning/error). Variant `accent` (bleu brand très faible `#eaf4ff`) gardé pour ponctuel (badge plan, badge beta) — comme le badge vert pastel "Fonctionnalités" de taap.
 - **Inputs** : bordure `gray-300`, focus ring noir sobre, radius `md` (10px).
 - **Touches « fancy »** observées chez designme à envisager pour PR 8+ : frame monitor avec cross hairs corners pour les screenshots dashboard, timecodes décoratifs en footer, speech bubbles dessinées au stylo pour humaniser (taap).
 
@@ -52,7 +52,7 @@ Icônes : **`lucide-react`** ajouté en dépendance (set d'icônes sans-serif l�
 > - Assets `/public/pattern.svg` + `src/assets/pattern.svg` supprimés.
 > - 3 usages site retirés (hero, audit-teaser, login) + 2 usages emails (welcome-paid, weekly-recap).
 >
-> L'identité visuelle s'appuie désormais sur : logo + couleur primary `#329cff` (boutons, accents) + `<CornerFrame>` (signature print subtile autour du hero) + favicon brand dans la top bar app. Le terracotta `--color-accent` reste actif sur badges `tone="accent"` et CTAs comme avant la décision 2026-05-18.
+> L'identité visuelle s'appuie désormais sur : logo + couleur brand bleu `#329cff` (CTAs accent, badges, highlights, charts) + `<CornerFrame>` (signature print subtile autour du hero) + favicon brand dans la top bar app. Le token `--color-accent` est aligné sur le bleu brand depuis le 2026-06-03 (auparavant terracotta).
 >
 > **À ne pas ré-introduire** sans validation explicite + démonstration que le problème de lisibilité × signature trouvé pendant les 4 itérations 2026-05-18→22 est résolu.
 
@@ -72,7 +72,7 @@ Quatre patterns visuels supplémentaires entrés dans le design system pour les 
 3. **AreaChart à gradient** (`<AreaChart data tone referenceValue />` dans `src/components/charts/area-chart.tsx`) :
    - Recharts `AreaChart` mono-série, fill `linear-gradient` (top stopOpacity 0.25 → bottom 0) sur la couleur de tonalité choisie.
    - Axe Y aligné à droite (`orientation="right"`), unité optionnelle (« % », « $ »).
-   - Référence dashée optionnelle (couleur accent terracotta) avec label aligné droite — pour afficher une moyenne ou un seuil.
+   - Référence dashée optionnelle (couleur accent bleu brand) avec label aligné droite — pour afficher une moyenne ou un seuil.
    - À utiliser pour les métriques single-series (cumul, volumétrie). Pour multi-LLM, garder `<LineChart>`.
 4. **BreakdownBars** (`<BreakdownBars segments mode total />` dans `src/components/charts/breakdown-bars.tsx`) :
    - Rangée de barres verticales colorées (une par segment), hauteur proportionnelle à la valeur (mode `absolute`) ou parts du total (mode `share`).
@@ -84,7 +84,7 @@ Quatre patterns visuels supplémentaires entrés dans le design system pour les 
 
 **Mentions de marque dans l'app** (update 2026-05-12) :
 
-- Côté pages applicatives `(app)/*`, le nom **« Mamie GEO »** n'apparaît **jamais** dans le chrome. Le top de sidebar suit le pattern **Vercel** (cf. screen Max 2026-05-12) : deux pills empilés, **workspace** au-dessus (avatar dégradé terracotta + nom + plan badge) et **brand/domaine** dessous (square noir avec initiale + domaine + chevron switcher). L'utilisateur sait où il est — répéter le nom produit est du bruit.
+- Côté pages applicatives `(app)/*`, le nom **« Mamie GEO »** n'apparaît **jamais** dans le chrome. Le top de sidebar suit le pattern **Vercel** (cf. screen Max 2026-05-12) : deux pills empilés, **workspace** au-dessus (avatar dégradé bleu brand + nom + plan badge) et **brand/domaine** dessous (square noir avec initiale + domaine + chevron switcher). L'utilisateur sait où il est — répéter le nom produit est du bruit.
 - Côté pages publiques (`(marketing)`, `(blog)`, `/login`), le nom reste affiché normalement (utilisateur non identifié, contexte ≠).
 - Côté placeholders de formulaires (onboarding), **rester générique** : `placeholder="Ta marque"` / `placeholder="ton-domaine.fr"` plutôt que des exemples nommés de la marque elle-même.
 
@@ -109,7 +109,7 @@ Deux pills empilés en haut de la sidebar, séparés par 6 px de gap :
 
 - La Direction A "éditorial chaud" donnait un look déjà-vu et chargé (crème + serif + italique = magazine), pas adapté à un produit data-driven.
 - Airbnb-like = standard moderne lisible, focus sur la donnée affichée (dashboard et tables sont l'essentiel produit), facile à itérer.
-- L'accent terracotta gardé conserve un fil avec le naming "Mamie GEO" (chaleur française) sans envahir l'interface.
+- Le bleu brand `#329cff` (logo) sert d'accent ponctuel — distinctif sans envahir l'interface (jamais en fond large).
 
 **Conservé du brief originel** :
 
@@ -133,7 +133,7 @@ Les 8 règles non-négociables pour ne pas avoir l'air "généré".
 
 ### 1. Pas de gradient violet/bleu en hero
 
-Le gradient `from-purple-600 to-blue-600` est devenu LE marqueur "AI startup". À bannir. Si gradient, alors couleurs chaudes (terracotta, ocre) ou monochrome subtil.
+Le gradient `from-purple-600 to-blue-600` plein écran est devenu LE marqueur "AI startup". À bannir **en hero / fond large**. Le `--gradient-ai` brand (bleu → purple → pink) reste autorisé **uniquement sur les boutons d'actions IA** (audit, suggérer prompts, Ask AI) où il signale explicitement une opération IA.
 
 ### 2. Voix personnelle, pas corporate
 

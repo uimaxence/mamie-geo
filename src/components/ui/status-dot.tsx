@@ -6,8 +6,7 @@ import type { HTMLAttributes } from "react";
 // "Run en cours…", "Provider live").
 //
 // Tones : success (vert running), error (rouge offline/failed),
-// warning (orange dégradé), accent (terracotta, brand), neutral
-// (gris idle).
+// warning (orange dégradé), accent (bleu brand), neutral (gris idle).
 
 type Tone = "success" | "error" | "warning" | "accent" | "neutral";
 
@@ -15,7 +14,7 @@ const toneClass: Record<Tone, string> = {
   success: "bg-[color:var(--color-green)] shadow-[var(--glow-green)]",
   error: "bg-[color:var(--color-error)] shadow-[var(--glow-red)]",
   warning: "bg-[color:var(--color-orange)] shadow-[var(--glow-orange)]",
-  accent: "bg-[color:var(--color-accent)] shadow-[var(--glow-orange)]",
+  accent: "bg-[color:var(--color-accent)] shadow-[var(--glow-blue)]",
   neutral: "bg-[color:var(--color-gray-400)]",
 };
 

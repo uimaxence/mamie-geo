@@ -31,7 +31,7 @@ Mamie GEO`;
         <h1 style="margin:0 0 16px;font-size:20px;font-weight:600;">Paiement refusé</h1>
         <p style="margin:0 0 16px;font-size:15px;line-height:1.6;">Le prélèvement pour ton abonnement sur <strong>${escapeHtml(data.workspaceName)}</strong> a été refusé. Mets à jour ta carte sous 7 jours pour éviter la suspension du tracking.</p>
         <p style="margin:24px 0;">
-          <a href="${escapeAttr(data.portalUrl)}" style="display:inline-block;background:#C5532E;color:#fff;text-decoration:none;padding:12px 20px;border-radius:8px;font-weight:500;font-size:14px;">Mettre à jour ma carte</a>
+          <a href="${escapeAttr(data.portalUrl)}" style="display:inline-block;background:#329CFF;color:#fff;text-decoration:none;padding:12px 20px;border-radius:8px;font-weight:500;font-size:14px;">Mettre à jour ma carte</a>
         </p>
         <p style="margin:24px 0 0;padding-top:24px;border-top:1px solid #efefef;font-size:13px;color:#6b6b6b;line-height:1.6;">Si tu penses qu'il s'agit d'une erreur, écris-nous à <a href="mailto:hello@mamie-geo.fr" style="color:#6b6b6b;">hello@mamie-geo.fr</a>.</p>
       </td></tr>

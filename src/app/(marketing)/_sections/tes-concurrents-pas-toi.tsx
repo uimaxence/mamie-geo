@@ -30,7 +30,7 @@ const USER_PROMPT = "Quels outils de monitoring de visibilité GEO me recommande
 
 // Tokens de réponse, chaque entrée = un "token" qui s'affiche en bloc.
 // Les `competitor` sont highlight rouge (= concurrent qui rafle la mise).
-// Mamie GEO apparaît en 4ᵉ avec un highlight terracotta (= notre marque
+// Mamie GEO apparaît en 4ᵉ avec un highlight bleu brand (= notre marque
 // est citée mais pas en tête, ce qui légitime le pitch « il y a de la
 // place pour grimper »).
 type Token =
@@ -165,7 +165,7 @@ export function TesConcurrentsPasToi() {
         "+=0.3",
       );
 
-      // 6b. Highlight Mamie GEO (terracotta faint), "tu y es, mais en
+      // 6b. Highlight Mamie GEO (bleu brand faint), "tu y es, mais en
       //     queue de peloton". L'effet finit après les concurrents pour
       //     ramener l'œil vers la marque.
       tl.to(

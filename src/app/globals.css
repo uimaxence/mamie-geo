@@ -31,21 +31,22 @@
   --color-border: var(--color-gray-200);
   --color-border-strong: var(--color-gray-300);
 
-  /* ── Accent ponctuel — réservé aux badges, jamais aux CTAs ── */
-  --color-accent: #c5532e;
-  --color-accent-dim: #a64525;
-  --color-accent-faint: #fbe9e2;
-
-  /* ── Primary brand (logo blue) — couleur de marque actée 2026-05-13.
-     Utilisée pour les illustrations data (charts marketing, mockups),
-     les gradients ambient subtils, et les accents ponctuels. À garder
-     sobre — pas en fond large, jamais comme CTA principal (le noir
-     reste le CTA primaire, le terracotta pour les badges). ───────── */
+  /* ── Brand blue (logo) — couleur de marque unique actée 2026-06-03
+     (cf. geo-project/09-decisions-journal.md). Remplace l'ancien
+     terracotta `#c5532e`. Les tokens `--color-accent*` sont conservés
+     comme alias historiques pour éviter de casser les 20+ fichiers
+     qui les référencent, mais pointent désormais vers le même bleu.
+     Le noir reste le CTA primaire ; le bleu est l'accent/highlight. */
   --color-primary: #329cff;
   --color-primary-dim: #1d7ee5;
   --color-primary-soft: #eaf4ff;
   --color-primary-faint: rgba(50, 156, 255, 0.08);
   --color-primary-glow: rgba(50, 156, 255, 0.25);
+
+  /* Aliases legacy — pointent sur le bleu brand */
+  --color-accent: #329cff;
+  --color-accent-dim: #1d7ee5;
+  --color-accent-faint: #eaf4ff;
 
   /* ── Status ── */
   --color-success: #15803d;
@@ -78,14 +79,15 @@
   --glow-orange: 0 0 12px rgba(234, 88, 12, 0.35);
   --glow-blue: 0 0 12px rgba(37, 99, 235, 0.3);
 
-  /* ── Gradient "AI" — combine les deux couleurs marque Mamie GEO
-     (terracotta + primary blue) avec un purple en passerelle pour
-     l'aspect IA. Distinctif et 100 % Mamie GEO. Réservé aux actions
-     IA (audit, suggérer prompts, futurs Ask AI). ─────────────────── */
-  --gradient-ai: linear-gradient(135deg, #c5532e 0%, #7c3aed 55%, #329cff 100%);
-  --gradient-ai-hover: linear-gradient(135deg, #b54824 0%, #6d28d9 55%, #1d7ee5 100%);
-  --glow-ai: 0 0 22px -4px rgba(197, 83, 46, 0.45), 0 4px 14px -2px rgba(50, 156, 255, 0.35);
-  --glow-ai-hover: 0 0 28px -2px rgba(197, 83, 46, 0.6), 0 6px 18px -2px rgba(50, 156, 255, 0.5);
+  /* ── Gradient "AI" — bleu brand → purple → pink. Refonte 2026-06-03
+     après abandon du terracotta. Le bleu ancre l'identité Mamie GEO,
+     le purple/pink apporte la signature "IA" (proche des codes
+     ChatGPT/Anthropic). Réservé aux actions IA (audit, suggérer
+     prompts, Ask AI). ────────────────────────────────────────────── */
+  --gradient-ai: linear-gradient(135deg, #329cff 0%, #7c3aed 55%, #ec4899 100%);
+  --gradient-ai-hover: linear-gradient(135deg, #1d7ee5 0%, #6d28d9 55%, #db2777 100%);
+  --glow-ai: 0 0 22px -4px rgba(50, 156, 255, 0.45), 0 4px 14px -2px rgba(124, 58, 237, 0.35);
+  --glow-ai-hover: 0 0 28px -2px rgba(50, 156, 255, 0.6), 0 6px 18px -2px rgba(124, 58, 237, 0.5);
 
   /* ── Police unique : Inter via next/font/google ── */
   --font-sans:
@@ -416,27 +418,22 @@
 }
 
 /* ─────────────────────────────────────────────────────────────────────
- * Gradients warm — signature brand expressive (cf. doc 09 § PR 12a).
+ * Gradients brand — signature expressive (cf. doc 09 § 2026-06-03).
  *
- * Refactor du 2026-05-14 suite retour Max :
- *   - Le gradient ne crashe plus le texte (était dans le bg de toute
- *     la card, lisibilité réduite). Il est désormais en pseudo-element
- *     ::before en absolute fill DERRIÈRE le contenu.
- *   - Apparaît au :hover smoothly (opacity 0 → 1 sur 400ms) au lieu
- *     d'être permanent. Le repos reste minimaliste, le hover donne du
- *     peps.
- *   - Couleurs nettement plus light (rgba 0.06-0.12 max au lieu de
- *     hex saturés).
+ * Les classes `card-hover-warm` et `gradient-warm-panel` conservent
+ * leur nom historique pour ne pas casser les nombreux callers, mais
+ * leurs teintes sont désormais bleu brand `#329cff` (pivot terracotta
+ * → bleu logo du 2026-06-03).
  *
- * `.card-hover-warm` : à appliquer sur n'importe quelle card (persona,
- *   step, feature, plan) — gradient apparaît au survol.
+ * `.card-hover-warm` : pseudo-element ::before en absolute fill
+ *   DERRIÈRE le contenu, opacity 0 → 1 au hover (400ms).
  * `.gradient-warm-panel` : grand panel split (login). Toujours
  *   permanent et plus saturé — c'est un panneau, pas une card.
  * ──────────────────────────────────────────────────────────────────── */
 
 .card-hover-warm {
   position: relative;
-  isolation: isolate; /* contient les pseudo-elements */
+  isolation: isolate;
   transition:
     transform 280ms ease,
     box-shadow 280ms ease;
@@ -449,9 +446,9 @@
   border-radius: inherit;
   background-image: radial-gradient(
     ellipse 120% 120% at 25% 75%,
-    rgba(197, 83, 46, 0.12) 0%,
-    rgba(237, 126, 76, 0.08) 22%,
-    rgba(251, 192, 147, 0.05) 45%,
+    rgba(50, 156, 255, 0.12) 0%,
+    rgba(96, 165, 250, 0.08) 22%,
+    rgba(186, 218, 255, 0.05) 45%,
     transparent 75%
   );
   opacity: 0;
@@ -472,11 +469,11 @@
 .gradient-warm-panel {
   background-image: radial-gradient(
     ellipse 100% 80% at 30% 45%,
-    #ed7e4c 0%,
-    #f5a072 18%,
-    #fbc093 40%,
-    #fde8d6 65%,
-    #fcf3e8 100%
+    #329cff 0%,
+    #60a5fa 18%,
+    #93c5fd 40%,
+    #dbeafe 65%,
+    #eff6ff 100%
   );
 }
 

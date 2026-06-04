@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 // Barre fixe en haut de page qui suit le scroll de l'article. Bon
 // boost UX, ~30 lignes, n'impacte pas le LCP (rendue après mount).
-// Couleur accent terracotta pour rester dans le langage Mamie GEO.
+// Couleur accent bleu brand pour rester dans le langage Mamie GEO.
 
 export function ReadingProgress() {
   const [progress, setProgress] = useState(0);

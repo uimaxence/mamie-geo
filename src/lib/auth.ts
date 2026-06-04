@@ -23,12 +23,19 @@ import { sendMagicLinkEmail } from "@/lib/email";
 //
 // Cf. https://www.better-auth.com/docs/concepts/cors#trusted-origins
 
+// En dev, Next.js bascule sur les ports 3001/3002/3003 si 3000 est
+// occupé (un autre `pnpm dev`, un dev server zombie…) — il faut tous
+// les autoriser sinon le client tombe en `error: {}` opaque (rejet
+// CORS Better Auth, sans message exploitable).
 const trustedOrigins = [
   env.NEXT_PUBLIC_APP_URL,
   env.BETTER_AUTH_URL,
   "https://mamie-geo.fr",
   "https://www.mamie-geo.fr",
   "http://localhost:3000",
+  "http://localhost:3001",
+  "http://localhost:3002",
+  "http://localhost:3003",
   process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null,
 ].filter((o): o is string => Boolean(o));
 

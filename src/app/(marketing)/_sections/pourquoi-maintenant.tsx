@@ -61,13 +61,13 @@ export function PourquoiMaintenant() {
       className="relative bg-[color:var(--color-ink)] text-white"
       style={{ minHeight: "180vh" }}
     >
-      {/* Radial warm subtile, touche de couleur, ~0,22 opacité max. */}
+      {/* Radial bleu brand subtil, touche de couleur, ~0,22 opacité max. */}
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
         <div
           className="absolute -top-32 -right-32 size-[640px] rounded-full"
           style={{
             background:
-              "radial-gradient(circle at center, rgba(197, 83, 46, 0.22) 0%, rgba(197, 83, 46, 0.08) 35%, transparent 65%)",
+              "radial-gradient(circle at center, rgba(50, 156, 255, 0.22) 0%, rgba(50, 156, 255, 0.08) 35%, transparent 65%)",
             filter: "blur(40px)",
           }}
         />

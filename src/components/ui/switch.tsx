@@ -4,7 +4,7 @@ import * as SwitchPrimitive from "@radix-ui/react-switch";
 import { forwardRef, type ComponentPropsWithoutRef, type ElementRef } from "react";
 import { cn } from "@/lib/utils";
 
-// Switch Radix : on = accent terracotta, off = gray-300. Taille standard
+// Switch Radix : on = accent bleu brand `#329cff`, off = gray-300. Taille standard
 // 36×20 px (track) + 16 px (thumb), pour rester discret en formulaire.
 
 export const Switch = forwardRef<

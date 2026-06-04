@@ -113,7 +113,7 @@ function renderHtml(report: AuditReport, failed: CheckResult[], passed: CheckRes
             : ""
         }
 
-        <div style="margin:40px 0 0;padding:24px;background:linear-gradient(135deg,#fbe9e2 0%,#eaf4ff 100%);border-radius:12px;">
+        <div style="margin:40px 0 0;padding:24px;background:linear-gradient(135deg,#eaf4ff 0%,#dbeafe 100%);border-radius:12px;">
           <h3 style="margin:0 0 8px;font-size:18px;font-weight:700;">Tu veux qu'on tracke ta visibilité IA en continu ?</h3>
           <p style="margin:0 0 16px;font-size:14px;color:#404040;">Mamie GEO mesure quotidiennement si ta marque apparaît dans ChatGPT, Claude, Perplexity, Gemini et Le Chat. À partir de 9,99 €/mois.</p>
           <p style="margin:0;">

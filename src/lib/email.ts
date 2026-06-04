@@ -170,7 +170,7 @@ Si tu utilises ton téléphone : le lien s'ouvrira dans ton navigateur, pas dans
 Tu n'as pas demandé ce lien ? Ignore cet email, il ne se passera rien.
 
 — L'équipe Mamie GEO`;
-  // HTML inline branded — gradient halo terracotta/blue, logo Mamie,
+  // HTML inline branded — gradient halo bleu brand, logo Mamie,
   // CTA bouton noir, instructions mobile-friendly + fallback support.
   const html = `<!doctype html>
 <html lang="fr">
@@ -198,7 +198,7 @@ Tu n'as pas demandé ce lien ? Ignore cet email, il ne se passera rien.
 
         <p style="margin:24px 0 0;font-size:13px;color:#737373;line-height:1.6;">Ou copie-colle cette URL dans ton navigateur :<br /><a href="${url}" style="color:#329cff;word-break:break-all;font-size:12px;">${url}</a></p>
 
-        <div style="margin:32px 0 0;padding:16px;background:linear-gradient(135deg,rgba(197,83,46,0.06) 0%,rgba(50,156,255,0.06) 100%);border-radius:10px;">
+        <div style="margin:32px 0 0;padding:16px;background:linear-gradient(135deg,rgba(50,156,255,0.10) 0%,rgba(50,156,255,0.04) 100%);border-radius:10px;">
           <p style="margin:0 0 6px;font-size:13px;font-weight:600;color:#191919;">📱 Sur ton téléphone&nbsp;?</p>
           <p style="margin:0;font-size:13px;line-height:1.55;color:#525252;">Le lien s'ouvrira dans ton navigateur, pas dans l'app email. Pas besoin de revenir manuellement à la page de login — ta session sera active partout.</p>
         </div>
@@ -525,7 +525,7 @@ PS : si tu veux aller plus vite, tu peux créer un compte directement (garantie 
         </p>
 
         <!-- CTA secondaire : créer un compte tout de suite -->
-        <div style="margin:32px 0 0;padding:18px;background:linear-gradient(135deg,rgba(197,83,46,0.06) 0%,rgba(50,156,255,0.06) 100%);border-radius:10px;">
+        <div style="margin:32px 0 0;padding:18px;background:linear-gradient(135deg,rgba(50,156,255,0.10) 0%,rgba(50,156,255,0.04) 100%);border-radius:10px;">
           <p style="margin:0 0 4px;font-size:13px;font-weight:600;color:#191919;">Tu veux aller plus vite&nbsp;?</p>
           <p style="margin:0 0 12px;font-size:13px;line-height:1.55;color:#525252;">
             Crée ton compte maintenant. Premier rapport en moins de 10&nbsp;minutes, garantie remboursement 14&nbsp;jours, annulable en 1 clic.

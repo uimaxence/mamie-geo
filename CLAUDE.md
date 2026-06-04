@@ -263,9 +263,25 @@ la doc devient un cimetière.
 
 ---
 
-## 9. État du projet (snapshot — 2026-05-22)
+## 9. État du projet (snapshot — 2026-06-03)
 
-> Mise à jour 2026-05-22 — Phase C livrée + polish UI + pattern retiré
+> Mise à jour 2026-06-03 — Pivot brand color terracotta → bleu logo + admin visuels LinkedIn
+>
+> **Brand color sweep** : `--color-accent` (terracotta `#C5532E`) aliasé sur
+> le bleu brand `#329CFF` (couleur du logo). Les classes `card-hover-warm`
+> et `gradient-warm-panel` (login) gardent leur nom historique mais leurs
+> valeurs basculent en dégradés bleu pâle. Le `--gradient-ai` (boutons
+> actions IA) passe de `terracotta → purple → bleu` à `bleu → purple →
+> pink`. 4 emails transac mis à jour. Doc 10 + doc 09 + CLAUDE.md alignés.
+> Cf. doc 09 § 2026-06-03 pour le contexte complet.
+>
+> **Admin visuels LinkedIn** : nouvelle route protégée
+> `/app/admin/visuals` (guard sur email Max) où sont rendus les visuels
+> LinkedIn au format exact (1080×1350 portrait). Bouton "Télécharger
+> PNG" via `html-to-image`. Premier visuel : tableau comparatif SEO vs
+> GEO 6 lignes pour le post du 2026-06-02 sur l'article geo-vs-seo.
+>
+> Précédente (2026-05-22) — Phase C livrée + polish UI + pattern retiré
 >
 > **Phase C livrée** : tous les 5 providers LLM sont en place via la
 > séquence PR1-5 multi-LLM. Le tracker peut désormais tourner sur
@@ -461,7 +477,7 @@ Phasage acté le 2026-05-07 (cf. `09-decisions-journal.md` § 2026-05-07) :
 
 ### Décisions Sprint 0 verrouillées (rappel)
 
-- Direction artistique : Pivot 2026-05-07 — Airbnb-like minimaliste. Blanc + nuances de gris, accent terracotta `#C5532E` réservé aux CTAs, pas de fond coloré, pas d'italique, une seule police.
+- Direction artistique : Pivot 2026-05-07 — Airbnb-like minimaliste. Fond blanc / gris `#fafafa` + nuances de gris. Accent **bleu brand `#329CFF`** (pivot 2026-06-03, remplace l'ancien terracotta `#C5532E`) réservé aux badges, liens, highlights data. CTA principal = noir plein. Pas d'italique, une seule police.
 - Police unique V0 : **Inter** via `next/font/google`. Geist + Newsreader + Geist Mono retirés.
 - Naming + domaine : Mamie GEO sur `mamie-geo.fr`. Redirect 301 défensif `mamie-seo.fr` → `mamie-geo.fr`.
 - Magic-link Better Auth : Brevo, **REST API** (acté 2026-05-12 — SMTP était bloqué par IP whitelist Free plan Brevo).

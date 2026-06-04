@@ -1,7 +1,7 @@
 import { LinkButton } from "@/components/ui";
 
 // Section CTA finale, juste avant le footer. Dernière chance avant
-// bounce. Réutilise le pattern fond noir + halo radial terracotta de
+// bounce. Réutilise le pattern fond noir + halo radial bleu brand de
 // <PourquoiMaintenant> pour rester cohérent visuellement (deux sections
 // noires dans la home : narrative au début, action à la fin).
 //
@@ -15,14 +15,14 @@ import { LinkButton } from "@/components/ui";
 export function FinalCTA() {
   return (
     <section className="relative overflow-hidden bg-[color:var(--color-ink)] text-white">
-      {/* Halo terracotta diffus, identique à PourquoiMaintenant pour
+      {/* Halo bleu brand diffus, identique à PourquoiMaintenant pour
        * créer un rappel visuel entre les deux sections noires. */}
       <div aria-hidden className="pointer-events-none absolute inset-0">
         <div
           className="absolute -bottom-32 -left-32 size-[640px] rounded-full"
           style={{
             background:
-              "radial-gradient(circle at center, rgba(197, 83, 46, 0.22) 0%, rgba(197, 83, 46, 0.08) 35%, transparent 65%)",
+              "radial-gradient(circle at center, rgba(50, 156, 255, 0.22) 0%, rgba(50, 156, 255, 0.08) 35%, transparent 65%)",
             filter: "blur(40px)",
           }}
         />

@@ -161,6 +161,41 @@ haut et l'entrée "2026-05-05 — Réponses aux 10 questions de bootstrap".
 
 ### Décisions enregistrées
 
+#### 2026-06-03 — Pivot brand color terracotta `#C5532E` → bleu logo `#329CFF` + admin visuels LinkedIn
+
+**Contexte** : La couleur du logo Mamie GEO est un bleu cobalt `#329CFF` depuis la décision 2026-05-13. Mais le doc 10 et l'app utilisent encore le terracotta `#C5532E` comme `--color-accent` (badges, liens, hover, CTAs accent, gradient AI, gradient warm panel login, avatars workspace). Le double signal "bleu logo + accent terracotta" crée une dissonance brand : la marque dit "bleu" via son logo, le produit dit "orange" via ses accents.
+
+À l'occasion de la création d'un générateur de visuels LinkedIn (post 2026-06-02 sur l'amplification de l'article geo-vs-seo), Max acte le pivot brand complet vers le bleu logo.
+
+**Options considérées** :
+- A) Ne rien changer (le terracotta reste l'accent) — rejeté, dissonance brand persistante.
+- B) Visuel LinkedIn uniquement en bleu, code stable terracotta — hybride, risque de figer la dissonance.
+- C) **Sweep brand complet** : `--color-accent` aliasé sur le bleu brand, gradients warm refactorés en gradients cool, gradient AI recomposé sans terracotta, emails et docs alignés.
+
+**Choix** : Option C — sweep complet.
+
+**Justification** :
+- Cohérence brand univoque (logo + accents + CTAs alignés sur le bleu).
+- Les tokens `--color-accent*` sont **conservés comme aliases** (pointent sur le bleu) pour ne pas casser les 22 fichiers qui les référencent — pas de rename invasif des classes Tailwind `text-accent` / `bg-accent-faint` / `tone="accent"`.
+- Les classes `card-hover-warm` et `gradient-warm-panel` gardent leur nom historique (refactor lourd inutile) mais leurs valeurs basculent en bleu (le nom devient un héritage interne, pas un engagement visuel).
+- Le gradient AI passe de `terracotta → purple → bleu` à `bleu → purple → pink` (signature IA distinctive, cohérente avec les codes ChatGPT/Anthropic, ancrée sur le bleu brand).
+
+**Conséquences attendues** :
+- Tous les badges `tone="accent"`, status dots, charts AreaChart de référence, hover liens, etc., basculent en bleu automatiquement via les aliases CSS.
+- Les pages marketing avec `card-hover-warm` (tes-outils, how-it-works, pour-qui, sans-avec) voient leur halo de hover passer de pêche à bleu pâle.
+- Le panel login (`gradient-warm-panel`) bascule d'un dégradé orange chaud à un dégradé bleu clair.
+- 4 templates email mis à jour (audit-score-drop, payment-failed, technical-audit-report).
+- Doc 10 (design direction) : ~7 paragraphes mis à jour. La section archivée "Direction A — Éditorial chaud" qui mentionne le terracotta reste intacte (archive historique).
+- Doc 09 : cette entrée.
+- L'item "anti-pattern gradient violet/bleu en hero" du doc 10 est nuancé : le `--gradient-ai` brand reste autorisé sur boutons d'actions IA (audit, suggérer prompts), mais l'interdit en hero/fond large reste.
+
+**Livré dans le même PR** :
+- Page admin protégée `/app/admin/visuals` (guard sur rôle/email Max — réutilisée pour future production de visuels marketing).
+- Premier visuel : tableau comparatif SEO vs GEO 1080×1350 portrait pour post LinkedIn du 2026-06-02.
+- Bouton "Télécharger PNG" via `html-to-image` (dep ajoutée).
+
+**À revisiter** : si les retours sur le bleu trop saturé reviennent (le `#329CFF` est cobalt vif), envisager `#1d7ee5` (`--color-primary-dim`) comme nouvelle valeur de `--color-accent` pour adoucir.
+
 #### 2026-05-26 — Polish "belle V0" pré-lancement + CTA prix dans le bouton + stats honnêtes
 
 **Contexte** : Avant hard launch public, audit comparatif vs getmint.ai (concurrent FR direct). Trois piliers conversion manquaient à la home : preuve produit visible (que des mockups CSS, zéro screenshot dashboard réel), garanties affichées (la garantie 14j enterrée en FAQ pricing, jamais surfacée hero), différenciation concurrentielle prouvée (aucune page comparative dédiée).

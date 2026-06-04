@@ -8,12 +8,13 @@ import {
 
 // Bouton primitif, direction designme.agency / taap.it (cf. doc 10
 // § Direction actée 2026-05-11). CTA principal = noir plein arrondi
-// pill, secondaire = outline gris, ghost = transparent. Le terracotta
-// ne sert plus pour les CTAs, il reste disponible via `accent` pour
-// les cas marginaux mais doit rester rare.
+// pill, secondaire = outline gris, ghost = transparent. Le bleu brand
+// `#329cff` (variant `accent`, pivot terracotta→bleu du 2026-06-03)
+// ne sert plus pour les CTAs principaux — réservé aux cas marginaux.
 //
-// Variant `ai` (ajouté 2026-05-16, refs Kree8) : dégradé rose→indigo +
-// glow externe. Réservé aux actions IA (Suggérer, Ask AI, audit IA…).
+// Variant `ai` (ajouté 2026-05-16, refonte gradient 2026-06-03) :
+// dégradé bleu brand → purple → pink + glow externe. Réservé aux
+// actions IA (Suggérer, Ask AI, audit IA…).
 // L'icône Sparkles est injectée automatiquement à gauche.
 //
 // Tous les boutons sont en `rounded-pill` (full radius) pour matcher
