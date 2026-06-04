@@ -27,9 +27,16 @@ export default function VisualsIndexPage() {
           >
             <div className="flex items-center justify-between gap-2">
               <span className="type-eyebrow">{visual.format.label}</span>
-              <span className="font-mono text-xs text-[color:var(--color-muted)] tabular-nums">
-                {visual.format.width}×{visual.format.height}
-              </span>
+              <div className="flex items-center gap-2">
+                {visual.slides.length > 1 && (
+                  <span className="rounded-full bg-[color:var(--color-primary-soft)] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[color:var(--color-primary-dim)]">
+                    {visual.slides.length} slides
+                  </span>
+                )}
+                <span className="font-mono text-xs text-[color:var(--color-muted)] tabular-nums">
+                  {visual.format.width}×{visual.format.height}
+                </span>
+              </div>
             </div>
             <h2 className="text-lg font-semibold leading-tight text-[color:var(--color-ink)]">
               {visual.title}
