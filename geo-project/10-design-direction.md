@@ -119,6 +119,70 @@ Deux pills empilés en haut de la sidebar, séparés par 6 px de gap :
 
 ---
 
+### Système design carousels LinkedIn (acté 2026-06-04)
+
+**Périmètre strict** : ce système design s'applique **uniquement aux visuels marketing externes** — carousels LinkedIn, OG images, blog covers V1+. **Ne PAS utiliser dans l'app `(app)/*`** qui reste en direction Airbnb-like minimaliste (blanc + gris + bleu brand accent).
+
+**Référence ancrée** : Unified™ Pinterest (carousels pastel jaune/lavande/blanc, big bold typo, vagues organiques en filigrane). Adaptation Mamie GEO : on garde l'esprit (variation slide-à-slide, paper-note cards, brand pill, vagues décoratives) mais on remplace le jaune saturé par un **crème chaude `#fff4d6`** qui apporte la chaleur sans contredire la décision brand bleu logo du 2026-06-03.
+
+**Palette carousel** (4 fonds combinables pour varier slide-à-slide) :
+- **Crème chaude** `#fff4d6` (`--color-cream`) — fond principal, optimiste, distinctif
+- **Crème soft** `#fffbed` (`--color-cream-soft`) — secondary slides
+- **Crème strong** `#fcd34d` (`--color-cream-strong`) — accents/badges sur slides crème
+- **Blanc** `#ffffff` — paper-note cards (toujours en superposition sur fond coloré)
+- **Bleu brand** `#329cff` — accent typo, surfaces colorées, vagues
+- **Ink** `#0a0a0a` — typo principale, brand pill, headers de tableaux
+
+**Primitives** (`src/components/admin/visuals/`) :
+
+1. **`<BrandPill>`** : badge rond en haut à gauche. Cercle bleu logo 26px contenant le `<Logo>` inline + label « MAMIE GEO » en small caps. Wrapper pill ink rounded-full.
+2. **`<SlideNumber index={N} total={M} />`** : tag pill discret en haut à droite, format `01 / 05` en tabular-nums, fond `rgba(10,10,10,0.06)`.
+3. **`<WavesDecoration position="top-right" | "bottom-left" />`** : SVG de 8 arcs concentriques (rayons 80 → 332) en `rgba(50,156,255,0.18)`, positionné absolu hors-canvas pour ne montrer que l'arc visible. Signature carousel — pose une touche de mouvement organique sans charger.
+4. **Paper-note card** (pattern inline, à extraire en composant quand 3+ usages) : `background:#fff` + `border:1px solid #e5e5e5` + `border-radius:24` + `box-shadow` doux. Sert à isoler du contenu structuré (tables, listes) du fond crème.
+
+**Layout standard** (1080×1350 portrait) :
+
+```
+┌──────────────────────────────────────────┐
+│ [BrandPill]                  [SlideNumber] │  60px top padding
+│                                            │
+│                                            │
+│  HEADLINE MASSIVE                          │  Inter 800, 88pt, -0.04em
+│  EN PLUSIEURS LIGNES                       │
+│  (accent bleu sur 1 mot clé)               │
+│                                            │
+│  Subtitle 22pt color ink-soft              │
+│                                            │
+│  ┌─ Paper-note card ──────────────────┐   │
+│  │                                     │   │  flex: 1
+│  │  Contenu structuré                  │   │
+│  │  (table, liste, stats…)             │   │
+│  │                                     │   │
+│  └─────────────────────────────────────┘   │
+│                                            │
+│  Punchline + pastille (~80% etc.)         │
+│                                            │
+│  mamie-geo.fr        TAGLINE FOOTER       │  50px bottom padding
+└──────────────────────────────────────────┘
+```
+
+**Règles dures** :
+- Inline-styles obligatoires (pas de Tailwind class) — garantit le rendu pixel-parfait par `html-to-image`.
+- Une seule famille typo : **Inter** (500/600/700/800). Pas de serif, pas d'italique (rappel doc 10 § Direction actée).
+- Headlines en 800 weight + `letter-spacing:-0.04em` pour la densité « Unified-like ».
+- Accent bleu brand uniquement sur **un mot clé** du headline (pas tout le titre, sinon perte d'impact).
+- Vagues max **2 par slide** (top-right + bottom-left). Plus = surchargé.
+
+**Anti-patterns spécifiques carousels** :
+- ❌ Jaune saturé en fond (= copie Unified, perte d'identité)
+- ❌ Italique pour les subtitles (interdit doc 10)
+- ❌ Stock illustrations 3D (rappel anti-pattern doc 10 § Principes anti-IA)
+- ❌ Charts dans paper-note (réservé à l'app — sur carousels, préférer stats grosses + mots clés)
+
+**Itération** : extraire les primitives dans `src/components/admin/visuals/_primitives/` quand 3+ visuels les partagent (heuristique standard repo).
+
+---
+
 ## Pourquoi ce document
 
 L'enjeu : sortir du look "fait par une IA" qui caractérise 80% des SaaS lancés en 2025-2026 (gradient violet/bleu, illustrations 3D Stripe-like, "Trusted by 1000+", composants shadcn par défaut, ton corporate vide). Mamie GEO doit avoir une identité **française, humaine et honnête** — sobre, focus sur la donnée.

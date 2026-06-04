@@ -196,6 +196,39 @@ haut et l'entrée "2026-05-05 — Réponses aux 10 questions de bootstrap".
 
 **À revisiter** : si les retours sur le bleu trop saturé reviennent (le `#329CFF` est cobalt vif), envisager `#1d7ee5` (`--color-primary-dim`) comme nouvelle valeur de `--color-accent` pour adoucir.
 
+#### 2026-06-04 — Système design carousels LinkedIn (style « Unified ») + crème chaude 3e ton marketing
+
+**Contexte** : Le visuel SEO vs GEO livré la veille (cf. entrée 2026-06-03) restait fonctionnel mais pas signature. Max envoie une référence Pinterest « Unified™ » (carousels LinkedIn pastel jaune/lavande/blanc, big bold typo, vagues organiques) et demande d'adapter ce langage à Mamie GEO pour cet asset et les futurs carousels LinkedIn.
+
+**Options considérées** :
+- A) Copie directe de la palette Unified (jaune saturé + lavande + rose) — rejeté, s'éloigne du brand bleu logo acté la veille.
+- B) Bleu brand strict (bleu + ink + blanc + grays) — discipliné mais perd la variation slide-à-slide qui fait le charme « Unified ».
+- C) **Bleu brand + ink + crème chaude `#fff4d6`** comme 3e ton marketing — apporte la chaleur Unified sans contredire la décision brand de la veille.
+
+**Choix** : Option C.
+
+**Justification** :
+- La crème chaude `#fff4d6` est suffisamment éloignée du jaune saturé Unified pour ne pas être perçue comme « copie » et suffisamment proche d'une teinte beige/butter pour apporter la chaleur recherchée.
+- Distinction nette **app vs carousels** : les tokens `--color-cream*` ne sont **PAS** à utiliser dans l'app `(app)/*`. L'app garde sa direction Airbnb-like minimaliste (blanc + gris + bleu brand accent). La crème est réservée aux visuels externes (carousels LinkedIn, OG images, blog covers V1+).
+- Système carousel : un visuel = `<BrandPill>` (top-left, ink rond avec logo bleu inset) + `<SlideNumber>` (top-right, `01 / N`) + headline bold massif + paper-note card pour le contenu + `<WavesDecoration>` organique en filigrane bleu pâle aux coins.
+
+**Tokens ajoutés** :
+- `--color-cream: #fff4d6` (background principal carousel)
+- `--color-cream-soft: #fffbed` (variante très light, pour secondary slides)
+- `--color-cream-strong: #fcd34d` (saturé, pour accents/badges sur slides crème)
+
+**Livré dans ce PR** :
+- 3 tokens dans `globals.css` (section dédiée « 3e ton marketing »).
+- Refonte `SeoVsGeoVisual` en style Unified : fond crème, vagues décoratives bleu pâle (top-right + bottom-left), brand pill ink + cercle bleu logo, slide number `01 / 01`, headline 88pt « SEO vs GEO. », paper-note card blanche contenant les 6 lignes avec rangées alternées (gris pour SEO, bleu soft pour GEO), punchline 80 % en pastille noire ink, footer minimal mamie-geo.fr.
+- 3 primitives carousel (`BrandPill`, `SlideNumber`, `WavesDecoration`) co-localisées dans `seo-vs-geo-visual.tsx` — à splitter dans `src/components/admin/visuals/_primitives/` quand 3+ visuels les partagent.
+
+**Conséquences attendues** :
+- Le visuel LinkedIn du 2026-06-02 a maintenant une signature distinctive (vagues bleu pâle + brand pill ink + crème chaude) qui le rend reconnaissable même hors-contexte Mamie GEO.
+- Les prochains carousels LinkedIn pourront reprendre le même langage : variation slide-à-slide via combinaison des 4 fonds (crème / blanc / bleu brand / ink) avec les primitives partagées.
+- L'app reste inchangée — discipline maintenue.
+
+**À revisiter** : si les premiers carousels révèlent que la crème seule manque de pep, envisager d'ajouter `--color-lavender` `#e0e7ff` comme 4e ton marketing (jamais dans l'app).
+
 #### 2026-05-26 — Polish "belle V0" pré-lancement + CTA prix dans le bouton + stats honnêtes
 
 **Contexte** : Avant hard launch public, audit comparatif vs getmint.ai (concurrent FR direct). Trois piliers conversion manquaient à la home : preuve produit visible (que des mockups CSS, zéro screenshot dashboard réel), garanties affichées (la garantie 14j enterrée en FAQ pricing, jamais surfacée hero), différenciation concurrentielle prouvée (aucune page comparative dédiée).

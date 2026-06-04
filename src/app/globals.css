@@ -48,6 +48,15 @@
   --color-accent-dim: #1d7ee5;
   --color-accent-faint: #eaf4ff;
 
+  /* ── Crème chaude — 3e ton marketing (carousels LinkedIn, OG images,
+     visuels externes). Référence Unified-style : variation slide-à-slide
+     bleu/cream/ink/blanc. À ne PAS utiliser dans l'app (réservé aux
+     visuels externes pour ne pas casser la direction Airbnb-like
+     minimaliste de l'app). Acté 2026-06-04. ──────────────────────── */
+  --color-cream: #fff4d6;
+  --color-cream-soft: #fffbed;
+  --color-cream-strong: #fcd34d;
+
   /* ── Status ── */
   --color-success: #15803d;
   --color-success-bg: #f0fdf4;

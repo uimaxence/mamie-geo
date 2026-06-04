@@ -263,9 +263,24 @@ la doc devient un cimetière.
 
 ---
 
-## 9. État du projet (snapshot — 2026-06-03)
+## 9. État du projet (snapshot — 2026-06-04)
 
-> Mise à jour 2026-06-03 — Pivot brand color terracotta → bleu logo + admin visuels LinkedIn
+> Mise à jour 2026-06-04 — Système design carousels LinkedIn « Unified » + crème chaude 3e ton
+>
+> **Carousels LinkedIn** : système design ancré sur la référence Unified™
+> (vagues organiques + big bold typo + paper-note card + brand pill). 3
+> nouveaux tokens `--color-cream*` (`#fff4d6` / `#fffbed` / `#fcd34d`)
+> réservés aux **visuels externes uniquement** (carousels, OG, blog
+> covers). L'app `(app)/*` reste en blanc + gris + bleu brand —
+> direction Airbnb-like inchangée. Le `SeoVsGeoVisual` (post LinkedIn
+> 2026-06-02) refait dans ce langage : fond crème, vagues bleu pâle,
+> brand pill ink, slide number `01 / 01`, headline 88pt, paper-note
+> card pour la table. 3 primitives co-localisées (`BrandPill`,
+> `SlideNumber`, `WavesDecoration`) prêtes à être splittées dans
+> `_primitives/` quand 3+ visuels les partagent. Cf. doc 09 §
+> 2026-06-04.
+>
+> Précédente (2026-06-03) — Pivot brand color terracotta → bleu logo + admin visuels LinkedIn
 >
 > **Brand color sweep** : `--color-accent` (terracotta `#C5532E`) aliasé sur
 > le bleu brand `#329CFF` (couleur du logo). Les classes `card-hover-warm`
