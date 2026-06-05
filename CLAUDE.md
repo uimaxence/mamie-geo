@@ -263,9 +263,31 @@ la doc devient un cimetière.
 
 ---
 
-## 9. État du projet (snapshot — 2026-06-04)
+## 9. État du projet (snapshot — 2026-06-05)
 
-> Mise à jour 2026-06-04 — Système design carousels LinkedIn « Unified » + crème chaude 3e ton
+> Mise à jour 2026-06-05 — Refonte DA carrousels persona « Mamie » + dual-DA acté
+>
+> **Carrousels LinkedIn DA refondue** : pivot du système Unified-like
+> (acté la veille) vers la persona « Mamie » selon nouveau brief
+> `geo-project/linkedindesign.md`. Palette chaude (crème `#FBF4E9` +
+> sable + encre brune `#2E2620` + **terracotta `#DD6B45` signature**
+> + miel `#F3B43F` + sauge + rose). Typo Fraunces (serif Bold/Black) +
+> Hanken Grotesk (corps) + Caveat (manuscrit rare) chargées via
+> `next/font/google` dans le admin layout UNIQUEMENT. Motif signature
+> marguerite 6 pétales + surligneur miel. 5 thèmes de fond combinables
+> pour rythmer les carrousels.
+>
+> **Bleu brand `#329CFF` préservé comme couleur primaire** : présent
+> sur logo (sur fonds clairs), 1 accent typo par slide, dots
+> pagination. Fil conducteur visuel entre les 2 DA.
+>
+> **Dual-DA volontaire** : app `(app)/*` + site marketing restent en
+> direction Airbnb-like minimaliste (Inter unique, blanc + gris + bleu
+> brand accent). **Aucun changement côté app.** Seuls les carrousels
+> LinkedIn et visuels marketing externes (OG, blog covers V1+)
+> utilisent la persona Mamie chaude. Cf. doc 09 § 2026-06-05.
+>
+> Précédente (2026-06-04) — Système design carousels LinkedIn « Unified » + crème chaude 3e ton
 >
 > **Carousels LinkedIn** : système design ancré sur la référence Unified™
 > (vagues organiques + big bold typo + paper-note card + brand pill). 3

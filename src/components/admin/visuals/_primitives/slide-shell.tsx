@@ -1,41 +1,42 @@
 import type { ReactNode } from "react";
-import { BACKGROUND_THEMES, FONT_FAMILY, FONT_FEATURES, SLIDE_HEIGHT, SLIDE_WIDTH, type SlideBackground } from "./tokens";
-import { BrandPill } from "./brand-pill";
-import { SlideNumber } from "./slide-number";
-import { WavesDecoration } from "./waves-decoration";
+import {
+  BACKGROUND_THEMES,
+  COLORS,
+  FONTS,
+  SLIDE_HEIGHT,
+  SLIDE_MARGIN,
+  SLIDE_WIDTH,
+  type SlideBackground,
+} from "./tokens";
+import { BrandHeader } from "./brand-header";
 
-// Canvas 1080×1350 d'une slide carousel. Fournit :
-//   - le fond (cream/ink/blue/white) avec son thème de teintes associé
-//   - les vagues décoratives aux 2 coins (toggleable)
-//   - le top bar avec brand pill + numéro de slide
-//   - le slot `children` pour le contenu de la slide
+// Canvas 1080×1350 d'une slide carrousel Mamie. Fournit :
+//   - le fond (cream/sand/terracotta/honey/sage) avec son thème
+//   - le brand header (logo + « mamie-geo ») en haut à gauche
+//   - la pagination (`02 / 07` ou points festonnés) en bas centre
+//   - le pied de marque URL en bas droite
+//   - le slot `children` pour le contenu central
 //
-// Les slides individuelles n'ont qu'à fournir leur contenu central et
-// éventuellement un footer custom (sinon, footer minimal "mamie-geo.fr"
-// auto-injecté).
+// Marge de sécurité 80 px sur 4 côtés (linkedindesign.md § 5).
+// Les slides individuelles ne définissent que leur contenu central.
 
 export interface SlideShellProps {
   index: number;
   total: number;
   background: SlideBackground;
-  /** Vagues organiques aux coins (défaut true). */
-  waves?: boolean;
-  /** Contenu central. */
   children: ReactNode;
-  /** Footer custom — si non fourni, footer auto "mamie-geo.fr · SWIPE →". */
-  footer?: ReactNode;
+  /** Pagination style. `dots` = points festonnés. Défaut : `numeric`. */
+  paginationStyle?: "numeric" | "dots";
 }
 
 export function SlideShell({
   index,
   total,
   background,
-  waves = true,
   children,
-  footer,
+  paginationStyle = "numeric",
 }: SlideShellProps) {
   const theme = BACKGROUND_THEMES[background];
-  const pillVariant = theme.dark ? "light" : "dark";
 
   return (
     <div
@@ -45,81 +46,110 @@ export function SlideShell({
         height: SLIDE_HEIGHT,
         background: theme.bg,
         color: theme.text,
-        fontFamily: FONT_FAMILY,
-        fontFeatureSettings: FONT_FEATURES,
+        fontFamily: FONTS.hanken,
         overflow: "hidden",
         boxSizing: "border-box",
+        padding: `${SLIDE_MARGIN}px ${SLIDE_MARGIN}px ${SLIDE_MARGIN - 24}px`,
+        display: "flex",
+        flexDirection: "column",
       }}
     >
-      {waves && (
-        <>
-          <WavesDecoration position="top-right" tint={theme.waveTint} />
-          <WavesDecoration position="bottom-left" tint={theme.waveTint} />
-        </>
-      )}
+      <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <BrandHeader tint={theme.brandTint} textColor={theme.text} />
+      </header>
 
       <div
         style={{
-          position: "relative",
-          width: "100%",
-          height: "100%",
-          padding: "60px 60px 50px",
-          boxSizing: "border-box",
+          flex: 1,
           display: "flex",
           flexDirection: "column",
+          minHeight: 0,
+          marginTop: 24,
         }}
       >
-        <div
+        {children}
+      </div>
+
+      <footer
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginTop: 24,
+        }}
+      >
+        <span
           style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
+            fontSize: 18,
+            fontWeight: 500,
+            color: theme.textSoft,
+            fontFamily: FONTS.hanken,
           }}
         >
-          <BrandPill variant={pillVariant} />
-          <SlideNumber index={index} total={total} variant={pillVariant} />
-        </div>
-
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
-          {children}
-        </div>
-
-        {footer ?? <DefaultFooter dark={theme.dark} index={index} total={total} />}
-      </div>
+          mamie-geo.fr
+        </span>
+        <Pagination
+          index={index}
+          total={total}
+          style={paginationStyle}
+          tint={theme.brandTint}
+          textColor={theme.text}
+          softColor={theme.textSoft}
+        />
+      </footer>
     </div>
   );
 }
 
-function DefaultFooter({ dark, index, total }: { dark: boolean; index: number; total: number }) {
-  const fg = dark ? "rgba(255, 255, 255, 0.7)" : "#404040";
-  const accent = dark ? "rgba(255, 255, 255, 0.55)" : "#737373";
-  const border = dark ? "rgba(255, 255, 255, 0.12)" : "rgba(10, 10, 10, 0.08)";
-  const isLast = index === total;
+interface PaginationProps {
+  index: number;
+  total: number;
+  style: "numeric" | "dots";
+  tint: string;
+  textColor: string;
+  softColor: string;
+}
+
+function Pagination({ index, total, style, tint, textColor, softColor }: PaginationProps) {
+  if (style === "dots") {
+    return (
+      <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+        {Array.from({ length: total }).map((_, i) => {
+          const active = i + 1 === index;
+          return (
+            <span
+              key={i}
+              style={{
+                width: active ? 16 : 8,
+                height: 8,
+                borderRadius: 9999,
+                background: active ? tint : softColor,
+                opacity: active ? 1 : 0.45,
+                transition: "all 200ms ease",
+              }}
+            />
+          );
+        })}
+      </div>
+    );
+  }
   return (
-    <div
+    <span
       style={{
-        marginTop: 20,
-        paddingTop: 18,
-        borderTop: `1px solid ${border}`,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        color: fg,
-        fontSize: 14,
+        fontSize: 18,
+        fontWeight: 600,
+        color: textColor,
+        fontFamily: FONTS.hanken,
+        fontVariantNumeric: "tabular-nums",
       }}
     >
-      <span style={{ fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>mamie-geo.fr</span>
-      <span
-        style={{
-          color: accent,
-          fontWeight: 600,
-          letterSpacing: "0.12em",
-          textTransform: "uppercase",
-          fontSize: 11,
-        }}
-      >
-        {isLast ? "Lien article en commentaire" : "Swipe →"}
-      </span>
-    </div>
+      {String(index).padStart(2, "0")}
+      <span style={{ color: softColor, margin: "0 6px" }}>/</span>
+      <span style={{ color: softColor }}>{String(total).padStart(2, "0")}</span>
+    </span>
   );
 }
+
+/** Utilitaire pratique pour les composants slide qui ont besoin de
+ *  référencer une couleur explicitement. Re-exporte les tokens. */
+export { COLORS };

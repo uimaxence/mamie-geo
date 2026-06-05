@@ -119,67 +119,21 @@ Deux pills empilés en haut de la sidebar, séparés par 6 px de gap :
 
 ---
 
-### Système design carousels LinkedIn (acté 2026-06-04)
+### ~~Système design carousels LinkedIn (acté 2026-06-04)~~ — RÉÉCRIT 2026-06-05
 
-**Périmètre strict** : ce système design s'applique **uniquement aux visuels marketing externes** — carousels LinkedIn, OG images, blog covers V1+. **Ne PAS utiliser dans l'app `(app)/*`** qui reste en direction Airbnb-like minimaliste (blanc + gris + bleu brand accent).
-
-**Référence ancrée** : Unified™ Pinterest (carousels pastel jaune/lavande/blanc, big bold typo, vagues organiques en filigrane). Adaptation Mamie GEO : on garde l'esprit (variation slide-à-slide, paper-note cards, brand pill, vagues décoratives) mais on remplace le jaune saturé par un **crème chaude `#fff4d6`** qui apporte la chaleur sans contredire la décision brand bleu logo du 2026-06-03.
-
-**Palette carousel** (4 fonds combinables pour varier slide-à-slide) :
-- **Crème chaude** `#fff4d6` (`--color-cream`) — fond principal, optimiste, distinctif
-- **Crème soft** `#fffbed` (`--color-cream-soft`) — secondary slides
-- **Crème strong** `#fcd34d` (`--color-cream-strong`) — accents/badges sur slides crème
-- **Blanc** `#ffffff` — paper-note cards (toujours en superposition sur fond coloré)
-- **Bleu brand** `#329cff` — accent typo, surfaces colorées, vagues
-- **Ink** `#0a0a0a` — typo principale, brand pill, headers de tableaux
-
-**Primitives** (`src/components/admin/visuals/`) :
-
-1. **`<BrandPill>`** : badge rond en haut à gauche. Cercle bleu logo 26px contenant le `<Logo>` inline + label « MAMIE GEO » en small caps. Wrapper pill ink rounded-full.
-2. **`<SlideNumber index={N} total={M} />`** : tag pill discret en haut à droite, format `01 / 05` en tabular-nums, fond `rgba(10,10,10,0.06)`.
-3. **`<WavesDecoration position="top-right" | "bottom-left" />`** : SVG de 8 arcs concentriques (rayons 80 → 332) en `rgba(50,156,255,0.18)`, positionné absolu hors-canvas pour ne montrer que l'arc visible. Signature carousel — pose une touche de mouvement organique sans charger.
-4. **Paper-note card** (pattern inline, à extraire en composant quand 3+ usages) : `background:#fff` + `border:1px solid #e5e5e5` + `border-radius:24` + `box-shadow` doux. Sert à isoler du contenu structuré (tables, listes) du fond crème.
-
-**Layout standard** (1080×1350 portrait) :
-
-```
-┌──────────────────────────────────────────┐
-│ [BrandPill]                  [SlideNumber] │  60px top padding
-│                                            │
-│                                            │
-│  HEADLINE MASSIVE                          │  Inter 800, 88pt, -0.04em
-│  EN PLUSIEURS LIGNES                       │
-│  (accent bleu sur 1 mot clé)               │
-│                                            │
-│  Subtitle 22pt color ink-soft              │
-│                                            │
-│  ┌─ Paper-note card ──────────────────┐   │
-│  │                                     │   │  flex: 1
-│  │  Contenu structuré                  │   │
-│  │  (table, liste, stats…)             │   │
-│  │                                     │   │
-│  └─────────────────────────────────────┘   │
-│                                            │
-│  Punchline + pastille (~80% etc.)         │
-│                                            │
-│  mamie-geo.fr        TAGLINE FOOTER       │  50px bottom padding
-└──────────────────────────────────────────┘
-```
-
-**Règles dures** :
-- Inline-styles obligatoires (pas de Tailwind class) — garantit le rendu pixel-parfait par `html-to-image`.
-- Une seule famille typo : **Inter** (500/600/700/800). Pas de serif, pas d'italique (rappel doc 10 § Direction actée).
-- Headlines en 800 weight + `letter-spacing:-0.04em` pour la densité « Unified-like ».
-- Accent bleu brand uniquement sur **un mot clé** du headline (pas tout le titre, sinon perte d'impact).
-- Vagues max **2 par slide** (top-right + bottom-left). Plus = surchargé.
-
-**Anti-patterns spécifiques carousels** :
-- ❌ Jaune saturé en fond (= copie Unified, perte d'identité)
-- ❌ Italique pour les subtitles (interdit doc 10)
-- ❌ Stock illustrations 3D (rappel anti-pattern doc 10 § Principes anti-IA)
-- ❌ Charts dans paper-note (réservé à l'app — sur carousels, préférer stats grosses + mots clés)
-
-**Itération** : extraire les primitives dans `src/components/admin/visuals/_primitives/` quand 3+ visuels les partagent (heuristique standard repo).
+> ⚠️ **Section archivée**. Le système « Unified-like » (crème `#fff4d6` + vagues bleu brand + brand pill ink + Inter 800) acté 2026-06-04 a été **remplacé** le 2026-06-05 par un système plus distinctif inspiré de la persona « Mamie » (chaud, manuscrit, marguerite). Cf. doc 09 § 2026-06-05.
+>
+> **Source de vérité actuelle pour les carrousels et visuels marketing externes** : [`linkedindesign.md`](./linkedindesign.md).
+>
+> Résumé du nouveau système (détails dans linkedindesign.md) :
+> - **Palette chaude Mamie** : Crème `#FBF4E9`, Sable `#F0E3CF`, Encre `#2E2620`, Terracotta `#DD6B45` (signature), Miel `#F3B43F` (surligneur), Sauge `#7FA67C`, Rose `#E59B96`. Le **bleu brand `#329CFF`** reste **couleur primaire** présente sur logo + accent typo signature par slide (1 mot clé bleu), pagination dots (confirmé Max 2026-06-05).
+> - **Typographies** : Fraunces (titres serif Bold/Black), Hanken Grotesk (corps sans rond), Caveat (note manuscrite rare). Chargées via next/font/google **uniquement** dans `src/app/(app)/app/admin/layout.tsx` — l'app et le site marketing gardent Inter unique.
+> - **Motif-signature** : marguerite 6 pétales (`<Daisy />`), terracotta/miel par défaut. Tailles grande (déco fond 8-15 % opacité) / moyenne (accent) / petite (puce).
+> - **Surligneur miel** (`<Highlight />`) sur le mot clé du titre — une seule technique de mise en valeur par slide.
+> - **Primitives** dans `src/components/admin/visuals/_primitives/` : `tokens.ts`, `daisy.tsx`, `highlight.tsx`, `brand-header.tsx`, `slide-shell.tsx`.
+> - **8 gabarits de slides** (Lego) : Couverture, Définition, Chiffre, Recette/Étapes, Conseil, Citation, Avant/Après, CTA — détails et exemples dans linkedindesign.md § 6.
+>
+> **Périmètre strict (inchangé)** : **carousels LinkedIn, OG images V1+, blog covers V1+ uniquement**. **L'app `(app)/*` et le site marketing restent en direction Airbnb-like minimaliste** (Inter unique + blanc + nuances de gris + bleu brand `#329CFF` accent ponctuel). Dual-DA volontaire — le SaaS est froid data-driven, les carrousels portent la persona Mamie chaleureuse.
 
 ---
 

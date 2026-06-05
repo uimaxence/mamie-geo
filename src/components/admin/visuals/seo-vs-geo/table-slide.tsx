@@ -1,223 +1,255 @@
 import { SlideShell } from "../_primitives/slide-shell";
-import { COLORS } from "../_primitives/tokens";
+import { COLORS, FONTS } from "../_primitives/tokens";
+import { Daisy } from "../_primitives/daisy";
 
-// Slide 02 — Tableau comparatif SEO vs GEO. Fond crème chaude, headline
-// massif avec « GEO » en bleu, paper-note card blanche pour la table
-// 6 lignes (headers ink/blue, rangées alternées), pastille `~80 %`
-// punchline en bas.
+// Slide 02 — Avant / Après (gabarit ⚖️ cf. linkedindesign.md § 6).
+// Fond crème, split visuel SEO (côté terne pâle) vs GEO (côté
+// terracotta/sauge). 4 contrastes clés (versions condensées des 6
+// lignes originales pour aérer en DA Mamie).
+//
+// Le mot « GEO » apparaît en bleu brand `#329CFF` pour garder
+// l'identité brand (Max 2026-06-05).
 
 interface Props {
   index: number;
   total: number;
 }
 
-interface Row {
-  criterion: string;
+interface Comparison {
+  axis: string;
   seo: string;
   geo: string;
 }
 
-const ROWS: Row[] = [
-  { criterion: "Objet optimisé", seo: "Une URL", geo: "Une marque" },
-  { criterion: "Surface", seo: "SERP Google", geo: "Réponses IA" },
-  { criterion: "Métrique clé", seo: "Position", geo: "Part de citation" },
-  { criterion: "Levier", seo: "Backlinks + contenu", geo: "Autorité + structure citable" },
-  { criterion: "Délai", seo: "3 à 6 mois", geo: "2 sem. à 18 mois" },
-  { criterion: "Mesure", seo: "Outil unique", geo: "Distribution sur N runs" },
+const COMPARISONS: Comparison[] = [
+  { axis: "Tu optimises…", seo: "une URL", geo: "ta marque" },
+  { axis: "Tu mesures…", seo: "ta position", geo: "ta part de citation" },
+  { axis: "Ton levier…", seo: "backlinks + contenu", geo: "autorité + structure" },
+  { axis: "Le délai…", seo: "3 à 6 mois", geo: "2 sem. à 18 mois" },
 ];
 
 export function TableSlide({ index, total }: Props) {
   return (
     <SlideShell index={index} total={total} background="cream">
-      <div style={{ marginTop: 32 }}>
-        <div
+      <Daisy
+        size={140}
+        petalColor={COLORS.rose}
+        centerColor={COLORS.honey}
+        opacity={0.45}
+        style={{ position: "absolute", top: 100, right: 60, pointerEvents: "none" }}
+      />
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 28 }}>
+        <h1
           style={{
-            fontSize: 80,
-            fontWeight: 800,
-            letterSpacing: "-0.04em",
-            lineHeight: 0.95,
+            fontFamily: FONTS.fraunces,
+            fontSize: 86,
+            fontWeight: 900,
+            lineHeight: 0.96,
+            letterSpacing: "-0.03em",
             color: COLORS.ink,
-          }}
-        >
-          SEO <span style={{ color: COLORS.muted, fontWeight: 500 }}>vs</span>{" "}
-          <span style={{ color: COLORS.blue }}>GEO.</span>
-        </div>
-        <div
-          style={{
-            marginTop: 14,
-            fontSize: 21,
-            color: COLORS.inkSoft,
-            lineHeight: 1.4,
+            margin: 0,
             maxWidth: 760,
-            fontWeight: 500,
           }}
         >
-          Deux disciplines qui ne se font pas la guerre. Elles se superposent.
-        </div>
+          SEO et{" "}
+          <span style={{ color: COLORS.brandBlue }}>GEO</span>{" "}
+          <span style={{ fontStyle: "italic", fontWeight: 700 }}>
+            ne se font pas la guerre.
+          </span>
+        </h1>
+
+        <p
+          style={{
+            fontFamily: FONTS.hanken,
+            fontSize: 26,
+            fontWeight: 500,
+            color: COLORS.inkSoft,
+            margin: 0,
+            maxWidth: 760,
+            lineHeight: 1.4,
+          }}
+        >
+          Ils se superposent. Voici ce qui change vraiment.
+        </p>
       </div>
 
       <div
         style={{
-          marginTop: 26,
-          background: COLORS.white,
-          border: `1px solid ${COLORS.border}`,
-          borderRadius: 24,
-          boxShadow:
-            "0 24px 48px -16px rgba(10, 10, 10, 0.10), 0 4px 12px -2px rgba(10, 10, 10, 0.05)",
-          overflow: "hidden",
-          display: "flex",
-          flexDirection: "column",
+          marginTop: 32,
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: 18,
           flex: 1,
         }}
       >
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
-          <div
-            style={{
-              background: COLORS.ink,
-              color: COLORS.white,
-              padding: "18px 26px",
-              display: "flex",
-              alignItems: "baseline",
-              gap: 10,
-              borderTopLeftRadius: 24,
-            }}
-          >
-            <span style={{ fontSize: 28, fontWeight: 800, letterSpacing: "-0.02em" }}>SEO</span>
-            <span
-              style={{
-                fontSize: 11,
-                fontWeight: 600,
-                color: "#a3a3a3",
-                letterSpacing: "0.1em",
-                textTransform: "uppercase",
-              }}
-            >
-              Search engines
-            </span>
-          </div>
-          <div
-            style={{
-              background: COLORS.blue,
-              color: COLORS.white,
-              padding: "18px 26px",
-              display: "flex",
-              alignItems: "baseline",
-              gap: 10,
-              borderTopRightRadius: 24,
-            }}
-          >
-            <span style={{ fontSize: 28, fontWeight: 800, letterSpacing: "-0.02em" }}>GEO</span>
-            <span
-              style={{
-                fontSize: 11,
-                fontWeight: 600,
-                color: "rgba(255,255,255,0.78)",
-                letterSpacing: "0.1em",
-                textTransform: "uppercase",
-              }}
-            >
-              Generative engines
-            </span>
-          </div>
-        </div>
-
-        {ROWS.map((row, i) => (
-          <div
-            key={row.criterion}
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              borderTop: `1px solid ${COLORS.border}`,
-              flex: 1,
-            }}
-          >
-            <div
-              style={{
-                padding: "12px 26px",
-                background: i % 2 === 0 ? "#fafafa" : COLORS.white,
-                borderRight: `1px solid ${COLORS.border}`,
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                gap: 3,
-              }}
-            >
-              <div
-                style={{
-                  fontSize: 10,
-                  fontWeight: 700,
-                  color: COLORS.muted,
-                  letterSpacing: "0.12em",
-                  textTransform: "uppercase",
-                }}
-              >
-                {row.criterion}
-              </div>
-              <div
-                style={{ fontSize: 18, fontWeight: 700, color: COLORS.ink, lineHeight: 1.25 }}
-              >
-                {row.seo}
-              </div>
-            </div>
-            <div
-              style={{
-                padding: "12px 26px",
-                background: i % 2 === 0 ? COLORS.blueSoft : COLORS.white,
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                gap: 3,
-              }}
-            >
-              <div
-                style={{
-                  fontSize: 10,
-                  fontWeight: 700,
-                  color: COLORS.blue,
-                  letterSpacing: "0.12em",
-                  textTransform: "uppercase",
-                }}
-              >
-                {row.criterion}
-              </div>
-              <div
-                style={{ fontSize: 18, fontWeight: 700, color: COLORS.ink, lineHeight: 1.25 }}
-              >
-                {row.geo}
-              </div>
-            </div>
-          </div>
-        ))}
+        <ComparisonColumn
+          title="SEO"
+          subtitle="Google search"
+          accent={COLORS.inkSoft}
+          bg={COLORS.sand}
+          textColor={COLORS.ink}
+          axisColor={COLORS.inkSoft}
+          items={COMPARISONS.map((c) => ({ axis: c.axis, value: c.seo }))}
+        />
+        <ComparisonColumn
+          title="GEO"
+          subtitle="Réponses IA"
+          accent={COLORS.brandBlue}
+          bg={COLORS.terracotta}
+          textColor={COLORS.cream}
+          axisColor="rgba(251, 244, 233, 0.78)"
+          items={COMPARISONS.map((c) => ({ axis: c.axis, value: c.geo }))}
+        />
       </div>
 
-      <div style={{ marginTop: 18, display: "flex", alignItems: "center", gap: 16 }}>
-        <div
+      <div
+        style={{
+          marginTop: 22,
+          padding: "20px 24px",
+          background: COLORS.honey,
+          borderRadius: 22,
+          display: "flex",
+          alignItems: "center",
+          gap: 16,
+        }}
+      >
+        <span
           style={{
-            width: 60,
-            height: 60,
-            borderRadius: "50%",
-            background: COLORS.ink,
-            color: COLORS.creamSoft,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: 18,
-            fontWeight: 800,
+            fontFamily: FONTS.fraunces,
+            fontSize: 44,
+            fontWeight: 900,
+            color: COLORS.ink,
             letterSpacing: "-0.03em",
+            lineHeight: 1,
             flexShrink: 0,
           }}
         >
-          ~80%
-        </div>
-        <div style={{ fontSize: 18, color: COLORS.ink, lineHeight: 1.35, fontWeight: 600 }}>
+          ~80&nbsp;%
+        </span>
+        <span
+          style={{
+            fontFamily: FONTS.hanken,
+            fontSize: 21,
+            fontWeight: 600,
+            color: COLORS.ink,
+            lineHeight: 1.3,
+          }}
+        >
           des signaux d&apos;autorité sont communs aux deux.
-          <div
-            style={{ fontSize: 14, color: COLORS.inkSoft, fontWeight: 400, marginTop: 2 }}
+          <span
+            style={{
+              display: "block",
+              fontFamily: FONTS.fraunces,
+              fontStyle: "italic",
+              fontWeight: 500,
+              color: COLORS.inkSoft,
+              fontSize: 18,
+              marginTop: 4,
+            }}
           >
-            Tu ne repars pas de zéro — tu ajoutes une couche de structure.
-          </div>
-        </div>
+            Tu pars pas de zéro, tu ajoutes une couche.
+          </span>
+        </span>
       </div>
     </SlideShell>
+  );
+}
+
+interface ComparisonColumnProps {
+  title: string;
+  subtitle: string;
+  accent: string;
+  bg: string;
+  textColor: string;
+  axisColor: string;
+  items: { axis: string; value: string }[];
+}
+
+function ComparisonColumn({
+  title,
+  subtitle,
+  accent,
+  bg,
+  textColor,
+  axisColor,
+  items,
+}: ComparisonColumnProps) {
+  return (
+    <div
+      style={{
+        background: bg,
+        borderRadius: 28,
+        padding: "26px 26px 22px",
+        display: "flex",
+        flexDirection: "column",
+        gap: 16,
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
+        <span
+          style={{
+            fontFamily: FONTS.fraunces,
+            fontSize: 44,
+            fontWeight: 900,
+            letterSpacing: "-0.03em",
+            color: accent,
+            lineHeight: 1,
+          }}
+        >
+          {title}
+        </span>
+        <span
+          style={{
+            fontFamily: FONTS.hanken,
+            fontSize: 13,
+            fontWeight: 700,
+            letterSpacing: "0.12em",
+            textTransform: "uppercase",
+            color: axisColor,
+          }}
+        >
+          {subtitle}
+        </span>
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 12, flex: 1 }}>
+        {items.map((it) => (
+          <div
+            key={it.axis}
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 2,
+              paddingTop: 10,
+              borderTop: `1px solid ${axisColor === "rgba(251, 244, 233, 0.78)" ? "rgba(251, 244, 233, 0.22)" : "rgba(46, 38, 32, 0.10)"}`,
+            }}
+          >
+            <span
+              style={{
+                fontFamily: FONTS.hanken,
+                fontSize: 12,
+                fontWeight: 700,
+                letterSpacing: "0.1em",
+                textTransform: "uppercase",
+                color: axisColor,
+              }}
+            >
+              {it.axis}
+            </span>
+            <span
+              style={{
+                fontFamily: FONTS.fraunces,
+                fontSize: 24,
+                fontWeight: 700,
+                color: textColor,
+                lineHeight: 1.2,
+              }}
+            >
+              {it.value}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }

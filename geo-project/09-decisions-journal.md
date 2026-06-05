@@ -196,6 +196,55 @@ haut et l'entrée "2026-05-05 — Réponses aux 10 questions de bootstrap".
 
 **À revisiter** : si les retours sur le bleu trop saturé reviennent (le `#329CFF` est cobalt vif), envisager `#1d7ee5` (`--color-primary-dim`) comme nouvelle valeur de `--color-accent` pour adoucir.
 
+#### 2026-06-05 — Refonte DA carrousels LinkedIn → persona « Mamie » (chaude, marguerite, Fraunces) — dual-DA acté
+
+**Contexte** : Le système carrousel acté la veille (« Unified-like » : crème `#fff4d6` + vagues bleu brand + Inter 800 + brand pill ink) restait fonctionnel mais trop proche d'un SaaS générique. Max rédige `geo-project/linkedindesign.md`, brief complet de génération visuelle pour les carrousels LinkedIn ancré sur la persona « Mamie » (chaud, manuscrit, motif marguerite, serif). Demande : refaire entièrement les visuels en s'appuyant sur ce brief.
+
+**Tension à résoudre** : la persona Mamie (terracotta + serif + manuscrit) entre apparemment en collision avec la décision brand bleu logo du 2026-06-03 (« sweep terracotta → bleu ») et avec doc 10 qui interdit l'italique et impose Inter unique.
+
+**Résolution** : **dual-DA assumé**.
+- **App `(app)/*` + site marketing** (home, pricing, blog, login) : reste en direction Airbnb-like minimaliste actée 2026-05-07/05-11 — Inter unique, blanc + nuances de gris, bleu brand `#329CFF` accent ponctuel. **Aucun changement.** Le SaaS doit rester froid, data-driven, premium-startup.
+- **Carrousels LinkedIn + visuels marketing externes** (OG images V1+, blog covers V1+) : DA persona « Mamie » selon `linkedindesign.md` — palette chaude (crème/sable/encre/terracotta/miel/sauge/rose), typo Fraunces + Hanken + Caveat, motif marguerite, surligneur miel, gabarits Lego.
+
+Le **bleu brand `#329CFF` reste couleur primaire** dans les carrousels (confirmation explicite Max 2026-06-05 « garde bien le bleu actuel comme couleur primaire ») : présent sur le logo (sur fonds clairs cream/sand/sage), sur 1 accent typo par slide (mot clé GEO en bleu), et sur les dots de pagination active. Remplace le « bleu pervenche `#A9C0D6` » pâle proposé dans linkedindesign.md original.
+
+**Options considérées** :
+- A) Étendre la persona Mamie à tout le site et l'app — rejeté, casse la cohérence SaaS premium en 24h alors que le pivot bleu logo date d'avant-hier.
+- B) Ignorer linkedindesign.md, garder le système Unified-like de la veille — rejeté, Max a explicitement demandé la refonte.
+- C) **Dual-DA** : app froide + carrousels chauds, isolés par périmètre clair — choisi.
+
+**Justification du dual-DA** :
+- Les carrousels sont un canal d'**acquisition LinkedIn** (cible PME marketing FR, ton humain) — la chaleur « Mamie » désamorce le jargon GEO et différencie radicalement de Profound/Peec/Mint.
+- L'app SaaS reste un **outil de mesure** — sobriété, lisibilité des charts, neutralité des données. Mélanger les deux serait perdre la crédibilité technique.
+- Le bleu brand commun (logo + accent signature) sert de **fil conducteur visuel** entre les deux DA — l'utilisateur qui passe du carrousel LinkedIn à l'app reconnaît l'identité sans choc.
+
+**Livré dans ce PR** :
+- `linkedindesign.md` annoté (scope explicite carrousels-only au top, ref vers cette entrée doc 09).
+- Polices Fraunces (600/700/900) + Hanken Grotesk (400/500/700) + Caveat (400/700) chargées via `next/font/google` dans `src/app/(app)/app/admin/layout.tsx` uniquement (self-host → html-to-image embed OK).
+- Refonte complète `src/components/admin/visuals/_primitives/` :
+  - `tokens.ts` : palette Mamie (8 couleurs + brandBlue `#329CFF` préservé) + 5 thèmes de fond (cream/sand/terracotta/honey/sage)
+  - `daisy.tsx` : motif-signature marguerite 6 pétales (couleurs et opacité configurables)
+  - `highlight.tsx` : surligneur miel pour 1 mot clé du titre
+  - `brand-header.tsx` : logo Mamie GEO en haut à gauche (~36px, logo bleu brand par défaut, swap cream sur fond terracotta)
+  - `slide-shell.tsx` : canvas 1080×1350 avec marges 80px, header + footer auto (pagination numeric ou dots festonnés), pas de waves
+- Suppression : `brand-pill.tsx`, `slide-number.tsx`, `waves-decoration.tsx` (vestiges du système Unified-like).
+- Refonte des 3 slides SEO vs GEO :
+  - **Cover** : fond terracotta + hook Fraunces Black 118pt « 40 % … posent leur question à [une IA] » avec surligneur miel + sous-titre Fraunces italic + marguerite déco bottom-right opacité 13 %
+  - **Comparaison** : fond crème + headline « SEO et GEO ne se font pas la guerre » (mot GEO en bleu brand) + 2 colonnes ronded (sable pour SEO, terracotta pour GEO) avec 4 axes condensés + pastille honey ~80 % en bas
+  - **CTA** : fond crème + hook « Teste ta visibilité IA en 60 secondes » + sticker manuscrit Caveat « ↘ c'est juste là » + card terracotta avec URL outil + 3 perks (5 IA / 60s / 0 €)
+- Doc 10 : section carousel Unified-like 2026-06-04 archivée avec pointeur vers linkedindesign.md.
+
+**Conséquences attendues** :
+- Les visuels LinkedIn auront une signature instantanément reconnaissable (terracotta + marguerite + Fraunces) qui sort des templates SaaS génériques.
+- Le brand bleu reste lisible en tant que primaire (logo, accent typo, pagination).
+- Les tokens `--color-cream*` ajoutés à `globals.css` la veille (2026-06-04) deviennent **inutiles** côté carrousels (palette Mamie inlined dans `tokens.ts`). Ils restent en place dans globals.css pour ne pas casser une éventuelle utilisation future en marketing externe (OG, blog cover) — à nettoyer dans un PR séparé si toujours unused dans 1 mois.
+- Le brief `linkedindesign.md` devient la source de vérité pour tous les futurs carrousels Mamie GEO.
+
+**À revisiter** :
+- Si Cowork génère des slides automatiques (futur), aligner son prompt sur linkedindesign.md.
+- Si la persona Mamie tire les conversions LinkedIn vers le haut, envisager un module marketing externe (blog cover, OG images dynamiques) qui hérite de la palette. Pas avant 30 jours de data.
+- Si le dual-DA crée de la confusion utilisateur (« je clique sur le CTA terracotta du carrousel et j'arrive sur un site bleu froid »), repenser le pont visuel — page d'atterrissage post-carrousel avec une touche terracotta éphémère ? Pas avant d'avoir le signal.
+
 #### 2026-06-04 — Système design carousels LinkedIn (style « Unified ») + crème chaude 3e ton marketing
 
 **Contexte** : Le visuel SEO vs GEO livré la veille (cf. entrée 2026-06-03) restait fonctionnel mais pas signature. Max envoie une référence Pinterest « Unified™ » (carousels LinkedIn pastel jaune/lavande/blanc, big bold typo, vagues organiques) et demande d'adapter ce langage à Mamie GEO pour cet asset et les futurs carousels LinkedIn.

@@ -2,7 +2,31 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import Link from "next/link";
+import { Fraunces, Hanken_Grotesk, Caveat } from "next/font/google";
 import { auth } from "@/lib/auth";
+
+// Fonts carrousels Mamie (cf. linkedindesign.md § 3 Typographie). Chargés
+// UNIQUEMENT pour les routes /app/admin/* — l'app et le site marketing
+// gardent Inter unique (doc 10). next/font/google self-host les fichiers
+// → même origine, html-to-image les embed sans CORS.
+const fraunces = Fraunces({
+  subsets: ["latin"],
+  weight: ["600", "700", "900"],
+  variable: "--font-fraunces",
+  display: "swap",
+});
+const hanken = Hanken_Grotesk({
+  subsets: ["latin"],
+  weight: ["400", "500", "700"],
+  variable: "--font-hanken",
+  display: "swap",
+});
+const caveat = Caveat({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  variable: "--font-caveat",
+  display: "swap",
+});
 
 // Layout admin — protégé par email allowlist (founder uniquement V0).
 // Toute route /app/admin/* hérite de ce guard.
@@ -33,7 +57,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   if (!ADMIN_EMAILS.has(email)) redirect("/app/dashboard");
 
   return (
-    <div className="min-h-screen bg-[color:var(--color-surface)]">
+    <div
+      className={`${fraunces.variable} ${hanken.variable} ${caveat.variable} min-h-screen bg-[color:var(--color-surface)]`}
+    >
       <header className="sticky top-0 z-10 border-b border-[color:var(--color-border)] bg-white">
         <div className="mx-auto flex max-w-[1400px] items-center justify-between px-6 py-3">
           <Link
