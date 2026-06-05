@@ -4,7 +4,17 @@
 > Objectif : produire des slides cohérents, chaleureux et zéro-jargon, prêts à habiller les posts LinkedIn.
 > Ce fichier est pensé pour être **réutilisé tel quel comme consigne** (à Claude, à un designer, ou à un outil de génération).
 
-> ⚠️ **Périmètre** (cadré 2026-06-05) : ce document s'applique **uniquement aux carrousels LinkedIn et visuels marketing externes** (OG images V1+, blog covers V1+). Il **ne s'applique PAS** à l'app `(app)/*` ni au site marketing (home, pricing, blog), qui restent en direction Airbnb-like minimaliste (blanc + nuances de gris + bleu brand `#329CFF` accent + Inter unique) actée doc 10 et confirmée 2026-06-03. Le SaaS reste froid et data-driven ; les carrousels portent la persona « Mamie » chaude et humaine. Dual-DA volontaire — cf. doc 09 § 2026-06-05.
+> ⚠️ **Périmètre** (cadré 2026-06-05) : ce document s'applique **uniquement aux carrousels LinkedIn et visuels marketing externes** (OG images V1+, blog covers V1+). Il **ne s'applique PAS** à l'app `(app)/*` ni au site marketing (home, pricing, blog), qui restent en direction Airbnb-like minimaliste (blanc + nuances de gris + bleu brand `#329CFF` accent + Inter unique) actée doc 10 et confirmée 2026-06-03. Dual-DA volontaire — cf. doc 09 § 2026-06-05.
+
+> 🔁 **Raffinement v2 (2026-06-05 soir)** après premier rendu du carrousel SEO vs GEO. Pivot vers plus de sobriété pro :
+>
+> 1. **Fond blanc par défaut**, plus crème (la crème/sable deviennent occasionnelles, max 1-2 par carrousel pour rythmer).
+> 2. **Bleu brand `#329CFF` = couleur primaire visible sur chaque slide** (logo, accent typo, CTA). La palette chaude (terracotta, miel, sauge, rose) reste mais **rétrogradée à accents secondaires** — pas en fond plein de slide sauf 1 slide CTA exceptionnelle.
+> 3. **Marguerite retirée** (trop kitsch). Pas non plus de washi-tape, tampon « FAIT MAISON », fleurs vintage. L'identité passe désormais par typo + logo + palette restreinte.
+> 4. **Tailles corps relevées** (corps min 32 px, corps large 40-48 px, label 24-28 px) — précédent trop petit en vignette feed mobile.
+> 5. **Contraste renforcé** — viser AAA. Texte sur fond bleu brand uniquement en titre ≥ 24 px bold.
+>
+> Le carrousel SEO vs GEO actuel (commit `c3b92e3`) a été construit selon la v1 et est conservé tel quel — toutes les **nouvelles slides** doivent suivre les règles ci-dessous, marquées « v2 » quand elles diffèrent.
 
 ---
 
@@ -40,32 +50,41 @@ Ce qu'on **n'imite pas** : le côté froid/agence des fonds bleus saturés (Mark
 
 ---
 
-## 2. Palette de couleurs
+## 2. Palette de couleurs (v2 — 2026-06-05 soir)
 
-Chaude, accessible, légèrement « pop » pour rester moderne (pas vieillot).
+Pivot vers une dominante pro : **blanc + bleu brand** comme socle, palette chaude rétrogradée en accents secondaires pour ponctuer.
 
 ### Neutres (fonds & texte)
-- `Crème` **#FBF4E9** — fond par défaut le plus fréquent
-- `Sable` **#F0E3CF** — fond alternatif / cartes secondaires
+- `Blanc` **#FFFFFF** — **fond par défaut**, sur ~80 % des slides (v2)
+- `Crème` **#FBF4E9** — fond alternatif occasionnel, max 1-2 slides par carrousel pour rythmer
+- `Sable` **#F0E3CF** — fond cartes secondaires, rare
 - `Encre` **#2E2620** — texte principal (brun très foncé, jamais noir pur)
 - `Encre douce` **#5A4A3C** — texte secondaire
+- `Gris` **#F5F0E8** — séparateurs/bordures discrets (sur fond blanc, donne un beige imperceptible)
 
-### Couleurs de marque
-- `Terracotta` **#DD6B45** — **couleur signature** (motif, accents forts, CTA)
-- `Miel` **#F3B43F** — surligneur, étiquettes, énergie
-- `Sauge` **#7FA67C** — vert doux, sérénité / "tout va bien"
-- `Rose ancien` **#E59B96** — douceur, touches déco
-- `Bleu pervenche` **#A9C0D6** — accent froid optionnel (rare, pour respirer)
+### Couleur primaire brand (présente sur chaque slide)
+- `Bleu brand` **#329CFF** — **couleur principale** : logo, accents typo (1 mot clé par slide), CTAs, traits décoratifs, dots de pagination active. Confirmation Max 2026-06-05 (« garde bien le bleu actuel comme couleur primaire »).
+- `Bleu brand dim` **#1D7EE5** — hover/pressed, contrastes plus durs sur fond clair
+- `Bleu brand soft` **#EAF4FF` — fond de pill/badge bleu, cartes accent
 
-### Règles d'usage
-- **1 fond + 1 dominante par slide.** Pas plus de 3 couleurs par slide (hors neutres).
-- Une slide = un fond plein (crème, sable, terracotta, sauge ou miel). On alterne les fonds le long du carrousel pour le rythme.
-- **Contraste obligatoire** (AA mini) :
-  - Texte sur Crème/Sable → `Encre`.
-  - Texte sur Terracotta → `Crème` (#FBF4E9).
-  - Texte sur Sauge → `Encre` ou `Crème`.
-  - Texte sur Miel → `Encre` (jamais blanc).
-- Le **rose** et le **pervenche** ne sont jamais des fonds de slide entiers → seulement accents/déco.
+### Couleurs d'accent chaud (jamais en fond plein de slide en v2)
+- `Terracotta` **#DD6B45** — accent chaleur ponctuel (puce de liste, soulignage typo, pill CTA). **Exception** : 1 slide CTA finale peut être full-bleed terracotta pour clôturer le carrousel — pas plus.
+- `Miel` **#F3B43F** — surligneur sur mot clé (technique de mise en valeur principale), pill « ASTUCE »
+- `Sauge` **#7FA67C** — accent secondaire « tout va bien » (rare)
+- `Rose ancien` **#E59B96** — touches déco rares
+
+### Règles d'usage v2
+- **Blanc en fond par défaut.** Crème/sable occasionnels (1-2 max par carrousel).
+- **Bleu brand visible sur chaque slide** au minimum via le logo + 1 accent typo.
+- **Pas de fond terracotta plein** sauf 1 slide CTA finale exceptionnelle.
+- **Max 2 couleurs d'accent par slide** (hors blanc + encre + bleu brand qui sont la base).
+- **Contraste AAA visé**, AA minimum strict :
+  - Texte sur Blanc/Crème/Sable → `Encre #2E2620` (ratio ≥ 13:1 ✓ AAA)
+  - Texte sur Bleu brand `#329CFF` → `Blanc` uniquement en titres ≥ 24 px bold (ratio 4.8:1 = AA Large only)
+  - Texte sur Terracotta → `Crème` (ratio 5.2:1 ✓ AA)
+  - Texte sur Miel → `Encre` (jamais blanc — ratio insuffisant)
+  - Texte sur Sauge → `Encre` (jamais blanc)
+- Le rose et la sauge ne sont jamais fonds de slide entiers — accents/déco uniquement.
 
 ---
 
@@ -82,45 +101,52 @@ Combo « mamie moderne » : un serif chaud + un sans rond + une touche manuscrit
 
 Alternatives équivalentes si besoin : *Recoleta* (≈ Fraunces), *General Sans* / *Inter* (≈ Hanken).
 
-### Échelle typographique (base format 1080 × 1350)
-- **Hook / display** : 110–140 px · Fraunces Black · interligne 0,95
-- **Titre de slide (H1)** : 76–92 px · Fraunces Bold · interligne 1,0
-- **H2** : 52–60 px · Fraunces Semibold
-- **Corps large** : 36–40 px · Hanken Medium · interligne 1,3
-- **Corps** : 28–32 px · Hanken Regular
-- **Label / pill** : 22–24 px · Hanken Bold · MAJUSCULES · interlettrage +4 %
-- **Note manuscrite** : 44–56 px · Caveat
+### Échelle typographique v2 (base format 1080 × 1350) — 2026-06-05 soir
+- **Hook / display** : 120–150 px · Fraunces Black · interligne 0,95
+- **Titre de slide (H1)** : 84–100 px · Fraunces Bold · interligne 1,0
+- **H2** : 56–66 px · Fraunces Semibold
+- **Corps large** : 40–48 px · Hanken Medium · interligne 1,35 *(v2 — précédent 36-40, illisible en vignette)*
+- **Corps** : 32–36 px · Hanken Regular *(v2 — précédent 28-32)*
+- **Label / pill** : 24–28 px · Hanken Bold · MAJUSCULES · interlettrage +4 % *(v2 — précédent 22-24)*
+- **Note manuscrite Caveat** : 50–60 px — **usage rare**, max 1 par carrousel et seulement si elle apporte du sens (pas de déco gratuite)
 
-### Règles
+### Règle de lisibilité durcie (v2)
+Tout texte qui n'est ni footer ni mention légale doit être **≥ 32 px**. **Test obligatoire** : afficher la slide en vignette ~135 × 168 px (1/8 de la taille native) — si tu ne distingues plus le contenu, c'est trop petit. LinkedIn affiche les carrousels d'abord en vignette dans le feed.
+
+### Règles générales
 - Max **2 niveaux de hiérarchie** par slide.
 - Titres **alignés à gauche** par défaut (centré seulement pour les cartes « définition » et « citation »).
 - Jamais plus de ~7 mots dans un hook.
-- L'emphase passe par : **surligneur miel** > *italique Fraunces* > souligné manuscrit. Une seule technique par slide.
+- L'emphase passe par : **surligneur miel** > *italique Fraunces* > **mot en bleu brand**. Une seule technique par slide. (v2 : le souligné manuscrit est retiré, trop kitsch.)
 
 ---
 
-## 4. Système de formes & motif-signature
+## 4. Système de formes (v2 — 2026-06-05 soir)
 
-C'est ce qui rend la DA reconnaissable d'un coup d'œil.
+> 🔁 **Motif-signature retiré (v2)**. La marguerite proposée en v1 a été abandonnée après le premier rendu du carrousel SEO vs GEO — trop décorative, trop kitsch, ne sert pas le positionnement pro. Idem pour washi-tape, tampon « FAIT MAISON », fleurs vintage.
+>
+> **L'identité visuelle passe désormais par 3 éléments simples** :
+> 1. Le **logo Mamie GEO** en bleu brand `#329CFF` (top-left chaque slide)
+> 2. La **palette restreinte** (blanc dominant + bleu brand + 1-2 accents chauds occasionnels)
+> 3. La **typographie Fraunces** (serif chaud, déjà signature en soi)
 
-### Le motif-signature : la **marguerite** 🌼
-L'équivalent de l'astérisque de Settle, mais chaleureux.
-- Marguerite stylisée à 6 pétales, terracotta ou miel.
-- Usages : ponctuer un titre, remplir un coin vide, marquer une fin de section, servir de puce.
-- Tailles : grande (déco de fond, 300–500 px, 8–15 % d'opacité possible), moyenne (accent à côté du titre), petite (puce de liste).
+### Formes-conteneurs autorisées
+- **Coins arrondis généreux** : rayon 24–32 px sur les cartes, 9999 px (pill) sur les boutons/labels/badges.
+- **Cartes blanches sur fond crème** (ou inverse) avec border 1 px `#F0E3CF` + box-shadow subtile pour isoler du contenu structuré.
+- **Traits de séparation** discrets (1 px `#F5F0E8`) entre sections d'une même slide.
+- **Pas de bord festonné/napperon** en v2 (trop ornemental). Coins arrondis suffisent.
 
-### La forme-conteneur : le **napperon festonné**
-L'équivalent des blobs/scallops des références, version dentelle de mamie.
-- Bord festonné (suite de demi-cercles) pour : cadres de photo, encadrés de citation, séparateurs.
-- Sinon, **coins arrondis généreux** : rayon 48–64 px sur les cartes, 999 px (pill) sur les boutons/labels.
+### Accents géométriques minimalistes (à doser)
+- **Flèche `→`** dans une pill bleu brand ou cream — usage CTA et « swipe ».
+- **Coche `✓`** ou croix `✗` simples dans une pill — pour les listes oui/non et Avant/Après.
+- **Pastille ronde** colorée (bleu brand, miel, ou ink) contenant un chiffre ou icône Lucide simple.
 
-### Motifs secondaires (à doser)
-- Petit **cœur** plein (rose ou terracotta) — affection, « on est avec toi ».
-- **Étoile 4 branches / scintille** (miel) — « astuce », « bonne nouvelle ».
-- **Pois / petits points** réguliers en fond (façon nappe vichy douce, très basse opacité).
-
-### Stickers façon mamie (déco, 0 à 1 par slide)
-Fleurs vintage, ruban washi-tape (effet collé légèrement de travers), tampon « FAIT MAISON », petit point de couture. Toujours discrets, jamais sur le texte.
+### v1 archivé (à ne PAS utiliser)
+- ❌ Marguerite signature 🌼
+- ❌ Bord festonné / napperon
+- ❌ Petits cœurs, étoiles 4 branches, pois vichy
+- ❌ Fleurs vintage, washi-tape, tampon « FAIT MAISON », point de couture
+- ❌ Stickers décoratifs en général
 
 ---
 
@@ -217,14 +243,16 @@ Règle d'or : **alterner les fonds** (crème → sable → terracotta → crème
 
 ---
 
-## 8. Techniques de mise en valeur
+## 8. Techniques de mise en valeur (v2)
 
 À choisir **une seule** par slide :
 
-1. **Le surligneur de mamie** — mot-clé dans une boîte arrondie miel (texte Encre dessus).
-2. **Le souligné manuscrit** — trait Caveat/marqueur terracotta sous le mot-clé.
+1. **Le surligneur miel** — mot-clé dans une boîte arrondie miel (texte Encre dessus). Technique privilégiée.
+2. **Le mot en bleu brand** `#329CFF` — un mot clé du titre en bleu brand pour ancrer l'identité.
 3. *L'italique Fraunces* — pour une nuance, un mot « du cœur ».
 4. **La pill-étiquette** — petit label MAJUSCULE (ASTUCE, VRAI/FAUX, À RETENIR) en haut de slide.
+
+> ❌ **Retirés en v2** : le souligné manuscrit (trop kitsch). Caveat manuscrit comme technique d'emphase → demoted, voir § 3 (usage rare et signifiant uniquement).
 
 ---
 
@@ -258,12 +286,17 @@ Règle d'or : **alterner les fonds** (crème → sable → terracotta → crème
 - Contraste AA respecté.
 
 **À éviter** ❌
-- Fond noir, bleus saturés froids, gris corporate.
-- Plus de 3 couleurs (hors neutres) sur une slide.
+- Fond noir, fond gris corporate.
+- Plus de 2 couleurs d'accent par slide (hors blanc + encre + bleu brand qui sont la base).
+- Fond plein terracotta hors slide CTA finale exceptionnelle.
 - Mélanger les ratios dans un carrousel.
-- Plus d'un sticker/déco par slide.
-- Du jargon non expliqué (« optimisation sémantique », « LLM », « embeddings » → à traduire en langage mamie).
+- **Marguerite, washi tape, tampon « FAIT MAISON », stickers en général** (v2 — trop kitsch, casse le positionnement pro).
+- Caveat manuscrit en déco gratuite (max 1 par carrousel et seulement si sens).
+- Souligné manuscrit comme technique d'emphase (v2 — retiré).
+- Du jargon non expliqué (« optimisation sémantique », « LLM », « embeddings » → à traduire en langage simple).
 - Texte qui touche les bords (respecter la marge 80 px).
+- **Texte corps < 32 px** (v2 — illisible en vignette feed mobile, voir § 3).
+- Texte blanc sur fond Miel ou Sauge (contraste insuffisant — toujours Encre dans ces cas).
 
 ---
 
@@ -272,11 +305,14 @@ Règle d'or : **alterner les fonds** (crème → sable → terracotta → crème
 > Copie-colle ceci en remplaçant le contenu :
 
 ```
-Génère un carrousel LinkedIn pour mamie-geo en suivant linkedindesign.md.
+Génère un carrousel LinkedIn pour mamie-geo en suivant linkedindesign.md (v2 — 2026-06-05 soir).
 Format 1080×1350, [N] slides, marge 80px.
-DA : palette chaude (Crème #FBF4E9, Terracotta #DD6B45, Miel #F3B43F, Sauge #7FA67C, Encre #2E2620),
-titres Fraunces Bold, corps Hanken Grotesk, motif marguerite + bord festonné, coins très arrondis,
-logo mamie-geo en haut à gauche + pagination en bas.
+DA v2 : fond BLANC par défaut (crème occasionnelle 1-2 slides max),
+couleur primaire BLEU BRAND #329CFF (logo + 1 accent typo/slide + CTA),
+accents chauds rétrogradés (terracotta/miel/sauge en accents ponctuels, jamais fond plein sauf 1 slide CTA),
+titres Fraunces Bold/Black, corps Hanken Grotesk min 32 px, coins arrondis 24-32 px,
+logo mamie-geo en haut à gauche + pagination en bas, contraste AAA visé.
+PAS DE marguerite, washi-tape, stickers décoratifs, souligné manuscrit (v1 archivé).
 
 Sujet du post : [SUJET]
 Angle / promesse : [PROMESSE]

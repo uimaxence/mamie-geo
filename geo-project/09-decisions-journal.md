@@ -196,6 +196,49 @@ haut et l'entrée "2026-05-05 — Réponses aux 10 questions de bootstrap".
 
 **À revisiter** : si les retours sur le bleu trop saturé reviennent (le `#329CFF` est cobalt vif), envisager `#1d7ee5` (`--color-primary-dim`) comme nouvelle valeur de `--color-accent` pour adoucir.
 
+#### 2026-06-05 (soir) — Raffinement DA carrousels v2 : fond blanc + bleu brand primaire, marguerite retirée
+
+**Contexte** : Le carrousel SEO vs GEO livré en début d'après-midi (commit `c3b92e3`, DA persona « Mamie » v1) est validé par Max sur le principe (« c'est pas trop mal, je vais garder ça »), mais le retour à chaud après visualisation pointe 5 axes d'amélioration pour les **prochains** carrousels :
+
+1. Certaines tailles corps trop petites (illisibles en vignette LinkedIn feed mobile)
+2. Contrastes de couleurs pas toujours suffisants
+3. Préférence pour **fond blanc classique** plutôt que crème/terracotta plein
+4. Bleu brand `#329CFF` à utiliser comme couleur principale (pas juste accent)
+5. **Pas de fleur** (marguerite trop kitsch)
+
+Synthèse Max : « simplifier et rendre ça plus pro ».
+
+**Décision** : ne **pas** refaire le carrousel actuel (kept as is, c'est la v1 historique du système), mais raffiner `linkedindesign.md` en **v2** pour cadrer tous les prochains visuels.
+
+**Changements documentés dans linkedindesign.md v2** :
+
+- **§ 2 Palette** : pivot vers `Blanc #FFFFFF` en fond par défaut (~80 % des slides). Crème/sable rétrogradés à fond occasionnel (1-2 slides max par carrousel pour rythmer). **Bleu brand `#329CFF` promu couleur primaire visible sur chaque slide** (logo + 1 accent typo + CTA + dots). Terracotta/miel/sauge/rose deviennent accents secondaires — **pas en fond plein** sauf 1 slide CTA finale exceptionnelle. Règles de contraste durcies (viser AAA, AA minimum strict, blanc sur bleu brand uniquement en titres ≥ 24 px bold).
+
+- **§ 3 Typographie** : tailles min relevées (corps 32+ vs 28-32 v1, corps large 40-48 vs 36-40, label 24-28 vs 22-24, hook 120-150 vs 110-140). Règle dure ajoutée : tout texte non-footer ≥ 32 px, test obligatoire en vignette ~135×168 px avant publication.
+
+- **§ 4 Système de formes** : **marguerite-signature retirée**. Plus de bord festonné, plus de stickers (washi-tape, tampon « FAIT MAISON », fleurs vintage). L'identité passe désormais par 3 éléments : **logo bleu brand + palette restreinte + typo Fraunces**. Seuls accents géométriques autorisés : flèches `→`, coches `✓✗` dans pills, pastilles rondes pour chiffres/icônes Lucide.
+
+- **§ 8 Mise en valeur** : 4 techniques v2 (surligneur miel, mot en bleu brand, italique Fraunces, pill-étiquette). Souligné manuscrit retiré (kitsch). Caveat demoted en usage rare significatif.
+
+- **§ 11 Anti-patterns** : ajouts « marguerite/stickers en général », « Caveat en déco gratuite », « texte corps < 32 px », « texte blanc sur miel/sauge ».
+
+- **§ 12 Prompt réutilisable** : refondu pour refléter v2 (fond blanc défaut, bleu brand primaire, pas de marguerite/stickers).
+
+**Code conservé en l'état** :
+- Le carrousel SEO vs GEO actuel reste sur le système v1 (fond terracotta + crème, marguerite déco, surligneur miel). Pas de refonte demandée.
+- Les primitives `<Daisy>`, `<Highlight>`, `<BrandHeader>`, `<SlideShell>` restent dans `src/components/admin/visuals/_primitives/`. `<Daisy>` ne devrait plus être instanciée dans les **nouveaux** slides ; à supprimer définitivement le jour où le carrousel SEO vs GEO sera lui-même refait/archivé.
+- Le `<SlideShell>` actuel propose 5 thèmes de fond (cream/sand/terracotta/honey/sage) — il manque un thème `white` pour la v2. À ajouter dans `tokens.ts` au prochain carrousel.
+
+**Conséquences** :
+- Les nouveaux carrousels seront plus sobres, plus lisibles, plus pro.
+- Le brand bleu `#329CFF` devient le marqueur visuel central des carrousels (au lieu du terracotta v1).
+- Le ton « Mamie » chaleureux survit principalement via la **typo serif Fraunces** (qui reste signature) et les **accents miel/terracotta ponctuels** (pas en fond).
+- Risque : se rapprocher trop de la DA app (blanc + bleu brand + Inter). Garder un œil sur la distinction — Fraunces + accents chauds ponctuels doivent rester perceptibles pour ne pas dissoudre le dual-DA en mono-DA déguisé.
+
+**À revisiter** :
+- Premier carrousel v2 : observer si la lisibilité en vignette est effectivement meilleure.
+- Si après 3-4 carrousels v2 la frontière app/marketing devient floue, ré-évaluer (renforcer un accent visuel propre aux carrousels, ou assumer la fusion progressive).
+
 #### 2026-06-05 — Refonte DA carrousels LinkedIn → persona « Mamie » (chaude, marguerite, Fraunces) — dual-DA acté
 
 **Contexte** : Le système carrousel acté la veille (« Unified-like » : crème `#fff4d6` + vagues bleu brand + Inter 800 + brand pill ink) restait fonctionnel mais trop proche d'un SaaS générique. Max rédige `geo-project/linkedindesign.md`, brief complet de génération visuelle pour les carrousels LinkedIn ancré sur la persona « Mamie » (chaud, manuscrit, motif marguerite, serif). Demande : refaire entièrement les visuels en s'appuyant sur ce brief.
