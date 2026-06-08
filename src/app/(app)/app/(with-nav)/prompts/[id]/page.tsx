@@ -132,7 +132,7 @@ export default async function PromptDetailPage({ params }: { params: Promise<{ i
                 Score moyen 0–100 par moteur sur la fenêtre 30 jours.
               </p>
               <div className="mt-6">
-                <BreakdownBars segments={breakdownSegments} mode="absolute" />
+                <BreakdownBars segments={breakdownSegments} mode="absolute" maxValue={100} />
               </div>
             </div>
           )}

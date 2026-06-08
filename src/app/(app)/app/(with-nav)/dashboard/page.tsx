@@ -165,7 +165,7 @@ export default async function DashboardPage() {
         <div className="mt-6">
           <DownloadableChart filename="visibilite-par-llm">
             <div className="p-4">
-              <BreakdownBars segments={breakdownSegments} mode="absolute" />
+              <BreakdownBars segments={breakdownSegments} mode="absolute" maxValue={100} />
             </div>
           </DownloadableChart>
         </div>

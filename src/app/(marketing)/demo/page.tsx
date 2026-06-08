@@ -165,7 +165,7 @@ export default function DemoPage() {
           <div className="mt-6">
             <DownloadableChart filename="demo-visibilite-par-llm">
               <div className="p-4">
-                <BreakdownBars segments={breakdownSegments} mode="absolute" />
+                <BreakdownBars segments={breakdownSegments} mode="absolute" maxValue={100} />
               </div>
             </DownloadableChart>
           </div>
