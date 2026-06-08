@@ -52,7 +52,7 @@ Module **Tracker** uniquement. Rien d'autre. Pas d'optimization, pas de content,
 | Vue concurrents (qui est cité, à quelle fréquence)              | P0       |                                                        |
 | Évolution dans le temps (graph 30 jours)                        | P0       |                                                        |
 | Email hebdo automatique                                         | P0       | Brevo                                                  |
-| Export CSV                                                      | P0       | ⚠️ Replanifié V0+ — listé P0 mais code absent au 2026-05-17 |
+| Export CSV                                                      | P0       | Livré 2026-06-08 — endpoints `/api/export/runs.csv` + `/api/export/metrics.csv`, section dédiée `/app/settings` |
 | Page facturation Stripe Customer Portal                         | P0       | Livré 2026-05-14                                       |
 | Plans Solo / Starter / Pro avec limitations volumes             | P0       | Solo 9,99 € ajouté 2026-05-14, Agency retiré UI public |
 | Hard-cap LLM 200 % du quota théorique mensuel                   | P0       | Livré 2026-05-16 (`src/lib/hardcap/`)                  |
@@ -165,7 +165,7 @@ Le V0 a livré la promesse de base (tracker + dashboard + audit gratuit + billin
 | **Comparison pages industrialisées**                     | 1 article publié (vs Profound). Industrialiser : vs Peec AI, vs Otterly, vs Rankscale (SEO + sales enablement). | `src/content/blog/*.mdx` + section dédiée doc 06                                       |
 | **Multi-select brand filter (Your brand / Competitors)** | UX évidente une fois vue. Filtre groupé sur dashboard + vues détaillées.                                       | Composant `BrandMultiSelect` dans `src/components/app/`                                |
 | **Save-as-PNG sur charts**                               | Drop direct dans Slack/deck client. Effet « felt » côté agence = partage = bouche-à-oreille.                   | Wrapper sur Recharts (LineChart, BarChart, AreaChart) — comptabiliser 1-2 j (pas trivial avec SSR + theming) |
-| **CSV export**                                           | Gap V0 (listé P0 mais code absent). Endpoints `/api/export/runs.csv`, `/api/export/metrics.csv`.               | Cf. doc 03 § Routes                                                                    |
+| **CSV export** ✅ livré 2026-06-08                       | Gap V0 (listé P0 mais code absent). Endpoints `/api/export/runs.csv`, `/api/export/metrics.csv`.               | UTF-8 BOM, RFC 4180, scope workspace, plage 90j par défaut, query params `?from/to/brandId`. Bouton dans `/app/settings`. |
 | **Pause/Resume projects**                                | Agence saisonnière / audit one-shot : pause le tracking sans perdre le setup, credits ne sont plus consommés.  | Champ `brands.paused_at TIMESTAMPTZ NULL` (cf. doc 03) + skip dans scheduler           |
 
 ### Hors périmètre V0+

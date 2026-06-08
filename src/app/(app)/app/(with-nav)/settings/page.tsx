@@ -158,6 +158,34 @@ export default async function SettingsPage({ searchParams }: PageProps) {
           </dl>
         </SectionCard>
 
+        {/* Exports CSV métier : runs bruts + métriques agrégées. Séparé
+         * du flow RGPD (JSON full export) qui vit dans la danger zone. */}
+        <SectionCard
+          title="Exports CSV"
+          subtitle="Télécharge tes données pour les analyser dans Excel, Sheets ou un BI."
+        >
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <a
+              href="/api/export/runs.csv"
+              className="inline-flex items-center justify-center rounded-[var(--radius-md)] border border-[color:var(--color-border)] bg-white px-4 py-2 text-sm font-medium text-[color:var(--color-ink)] transition hover:bg-[color:var(--color-gray-50)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-ink)]"
+              download
+            >
+              Historique des runs (CSV)
+            </a>
+            <a
+              href="/api/export/metrics.csv"
+              className="inline-flex items-center justify-center rounded-[var(--radius-md)] border border-[color:var(--color-border)] bg-white px-4 py-2 text-sm font-medium text-[color:var(--color-ink)] transition hover:bg-[color:var(--color-gray-50)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-ink)]"
+              download
+            >
+              Métriques quotidiennes (CSV)
+            </a>
+          </div>
+          <p className="type-meta mt-3 text-xs">
+            Plage par défaut : 90 derniers jours, toutes tes marques. Encodage UTF-8 avec BOM,
+            compatible Excel.
+          </p>
+        </SectionCard>
+
         {/* Déconnexion : action douce, pas de Card pour rester distinct
          * de la danger zone RGPD (suppression / export). */}
         <section className="mt-4 rounded-[var(--radius-xl)] border border-[color:var(--color-border)] bg-white p-6">

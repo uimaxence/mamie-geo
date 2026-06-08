@@ -263,9 +263,22 @@ la doc devient un cimetière.
 
 ---
 
-## 9. État du projet (snapshot — 2026-06-05)
+## 9. État du projet (snapshot — 2026-06-08)
 
-> Mise à jour 2026-06-05 — Refonte DA carrousels persona « Mamie » + dual-DA acté
+> Mise à jour 2026-06-08 — V0+ kick-off : CSV export livré
+>
+> **CSV export** (gap V0 listé P0 mais code absent jusqu'ici) : 2
+> endpoints `/api/export/runs.csv` (historique runs aplati, 1 ligne =
+> 1 prompt × 1 LLM × 1 date avec colonnes scoring) et
+> `/api/export/metrics.csv` (`citation_metrics_daily` aplati). Helper
+> `src/lib/csv/index.ts` RFC 4180 + BOM UTF-8 pour compat Excel
+> direct (5 tests). Auth session Better Auth + scope par membership
+> workspace, query params optionnels `?from/to/brandId`, plage 90 j
+> par défaut, cap 50 k lignes avec header `X-Export-Truncated`.
+> Section "Exports CSV" ajoutée dans `/app/settings`, distincte de la
+> danger zone RGPD (qui reste sur le JSON full export article 20).
+>
+> Précédente (2026-06-05) — Refonte DA carrousels persona « Mamie » + dual-DA acté
 >
 > **Carrousels LinkedIn DA refondue** : pivot du système Unified-like
 > (acté la veille) vers la persona « Mamie » selon nouveau brief
@@ -487,7 +500,7 @@ Phasage acté le 2026-05-07 (cf. `09-decisions-journal.md` § 2026-05-07) :
 2. **Setup `BREVO_BLOG_LIST_ID`** : créer la liste "Newsletter blog" dans Brevo dashboard puis copier l'ID dans Vercel env vars → form inscription `/blog` actif + notification auto à chaque article publié.
 3. **Hard launch public** : DNS Brevo (DKIM/SPF/DMARC) + Stripe LIVE déjà configurés selon user. Reste communication (LinkedIn, communautés FR).
 4. **Drip d'éducation post-signup** (remplace ancien trial nurture J+3/J+10 — plus de trial auto en V0).
-5. **Items V0+ veille concurrence** (cf. doc 02 § V0+) : URL drill-down `/app/sources/[id]`, per-prompt cadence, sources funnel 3 métriques (Apparition/Fréquence/Citation), pause/resume projects, save-as-PNG charts, CSV export, multi-select brand filter, comparison pages industrialisées, crawlabilité bots IA dans audit-technique, régénérer prompts depuis profil.
+5. **Items V0+ veille concurrence** (cf. doc 02 § V0+) : URL drill-down `/app/sources/[id]`, per-prompt cadence, sources funnel 3 métriques (Apparition/Fréquence/Citation), pause/resume projects, save-as-PNG charts, ~~CSV export~~ ✅ livré 2026-06-08, multi-select brand filter, comparison pages industrialisées, crawlabilité bots IA dans audit-technique, régénérer prompts depuis profil.
 
 **Phase C livrée** (~~barré~~) :
 
