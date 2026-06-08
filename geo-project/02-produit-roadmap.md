@@ -166,7 +166,7 @@ Le V0 a livré la promesse de base (tracker + dashboard + audit gratuit + billin
 | **Multi-select brand filter (Your brand / Competitors)** | UX évidente une fois vue. Filtre groupé sur dashboard + vues détaillées.                                       | Composant `BrandMultiSelect` dans `src/components/app/`                                |
 | **Save-as-PNG sur charts**                               | Drop direct dans Slack/deck client. Effet « felt » côté agence = partage = bouche-à-oreille.                   | Wrapper sur Recharts (LineChart, BarChart, AreaChart) — comptabiliser 1-2 j (pas trivial avec SSR + theming) |
 | **CSV export** ✅ livré 2026-06-08                       | Gap V0 (listé P0 mais code absent). Endpoints `/api/export/runs.csv`, `/api/export/metrics.csv`.               | UTF-8 BOM, RFC 4180, scope workspace, plage 90j par défaut, query params `?from/to/brandId`. Bouton dans `/app/settings`. |
-| **Pause/Resume projects**                                | Agence saisonnière / audit one-shot : pause le tracking sans perdre le setup, credits ne sont plus consommés.  | Champ `brands.paused_at TIMESTAMPTZ NULL` (cf. doc 03) + skip dans scheduler           |
+| **Pause/Resume projects** ✅ livré 2026-06-08            | Agence saisonnière / audit one-shot : pause le tracking sans perdre le setup, credits ne sont plus consommés.  | Champ `brands.paused_at TIMESTAMPTZ NULL` + index partiel `idx_brands_active` (WHERE paused_at IS NULL) + skip dans scheduler (cf. lib/scheduler/schedule-runs.ts) + toggle UI dans `/app/settings`. |
 
 ### Hors périmètre V0+
 

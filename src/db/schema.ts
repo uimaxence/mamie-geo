@@ -161,9 +161,19 @@ export const brands = pgTable(
       .array()
       .notNull()
       .default(sql`'{}'`),
+    // V0+ pause/resume — quand non null, le scheduler skipe cette brand
+    // (cf. doc 02 § V0+). Resume = SET NULL.
+    pausedAt: timestamp({ withTimezone: true }),
     createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [index("idx_brands_workspace").on(t.workspaceId)],
+  (t) => [
+    index("idx_brands_workspace").on(t.workspaceId),
+    // Partial index documenté doc 03 § brands : accélère le scheduler
+    // qui filtre `isNull(pausedAt)` à chaque cron.
+    index("idx_brands_active")
+      .on(t.workspaceId)
+      .where(sql`paused_at IS NULL`),
+  ],
 );
 
 export const competitors = pgTable(

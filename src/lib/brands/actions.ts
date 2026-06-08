@@ -1,7 +1,7 @@
 "use server";
 
 import { randomUUID } from "node:crypto";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
@@ -121,4 +121,75 @@ export async function createBrand(input: CreateBrandInput): Promise<CreateBrandR
   revalidatePath("/app", "layout");
 
   return { ok: true, brandId };
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Pause/Resume — V0+ (cf. doc 02 § V0+). Met à jour brands.pausedAt.
+// Une brand en pause est skip dans le scheduler (cf. scheduler/schedule-
+// runs.ts). Aucune donnée n'est supprimée, le setup reste intact.
+// ──────────────────────────────────────────────────────────────────────
+
+export type PauseBrandResult =
+  | { ok: true; pausedAt: Date | null }
+  | { ok: false; error: "unauthorized" | "brand_not_found" };
+
+async function assertBrandWritableByUser(
+  brandId: string,
+  userId: string,
+): Promise<{ ok: true } | { ok: false; error: "unauthorized" | "brand_not_found" }> {
+  const rows = await db
+    .select({
+      brandId: brands.id,
+      role: workspaceMembers.role,
+    })
+    .from(brands)
+    .innerJoin(workspaceMembers, eq(workspaceMembers.workspaceId, brands.workspaceId))
+    .where(and(eq(brands.id, brandId), eq(workspaceMembers.userId, userId)))
+    .limit(1);
+
+  const row = rows[0];
+  if (!row) return { ok: false, error: "brand_not_found" };
+  if (row.role !== "owner" && row.role !== "admin") {
+    return { ok: false, error: "unauthorized" };
+  }
+  return { ok: true };
+}
+
+export async function pauseBrand(brandId: string): Promise<PauseBrandResult> {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) return { ok: false, error: "unauthorized" };
+
+  const check = await assertBrandWritableByUser(brandId, session.user.id);
+  if (!check.ok) return check;
+
+  const now = new Date();
+  await db.update(brands).set({ pausedAt: now }).where(eq(brands.id, brandId));
+
+  logCronEvent({
+    event: "brand_paused",
+    brandId,
+    userId: session.user.id,
+  });
+
+  revalidatePath("/app", "layout");
+  return { ok: true, pausedAt: now };
+}
+
+export async function resumeBrand(brandId: string): Promise<PauseBrandResult> {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) return { ok: false, error: "unauthorized" };
+
+  const check = await assertBrandWritableByUser(brandId, session.user.id);
+  if (!check.ok) return check;
+
+  await db.update(brands).set({ pausedAt: null }).where(eq(brands.id, brandId));
+
+  logCronEvent({
+    event: "brand_resumed",
+    brandId,
+    userId: session.user.id,
+  });
+
+  revalidatePath("/app", "layout");
+  return { ok: true, pausedAt: null };
 }

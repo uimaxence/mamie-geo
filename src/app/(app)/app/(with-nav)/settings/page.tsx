@@ -9,6 +9,7 @@ import { Badge, Card, CardBody, CardHeader } from "@/components/ui";
 import { AccountDangerZone } from "./account-danger-zone";
 import { BillingSection } from "./billing-section";
 import { BrandAliasesForm } from "./brand-aliases-form";
+import { BrandPauseToggle } from "./brand-pause-toggle";
 import { SignOutButton } from "./sign-out-button";
 import { WorkspaceForm } from "./workspace-form";
 
@@ -47,7 +48,7 @@ export default async function SettingsPage({ searchParams }: PageProps) {
     .where(eq(workspaces.id, data.workspace.id))
     .limit(1);
   const brandRow = await db
-    .select({ aliases: brands.aliases })
+    .select({ aliases: brands.aliases, pausedAt: brands.pausedAt })
     .from(brands)
     .where(eq(brands.id, data.brand.id))
     .limit(1);
@@ -124,12 +125,33 @@ export default async function SettingsPage({ searchParams }: PageProps) {
           subtitle="Nom + domaine non éditables (changent l'identité). Aliases modifiables."
         >
           <dl className="grid grid-cols-1 gap-x-8 gap-y-4 sm:grid-cols-3">
-            <Field label="Nom" value={data.brand.name} />
+            <Field
+              label="Nom"
+              value={
+                <span className="inline-flex items-center gap-2">
+                  {data.brand.name}
+                  {brandRow[0]?.pausedAt && (
+                    <Badge tone="warning" className="shrink-0">
+                      en pause
+                    </Badge>
+                  )}
+                </span>
+              }
+            />
             <Field label="Domaine" value={data.brand.domain} mono />
             <div className="sm:col-span-3">
               <dt className="type-eyebrow">Aliases</dt>
               <dd className="mt-2">
                 <BrandAliasesForm currentAliases={brandRow[0]?.aliases ?? []} />
+              </dd>
+            </div>
+            <div className="sm:col-span-3">
+              <dt className="type-eyebrow">Statut tracking</dt>
+              <dd className="mt-2">
+                <BrandPauseToggle
+                  brandId={data.brand.id}
+                  initialPausedAt={brandRow[0]?.pausedAt ?? null}
+                />
               </dd>
             </div>
           </dl>

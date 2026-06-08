@@ -90,6 +90,7 @@ export async function scheduleRunsForEligiblePlans(
     .where(
       and(
         eq(prompts.isActive, true),
+        isNull(brands.pausedAt),
         isNull(workspaces.hardCapHitAt),
         inArray(workspaces.plan, eligiblePlans as string[]),
       ),
@@ -117,6 +118,7 @@ export async function scheduleRunsForWorkspace(workspaceId: string): Promise<Sch
     .where(
       and(
         eq(prompts.isActive, true),
+        isNull(brands.pausedAt),
         isNull(workspaces.hardCapHitAt),
         eq(workspaces.id, workspaceId),
       ),
