@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   Cog,
+  Globe,
   LayoutDashboard,
   ListChecks,
   LogOut,
@@ -47,6 +48,7 @@ interface NavItem {
 const NAV: NavItem[] = [
   { href: "/app/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/app/prompts", label: "Prompts", icon: MessageSquareQuote },
+  { href: "/app/sources", label: "Sources", icon: Globe },
   { href: "/app/competitors", label: "Concurrents", icon: Users },
   { href: "/app/audits", label: "Audits techniques", icon: Wrench },
   { href: "/app/runs", label: "Runs", icon: ListChecks },
