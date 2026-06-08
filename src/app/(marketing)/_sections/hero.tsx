@@ -39,13 +39,13 @@ export function Hero() {
               Démarrer — 9,99&nbsp;€/mois
             </TrackedLinkButton>
             <TrackedLinkButton
-              href="/outils/audit-technique"
-              variant="ai"
+              href="/demo"
+              variant="secondary"
               size="lg"
               trackEvent="home_cta_clicked"
-              trackProperties={{ cta_label: "Audit gratuit", section: "hero", href: "/outils/audit-technique" }}
+              trackProperties={{ cta_label: "Voir la démo", section: "hero", href: "/demo" }}
             >
-              Audit gratuit
+              Voir la démo →
             </TrackedLinkButton>
           </div>
           <p className="type-meta mt-6">

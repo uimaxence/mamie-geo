@@ -37,6 +37,12 @@ export function MarketingHeader() {
               Features
             </Link>
             <Link
+              href="/demo"
+              className="text-sm font-medium text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]"
+            >
+              Démo
+            </Link>
+            <Link
               href="/pricing"
               className="text-sm font-medium text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]"
             >

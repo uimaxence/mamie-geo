@@ -12,6 +12,7 @@ import { Logo } from "@/components/marketing/logo";
 
 const NAV_LINKS = [
   { href: "/#how-it-works", label: "Features" },
+  { href: "/demo", label: "Démo" },
   { href: "/pricing", label: "Tarif" },
   { href: "/blog", label: "Blog" },
   { href: "/#faq", label: "FAQ" },

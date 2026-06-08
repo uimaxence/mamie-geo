@@ -12,6 +12,7 @@ const BASE_URL = env.NEXT_PUBLIC_APP_URL ?? "https://mamie-geo.fr";
 
 const STATIC_ROUTES: { path: string; priority: number; changeFrequency: "weekly" | "monthly" }[] = [
   { path: "", priority: 1.0, changeFrequency: "weekly" },
+  { path: "/demo", priority: 0.9, changeFrequency: "weekly" },
   { path: "/pricing", priority: 0.9, changeFrequency: "weekly" },
   { path: "/blog", priority: 0.8, changeFrequency: "weekly" },
   { path: "/outils/test-visibilite-ia", priority: 0.7, changeFrequency: "monthly" },
