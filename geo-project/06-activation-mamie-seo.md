@@ -122,11 +122,13 @@ Objectif : devenir LA source FR sur le GEO. Métaphysiquement, ces articles sero
 
 Cibles V0+ (3 nouvelles pages, livraison 60 j post-lancement) :
 
-| Slug                                | Cible                                                                              | Angle                                                              |
-| ----------------------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
-| `/comparatifs/peec-ai-vs-mamie-geo` | Comparatifs SEO recherchés par early adopters EU                                   | Moat FR, Le Chat en hero, pricing €, garantie 14 j refund vs trial |
-| `/comparatifs/otterly-vs-mamie-geo` | Otterly est distribué via Semrush App Center à $27/mo                              | Suite locale FR vs add-on Semrush US                               |
-| `/comparatifs/rankscale-vs-mamie-geo` | Rankscale credit-based + partner directory                                         | Flat-prompts simplicité vs credits, cible PME/freelance vs agence  |
+| Slug                                  | Cible                                                                | Angle                                                              | Statut       |
+| ------------------------------------- | -------------------------------------------------------------------- | ------------------------------------------------------------------ | ------------ |
+| `/blog/mamie-geo-vs-peec-ai`          | Comparatifs SEO recherchés par early adopters EU                     | Moat FR, Le Chat en hero, pricing €, garantie 14 j refund vs trial | ✅ 2026-06-08 |
+| `/blog/mamie-geo-vs-otterly`          | Otterly est distribué via Semrush App Center à $27/mo                | Suite locale FR vs add-on Semrush US                               | ✅ 2026-06-08 |
+| `/blog/mamie-geo-vs-rankscale`        | Rankscale credit-based + partner directory                           | Flat-prompts simplicité vs credits, cible PME/freelance vs agence  | ✅ 2026-06-08 |
+
+> 2026-06-08 — V0+ a opté pour le slug `/blog/...` plutôt que `/comparatifs/...` (cf. roadmap V1). Permet de réutiliser le pipeline blog content-driven existant (MDX, FAQPage JSON-LD, related articles, sitemap auto) sans monter une nouvelle route dédiée. La bascule vers une route landing comparatif `/comparatifs/[slug]` reste planifiée en V1 si la traction le justifie.
 
 Cibles V1 :
 

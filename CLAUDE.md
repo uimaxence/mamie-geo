@@ -265,7 +265,20 @@ la doc devient un cimetière.
 
 ## 9. État du projet (snapshot — 2026-06-08)
 
-> Mise à jour 2026-06-08 — V0+ kick-off : CSV export + Pause/Resume + Funnel sources
+> Mise à jour 2026-06-08 — 4 features V0+ poussées en un jour : CSV
+> export, Pause/Resume, Funnel sources, Comparison pages
+>
+> **Comparison pages industrialisées** (cf. doc 02 § V0+ + doc 06 §
+> Comparison pages) : 3 articles MDX publiés dans `/blog/` plutôt que
+> sur le slug `/comparatifs/[slug]` d'origine (réutilisation du
+> pipeline blog content-driven existant — FAQPage JSON-LD, related
+> articles, sitemap auto). Articles : `mamie-geo-vs-peec-ai.mdx`
+> (concurrent direct EU, funnel sources installé), `mamie-geo-vs-otterly
+> .mdx` (add-on Semrush vs suite autonome), `mamie-geo-vs-rankscale.mdx`
+> (credit-based agence vs flat-prompts PME/freelance). Ton honnête
+> "lequel est pertinent pour qui" + disclaimers "selon leur site au
+> [date]". Bascule vers route dédiée `/comparatifs/[slug]` reportée
+> V1 si traction (cf. doc 06).
 >
 > **Funnel sources Apparition/Fréquence/Citation** (cf. doc 02 § Glossaire
 > + doc 03 § citation_metrics_daily) : 3 colonnes ajoutées
@@ -522,7 +535,7 @@ Phasage acté le 2026-05-07 (cf. `09-decisions-journal.md` § 2026-05-07) :
 2. **Setup `BREVO_BLOG_LIST_ID`** : créer la liste "Newsletter blog" dans Brevo dashboard puis copier l'ID dans Vercel env vars → form inscription `/blog` actif + notification auto à chaque article publié.
 3. **Hard launch public** : DNS Brevo (DKIM/SPF/DMARC) + Stripe LIVE déjà configurés selon user. Reste communication (LinkedIn, communautés FR).
 4. **Drip d'éducation post-signup** (remplace ancien trial nurture J+3/J+10 — plus de trial auto en V0).
-5. **Items V0+ veille concurrence** (cf. doc 02 § V0+) : URL drill-down `/app/sources/[id]`, per-prompt cadence, ~~sources funnel 3 métriques (Apparition/Fréquence/Citation)~~ ✅ livré 2026-06-08, ~~pause/resume projects~~ ✅ livré 2026-06-08, save-as-PNG charts, ~~CSV export~~ ✅ livré 2026-06-08, multi-select brand filter, comparison pages industrialisées, crawlabilité bots IA dans audit-technique, régénérer prompts depuis profil.
+5. **Items V0+ veille concurrence** (cf. doc 02 § V0+) : URL drill-down `/app/sources/[id]`, per-prompt cadence, ~~sources funnel 3 métriques (Apparition/Fréquence/Citation)~~ ✅ livré 2026-06-08, ~~pause/resume projects~~ ✅ livré 2026-06-08, save-as-PNG charts, ~~CSV export~~ ✅ livré 2026-06-08, multi-select brand filter, ~~comparison pages industrialisées~~ ✅ livré 2026-06-08, crawlabilité bots IA dans audit-technique, régénérer prompts depuis profil.
 
 **Phase C livrée** (~~barré~~) :
 

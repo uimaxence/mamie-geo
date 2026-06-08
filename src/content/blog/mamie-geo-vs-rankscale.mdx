@@ -1,0 +1,73 @@
+---
+title: "Mamie GEO vs Rankscale, flat-prompts simples ou crédits modulables"
+description: "Rankscale fonctionne en crédits modulables et adresse les agences avec un annuaire de partenaires (Coalition, Dentsu, Publicis…). Mamie GEO préfère le flat-prompts simple pour freelances et PME. Comparaison sans bullshit."
+date: 2026-06-08
+category: Comparatif
+author: Maxence Cailleau
+readingTimeMin: 5
+keywords: [Rankscale, comparatif, GEO, agence, credits, annuaire partenaire]
+cta: solo
+---
+
+## Le contexte avant tout
+
+Rankscale est un outil GEO US qui se distingue par deux choix produit : un **pricing credit-based** modulable (tu achètes des crédits, tu les dépenses sur engines × prompts × cadence) et un **annuaire public d'agences partenaires** listant Coalition, Dentsu, Publicis Sapient, WPP Media, Monks et d'autres. Une API REST a été ouverte en avril 2026.
+
+Mamie GEO arrive sur un autre angle : **flat-prompts par plan, pricing fixe en euros**, et focus PME/freelance plutôt qu'agence grand groupe. Données issues du site Rankscale à la date de cet article.
+
+## 1. Modèle de pricing
+
+**Rankscale** : pricing credit-based. Tu achètes une enveloppe de crédits par mois (l'enveloppe Starter démarre autour de 100 $/mois) et tu décides comment les dépenser : plus de LLMs ou plus de prompts ou plus de cadence. Flexibilité maximale, mais nécessite d'estimer son besoin et de surveiller son solde.
+
+**Mamie GEO** : flat-prompts par plan. Solo = 10 prompts trackés sur 5 LLMs en cadence weekly, Starter = 30 prompts daily, Pro = 100 prompts daily. Pas de calcul de crédits, pas de surprise en fin de mois. Hard-cap technique à 200 % du quota théorique pour protéger contre les abus.
+
+Trade-off honnête : si tu es agence avec 5 clients à modulations très différentes (un client veut 200 prompts hebdo, un autre 20 prompts quotidiens), Rankscale est plus souple. Si tu es freelance ou PME avec un setup stable, Mamie GEO est plus simple à raisonner.
+
+## 2. Audience cible
+
+**Rankscale** : agences SEO/marketing US qui revendent du tracking GEO à leurs clients. Le partner directory liste des holdings et grandes agences digitales. C'est une stratégie clear « land grand compte agence ».
+
+**Mamie GEO** : freelances SEO, PME marketing, petites agences francophones. Plan Agency (300 prompts) sur devis pour les agences qui veulent industrialiser sans passer par crédits.
+
+## 3. LLMs trackés et features avancées
+
+**Rankscale** : ChatGPT, Claude, Perplexity, Gemini, Copilot, parfois Grok ou DeepSeek selon plan. API REST ouverte depuis avril 2026 (cas d'usage : automation côté agence, intégration dans dashboards clients).
+
+**Mamie GEO** : ChatGPT, Claude, Perplexity, Gemini, **Le Chat de Mistral**. Pas d'API publique en V0 (prévue en V1). Tracking honnête sans crédit, exports CSV natifs, webhook Stripe pour les events de billing.
+
+Si tu as une équipe technique côté agence qui veut intégrer dans un dashboard maison maintenant, Rankscale est plus avancé. Si tu veux juste un dashboard prêt à l'emploi qui marche pour 95 % des cas, Mamie GEO suffit.
+
+## 4. Stratégie partenaire et annuaire public
+
+**Rankscale** : annuaire public listant les agences signées, format SaaS classique « directory ». Visibilité bidirectionnelle (les agences gagnent en référencement, Rankscale gagne en social proof).
+
+**Mamie GEO** : programme partenaire + annuaire prévu en V1 (cf. roadmap interne). V0+ se concentre sur le produit, pas encore sur l'industrialisation du canal agence. Si tu es agence FR et veux être listée sur un annuaire GEO francophone, on en parle.
+
+## 5. Langue, support et géographie
+
+**Rankscale** : interface 100 % anglais. Documentation, support, blog tous en anglais. Hébergement US.
+
+**Mamie GEO** : interface 100 % français. Support en français, hébergement EU (Vercel Paris + Neon Frankfurt). Documentation et blog en français natif.
+
+## En résumé : qui choisir ?
+
+> **Choisir Rankscale si** : tu es une agence US ou UK avec plusieurs clients à modulations très différentes, équipe technique qui veut une API, budget tooling supérieur à 200 $/mois sur le poste GEO, intérêt pour être listée dans un annuaire international d'agences GEO.
+
+> **Choisir Mamie GEO si** : tu es freelance ou PME francophone, setup stable (un nombre de prompts cohérent qui ne change pas chaque semaine), veux un pricing fixe en euros sans gestion de crédits, besoin Le Chat dans le tracking.
+
+<BlogFAQ
+  items={[
+    {
+      q: "Mamie GEO va-t-il passer en pricing credit-based ?",
+      a: "Non, c'est une décision produit délibérée (cf. roadmap interne). Flat-prompts pour V0/V0+. Un tier credit-based optionnel pourrait être réintroduit en V1 si une demande client agence clair émerge, mais ce n'est pas un acquis. La simplicité du flat-prompts est un argument de vente pour notre cible PME/freelance.",
+    },
+    {
+      q: "Y a-t-il un annuaire d'agences partenaires chez Mamie GEO ?",
+      a: "Pas en V0+. Le programme partenaire et l'annuaire public francophone sont prévus en V1 (cf. doc go-to-market interne). Si tu es agence FR intéressée par devenir partenaire fondateur, écris à hello@mamie-geo.fr — on prépare l'industrialisation pour fin 2026.",
+    },
+    {
+      q: "Rankscale a une API publique, pas Mamie GEO. Bloquant ?",
+      a: "Dépend de ton besoin. Si tu veux pousser les données dans un dashboard maison ou un BI, Mamie GEO V0+ propose les exports CSV (runs et metrics) et l'export JSON RGPD complet. Une API REST est prévue en V1. Pour la plupart des PME, les CSV suffisent. Pour une agence qui automatise 50 clients, attendre V1 ou prendre Rankscale.",
+    },
+  ]}
+/>

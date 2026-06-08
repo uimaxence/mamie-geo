@@ -1,0 +1,79 @@
+---
+title: "Mamie GEO vs Peec AI, le comparatif francophone honnête"
+description: "Peec AI cumule 10 M$ d'ARR en visant scale-ups et mid-market US/DE en anglais. Mamie GEO vise freelances et PME francophones avec Le Chat tracké en natif et pricing en euros. Comparaison sans bullshit."
+date: 2026-06-08
+category: Comparatif
+author: Maxence Cailleau
+readingTimeMin: 6
+keywords: [Peec AI, comparatif, GEO, Le Chat, Mistral, pricing, mid-market]
+cta: solo
+---
+
+## Le contexte avant tout
+
+Peec AI (Berlin, levée Series A 21 M$ en novembre 2025, [10 M$ d'ARR atteints en mai 2026](/blog/peec-ai-10-millions-arr-marche-geo-france)) est le leader européen actuel du tracking de visibilité dans les LLMs. Ils ont popularisé le funnel **Apparition / Fréquence / Citation** comme standard du marché. Mamie GEO arrive en 2026 sur le marché francophone avec un positionnement et un pricing différents.
+
+Cette comparaison n'est pas un « Mamie GEO est mieux que Peec ». C'est plutôt : **lequel est pertinent pour qui**. Données issues du site public de Peec à la date de cet article — vérifier sur leur page pricing pour le détail à jour.
+
+## 1. Audience cible
+
+**Peec AI** : scale-ups SaaS européennes et US, mid-market international. Cible explicitement des équipes marketing de 20 à 200 personnes avec une présence multi-pays. Bureau récemment ouvert à New York pour adresser le marché US.
+
+**Mamie GEO** : freelances SEO, équipes marketing de PME, agences SEO/marketing francophones. Cible cœur entre 1 et 50 personnes, budget tooling de 1 à 10 k€/an total. Pas de présence internationale prévue, focus France et marchés francophones (Belgique, Suisse, Québec).
+
+## 2. Pricing
+
+**Peec AI** : à partir de 199 € en plan Starter, 499 € en Growth, sur devis au-delà. Démo commerciale recommandée pour les plans Growth et Enterprise. Trial 7 ou 14 jours selon période commerciale.
+
+**Mamie GEO** : 9,99 € en Solo, 49 € en Starter, 149 € en Pro. Pas de trial automatique mais **garantie remboursement 14 jours** sur toute première souscription, et outil d'audit gratuit one-shot sur `/outils/test-visibilite-ia`.
+
+Différence d'un facteur 5 à 20 sur le plan d'entrée. Logique : Peec vise mid-market avec ACV à 4 ou 5 chiffres, Mamie GEO vise PME/freelance avec ACV à 3 chiffres.
+
+## 3. LLMs trackés
+
+**Peec AI** : ChatGPT, Claude, Gemini, Perplexity, Copilot. 5 modèles, focus US-DE. Le Chat de Mistral n'est pas tracké en natif au moment de cet article — il faudrait vérifier leur roadmap.
+
+**Mamie GEO** : ChatGPT, Claude, Perplexity, Gemini, **Le Chat de Mistral**. 5 modèles, dont Le Chat qui est le LLM par défaut de Bouygues Telecom, BNP Paribas et plusieurs ministères français.
+
+Trade-off explicite : si tu cibles un marché européen générique avec Copilot dans le mix, Peec est mieux. Si tu cibles un marché francophone où Le Chat compte vraiment, Mamie GEO est mieux.
+
+## 4. Hébergement et conformité
+
+**Peec AI** : hébergement et conformité non documentés publiquement de façon détaillée. Société allemande donc soumise au RGPD, mais infrastructure (AWS US ? Hetzner ? autre) à vérifier directement via DPA.
+
+**Mamie GEO** : hébergement Vercel cdg1 (Paris) + Neon Frankfurt (100 % UE), RGPD compliant by design. DPA disponible sur demande pour tous les plans. Pas de transfert hors UE pour la donnée client.
+
+Pour les secteurs régulés en France (santé, finance, public), l'hébergement EU explicite avec DPA documenté est souvent obligatoire. Mamie GEO démarre conforme et le dit, Peec demande de demander.
+
+## 5. Langue et copywriting
+
+**Peec AI** : interface 100 % anglais. Rapports en anglais. Support en anglais (équipe EU mais anglophone).
+
+**Mamie GEO** : interface 100 % français. Rapports en français. Support en français. Documentation, blog, mails transactionnels et hebdo en français natif (pas une traduction).
+
+Petit détail qui fait grosse différence sur un audit à présenter à un comité de direction française, ou sur un export envoyé à un client agence qui ne lit pas l'anglais technique.
+
+## En résumé : qui choisir ?
+
+> **Choisir Peec AI si** : scale-up multi-pays anglophone, budget supérieur à 250 €/mois sur le tooling de visibilité IA, équipe marketing à l'aise en anglais, besoin de Copilot dans le tracking, présence US déjà active.
+
+> **Choisir Mamie GEO si** : freelance SEO ou PME francophone, budget inférieur à 200 €/mois sur ce poste, besoin de Le Chat dans le tracking, valeur l'hébergement EU et le support en français, veux pouvoir tester sans engagement (garantie 14 jours).
+
+Pas de marketing fragile : Peec est solide, ils ont mérité leur ARR. Ils visent juste un autre marché que nous.
+
+<BlogFAQ
+  items={[
+    {
+      q: "Peec AI track-t-il Le Chat de Mistral ?",
+      a: "Pas en natif au moment de cet article — leur set tracké standard est ChatGPT/Claude/Gemini/Perplexity/Copilot. À vérifier sur leur page produit. Mamie GEO track Le Chat depuis le V0 comme moteur de premier rang, pas comme option payante.",
+    },
+    {
+      q: "Mamie GEO reprend-il le vocabulaire Apparition/Fréquence/Citation de Peec ?",
+      a: "Oui, c'est délibéré. Peec a installé ce funnel comme standard du marché et ça serait contre-productif de partir avec un vocabulaire concurrent. On utilise les mêmes termes en français (Apparition / Fréquence / Citation) et on les affiche dans le dashboard et les exports CSV.",
+    },
+    {
+      q: "Quel est l'équivalent du plan Solo 9,99 € chez Peec ?",
+      a: "Pas d'équivalent au moment de cet article. Le plan d'entrée Peec démarre autour de 199 €, soit un facteur 20. Si ton besoin est juste « est-ce que ChatGPT et Claude me citent sur 10 prompts par semaine », Mamie GEO Solo couvre, Peec sera surdimensionné.",
+    },
+  ]}
+/>
