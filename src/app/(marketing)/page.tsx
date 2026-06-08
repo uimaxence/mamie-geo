@@ -3,6 +3,7 @@ import { AuditTeaser } from "./_sections/audit-teaser";
 import { FAQ } from "./_sections/faq";
 import { FinalCTA } from "./_sections/final-cta";
 import { Hero } from "./_sections/hero";
+import { HomeDemoPreview } from "./_sections/home-demo-preview";
 import { HowItWorks } from "./_sections/how-it-works";
 import { LLMBadges } from "./_sections/llm-badges";
 import { MarketingFooter } from "./_sections/marketing-footer";
@@ -46,6 +47,10 @@ export default function HomePage() {
       <ProofStrip />
       <SansAvec />
       <HowItWorks />
+      {/* Pattern DataFast : preview live du dashboard juste après le
+       * "comment ça marche". L'utilisateur a compris le concept, on lui
+       * montre le résultat avant de cliquer vers /demo. */}
+      <HomeDemoPreview />
       <TesOutils />
       <PourQui />
       <NEstPas />

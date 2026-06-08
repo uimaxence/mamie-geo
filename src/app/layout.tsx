@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import Script from "next/script";
 import { Analytics } from "@vercel/analytics/next";
 import { CookieNotice } from "@/components/cookie-notice";
 import "./globals.css";
@@ -35,6 +36,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {children}
         <CookieNotice />
         <Analytics />
+        <Script
+          src="https://datafa.st/js/script.js"
+          data-website-id="dfid_VTif6nvQ19KqspbPqX5W2"
+          data-domain="mamie-geo.fr"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   );
