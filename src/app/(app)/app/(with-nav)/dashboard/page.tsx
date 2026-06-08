@@ -9,6 +9,7 @@ import { DownloadableChart } from "@/components/charts/downloadable-chart";
 import { LLM_COLORS, LLM_LABELS } from "@/components/charts/llm-colors";
 import { BatchesTable } from "@/components/app/batches-table";
 import { deriveSourcesFunnelRatios } from "@/lib/metrics/sources-funnel";
+import { DashboardTracker } from "./dashboard-tracker";
 import { TrendSection } from "./trend-section";
 import { TriggerRunForm } from "./trigger-form";
 
@@ -73,6 +74,11 @@ export default async function DashboardPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-12 lg:px-10">
+      <DashboardTracker
+        hasRuns={hasRunsToday}
+        visibilityScore={visibilityScore}
+        trackedLlms={data.metricsToday.length}
+      />
       {/* Header simple : titre de page + action principale.
        * L'identité (workspace, brand, plan, domaine) est portée par la
        * sidebar, pas la peine de la répéter ici. */}

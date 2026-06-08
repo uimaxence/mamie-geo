@@ -4,6 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { Badge, Card } from "@/components/ui";
+import { PageViewTracker } from "@/components/app/page-view-tracker";
 import { getDashboardData } from "@/lib/dashboard/queries";
 import type { CheckResult, SubScore } from "@/lib/audit/types";
 import { getAuditDetail } from "../actions";
@@ -56,6 +57,17 @@ export default async function AuditDetailPage({ params }: PageProps) {
 
   return (
     <div className="mx-auto max-w-5xl px-6 py-12 lg:px-10">
+      <PageViewTracker
+        event="audit_viewed"
+        properties={{
+          audit_id: id,
+          score_global: audit.scoreGlobal,
+          is_competitor: audit.isCompetitor,
+          has_critical: critical.length > 0,
+          critical_count: critical.length,
+          warnings_count: warnings.length,
+        }}
+      />
       <Link
         href="/app/audits"
         className="inline-flex items-center gap-2 text-sm text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]"

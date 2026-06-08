@@ -11,6 +11,7 @@ import { getUserContext } from "@/lib/auth/user-context";
 import { incrementAuditCounter } from "@/lib/audits/counters";
 import { runAudit } from "@/lib/audit/run";
 import { enqueue } from "@/lib/queue";
+import { captureServerEvent } from "@/lib/posthog-server";
 import { quotaReached, quotasFor, type PlanKey, type QuotaReachedError } from "@/lib/plans/quotas";
 
 // Server actions /app/audits, Sprint 6 PR B (cf. doc 09 § 2026-05-17).
@@ -31,12 +32,20 @@ export interface ActionError {
 }
 export type ActionResult = ActionOk | ActionError | QuotaReachedError;
 
-async function getCtxOrError() {
+type CtxOrError =
+  | { ok: false; error: string }
+  | {
+      ok: true;
+      ctx: NonNullable<Awaited<ReturnType<typeof getUserContext>>>;
+      userId: string;
+    };
+
+async function getCtxOrError(): Promise<CtxOrError> {
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) return { error: "Non authentifié" as const };
+  if (!session) return { ok: false, error: "Non authentifié" };
   const ctx = await getUserContext(session.user.id);
-  if (!ctx) return { error: "Aucun workspace" as const };
-  return { ctx };
+  if (!ctx) return { ok: false, error: "Aucun workspace" };
+  return { ok: true, ctx, userId: session.user.id };
 }
 
 const runAuditSchema = z.object({
@@ -57,8 +66,9 @@ export type RunWorkspaceAuditInput = z.input<typeof runAuditSchema>;
  * - Persiste dans `technical_audits` (workspaceId, brandId, scoreGlobal…)
  */
 export async function runWorkspaceAudit(raw: RunWorkspaceAuditInput): Promise<ActionResult> {
-  const { error, ctx } = await getCtxOrError();
-  if (error) return { ok: false, error };
+  const got = await getCtxOrError();
+  if (!got.ok) return { ok: false, error: got.error };
+  const { ctx, userId } = got;
 
   const parsed = runAuditSchema.safeParse(raw);
   if (!parsed.success) {
@@ -74,6 +84,16 @@ export async function runWorkspaceAudit(raw: RunWorkspaceAuditInput): Promise<Ac
     isCompetitor,
   });
   if (!increment.ok) {
+    await captureServerEvent({
+      event: "quota_limit_hit",
+      distinctId: userId,
+      ctx: { workspaceId: ctx.workspace.id, plan: ctx.workspace.plan, role: ctx.role },
+      properties: {
+        quota_type: isCompetitor ? "comparison_competitors" : "audits",
+        current: increment.current,
+        limit: increment.max,
+      },
+    });
     return quotaReached(
       isCompetitor ? "comparison_competitors" : "audits",
       increment.current,
@@ -81,6 +101,13 @@ export async function runWorkspaceAudit(raw: RunWorkspaceAuditInput): Promise<Ac
       ctx.workspace.plan as PlanKey,
     );
   }
+
+  await captureServerEvent({
+    event: "audit_run_started",
+    distinctId: userId,
+    ctx: { workspaceId: ctx.workspace.id, plan: ctx.workspace.plan, role: ctx.role },
+    properties: { url, is_competitor: isCompetitor, source: "audits_page" },
+  });
 
   const result = await runAudit(url);
   if (!result.ok) {
@@ -108,8 +135,22 @@ export async function runWorkspaceAudit(raw: RunWorkspaceAuditInput): Promise<Ac
     })
     .returning({ id: technicalAudits.id });
 
+  const auditId = inserted[0]?.id;
+  await captureServerEvent({
+    event: "audit_completed_in_app",
+    distinctId: userId,
+    ctx: { workspaceId: ctx.workspace.id, plan: ctx.workspace.plan, role: ctx.role },
+    properties: {
+      audit_id: auditId,
+      url,
+      is_competitor: isCompetitor,
+      score_global: report.scoreGlobal,
+      sub_scores: report.subScores,
+    },
+  });
+
   revalidatePath("/app/audits");
-  return { ok: true, id: inserted[0]?.id };
+  return { ok: true, id: auditId };
 }
 
 /**
@@ -120,8 +161,9 @@ export async function runWorkspaceAudit(raw: RunWorkspaceAuditInput): Promise<Ac
  * concurrent enqueué. Réservé aux plans avec `comparisonCompetitors > 0`.
  */
 export async function runCompetitorsBatch(): Promise<ActionResult> {
-  const { error, ctx } = await getCtxOrError();
-  if (error) return { ok: false, error };
+  const got = await getCtxOrError();
+  if (!got.ok) return { ok: false, error: got.error };
+  const { ctx, userId } = got;
 
   const quotas = quotasFor(ctx.workspace.plan as PlanKey);
   if (quotas.comparisonCompetitors === 0) {
@@ -176,13 +218,20 @@ export async function runCompetitorsBatch(): Promise<ActionResult> {
   if (enqueued === 0) {
     return { ok: false, error: "Quota concurrents atteint" };
   }
+  await captureServerEvent({
+    event: "competitors_batch_audit_enqueued",
+    distinctId: userId,
+    ctx: { workspaceId: ctx.workspace.id, plan: ctx.workspace.plan, role: ctx.role },
+    properties: { enqueued, available: auditable.length, limit },
+  });
   revalidatePath("/app/audits/compare");
   return { ok: true };
 }
 
 export async function deleteAudit(auditId: string): Promise<ActionResult> {
-  const { error, ctx } = await getCtxOrError();
-  if (error) return { ok: false, error };
+  const got = await getCtxOrError();
+  if (!got.ok) return { ok: false, error: got.error };
+  const { ctx, userId } = got;
 
   const owned = await db
     .select({ id: technicalAudits.id })
@@ -194,6 +243,12 @@ export async function deleteAudit(auditId: string): Promise<ActionResult> {
   }
 
   await db.delete(technicalAudits).where(eq(technicalAudits.id, auditId));
+  await captureServerEvent({
+    event: "audit_deleted",
+    distinctId: userId,
+    ctx: { workspaceId: ctx.workspace.id, plan: ctx.workspace.plan, role: ctx.role },
+    properties: { audit_id: auditId },
+  });
   revalidatePath("/app/audits");
   return { ok: true };
 }

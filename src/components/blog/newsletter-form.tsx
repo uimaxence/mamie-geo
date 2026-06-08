@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { Button } from "@/components/ui";
+import { capture, identify } from "@/lib/posthog-client";
 import { subscribeToBlogNewsletter } from "@/lib/blog/newsletter-action";
 
 // Form d'inscription à la newsletter blog. Inline sur /blog (header
@@ -24,9 +25,15 @@ export function BlogNewsletterForm() {
 
   function handleSubmit(formData: FormData) {
     setFeedback(null);
+    const submittedEmail = (formData.get("email") ?? "").toString().trim();
     startTransition(async () => {
       const result = await subscribeToBlogNewsletter(formData);
       if (result.ok) {
+        if (submittedEmail) identify(submittedEmail, { email: submittedEmail });
+        capture("newsletter_signup_submitted", {
+          source: "blog_index",
+          was_new: result.created,
+        });
         setFeedback({
           tone: result.created ? "success" : "info",
           message: result.created

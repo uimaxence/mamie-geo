@@ -2,7 +2,7 @@
 
 **Version V0 placeholder, à valider par juriste avant lancement public payant.**
 
-Dernière mise à jour : 11 mai 2026.
+Dernière mise à jour : 8 juin 2026.
 
 ### 1. Responsable du traitement
 
@@ -65,6 +65,7 @@ Toutes les données sont hébergées en Europe :
 | Brevo         | Envoi d'emails transactionnels      | France       |
 | Stripe        | Traitement des paiements            | Irlande      |
 | Anthropic     | Appels API LLM (Claude Haiku 4.5)   | États-Unis   |
+| PostHog       | Analytics produit et session replay | Francfort (EU Cloud) |
 
 Concernant Anthropic (États-Unis) : les prompts envoyés sont ceux configurés par l'utilisateur (questions publiques, pas de données personnelles). Anthropic ne conserve pas les requêtes API au-delà de 30 jours et ne les utilise pas pour entraîner ses modèles, conformément à leur DPA. Un transfert hors UE est encadré par les Clauses Contractuelles Types (CCT) de la Commission Européenne.
 
@@ -96,9 +97,18 @@ Pour exercer ces droits, contactez `hello@mamie-geo.fr`. Réponse sous 30 jours 
 - Pas de stockage de cartes bancaires (déléguées à Stripe)
 - Audits internes trimestriels
 
-### 9. Cookies
+### 9. Cookies et analytics
 
 Mamie GEO utilise uniquement des cookies strictement nécessaires au fonctionnement (cookie de session Better Auth). Aucun cookie publicitaire ou de tracking tiers n'est posé. Pas de bannière cookie requise par la directive ePrivacy puisque les cookies sont fonctionnels.
+
+**Analytics produit (PostHog)** : nous utilisons PostHog (hébergé en EU à Francfort) pour comprendre comment notre service est utilisé et améliorer le produit. Le SDK PostHog est servi en first-party via un reverse proxy `/ingest` sur notre domaine. Les données collectées :
+
+- Pages vues, clics et navigation (autocapture)
+- Évènements produit (création de prompts, lancement de runs, etc.)
+- Session replay (enregistrement vidéo anonymisé de la navigation pour identifier les frictions UX). Les champs `email`, `mot de passe`, et tout élément marqué `data-private` sont automatiquement masqués (affichés en `*****` dans les enregistrements).
+- Adresse IP et user-agent
+
+Aucun cookie publicitaire ni partage avec des tiers commerciaux. Les données restent en EU. Tu peux demander à tout moment le retrait de tes données analytics en écrivant à `hello@mamie-geo.fr` (cf. section 7 Vos droits).
 
 ### 10. Modification de la politique
 

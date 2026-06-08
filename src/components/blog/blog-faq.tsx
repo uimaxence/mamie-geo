@@ -1,4 +1,7 @@
+"use client";
+
 import { Plus } from "lucide-react";
+import { capture } from "@/lib/posthog-client";
 import { FaqJsonLd, type FaqItem } from "./json-ld";
 
 // Composant <BlogFAQ> à utiliser dans le MDX d'un article :
@@ -37,6 +40,11 @@ export function BlogFAQ({ items }: BlogFAQProps) {
           <details
             key={item.q}
             className={`group py-4 ${idx > 0 ? "border-t border-[color:var(--color-border)]" : ""}`}
+            onToggle={(event) => {
+              if ((event.currentTarget as HTMLDetailsElement).open) {
+                capture("blog_faq_expanded", { question_id: idx, question: item.q });
+              }
+            }}
           >
             <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-base font-medium text-[color:var(--color-ink)]">
               <span>{item.q}</span>

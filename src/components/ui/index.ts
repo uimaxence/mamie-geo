@@ -1,5 +1,6 @@
 // Barrel export, pour `import { Button, Card, Stat, Badge, … } from "@/components/ui"`
 export { Button, LinkButton } from "./button";
+export type { LinkButtonProps } from "./button";
 export { Card, CardHeader, CardBody, CardFooter } from "./card";
 export { Stat } from "./stat";
 export type { IconTone, StatDelta, StatProps } from "./stat";

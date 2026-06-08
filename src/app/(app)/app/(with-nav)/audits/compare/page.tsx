@@ -7,6 +7,7 @@ import { db } from "@/db/client";
 import { technicalAudits } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { Badge, Banner, Card, EmptyState, LinkButton } from "@/components/ui";
+import { PageViewTracker } from "@/components/app/page-view-tracker";
 import { getDashboardData } from "@/lib/dashboard/queries";
 import { quotasFor } from "@/lib/plans/quotas";
 import type { SubScore } from "@/lib/audit/types";
@@ -81,6 +82,13 @@ export default async function ComparePage({ searchParams }: PageProps) {
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-12 lg:px-10">
+      <PageViewTracker
+        event="audit_compare_viewed"
+        properties={{
+          owned_count: ownedRows.length,
+          competitor_count: competitorRows.length,
+        }}
+      />
       <Link
         href="/app/audits"
         className="inline-flex items-center gap-2 text-sm text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]"

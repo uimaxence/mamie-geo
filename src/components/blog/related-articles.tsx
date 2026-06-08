@@ -1,7 +1,7 @@
-import Link from "next/link";
 import { Badge } from "@/components/ui";
 import { getRelatedArticles } from "@/lib/blog/registry";
 import { CATEGORY_TONE } from "@/lib/blog/schemas";
+import { RelatedArticleLink } from "./related-article-link";
 
 // 3 articles liés en fin d'article, fait le maillage interne SEO
 // + propose une lecture suite sans nécessiter d'écrire les liens à la
@@ -19,10 +19,7 @@ export function RelatedArticles({ slug }: { slug: string }) {
       <ul className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
         {related.map((article) => (
           <li key={article.slug}>
-            <Link
-              href={`/blog/${article.slug}`}
-              className="group flex h-full flex-col rounded-[var(--radius-lg)] border border-[color:var(--color-border)] bg-white p-5 transition hover:border-[color:var(--color-border-strong)]"
-            >
+            <RelatedArticleLink fromSlug={slug} toSlug={article.slug}>
               <Badge tone={CATEGORY_TONE[article.category]} className="self-start">
                 {article.category}
               </Badge>
@@ -33,7 +30,7 @@ export function RelatedArticles({ slug }: { slug: string }) {
               <span className="type-meta mt-auto pt-4">
                 {article.readingTimeMin} min de lecture
               </span>
-            </Link>
+            </RelatedArticleLink>
           </li>
         ))}
       </ul>

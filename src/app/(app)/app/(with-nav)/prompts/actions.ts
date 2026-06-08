@@ -7,7 +7,7 @@ import { db } from "@/db/client";
 import { competitors, prompts } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { getUserContext } from "@/lib/auth/user-context";
-import { getPostHogClient, shutdownPostHog } from "@/lib/posthog-server";
+import { captureServerEvent } from "@/lib/posthog-server";
 import { quotaReached, quotasFor, type PlanKey, type QuotaReachedError } from "@/lib/plans/quotas";
 import {
   createPromptSchema,
@@ -53,7 +53,7 @@ async function assertPromptOwnership(promptId: string, brandId: string): Promise
 // ─── CREATE ──────────────────────────────────────────────────────────
 
 export async function createPrompt(raw: CreatePromptInput): Promise<ActionResult> {
-  const { ctx } = await getCtxOrThrow();
+  const { ctx, userId } = await getCtxOrThrow();
 
   const parsed = createPromptSchema.safeParse(raw);
   if (!parsed.success) {
@@ -76,6 +76,12 @@ export async function createPrompt(raw: CreatePromptInput): Promise<ActionResult
   if (quotas.prompts !== Number.POSITIVE_INFINITY) {
     const count = await db.$count(prompts, eq(prompts.brandId, ctx.brand.id));
     if (count >= quotas.prompts) {
+      await captureServerEvent({
+        event: "quota_limit_hit",
+        distinctId: userId,
+        ctx: { workspaceId: ctx.workspace.id, plan: ctx.workspace.plan, role: ctx.role },
+        properties: { quota_type: "prompts", current: count, limit: quotas.prompts },
+      });
       return quotaReached("prompts", count, quotas.prompts, ctx.workspace.plan as PlanKey);
     }
   }
@@ -92,8 +98,21 @@ export async function createPrompt(raw: CreatePromptInput): Promise<ActionResult
     })
     .returning({ id: prompts.id });
 
+  const newId = result[0]?.id;
+  await captureServerEvent({
+    event: "prompt_created",
+    distinctId: userId,
+    ctx: { workspaceId: ctx.workspace.id, plan: ctx.workspace.plan, role: ctx.role },
+    properties: {
+      prompt_id: newId,
+      category: parsed.data.category ?? null,
+      cadence: parsed.data.cadence,
+      is_active: parsed.data.isActive,
+    },
+  });
+
   revalidatePath("/app/prompts");
-  return { ok: true, id: result[0]?.id };
+  return { ok: true, id: newId };
 }
 
 // ─── UPDATE ──────────────────────────────────────────────────────────
@@ -102,7 +121,7 @@ export async function updatePrompt(
   promptId: string,
   raw: UpdatePromptInput,
 ): Promise<ActionResult> {
-  const { ctx } = await getCtxOrThrow();
+  const { ctx, userId } = await getCtxOrThrow();
 
   if (!(await assertPromptOwnership(promptId, ctx.brand.id))) {
     return { ok: false, error: "Prompt introuvable" };
@@ -138,6 +157,13 @@ export async function updatePrompt(
 
   await db.update(prompts).set(updates).where(eq(prompts.id, promptId));
 
+  await captureServerEvent({
+    event: "prompt_updated",
+    distinctId: userId,
+    ctx: { workspaceId: ctx.workspace.id, plan: ctx.workspace.plan, role: ctx.role },
+    properties: { prompt_id: promptId, fields_updated: Object.keys(updates) },
+  });
+
   revalidatePath("/app/prompts");
   revalidatePath(`/app/prompts/${promptId}`);
   return { ok: true, id: promptId };
@@ -146,7 +172,7 @@ export async function updatePrompt(
 // ─── TOGGLE ACTIVE ───────────────────────────────────────────────────
 
 export async function togglePromptActive(promptId: string): Promise<ActionResult> {
-  const { ctx } = await getCtxOrThrow();
+  const { ctx, userId } = await getCtxOrThrow();
 
   if (!(await assertPromptOwnership(promptId, ctx.brand.id))) {
     return { ok: false, error: "Prompt introuvable" };
@@ -159,7 +185,15 @@ export async function togglePromptActive(promptId: string): Promise<ActionResult
     .limit(1);
   if (!row[0]) return { ok: false, error: "Prompt introuvable" };
 
-  await db.update(prompts).set({ isActive: !row[0].isActive }).where(eq(prompts.id, promptId));
+  const newState = !row[0].isActive;
+  await db.update(prompts).set({ isActive: newState }).where(eq(prompts.id, promptId));
+
+  await captureServerEvent({
+    event: "prompt_active_toggled",
+    distinctId: userId,
+    ctx: { workspaceId: ctx.workspace.id, plan: ctx.workspace.plan, role: ctx.role },
+    properties: { prompt_id: promptId, new_state: newState },
+  });
 
   revalidatePath("/app/prompts");
   revalidatePath(`/app/prompts/${promptId}`);
@@ -169,7 +203,7 @@ export async function togglePromptActive(promptId: string): Promise<ActionResult
 // ─── DELETE ──────────────────────────────────────────────────────────
 
 export async function deletePrompt(promptId: string): Promise<ActionResult> {
-  const { ctx } = await getCtxOrThrow();
+  const { ctx, userId } = await getCtxOrThrow();
 
   if (!(await assertPromptOwnership(promptId, ctx.brand.id))) {
     return { ok: false, error: "Prompt introuvable" };
@@ -177,6 +211,13 @@ export async function deletePrompt(promptId: string): Promise<ActionResult> {
 
   // ON DELETE CASCADE supprime aussi les runs liés (cf. schema runs FK)
   await db.delete(prompts).where(eq(prompts.id, promptId));
+
+  await captureServerEvent({
+    event: "prompt_deleted",
+    distinctId: userId,
+    ctx: { workspaceId: ctx.workspace.id, plan: ctx.workspace.plan, role: ctx.role },
+    properties: { prompt_id: promptId },
+  });
 
   revalidatePath("/app/prompts");
   return { ok: true };
@@ -215,17 +256,16 @@ export async function suggestMorePrompts(): Promise<SuggestResult | ActionError>
     .where(eq(prompts.brandId, ctx.brand.id));
   const existingTexts = existingRows.map((r) => r.text);
 
-  const posthog = getPostHogClient();
-  posthog.capture({
-    distinctId: userId,
+  await captureServerEvent({
     event: "prompt_ai_suggestions_requested",
+    distinctId: userId,
+    ctx: { workspaceId: ctx.workspace.id, plan: ctx.workspace.plan, role: ctx.role },
     properties: {
       source: "prompts_page",
       existing_count: existingTexts.length,
       competitors_count: competitorNames.length,
     },
   });
-  await shutdownPostHog();
 
   try {
     const result = await suggestFromOnboarding({

@@ -9,7 +9,7 @@ import { db } from "@/db/client";
 import { brands, workspaceMembers, workspaces } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { logCronEvent } from "@/lib/cron-logger";
-import { getPostHogClient, shutdownPostHog } from "@/lib/posthog-server";
+import { captureServerEvent } from "@/lib/posthog-server";
 import { quotasFor, type PlanKey } from "@/lib/plans/quotas";
 
 // Server action : crée une nouvelle marque (brand) dans le workspace de
@@ -89,6 +89,12 @@ export async function createBrand(input: CreateBrandInput): Promise<CreateBrandR
   const max = quotasFor(ws.plan).brands;
 
   if (current >= max) {
+    await captureServerEvent({
+      event: "quota_limit_hit",
+      distinctId: session.user.id,
+      ctx: { workspaceId: ws.workspaceId, plan: ws.plan, role: ws.role },
+      properties: { quota_type: "brands", current, limit: max },
+    });
     return {
       ok: false,
       error: "quota_reached",
@@ -117,13 +123,12 @@ export async function createBrand(input: CreateBrandInput): Promise<CreateBrandR
     domain: data.domain,
   });
 
-  const posthog = getPostHogClient();
-  posthog.capture({
-    distinctId: session.user.id,
+  await captureServerEvent({
     event: "brand_created",
-    properties: { plan: ws.plan },
+    distinctId: session.user.id,
+    ctx: { workspaceId: ws.workspaceId, plan: ws.plan, role: ws.role },
+    properties: { brand_id: brandId, domain: data.domain, brand_count: current + 1 },
   });
-  await shutdownPostHog();
 
   // Invalide tout le segment /app pour que la sidebar et les data
   // dépendantes (loadSidebarData, dashboard, prompts, etc.) rechargent.
@@ -145,14 +150,20 @@ export type PauseBrandResult =
 async function assertBrandWritableByUser(
   brandId: string,
   userId: string,
-): Promise<{ ok: true } | { ok: false; error: "unauthorized" | "brand_not_found" }> {
+): Promise<
+  | { ok: true; workspaceId: string; plan: string; role: string }
+  | { ok: false; error: "unauthorized" | "brand_not_found" }
+> {
   const rows = await db
     .select({
       brandId: brands.id,
+      workspaceId: brands.workspaceId,
       role: workspaceMembers.role,
+      plan: workspaces.plan,
     })
     .from(brands)
     .innerJoin(workspaceMembers, eq(workspaceMembers.workspaceId, brands.workspaceId))
+    .innerJoin(workspaces, eq(workspaces.id, brands.workspaceId))
     .where(and(eq(brands.id, brandId), eq(workspaceMembers.userId, userId)))
     .limit(1);
 
@@ -161,7 +172,7 @@ async function assertBrandWritableByUser(
   if (row.role !== "owner" && row.role !== "admin") {
     return { ok: false, error: "unauthorized" };
   }
-  return { ok: true };
+  return { ok: true, workspaceId: row.workspaceId, plan: row.plan, role: row.role };
 }
 
 export async function pauseBrand(brandId: string): Promise<PauseBrandResult> {
@@ -180,9 +191,12 @@ export async function pauseBrand(brandId: string): Promise<PauseBrandResult> {
     userId: session.user.id,
   });
 
-  const posthog = getPostHogClient();
-  posthog.capture({ distinctId: session.user.id, event: "brand_paused" });
-  await shutdownPostHog();
+  await captureServerEvent({
+    event: "brand_paused",
+    distinctId: session.user.id,
+    ctx: { workspaceId: check.workspaceId, plan: check.plan, role: check.role },
+    properties: { brand_id: brandId },
+  });
 
   revalidatePath("/app", "layout");
   return { ok: true, pausedAt: now };
@@ -203,9 +217,12 @@ export async function resumeBrand(brandId: string): Promise<PauseBrandResult> {
     userId: session.user.id,
   });
 
-  const posthog = getPostHogClient();
-  posthog.capture({ distinctId: session.user.id, event: "brand_resumed" });
-  await shutdownPostHog();
+  await captureServerEvent({
+    event: "brand_resumed",
+    distinctId: session.user.id,
+    ctx: { workspaceId: check.workspaceId, plan: check.plan, role: check.role },
+    properties: { brand_id: brandId },
+  });
 
   revalidatePath("/app", "layout");
   return { ok: true, pausedAt: null };

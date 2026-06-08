@@ -7,6 +7,7 @@ import { db } from "@/db/client";
 import { brands, workspaces } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { getUserContext } from "@/lib/auth/user-context";
+import { captureServerEvent } from "@/lib/posthog-server";
 import {
   updateBrandAliasesSchema,
   updateWorkspaceNameSchema,
@@ -32,13 +33,13 @@ async function getCtxOrThrow() {
   if (!session) throw new Error("Non authentifié");
   const ctx = await getUserContext(session.user.id);
   if (!ctx) throw new Error("Aucun workspace");
-  return { ctx };
+  return { ctx, userId: session.user.id };
 }
 
 // ─── UPDATE workspace.name ──────────────────────────────────────────
 
 export async function updateWorkspaceName(raw: UpdateWorkspaceNameInput): Promise<ActionResult> {
-  const { ctx } = await getCtxOrThrow();
+  const { ctx, userId } = await getCtxOrThrow();
 
   const parsed = updateWorkspaceNameSchema.safeParse(raw);
   if (!parsed.success) {
@@ -50,6 +51,12 @@ export async function updateWorkspaceName(raw: UpdateWorkspaceNameInput): Promis
     .set({ name: parsed.data.name })
     .where(eq(workspaces.id, ctx.workspace.id));
 
+  await captureServerEvent({
+    event: "workspace_name_updated",
+    distinctId: userId,
+    ctx: { workspaceId: ctx.workspace.id, plan: ctx.workspace.plan, role: ctx.role },
+  });
+
   // Le nom du workspace est affiché dans la sidebar (top), dans le
   // dashboard header, et dans Settings → revalider plusieurs paths.
   revalidatePath("/app/settings");
@@ -60,14 +67,25 @@ export async function updateWorkspaceName(raw: UpdateWorkspaceNameInput): Promis
 // ─── UPDATE brand.aliases ────────────────────────────────────────────
 
 export async function updateBrandAliases(raw: UpdateBrandAliasesInput): Promise<ActionResult> {
-  const { ctx } = await getCtxOrThrow();
+  const { ctx, userId } = await getCtxOrThrow();
 
   const parsed = updateBrandAliasesSchema.safeParse(raw);
   if (!parsed.success) {
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Données invalides" };
   }
 
+  const before = ctx.brand.aliases?.length ?? 0;
   await db.update(brands).set({ aliases: parsed.data.aliases }).where(eq(brands.id, ctx.brand.id));
+
+  await captureServerEvent({
+    event: "brand_aliases_updated",
+    distinctId: userId,
+    ctx: { workspaceId: ctx.workspace.id, plan: ctx.workspace.plan, role: ctx.role },
+    properties: {
+      aliases_count_before: before,
+      aliases_count_after: parsed.data.aliases.length,
+    },
+  });
 
   revalidatePath("/app/settings");
   // Les aliases changent la détection citation : revalider le dashboard.

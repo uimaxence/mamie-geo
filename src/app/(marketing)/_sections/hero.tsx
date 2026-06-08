@@ -1,4 +1,5 @@
-import { Badge, CornerFrame, LinkButton, Section, StatusDot } from "@/components/ui";
+import { Badge, CornerFrame, Section, StatusDot } from "@/components/ui";
+import { TrackedLinkButton } from "@/components/marketing/tracked-link-button";
 import { HeroDataShowcase } from "./hero-data-showcase";
 import { HeroLLMRotator } from "./hero-llm-rotator";
 
@@ -28,12 +29,24 @@ export function Hero() {
            * anti-friction maximum, lève l'objection "combien ça coûte vraiment".
            * Garantie 14j affichée immédiatement sous les CTAs en microcopy. */}
           <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
-            <LinkButton href="/pricing" variant="primary" size="lg">
+            <TrackedLinkButton
+              href="/pricing"
+              variant="primary"
+              size="lg"
+              trackEvent="home_cta_clicked"
+              trackProperties={{ cta_label: "Démarrer — 9,99 €/mois", section: "hero", href: "/pricing" }}
+            >
               Démarrer — 9,99&nbsp;€/mois
-            </LinkButton>
-            <LinkButton href="/outils/audit-technique" variant="ai" size="lg">
+            </TrackedLinkButton>
+            <TrackedLinkButton
+              href="/outils/audit-technique"
+              variant="ai"
+              size="lg"
+              trackEvent="home_cta_clicked"
+              trackProperties={{ cta_label: "Audit gratuit", section: "hero", href: "/outils/audit-technique" }}
+            >
               Audit gratuit
-            </LinkButton>
+            </TrackedLinkButton>
           </div>
           <p className="type-meta mt-6">
             Garantie remboursement 14&nbsp;jours · Sans engagement · Hébergé EU

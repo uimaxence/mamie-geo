@@ -142,6 +142,7 @@ function DeleteAccountDialog({ userEmail }: { userEmail: string }) {
               onChange={(e) => setConfirmation(e.target.value)}
               placeholder="SUPPRIMER"
               autoComplete="off"
+              data-private="true"
               autoCapitalize="characters"
               spellCheck={false}
             />

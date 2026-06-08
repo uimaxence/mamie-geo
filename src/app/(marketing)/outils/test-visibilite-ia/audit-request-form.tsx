@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { Button, Field, Input } from "@/components/ui";
+import { capture, identify } from "@/lib/posthog-client";
 import { submitAuditRequest } from "./actions";
 
 // Form lead magnet, 3 champs minimum (email + marque + domaine) + notes
@@ -28,6 +29,13 @@ export function AuditRequestForm() {
           brandName: brandName.trim(),
           domain: domain.trim().toLowerCase(),
           notes: notes.trim() || undefined,
+        });
+        identify(email.trim(), { email: email.trim() });
+        capture("tool_lead_form_submitted", {
+          tool: "test-visibilite-ia",
+          has_notes: notes.trim().length > 0,
+          domain: domain.trim().toLowerCase(),
+          brand_name: brandName.trim(),
         });
         setStatus("sent");
       } catch (error) {

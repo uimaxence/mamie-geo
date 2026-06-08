@@ -17,6 +17,7 @@ import {
   type WeeklyRecapStat,
 } from "@/lib/email/templates/weekly-recap";
 import { sendWeeklyRecapEmail } from "@/lib/email";
+import { captureServerEvent } from "@/lib/posthog-server";
 import type { SendWeeklyEmailPayload } from "./send-weekly-email-payload";
 
 export {
@@ -208,6 +209,16 @@ export async function sendWeeklyEmail(
       isoWeek,
       messageId: sent.messageId,
       recipient: member.email,
+    });
+    await captureServerEvent({
+      event: "weekly_recap_email_sent",
+      distinctId: member.userId,
+      ctx: { workspaceId, plan: workspace.plan },
+      properties: {
+        iso_week: isoWeek,
+        message_id: sent.messageId,
+        score: stats[0]?.value ?? null,
+      },
     });
   }
 }

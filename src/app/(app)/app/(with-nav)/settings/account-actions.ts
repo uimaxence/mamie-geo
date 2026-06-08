@@ -5,6 +5,7 @@ import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { db } from "@/db/client";
 import { user, workspaceMembers, workspaces } from "@/db/schema";
+import { captureServerEvent } from "@/lib/posthog-server";
 import { getStripe } from "@/lib/stripe/client";
 
 // Server actions du compte utilisateur — droit à l'effacement RGPD
@@ -53,10 +54,28 @@ export async function deleteAccount(confirmation: string): Promise<DeleteAccount
       .select({
         workspaceId: workspaceMembers.workspaceId,
         stripeSubscriptionId: workspaces.stripeSubscriptionId,
+        plan: workspaces.plan,
+        wsCreatedAt: workspaces.createdAt,
       })
       .from(workspaceMembers)
       .innerJoin(workspaces, eq(workspaces.id, workspaceMembers.workspaceId))
       .where(and(eq(workspaceMembers.userId, userId), eq(workspaceMembers.role, "owner")));
+
+    // Capture l'event AVANT le delete pour que le distinctId existe encore
+    // côté PostHog et qu'on garde la trace de la suppression dans les events.
+    const firstWorkspace = ownedMemberships[0];
+    await captureServerEvent({
+      event: "account_deletion_requested",
+      distinctId: userId,
+      ctx: firstWorkspace
+        ? { workspaceId: firstWorkspace.workspaceId, plan: firstWorkspace.plan }
+        : undefined,
+      properties: {
+        owned_workspaces: ownedMemberships.length,
+        plan: firstWorkspace?.plan,
+        had_subscription: ownedMemberships.some((m) => Boolean(m.stripeSubscriptionId)),
+      },
+    });
 
     // 2. Annulation Stripe pour chaque subscription active.
     // On utilise `subscriptions.cancel()` (annulation immédiate, pas

@@ -1,4 +1,4 @@
-import { LinkButton } from "@/components/ui";
+import { TrackedLinkButton } from "@/components/marketing/tracked-link-button";
 import type { BlogCta } from "@/lib/blog/schemas";
 
 // CTA produit injecté automatiquement en fin de chaque article. Le
@@ -58,16 +58,22 @@ const CTA_CONFIG: Record<BlogCta, CTAConfig> = {
   },
 };
 
-export function ArticleCTA({ cta }: { cta: BlogCta }) {
+export function ArticleCTA({ cta, slug }: { cta: BlogCta; slug?: string }) {
   const config = CTA_CONFIG[cta];
   return (
     <aside className="not-prose mt-16 rounded-[var(--radius-xl)] border border-[color:var(--color-border)] bg-white p-8 shadow-[var(--shadow-sm)]">
       <h3 className="type-h3">{config.headline}</h3>
       <p className="type-body mt-3 max-w-prose text-sm">{config.body}</p>
       <div className="mt-6">
-        <LinkButton href={config.href} variant={config.buttonVariant} size="lg">
+        <TrackedLinkButton
+          href={config.href}
+          variant={config.buttonVariant}
+          size="lg"
+          trackEvent="blog_cta_clicked"
+          trackProperties={{ slug, variant: cta, href: config.href }}
+        >
           {config.buttonLabel}
-        </LinkButton>
+        </TrackedLinkButton>
       </div>
     </aside>
   );

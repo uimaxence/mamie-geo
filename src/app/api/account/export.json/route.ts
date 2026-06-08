@@ -13,6 +13,7 @@ import {
   workspaceMembers,
   workspaces,
 } from "@/db/schema";
+import { captureServerEvent } from "@/lib/posthog-server";
 
 // Endpoint GET /api/account/export.json — droit à la portabilité RGPD
 // (article 20). Retourne un JSON contenant toutes les données
@@ -188,6 +189,19 @@ export async function GET() {
     },
     workspaces: workspacesPayload,
   };
+
+  const firstWs = wsRows[0];
+  await captureServerEvent({
+    event: "account_data_exported",
+    distinctId: userId,
+    ctx: firstWs ? { workspaceId: firstWs.id, plan: firstWs.plan } : undefined,
+    properties: {
+      workspaces_count: wsRows.length,
+      brands_count: brandRows.length,
+      runs_count: runRows.length,
+      audits_count: auditRows.length,
+    },
+  });
 
   const dateStr = new Date().toISOString().slice(0, 10);
   return new Response(JSON.stringify(payload, null, 2), {

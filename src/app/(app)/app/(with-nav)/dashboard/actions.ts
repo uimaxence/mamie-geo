@@ -8,7 +8,7 @@ import { db } from "@/db/client";
 import { brands, prompts, runs, workspaceMembers, workspaces } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import type { LLMValue } from "@/lib/llm";
-import { getPostHogClient, shutdownPostHog } from "@/lib/posthog-server";
+import { captureServerEvent } from "@/lib/posthog-server";
 import { enqueue } from "@/lib/queue";
 
 // Server Action pour le bouton "Lancer un run" du dashboard. Même logique
@@ -36,6 +36,8 @@ export async function triggerRunNow(): Promise<TriggerResult> {
     .select({
       workspaceId: workspaceMembers.workspaceId,
       hardCapHitAt: workspaces.hardCapHitAt,
+      plan: workspaces.plan,
+      role: workspaceMembers.role,
     })
     .from(workspaceMembers)
     .innerJoin(workspaces, eq(workspaces.id, workspaceMembers.workspaceId))
@@ -82,13 +84,17 @@ export async function triggerRunNow(): Promise<TriggerResult> {
     }
   }
 
-  const posthog = getPostHogClient();
-  posthog.capture({
-    distinctId: session.user.id,
+  await captureServerEvent({
     event: "run_triggered_manually",
-    properties: { jobs_enqueued: jobsEnqueued, runs_created: runsCreated },
+    distinctId: session.user.id,
+    ctx: { workspaceId: ws.workspaceId, plan: ws.plan, role: ws.role },
+    properties: {
+      jobs_enqueued: jobsEnqueued,
+      runs_created: runsCreated,
+      skipped,
+      active_prompts: activePrompts.length,
+    },
   });
-  await shutdownPostHog();
 
   // Force le re-render du dashboard côté client après l'action
   revalidatePath("/app/dashboard");

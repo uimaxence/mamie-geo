@@ -1,5 +1,6 @@
 import { Check, Minus } from "lucide-react";
 import { Section } from "@/components/ui";
+import { PageViewTracker } from "@/components/app/page-view-tracker";
 import { COMPARISON_GROUPS, PLANS, type ComparisonRow } from "./pricing-data";
 
 // Tableau comparatif détaillé (cf. doc 10 § Pricing). 3 groupes
@@ -12,6 +13,7 @@ const PLAN_HEADERS = PLANS.map((p) => ({ id: p.id, name: p.name }));
 export function PricingComparison() {
   return (
     <Section variant="tinted" pad="xl">
+      <PageViewTracker event="plan_compare_viewed" />
       <div className="mx-auto max-w-3xl text-center">
         <span className="type-eyebrow">Comparatif détaillé</span>
         <h2 className="type-h1 mt-3">Toutes les features, plan par plan.</h2>

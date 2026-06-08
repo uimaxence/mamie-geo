@@ -1,4 +1,4 @@
-import { LinkButton } from "@/components/ui";
+import { TrackedLinkButton } from "@/components/marketing/tracked-link-button";
 
 // Section CTA finale, juste avant le footer. Dernière chance avant
 // bounce. Réutilise le pattern fond noir + halo radial bleu brand de
@@ -44,12 +44,24 @@ export function FinalCTA() {
           hébergé en Europe.
         </p>
         <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
-          <LinkButton href="/pricing" variant="secondary" size="lg">
+          <TrackedLinkButton
+            href="/pricing"
+            variant="secondary"
+            size="lg"
+            trackEvent="home_cta_clicked"
+            trackProperties={{ cta_label: "Démarrer — 9,99 €/mois", section: "final", href: "/pricing" }}
+          >
             Démarrer — 9,99&nbsp;€/mois
-          </LinkButton>
-          <LinkButton href="/outils/audit-technique" variant="ai" size="lg">
+          </TrackedLinkButton>
+          <TrackedLinkButton
+            href="/outils/audit-technique"
+            variant="ai"
+            size="lg"
+            trackEvent="home_cta_clicked"
+            trackProperties={{ cta_label: "Audit gratuit", section: "final", href: "/outils/audit-technique" }}
+          >
             Audit gratuit
-          </LinkButton>
+          </TrackedLinkButton>
         </div>
         <p className="type-meta mt-6 text-[color:var(--color-gray-300)]">
           Garantie remboursement 14&nbsp;jours · Sans engagement · Hébergé EU

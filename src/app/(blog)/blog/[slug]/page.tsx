@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Badge, Section } from "@/components/ui";
+import { ArticleAnalytics } from "@/components/blog/article-analytics";
 import { ArticleCTA } from "@/components/blog/article-cta";
 import { ArticleJsonLd, BreadcrumbJsonLd } from "@/components/blog/json-ld";
 import { ReadingProgress } from "@/components/blog/reading-progress";
@@ -78,6 +79,11 @@ export default async function ArticlePage({ params }: { params: Promise<Params> 
   return (
     <article>
       <ReadingProgress />
+      <ArticleAnalytics
+        slug={slug}
+        category={article.category}
+        readingTimeMin={article.readingTimeMin}
+      />
 
       <ArticleJsonLd
         title={article.title}
@@ -124,7 +130,7 @@ export default async function ArticlePage({ params }: { params: Promise<Params> 
         <div className="mx-auto grid max-w-6xl grid-cols-1 gap-12 lg:grid-cols-[1fr_240px]">
           <div data-blog-content className="min-w-0 max-w-3xl">
             <ArticleBody />
-            <ArticleCTA cta={article.cta} />
+            <ArticleCTA cta={article.cta} slug={slug} />
             <RelatedArticles slug={slug} />
           </div>
           {/* TOC affichée uniquement si article assez long (cf. composant). */}

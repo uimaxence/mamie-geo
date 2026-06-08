@@ -161,6 +161,34 @@ haut et l'entrée "2026-05-05 — Réponses aux 10 questions de bootstrap".
 
 ### Décisions enregistrées
 
+#### 2026-06-08 — Instrumentation PostHog exhaustive (autocapture + session replay + ~40 events custom) avant trafic
+
+**Contexte** : Le wizard PostHog (commit `e66dd07`) a câblé 15 events business critiques (login, onboarding, brand CRUD, run manuel, public audit, Stripe webhook), un reverse-proxy `/ingest` sur `mamie-geo.fr`, et un identify minimal sur l'app authentifiée. Mais : pas d'autocapture, pas de pageviews, pas de session replay, identify ne porte pas le contexte workspace (plan/role/brand_count), pas de Groups Analytics, et 0 event sur les CRUD app (prompts/competitors/audits), les CSV exports, le time-range dashboard, les quotas hits, l'upgrade banner. Avec lancement public imminent et trafic encore nul, c'est le moment de poser l'instrumentation complète pour que les funnels d'acquisition / activation / conversion / rétention collectent dès le 1er visiteur.
+
+**Options considérées** :
+
+- A : MVP analytics (autocapture + pageviews + identify enrichi + 4 events critiques manquants)
+- B : Couverture funnels (10 events sur les 4 funnels clés acquisition / activation / paid / lead magnet)
+- C : Couverture exhaustive (~40 events business, session replay, Groups Analytics, person/group properties, scaffolding feature flags)
+
+**Choix** : C — couverture exhaustive.
+
+**Justification** : (1) trafic nul = aucun risque de pollution rétroactive ; (2) le coût marginal d'ajouter 30 events vs 4 est faible (helpers réutilisables `captureServerEvent` / `<TrackedLinkButton>` / `<PageViewTracker>` rendent chaque event en one-liner) ; (3) avec session replay activé et `person_profiles: "always"`, on peut littéralement regarder les 20 premiers visiteurs interagir et reconstruire des funnels rétroactivement même sans event custom ; (4) PostHog EU-hosted + reverse proxy first-party + masquage PII (`input[type=email|password]` + convention `[data-private]`) + mention claire dans `/legal/privacy` → opt-in implicite défensible juridiquement sans banner cookie (approche Linear / Vercel, ePrivacy compliant).
+
+**Conséquences attendues** :
+
+- Pipeline complet pour mesurer : funnel marketing → signup → onboarding → first_run_completed → first_metric_viewed → conversion paid → churn signals
+- Groups Analytics workspace (plan, mrr, brand_count, prompt_count) → cohort retention par tier de revenu
+- Session replays disponibles pour user research qualitative dès les premiers visiteurs
+- Privacy policy V0 enrichie d'une section "Analytics produit" (PostHog sous-traitant EU, masquage PII, droit de retrait via email)
+- Bug fix Stripe webhook : les events `subscription_activated/canceled/payment_failed` utilisaient `ws.id` comme `distinctId` → empêchait le merge personne PostHog. Corrigé : lookup `findWorkspaceOwnerUserId()` pour rattacher au profil utilisateur, `ws.id` mis dans `groups.workspace`.
+- Helpers introduits réutilisables pour V0+ : `TrackedLinkButton`, `PageViewTracker`, `ArticleAnalytics` (scroll depth dédupliqué), `DashboardTracker`, `UpgradeBannerLink`, scaffold `useFeatureFlag(key)` côté client + `isFeatureEnabled()` côté serveur pour futurs A/B tests pricing.
+- Webhook Brevo `/api/webhooks/brevo` scaffold (inerte tant que Brevo dashboard pas configuré pour POST l'event `click` → permettra `weekly_recap_email_clicked`).
+
+**À revisiter** : Quand on atteint 1000 events/jour, vérifier sur PostHog Insights que les funnels et cohorts sont exploitables. Si manque granularité → ajouter events. Si trop de bruit → consolider.
+
+---
+
 #### 2026-06-03 — Pivot brand color terracotta `#C5532E` → bleu logo `#329CFF` + admin visuels LinkedIn
 
 **Contexte** : La couleur du logo Mamie GEO est un bleu cobalt `#329CFF` depuis la décision 2026-05-13. Mais le doc 10 et l'app utilisent encore le terracotta `#C5532E` comme `--color-accent` (badges, liens, hover, CTAs accent, gradient AI, gradient warm panel login, avatars workspace). Le double signal "bleu logo + accent terracotta" crée une dissonance brand : la marque dit "bleu" via son logo, le produit dit "orange" via ses accents.

@@ -1,13 +1,14 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import type Stripe from "stripe";
 import { db } from "@/db/client";
-import { subscriptionEvents, workspaces } from "@/db/schema";
+import { subscriptionEvents, workspaceMembers, workspaces } from "@/db/schema";
 import { logCronEvent } from "@/lib/cron-logger";
 import { sendTransactional } from "@/lib/email";
 import { renderPaymentFailed } from "@/lib/email/templates/payment-failed";
 import { renderWelcomePaid } from "@/lib/email/templates/welcome-paid";
 import { env } from "@/lib/env";
-import { getPostHogClient, shutdownPostHog } from "@/lib/posthog-server";
+import { planToMrr } from "@/lib/plans/mrr";
+import { captureServerEvent, groupServer } from "@/lib/posthog-server";
 import { scheduleRunsForWorkspace } from "@/lib/scheduler/schedule-runs";
 import { planFromPriceId } from "@/lib/stripe/products";
 
@@ -34,6 +35,25 @@ async function findWorkspaceByCustomer(customerId: string) {
     .where(eq(workspaces.stripeCustomerId, customerId))
     .limit(1);
   return rows[0] ?? null;
+}
+
+/** Récupère le userId du owner du workspace pour rattacher les events
+ *  PostHog au profil utilisateur (au lieu de l'ID workspace, qui empêche
+ *  le merge personne). Fallback admin si pas d'owner. */
+async function findWorkspaceOwnerUserId(workspaceId: string): Promise<string | null> {
+  const owner = await db
+    .select({ userId: workspaceMembers.userId })
+    .from(workspaceMembers)
+    .where(and(eq(workspaceMembers.workspaceId, workspaceId), eq(workspaceMembers.role, "owner")))
+    .limit(1);
+  if (owner[0]) return owner[0].userId;
+  const admin = await db
+    .select({ userId: workspaceMembers.userId })
+    .from(workspaceMembers)
+    .where(eq(workspaceMembers.workspaceId, workspaceId))
+    .orderBy(workspaceMembers.createdAt)
+    .limit(1);
+  return admin[0]?.userId ?? null;
 }
 
 /** Envoi best-effort d'un email transactionnel — on log et on continue si fail. */
@@ -145,13 +165,20 @@ export async function handleCheckoutCompleted(
     "welcome_paid",
   );
 
-  const posthog = getPostHogClient();
-  posthog.capture({
-    distinctId: ws.id,
-    event: "subscription_activated",
-    properties: { plan, from_plan: ws.plan, immediate_runs_enqueued: immediateRuns },
+  const ownerUserId = await findWorkspaceOwnerUserId(ws.id);
+  if (ownerUserId) {
+    await captureServerEvent({
+      event: "subscription_activated",
+      distinctId: ownerUserId,
+      ctx: { workspaceId: ws.id, plan },
+      properties: { plan, from_plan: ws.plan, immediate_runs_enqueued: immediateRuns },
+    });
+  }
+  await groupServer({
+    groupType: "workspace",
+    groupKey: ws.id,
+    properties: { plan, mrr: planToMrr(plan), name: ws.name, slug: ws.slug },
   });
-  await shutdownPostHog();
 
   return { workspaceId: ws.id, fromPlan: ws.plan, toPlan: plan };
 }
@@ -221,13 +248,20 @@ export async function handleSubscriptionDeleted(
     })
     .where(eq(workspaces.id, ws.id));
 
-  const posthog = getPostHogClient();
-  posthog.capture({
-    distinctId: ws.id,
-    event: "subscription_canceled",
-    properties: { from_plan: ws.plan },
+  const ownerUserId = await findWorkspaceOwnerUserId(ws.id);
+  if (ownerUserId) {
+    await captureServerEvent({
+      event: "subscription_canceled",
+      distinctId: ownerUserId,
+      ctx: { workspaceId: ws.id, plan: ws.plan },
+      properties: { from_plan: ws.plan },
+    });
+  }
+  await groupServer({
+    groupType: "workspace",
+    groupKey: ws.id,
+    properties: { plan: "expired", mrr: null },
   });
-  await shutdownPostHog();
 
   return { workspaceId: ws.id, fromPlan: ws.plan, toPlan: "expired" };
 }
@@ -259,13 +293,15 @@ export async function handlePaymentFailed(invoice: Stripe.Invoice): Promise<Hand
     "payment_failed",
   );
 
-  const posthog = getPostHogClient();
-  posthog.capture({
-    distinctId: ws.id,
-    event: "payment_failed",
-    properties: { from_plan: ws.plan },
-  });
-  await shutdownPostHog();
+  const ownerUserId = await findWorkspaceOwnerUserId(ws.id);
+  if (ownerUserId) {
+    await captureServerEvent({
+      event: "payment_failed",
+      distinctId: ownerUserId,
+      ctx: { workspaceId: ws.id, plan: ws.plan },
+      properties: { from_plan: ws.plan },
+    });
+  }
 
   return { workspaceId: ws.id, fromPlan: ws.plan, toPlan: "past_due" };
 }

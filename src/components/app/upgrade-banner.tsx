@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { UpgradeBannerLink } from "./upgrade-banner-link";
 
 // Bannière persistante affichée en haut du layout (with-nav) quand le
 // plan n'est pas actif OU quand le hard-cap LLM est hit. Server
@@ -22,6 +22,7 @@ interface BannerCopy {
   message: string;
   cta: string;
   tone: "neutral" | "warning" | "error";
+  variant: string;
 }
 
 const COPY: Record<string, BannerCopy> = {
@@ -29,21 +30,25 @@ const COPY: Record<string, BannerCopy> = {
     message: "Configure ton tracking en choisissant un plan.",
     cta: "Choisir un plan",
     tone: "neutral",
+    variant: "trialing",
   },
   past_due: {
     message: "Paiement refusé, mets à jour ta carte sous 7 jours.",
     cta: "Mettre à jour",
     tone: "error",
+    variant: "past_due",
   },
   expired: {
     message: "Ton abonnement est expiré. Réactive-le pour reprendre le tracking.",
     cta: "Réactiver",
     tone: "warning",
+    variant: "expired",
   },
   canceled: {
     message: "Ton abonnement est annulé. Réactive-le pour reprendre le tracking.",
     cta: "Réactiver",
     tone: "warning",
+    variant: "canceled",
   },
 };
 
@@ -52,6 +57,7 @@ const HARDCAP_COPY: BannerCopy = {
     "Usage anormal détecté, runs suspendus. Contacte hello@mamie-geo.fr ou passe à un plan supérieur.",
   cta: "Gérer mon plan",
   tone: "error",
+  variant: "hardcap",
 };
 
 const TONE_STYLE: Record<BannerCopy["tone"], string> = {
@@ -64,26 +70,21 @@ export function UpgradeBanner({ plan, hardCapHitAt }: UpgradeBannerProps) {
   // Hard-cap a priorité sur le plan : un workspace actif qui dépasse
   // doit voir la bannière hard-cap, pas une bannière liée au plan.
   if (hardCapHitAt) {
-    return renderBanner(HARDCAP_COPY);
+    return renderBanner(HARDCAP_COPY, plan);
   }
 
   const copy = COPY[plan];
   if (!copy) return null;
-  return renderBanner(copy);
+  return renderBanner(copy, plan);
 }
 
-function renderBanner(copy: BannerCopy) {
+function renderBanner(copy: BannerCopy, currentPlan: string) {
   return (
     <div
       className={`flex items-center justify-between gap-3 border-b border-[color:var(--color-border)] px-4 py-2 text-sm ${TONE_STYLE[copy.tone]}`}
     >
       <span>{copy.message}</span>
-      <Link
-        href="/app/settings#billing"
-        className="shrink-0 rounded-[var(--radius-md)] bg-[color:var(--color-ink)] px-3 py-1 text-xs font-medium text-white hover:bg-[color:var(--color-ink-soft)]"
-      >
-        {copy.cta}
-      </Link>
+      <UpgradeBannerLink variant={copy.variant} currentPlan={currentPlan} cta={copy.cta} />
     </div>
   );
 }

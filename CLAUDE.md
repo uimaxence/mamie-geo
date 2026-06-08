@@ -265,7 +265,51 @@ la doc devient un cimetière.
 
 ## 9. État du projet (snapshot — 2026-06-08)
 
-> Mise à jour 2026-06-08 — 4 features V0+ poussées en un jour : CSV
+> Mise à jour 2026-06-08 (soir) — Instrumentation PostHog exhaustive
+> avant trafic
+>
+> **Couverture analytics complète** (cf. doc 09 § 2026-06-08
+> Instrumentation PostHog) : sur la base du wizard initial (commit
+> e66dd07, 15 events business), on a ajouté autocapture + pageviews +
+> session replay (masquage PII via `input[type=email|password]` +
+> convention `data-private`) + `person_profiles: "always"` pour merger
+> l'anonyme marketing au signup. Identify enrichi avec `plan, role,
+> workspace_id, brand_count, last_seen_plan` (set) + `signup_at` (setOnce)
+> + Groups Analytics workspace (`name, plan, slug, brand_count,
+> prompt_count, created_at, mrr`). Helpers serveur (`captureServerEvent`,
+> `identifyServerUser`, `groupServer`, `isFeatureEnabled`) standardisent
+> les sites de capture via `flush()` au lieu de `shutdown()` (~3× plus
+> rapide warm Vercel). ~25 events business ajoutés couvrant marketing
+> (pricing CTA, FAQ expand, blog scroll depth/CTA/related), app CRUD
+> (prompts/competitors/audits create/update/delete/active_toggled), CSV
+> exports, dashboard (viewed, time_range, first_metric_viewed_at
+> setOnce), audit detail/compare views, account RGPD (data_exported,
+> deletion_requested), monétisation (quota_limit_hit sur tous les
+> quotas, upgrade_banner viewed/clicked, billing_portal_opened,
+> weekly_recap_email_sent + scaffold webhook Brevo
+> `/api/webhooks/brevo` pour weekly_recap_email_clicked).
+> Activation milestone `app_first_run_completed` fired idempotent
+> dans le worker `execute-prompt` au passage du premier run.success
+> par workspace (+ `first_run_at` setOnce sur le owner).
+>
+> **Bug fix Stripe webhook** : les events `subscription_activated/
+> canceled/payment_failed` utilisaient `ws.id` comme `distinctId` →
+> empêchait le merge personne PostHog. Corrigé via
+> `findWorkspaceOwnerUserId()` (`ws.id` déplacé dans `groups.workspace`).
+>
+> **Privacy policy mise à jour** : `/legal/privacy/page.mdx` enrichi
+> d'une section "Analytics produit" (PostHog EU sous-traitant + masquage
+> PII + droit de retrait email). Opt-in implicite défensible
+> juridiquement (ePrivacy compliant) sans banner cookie, approche
+> Linear/Vercel.
+>
+> **Convention `data-private`** : appliquer aux éléments qui peuvent
+> contenir de la PII non-couverte par les masques inputs par défaut
+> (ex: l'input de confirmation `SUPPRIMER` dans la danger zone). Le
+> session recording PostHog masque automatiquement (`***`) tout
+> élément avec `data-private="true"`.
+>
+> Précédente (2026-06-08 matin) — 4 features V0+ poussées en un jour : CSV
 > export, Pause/Resume, Funnel sources, Comparison pages
 >
 > **Comparison pages industrialisées** (cf. doc 02 § V0+ + doc 06 §

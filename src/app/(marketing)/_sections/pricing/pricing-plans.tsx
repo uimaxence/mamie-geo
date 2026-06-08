@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Check } from "lucide-react";
 import { Badge, LinkButton, Section } from "@/components/ui";
+import { capture } from "@/lib/posthog-client";
 import { ANNUAL_DISCOUNT_PCT, annualMonthly, PLANS, type Plan } from "./pricing-data";
 
 // 3 cards plans + toggle mensuel/annuel + ligne "Plus de volume ? Contact".
@@ -13,6 +14,12 @@ import { ANNUAL_DISCOUNT_PCT, annualMonthly, PLANS, type Plan } from "./pricing-
 
 export function PricingPlans() {
   const [period, setPeriod] = useState<"monthly" | "annual">("monthly");
+
+  function togglePeriod(next: "monthly" | "annual") {
+    if (next === period) return;
+    capture("pricing_billing_cycle_toggled", { from: period, to: next });
+    setPeriod(next);
+  }
 
   return (
     <Section pad="xl">
@@ -29,14 +36,10 @@ export function PricingPlans() {
           role="tablist"
           className="mt-10 inline-flex items-center rounded-[var(--radius-pill)] border border-[color:var(--color-border)] bg-white p-1"
         >
-          <PeriodTab
-            active={period === "monthly"}
-            onClick={() => setPeriod("monthly")}
-            label="Mensuel"
-          />
+          <PeriodTab active={period === "monthly"} onClick={() => togglePeriod("monthly")} label="Mensuel" />
           <PeriodTab
             active={period === "annual"}
-            onClick={() => setPeriod("annual")}
+            onClick={() => togglePeriod("annual")}
             label={`Annuel −${ANNUAL_DISCOUNT_PCT} %`}
           />
         </div>
@@ -145,6 +148,13 @@ function PlanCard({ plan, period }: { plan: Plan; period: "monthly" | "annual" }
         href={plan.ctaHref}
         variant={isPopular ? "primary" : "secondary"}
         className="w-full"
+        onClick={() =>
+          capture("pricing_plan_cta_clicked", {
+            plan: plan.id,
+            billing_cycle: period,
+            source: "pricing_page",
+          })
+        }
       >
         {plan.ctaLabel}
       </LinkButton>

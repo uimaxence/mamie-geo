@@ -7,6 +7,7 @@ import { db } from "@/db/client";
 import { competitors } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { getUserContext } from "@/lib/auth/user-context";
+import { captureServerEvent } from "@/lib/posthog-server";
 import { quotaReached, quotasFor, type PlanKey } from "@/lib/plans/quotas";
 import {
   createCompetitorSchema,
@@ -35,7 +36,7 @@ async function getCtxOrThrow() {
   if (!session) throw new Error("Non authentifié");
   const ctx = await getUserContext(session.user.id);
   if (!ctx) throw new Error("Aucun workspace");
-  return { ctx };
+  return { ctx, userId: session.user.id };
 }
 
 async function assertCompetitorOwnership(competitorId: string, brandId: string): Promise<boolean> {
@@ -50,7 +51,7 @@ async function assertCompetitorOwnership(competitorId: string, brandId: string):
 // ─── CREATE ──────────────────────────────────────────────────────────
 
 export async function createCompetitor(raw: CreateCompetitorInput): Promise<ActionResult> {
-  const { ctx } = await getCtxOrThrow();
+  const { ctx, userId } = await getCtxOrThrow();
 
   const parsed = createCompetitorSchema.safeParse(raw);
   if (!parsed.success) {
@@ -62,6 +63,12 @@ export async function createCompetitor(raw: CreateCompetitorInput): Promise<Acti
   if (quotas.competitors !== Number.POSITIVE_INFINITY) {
     const count = await db.$count(competitors, eq(competitors.brandId, ctx.brand.id));
     if (count >= quotas.competitors) {
+      await captureServerEvent({
+        event: "quota_limit_hit",
+        distinctId: userId,
+        ctx: { workspaceId: ctx.workspace.id, plan: ctx.workspace.plan, role: ctx.role },
+        properties: { quota_type: "competitors", current: count, limit: quotas.competitors },
+      });
       return quotaReached("competitors", count, quotas.competitors, ctx.workspace.plan as PlanKey);
     }
   }
@@ -76,8 +83,20 @@ export async function createCompetitor(raw: CreateCompetitorInput): Promise<Acti
     })
     .returning({ id: competitors.id });
 
+  const newId = result[0]?.id;
+  await captureServerEvent({
+    event: "competitor_created",
+    distinctId: userId,
+    ctx: { workspaceId: ctx.workspace.id, plan: ctx.workspace.plan, role: ctx.role },
+    properties: {
+      competitor_id: newId,
+      has_domain: Boolean(parsed.data.domain),
+      aliases_count: parsed.data.aliases.length,
+    },
+  });
+
   revalidatePath("/app/competitors");
-  return { ok: true, id: result[0]?.id };
+  return { ok: true, id: newId };
 }
 
 // ─── UPDATE ──────────────────────────────────────────────────────────
@@ -86,7 +105,7 @@ export async function updateCompetitor(
   competitorId: string,
   raw: UpdateCompetitorInput,
 ): Promise<ActionResult> {
-  const { ctx } = await getCtxOrThrow();
+  const { ctx, userId } = await getCtxOrThrow();
 
   if (!(await assertCompetitorOwnership(competitorId, ctx.brand.id))) {
     return { ok: false, error: "Concurrent introuvable" };
@@ -108,6 +127,13 @@ export async function updateCompetitor(
 
   await db.update(competitors).set(updates).where(eq(competitors.id, competitorId));
 
+  await captureServerEvent({
+    event: "competitor_updated",
+    distinctId: userId,
+    ctx: { workspaceId: ctx.workspace.id, plan: ctx.workspace.plan, role: ctx.role },
+    properties: { competitor_id: competitorId, fields_updated: Object.keys(updates) },
+  });
+
   revalidatePath("/app/competitors");
   return { ok: true, id: competitorId };
 }
@@ -115,13 +141,20 @@ export async function updateCompetitor(
 // ─── DELETE ──────────────────────────────────────────────────────────
 
 export async function deleteCompetitor(competitorId: string): Promise<ActionResult> {
-  const { ctx } = await getCtxOrThrow();
+  const { ctx, userId } = await getCtxOrThrow();
 
   if (!(await assertCompetitorOwnership(competitorId, ctx.brand.id))) {
     return { ok: false, error: "Concurrent introuvable" };
   }
 
   await db.delete(competitors).where(eq(competitors.id, competitorId));
+
+  await captureServerEvent({
+    event: "competitor_deleted",
+    distinctId: userId,
+    ctx: { workspaceId: ctx.workspace.id, plan: ctx.workspace.plan, role: ctx.role },
+    properties: { competitor_id: competitorId },
+  });
 
   revalidatePath("/app/competitors");
   return { ok: true };

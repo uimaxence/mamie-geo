@@ -1,5 +1,8 @@
+"use client";
+
 import { Plus } from "lucide-react";
 import { Section } from "@/components/ui";
+import { capture } from "@/lib/posthog-client";
 
 // FAQ dédiée pricing, questions spécifiques au paiement / abonnement /
 // changements de plan. cf. doc 10 § Pricing.
@@ -56,6 +59,11 @@ export function PricingFAQ() {
           <details
             key={item.q}
             className={`group py-5 ${idx > 0 ? "border-t border-[color:var(--color-border)]" : ""}`}
+            onToggle={(event) => {
+              if ((event.currentTarget as HTMLDetailsElement).open) {
+                capture("pricing_faq_expanded", { question_id: idx, question: item.q });
+              }
+            }}
           >
             <summary className="flex cursor-pointer items-center justify-between gap-4 list-none">
               <span className="text-base font-medium text-[color:var(--color-ink)]">{item.q}</span>

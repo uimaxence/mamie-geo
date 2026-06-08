@@ -7,7 +7,7 @@ import { workspaces } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { getUserContext } from "@/lib/auth/user-context";
 import { env } from "@/lib/env";
-import { getPostHogClient, shutdownPostHog } from "@/lib/posthog-server";
+import { captureServerEvent } from "@/lib/posthog-server";
 import { getStripe } from "@/lib/stripe/client";
 import { isPurchasablePlan, type PurchasablePlan } from "@/lib/stripe/plan-catalog";
 import { priceIdForPlan } from "@/lib/stripe/products";
@@ -96,9 +96,12 @@ export async function openCheckout(plan: PurchasablePlan): Promise<BillingAction
 
   if (!checkout.url) return { ok: false, error: "Échec création session" };
 
-  const posthog = getPostHogClient();
-  posthog.capture({ distinctId: userId, event: "checkout_initiated", properties: { plan } });
-  await shutdownPostHog();
+  await captureServerEvent({
+    event: "checkout_initiated",
+    distinctId: userId,
+    ctx: { workspaceId: ctx.workspace.id, plan: ctx.workspace.plan, role: ctx.role },
+    properties: { plan, from_plan: ctx.workspace.plan },
+  });
 
   return { ok: true, url: checkout.url };
 }
@@ -106,7 +109,7 @@ export async function openCheckout(plan: PurchasablePlan): Promise<BillingAction
 export async function openPortal(): Promise<BillingActionResult> {
   const got = await getCtxOrError();
   if ("error" in got) return { ok: false, error: got.error };
-  const { ctx } = got;
+  const { ctx, userId } = got;
   if (!ctx) return { ok: false, error: "Aucun workspace" };
 
   const wsRows = await db
@@ -123,5 +126,13 @@ export async function openPortal(): Promise<BillingActionResult> {
     customer: ws.stripeCustomerId,
     return_url: `${env.NEXT_PUBLIC_APP_URL}/app/settings`,
   });
+
+  await captureServerEvent({
+    event: "billing_portal_opened",
+    distinctId: userId,
+    ctx: { workspaceId: ctx.workspace.id, plan: ctx.workspace.plan, role: ctx.role },
+    properties: { current_plan: ctx.workspace.plan },
+  });
+
   return { ok: true, url: portal.url };
 }

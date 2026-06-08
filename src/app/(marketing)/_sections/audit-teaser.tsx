@@ -1,4 +1,5 @@
-import { LinkButton, Section } from "@/components/ui";
+import { Section } from "@/components/ui";
+import { TrackedLinkButton } from "@/components/marketing/tracked-link-button";
 import { MockupAudit } from "./mockups/mockup-audit";
 
 // Promo audit technique sur la home, PR 2026-05-16 (cf. doc 09).
@@ -28,9 +29,19 @@ export function AuditTeaser() {
           </p>
 
           <div className="mt-8">
-            <LinkButton href="/outils/audit-technique" variant="ai" size="lg">
+            <TrackedLinkButton
+              href="/outils/audit-technique"
+              variant="ai"
+              size="lg"
+              trackEvent="home_cta_clicked"
+              trackProperties={{
+                cta_label: "Auditer mon site",
+                section: "audit-teaser",
+                href: "/outils/audit-technique",
+              }}
+            >
               Auditer mon site →
-            </LinkButton>
+            </TrackedLinkButton>
           </div>
 
           <p className="type-meta mt-5">

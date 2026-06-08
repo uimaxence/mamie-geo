@@ -2,9 +2,10 @@ import { and, between, eq, inArray } from "drizzle-orm";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { db } from "@/db/client";
-import { brands, citationMetricsDaily, workspaceMembers } from "@/db/schema";
+import { brands, citationMetricsDaily, workspaceMembers, workspaces } from "@/db/schema";
 import { csvResponseHeaders, stringifyCsv } from "@/lib/csv";
 import { deriveSourcesFunnelRatios } from "@/lib/metrics/sources-funnel";
+import { captureServerEvent } from "@/lib/posthog-server";
 
 // GET /api/export/metrics.csv — export plat de citation_metrics_daily
 // (1 ligne = 1 brand × 1 LLM × 1 jour).
@@ -61,8 +62,13 @@ export async function GET(request: Request) {
   const brandIdParam = url.searchParams.get("brandId");
 
   const memberships = await db
-    .select({ workspaceId: workspaceMembers.workspaceId })
+    .select({
+      workspaceId: workspaceMembers.workspaceId,
+      role: workspaceMembers.role,
+      plan: workspaces.plan,
+    })
     .from(workspaceMembers)
+    .innerJoin(workspaces, eq(workspaces.id, workspaceMembers.workspaceId))
     .where(eq(workspaceMembers.userId, session.user.id));
   const workspaceIds = memberships.map((m) => m.workspaceId);
   if (workspaceIds.length === 0) {
@@ -70,6 +76,20 @@ export async function GET(request: Request) {
       headers: csvResponseHeaders(filename("metrics", fromStr, toStr)),
     });
   }
+  const primary = memberships[0]!;
+
+  const fromDate = new Date(`${fromStr}T00:00:00.000Z`);
+  const toDate = new Date(`${toStr}T23:59:59.999Z`);
+  const dateRangeDays = Math.max(
+    1,
+    Math.round((toDate.getTime() - fromDate.getTime()) / 86_400_000),
+  );
+  await captureServerEvent({
+    event: "csv_export_clicked",
+    distinctId: session.user.id,
+    ctx: { workspaceId: primary.workspaceId, plan: primary.plan, role: primary.role },
+    properties: { kind: "metrics", date_range_days: dateRangeDays, brand_id: brandIdParam },
+  });
 
   const brandRows = await db
     .select({ id: brands.id, name: brands.name })

@@ -2,8 +2,9 @@ import { and, between, eq, inArray } from "drizzle-orm";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { db } from "@/db/client";
-import { brands, prompts, runs, workspaceMembers } from "@/db/schema";
+import { brands, prompts, runs, workspaceMembers, workspaces } from "@/db/schema";
 import { csvResponseHeaders, stringifyCsv } from "@/lib/csv";
+import { captureServerEvent } from "@/lib/posthog-server";
 import type { ParsedBrandsPayload } from "@/lib/citation/types";
 
 // GET /api/export/runs.csv — export plat de l'historique des runs du
@@ -66,13 +67,31 @@ export async function GET(request: Request) {
   const brandIdParam = url.searchParams.get("brandId");
 
   const memberships = await db
-    .select({ workspaceId: workspaceMembers.workspaceId })
+    .select({
+      workspaceId: workspaceMembers.workspaceId,
+      role: workspaceMembers.role,
+      plan: workspaces.plan,
+    })
     .from(workspaceMembers)
+    .innerJoin(workspaces, eq(workspaces.id, workspaceMembers.workspaceId))
     .where(eq(workspaceMembers.userId, session.user.id));
   const workspaceIds = memberships.map((m) => m.workspaceId);
   if (workspaceIds.length === 0) {
     return new Response(emptyCsv(), { headers: csvResponseHeaders(filename("runs", from, to)) });
   }
+  const primary = memberships[0]!;
+
+  const dateRangeDays = Math.max(1, Math.round((to.getTime() - from.getTime()) / 86_400_000));
+  await captureServerEvent({
+    event: "csv_export_clicked",
+    distinctId: session.user.id,
+    ctx: { workspaceId: primary.workspaceId, plan: primary.plan, role: primary.role },
+    properties: {
+      kind: "runs",
+      date_range_days: dateRangeDays,
+      brand_id: brandIdParam,
+    },
+  });
 
   const brandRows = await db
     .select({ id: brands.id, name: brands.name, workspaceId: brands.workspaceId })

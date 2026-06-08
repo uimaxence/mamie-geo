@@ -1,8 +1,9 @@
-import { eq, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { db } from "@/db/client";
-import { brands, prompts, runs, usageCounters } from "@/db/schema";
+import { brands, prompts, runs, usageCounters, workspaceMembers } from "@/db/schema";
 import { checkQuotaBeforeRun } from "@/lib/hardcap/check";
 import { getLLMClient, LLMError, type LLMClient, type LLMValue } from "@/lib/llm";
+import { captureServerEvent, identifyServerUser } from "@/lib/posthog-server";
 import { enqueue } from "@/lib/queue";
 import type { ExecutePromptPayload } from "./execute-prompt-payload";
 
@@ -145,6 +146,44 @@ export async function executePrompt(
     kind: "score_response",
     payload: { runId },
   });
+
+  // 7. PostHog : si c'est le tout premier run.success de ce workspace,
+  //    fire app_first_run_completed + set first_run_at person property.
+  //    Vérification idempotente par count(*) où status='success' joint
+  //    aux prompts du workspace. Si count == 1 (= ce run), c'est le premier.
+  try {
+    await emitFirstRunIfApplicable(brand.workspaceId, runId);
+  } catch (error) {
+    // Pas bloquant : un fail PostHog ne doit pas faire échouer le worker.
+    console.error("[execute-prompt] PostHog first-run capture failed", error);
+  }
+}
+
+async function emitFirstRunIfApplicable(workspaceId: string, runId: string): Promise<void> {
+  const totalSuccess = await db
+    .select({ id: runs.id })
+    .from(runs)
+    .innerJoin(prompts, eq(prompts.id, runs.promptId))
+    .innerJoin(brands, eq(brands.id, prompts.brandId))
+    .where(and(eq(brands.workspaceId, workspaceId), eq(runs.status, "success")))
+    .limit(2);
+  if (totalSuccess.length !== 1) return;
+  if (totalSuccess[0]?.id !== runId) return;
+  const owner = await db
+    .select({ userId: workspaceMembers.userId })
+    .from(workspaceMembers)
+    .where(and(eq(workspaceMembers.workspaceId, workspaceId), eq(workspaceMembers.role, "owner")))
+    .limit(1);
+  const ownerId = owner[0]?.userId;
+  if (!ownerId) return;
+  const now = new Date().toISOString();
+  await captureServerEvent({
+    event: "app_first_run_completed",
+    distinctId: ownerId,
+    ctx: { workspaceId },
+    properties: { run_id: runId, first_run_at: now },
+  });
+  await identifyServerUser({ distinctId: ownerId, setOnce: { first_run_at: now } });
 }
 
 function startOfCurrentMonth(): string {

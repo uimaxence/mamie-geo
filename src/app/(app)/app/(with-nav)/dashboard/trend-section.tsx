@@ -5,6 +5,7 @@ import { Sparkles } from "lucide-react";
 import { SegmentedControl, type SegmentedControlOption } from "@/components/ui";
 import { DownloadableChart } from "@/components/charts/downloadable-chart";
 import { LineChart, type LineChartDatum } from "@/components/charts/line-chart";
+import { capture } from "@/lib/posthog-client";
 
 // Section "Évolution" du dashboard, avec un SegmentedControl pour
 // changer la fenêtre temporelle (7D / 30D / 90D). On reçoit l'intégral
@@ -74,6 +75,12 @@ export function TrendSection({
 }) {
   const [range, setRange] = useState<Range>("30d");
 
+  function handleRangeChange(next: Range) {
+    if (next === range) return;
+    capture("dashboard_time_range_changed", { from: range, to: next });
+    setRange(next);
+  }
+
   const effectiveSeries = series.length > 0 ? series : DEFAULT_SERIES;
   const isSparse = fullTrend.length < SPARSE_THRESHOLD;
 
@@ -91,7 +98,7 @@ export function TrendSection({
         </div>
         <SegmentedControl
           value={range}
-          onValueChange={setRange}
+          onValueChange={handleRangeChange}
           options={RANGE_OPTIONS}
           ariaLabel="Fenêtre temporelle"
           size="sm"
