@@ -52,6 +52,10 @@ export interface MetricsPerLLM {
   // Décimal stocké en string Postgres → on parse en number côté client
   visibilityScore: number;
   topCompetitors: Array<{ name: string; citationCount: number }>;
+  // V0+ funnel sources (compteurs bruts, ratios dérivés au rendu)
+  retrievedCount: number;
+  retrievalsTotal: number;
+  citationsCount: number;
 }
 
 /**
@@ -71,6 +75,12 @@ export interface MetricsAggregated {
   topCompetitor: { name: string; citationCount: number } | null;
   partDeVoix: number;
   llmsCount: number;
+  /** V0+ Funnel sources tous-LLMs (sommes brutes, ratios dérivés au rendu). */
+  sourcesFunnel: {
+    retrievedCount: number;
+    retrievalsTotal: number;
+    citationsCount: number;
+  };
 }
 
 export interface UsagePeriod {
@@ -142,6 +152,9 @@ export async function getDashboardData(userId: string): Promise<DashboardData | 
         name: c.name,
         citationCount: c.citationCount,
       })),
+      retrievedCount: row.retrievedCount,
+      retrievalsTotal: row.retrievalsTotal,
+      citationsCount: row.citationsCount,
     };
   });
 
@@ -266,6 +279,17 @@ async function computeMetricsAggregated(
     })),
   ).percentage;
 
+  // V0+ funnel sources : sommes brutes tous-LLMs (les ratios sont dérivés
+  // au rendu côté dashboard / CSV pour éviter les arrondis prématurés).
+  const sourcesFunnel = metricsToday.reduce(
+    (acc, m) => ({
+      retrievedCount: acc.retrievedCount + m.retrievedCount,
+      retrievalsTotal: acc.retrievalsTotal + m.retrievalsTotal,
+      citationsCount: acc.citationsCount + m.citationsCount,
+    }),
+    { retrievedCount: 0, retrievalsTotal: 0, citationsCount: 0 },
+  );
+
   return {
     visibilityScore,
     brandCitedCount,
@@ -273,6 +297,7 @@ async function computeMetricsAggregated(
     topCompetitor,
     partDeVoix,
     llmsCount,
+    sourcesFunnel,
   };
 }
 

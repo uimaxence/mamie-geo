@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/db/client";
 import { brands, citationMetricsDaily, workspaceMembers } from "@/db/schema";
 import { csvResponseHeaders, stringifyCsv } from "@/lib/csv";
+import { deriveSourcesFunnelRatios } from "@/lib/metrics/sources-funnel";
 
 // GET /api/export/metrics.csv — export plat de citation_metrics_daily
 // (1 ligne = 1 brand × 1 LLM × 1 jour).
@@ -26,6 +27,12 @@ interface CsvRow extends Record<string, unknown> {
   total_runs: number;
   brand_cited_count: number;
   visibility_score: string;
+  retrieved_count: number;
+  retrievals_total: number;
+  citations_count: number;
+  apparition_pct: string;
+  frequence: string;
+  citation_pct: string;
 }
 
 const CSV_HEADERS = [
@@ -35,6 +42,12 @@ const CSV_HEADERS = [
   "total_runs",
   "brand_cited_count",
   "visibility_score",
+  "retrieved_count",
+  "retrievals_total",
+  "citations_count",
+  "apparition_pct",
+  "frequence",
+  "citation_pct",
 ] as const satisfies readonly (keyof CsvRow)[];
 
 export async function GET(request: Request) {
@@ -84,6 +97,9 @@ export async function GET(request: Request) {
       totalRuns: citationMetricsDaily.totalRuns,
       brandCitedCount: citationMetricsDaily.brandCitedCount,
       visibilityScore: citationMetricsDaily.visibilityScore,
+      retrievedCount: citationMetricsDaily.retrievedCount,
+      retrievalsTotal: citationMetricsDaily.retrievalsTotal,
+      citationsCount: citationMetricsDaily.citationsCount,
     })
     .from(citationMetricsDaily)
     .where(
@@ -99,14 +115,28 @@ export async function GET(request: Request) {
 
   const brandById = new Map(brandRows.map((b) => [b.id, b.name]));
 
-  const csvRows: CsvRow[] = slice.map((r) => ({
-    date: r.date,
-    brand_name: brandById.get(r.brandId) ?? "",
-    llm: r.llm,
-    total_runs: r.totalRuns,
-    brand_cited_count: r.brandCitedCount,
-    visibility_score: r.visibilityScore ?? "",
-  }));
+  const csvRows: CsvRow[] = slice.map((r) => {
+    const ratios = deriveSourcesFunnelRatios({
+      totalRuns: r.totalRuns,
+      retrievedCount: r.retrievedCount,
+      retrievalsTotal: r.retrievalsTotal,
+      citationsCount: r.citationsCount,
+    });
+    return {
+      date: r.date,
+      brand_name: brandById.get(r.brandId) ?? "",
+      llm: r.llm,
+      total_runs: r.totalRuns,
+      brand_cited_count: r.brandCitedCount,
+      visibility_score: r.visibilityScore ?? "",
+      retrieved_count: r.retrievedCount,
+      retrievals_total: r.retrievalsTotal,
+      citations_count: r.citationsCount,
+      apparition_pct: ratios.apparitionPct.toFixed(2),
+      frequence: ratios.frequence.toFixed(2),
+      citation_pct: ratios.citationPct.toFixed(2),
+    };
+  });
 
   const csv = stringifyCsv(csvRows, CSV_HEADERS);
   const responseHeaders = new Headers(csvResponseHeaders(filename("metrics", fromStr, toStr)));

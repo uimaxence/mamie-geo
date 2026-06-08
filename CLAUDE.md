@@ -265,7 +265,20 @@ la doc devient un cimetière.
 
 ## 9. État du projet (snapshot — 2026-06-08)
 
-> Mise à jour 2026-06-08 — V0+ kick-off : CSV export + Pause/Resume
+> Mise à jour 2026-06-08 — V0+ kick-off : CSV export + Pause/Resume + Funnel sources
+>
+> **Funnel sources Apparition/Fréquence/Citation** (cf. doc 02 § Glossaire
+> + doc 03 § citation_metrics_daily) : 3 colonnes ajoutées
+> (`retrieved_count`, `retrievals_total`, `citations_count`, migration
+> `0004_salty_molten_man`). Helper `src/lib/citation/source-match.ts`
+> matche URLs vs `brand.domain + aliases` (12 tests, support www. +
+> sous-domaines + filtrage aliases non-domaines). Worker recompute
+> étendu via `aggregateSourcesFunnel` (6 tests). Dashboard : nouvelle
+> section dédiée avec 3 cards Stat (Apparition % / Fréquence / Citation
+> %) entre "Visibilité par LLM" et "10 derniers batches". CSV export
+> `/api/export/metrics.csv` enrichi avec 6 colonnes (3 compteurs +
+> 3 ratios dérivés). Pas de backfill rétro — les anciens runs
+> restent à 0, les nouveaux alimentent les compteurs au fil de l'eau.
 >
 > **Pause/Resume projects** (cf. doc 02 § V0+) : nouvelle colonne
 > `brands.paused_at TIMESTAMPTZ` + index partiel `idx_brands_active`
@@ -509,7 +522,7 @@ Phasage acté le 2026-05-07 (cf. `09-decisions-journal.md` § 2026-05-07) :
 2. **Setup `BREVO_BLOG_LIST_ID`** : créer la liste "Newsletter blog" dans Brevo dashboard puis copier l'ID dans Vercel env vars → form inscription `/blog` actif + notification auto à chaque article publié.
 3. **Hard launch public** : DNS Brevo (DKIM/SPF/DMARC) + Stripe LIVE déjà configurés selon user. Reste communication (LinkedIn, communautés FR).
 4. **Drip d'éducation post-signup** (remplace ancien trial nurture J+3/J+10 — plus de trial auto en V0).
-5. **Items V0+ veille concurrence** (cf. doc 02 § V0+) : URL drill-down `/app/sources/[id]`, per-prompt cadence, sources funnel 3 métriques (Apparition/Fréquence/Citation), ~~pause/resume projects~~ ✅ livré 2026-06-08, save-as-PNG charts, ~~CSV export~~ ✅ livré 2026-06-08, multi-select brand filter, comparison pages industrialisées, crawlabilité bots IA dans audit-technique, régénérer prompts depuis profil.
+5. **Items V0+ veille concurrence** (cf. doc 02 § V0+) : URL drill-down `/app/sources/[id]`, per-prompt cadence, ~~sources funnel 3 métriques (Apparition/Fréquence/Citation)~~ ✅ livré 2026-06-08, ~~pause/resume projects~~ ✅ livré 2026-06-08, save-as-PNG charts, ~~CSV export~~ ✅ livré 2026-06-08, multi-select brand filter, comparison pages industrialisées, crawlabilité bots IA dans audit-technique, régénérer prompts depuis profil.
 
 **Phase C livrée** (~~barré~~) :
 

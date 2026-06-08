@@ -263,6 +263,14 @@ export const citationMetricsDaily = pgTable(
     brandCitedCount: integer().notNull(),
     visibilityScore: decimal({ precision: 5, scale: 2 }),
     competitorsData: jsonb(),
+    // V0+ funnel sources (cf. doc 02 § Glossaire + doc 03 § citation_metrics_daily).
+    // Calculé par worker recompute à partir de runs.parsedCitations.
+    //   Apparition = retrievedCount / totalRuns
+    //   Fréquence  = retrievalsTotal / retrievedCount  (si retrievedCount > 0)
+    //   Citation   = citationsCount / retrievalsTotal  (si retrievalsTotal > 0)
+    retrievedCount: integer().notNull().default(0),
+    retrievalsTotal: integer().notNull().default(0),
+    citationsCount: integer().notNull().default(0),
   },
   (t) => [primaryKey({ columns: [t.brandId, t.llm, t.date] })],
 );

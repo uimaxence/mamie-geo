@@ -1,12 +1,13 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { Activity, Flame, PieChart, Users } from "lucide-react";
+import { Activity, Eye, Flame, Layers, PieChart, Quote, Users } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { computeDelta, getDashboardData, getVisibilityTrend } from "@/lib/dashboard/queries";
 import { Card, Stat } from "@/components/ui";
 import { BreakdownBars } from "@/components/charts/breakdown-bars";
 import { LLM_COLORS, LLM_LABELS } from "@/components/charts/llm-colors";
 import { BatchesTable } from "@/components/app/batches-table";
+import { deriveSourcesFunnelRatios } from "@/lib/metrics/sources-funnel";
 import { TrendSection } from "./trend-section";
 import { TriggerRunForm } from "./trigger-form";
 
@@ -159,6 +160,19 @@ export default async function DashboardPage() {
         </div>
       </section>
 
+      {/* Funnel sources V0+ (cf. doc 02 § Glossaire) — 3 stats dérivées
+       * de citation_metrics_daily, agrégées tous-LLMs : Apparition →
+       * Fréquence → Citation. Données alimentées au fil des runs ;
+       * historique pré-2026-06-08 reste à 0 (pas de backfill rétro). */}
+      <section className="mt-14">
+        <FunnelSourcesSection
+          totalRuns={agg.totalRuns}
+          retrievedCount={agg.sourcesFunnel.retrievedCount}
+          retrievalsTotal={agg.sourcesFunnel.retrievalsTotal}
+          citationsCount={agg.sourcesFunnel.citationsCount}
+        />
+      </section>
+
       {/* Runs récents, groupés par batch (prompt × jour) */}
       <section className="mt-14">
         <div className="flex items-baseline justify-between">
@@ -176,5 +190,76 @@ export default async function DashboardPage() {
       </section>
 
     </div>
+  );
+}
+
+function FunnelSourcesSection({
+  totalRuns,
+  retrievedCount,
+  retrievalsTotal,
+  citationsCount,
+}: {
+  totalRuns: number;
+  retrievedCount: number;
+  retrievalsTotal: number;
+  citationsCount: number;
+}) {
+  const ratios = deriveSourcesFunnelRatios({
+    totalRuns,
+    retrievedCount,
+    retrievalsTotal,
+    citationsCount,
+  });
+  const hasData = retrievedCount > 0 || retrievalsTotal > 0;
+
+  return (
+    <>
+      <div className="flex items-baseline justify-between">
+        <div>
+          <h2 className="type-h2">Funnel sources</h2>
+          <p className="type-meta mt-1">
+            Apparition → Fréquence → Citation. Suit le passage de tes URLs des résultats de
+            retrieval vers une citation explicite.
+          </p>
+        </div>
+      </div>
+      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <Card className="p-5">
+          <Stat
+            label="Apparition"
+            value={hasData ? `${ratios.apparitionPct.toFixed(1)}%` : "—"}
+            icon={Eye}
+            iconTone="blue"
+            hint={hasData ? `${retrievedCount}/${totalRuns} réponses` : "en attente de données"}
+          />
+        </Card>
+        <Card className="p-5">
+          <Stat
+            label="Fréquence"
+            value={hasData ? ratios.frequence.toFixed(2) : "—"}
+            icon={Layers}
+            iconTone="purple"
+            hint={
+              hasData
+                ? `${retrievalsTotal} apparitions au total`
+                : "moyenne par réponse où la marque apparaît"
+            }
+          />
+        </Card>
+        <Card className="p-5">
+          <Stat
+            label="Citation"
+            value={hasData ? `${ratios.citationPct.toFixed(1)}%` : "—"}
+            icon={Quote}
+            iconTone="green"
+            hint={
+              hasData
+                ? `${citationsCount} citation${citationsCount > 1 ? "s" : ""} explicite${citationsCount > 1 ? "s" : ""}`
+                : "% des apparitions converties"
+            }
+          />
+        </Card>
+      </div>
+    </>
   );
 }
