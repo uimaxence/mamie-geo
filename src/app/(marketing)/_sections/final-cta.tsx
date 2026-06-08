@@ -1,4 +1,7 @@
+import { headers } from "next/headers";
+import { LinkButton } from "@/components/ui";
 import { TrackedLinkButton } from "@/components/marketing/tracked-link-button";
+import { auth } from "@/lib/auth";
 
 // Section CTA finale, juste avant le footer. Dernière chance avant
 // bounce. Réutilise le pattern fond noir + halo radial bleu brand de
@@ -10,9 +13,16 @@ import { TrackedLinkButton } from "@/components/marketing/tracked-link-button";
 // → effet "bouton blanc inversé" qui ressort sur le noir. Le variant
 // `ai` (gradient) marche tel quel.
 //
+// 2026-06-08 — si user connecté, on remplace les CTA acquisition par
+// un retour direct au dashboard (sinon le user voit "Démarrer 9,99€"
+// alors qu'il est déjà client → friction inutile).
+//
 // Cf. plan V0 belle home P0.7 (2026-05-26).
 
-export function FinalCTA() {
+export async function FinalCTA() {
+  const session = await auth.api.getSession({ headers: await headers() });
+  const isLoggedIn = Boolean(session?.user);
+
   return (
     <section className="relative overflow-hidden bg-[color:var(--color-ink)] text-white">
       {/* Halo bleu brand diffus, identique à PourquoiMaintenant pour
@@ -44,28 +54,38 @@ export function FinalCTA() {
           hébergé en Europe.
         </p>
         <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
-          <TrackedLinkButton
-            href="/pricing"
-            variant="secondary"
-            size="lg"
-            trackEvent="home_cta_clicked"
-            trackProperties={{ cta_label: "Démarrer — 9,99 €/mois", section: "final", href: "/pricing" }}
-          >
-            Démarrer — 9,99&nbsp;€/mois
-          </TrackedLinkButton>
-          <TrackedLinkButton
-            href="/outils/audit-technique"
-            variant="ai"
-            size="lg"
-            trackEvent="home_cta_clicked"
-            trackProperties={{ cta_label: "Audit gratuit", section: "final", href: "/outils/audit-technique" }}
-          >
-            Audit gratuit
-          </TrackedLinkButton>
+          {isLoggedIn ? (
+            <LinkButton href="/app/dashboard" variant="secondary" size="lg">
+              Accéder à mon tableau de bord
+            </LinkButton>
+          ) : (
+            <>
+              <TrackedLinkButton
+                href="/pricing"
+                variant="secondary"
+                size="lg"
+                trackEvent="home_cta_clicked"
+                trackProperties={{ cta_label: "Démarrer — 9,99 €/mois", section: "final", href: "/pricing" }}
+              >
+                Démarrer — 9,99&nbsp;€/mois
+              </TrackedLinkButton>
+              <TrackedLinkButton
+                href="/outils/audit-technique"
+                variant="ai"
+                size="lg"
+                trackEvent="home_cta_clicked"
+                trackProperties={{ cta_label: "Audit gratuit", section: "final", href: "/outils/audit-technique" }}
+              >
+                Audit gratuit
+              </TrackedLinkButton>
+            </>
+          )}
         </div>
-        <p className="type-meta mt-6 text-[color:var(--color-gray-300)]">
-          Garantie remboursement 14&nbsp;jours · Sans engagement · Hébergé EU
-        </p>
+        {!isLoggedIn && (
+          <p className="type-meta mt-6 text-[color:var(--color-gray-300)]">
+            Garantie remboursement 14&nbsp;jours · Sans engagement · Hébergé EU
+          </p>
+        )}
       </div>
     </section>
   );

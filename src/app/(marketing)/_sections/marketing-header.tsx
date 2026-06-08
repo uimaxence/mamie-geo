@@ -1,6 +1,8 @@
 import Link from "next/link";
+import { headers } from "next/headers";
 import { LinkButton } from "@/components/ui";
 import { Logo } from "@/components/marketing/logo";
+import { auth } from "@/lib/auth";
 import { MarketingMobileNav } from "./marketing-mobile-nav";
 
 // Header marketing, logo à gauche, à droite : nav items + séparateur
@@ -9,10 +11,18 @@ import { MarketingMobileNav } from "./marketing-mobile-nav";
 // (avant : nav `hidden sm:flex` sans alternative → pages inaccessibles
 // depuis mobile).
 //
+// 2026-06-08 — lecture session côté serveur pour afficher "Tableau de
+// bord" au lieu de "Connexion / Inscription" quand le user est déjà
+// authentifié. Conséquence : `getSession()` lit les headers donc la
+// page parent bascule en dynamic rendering (cf. doc 09).
+//
 // Tous les liens internes via next/link (exigence ESLint
 // @next/next/no-html-link-for-pages).
 
-export function MarketingHeader() {
+export async function MarketingHeader() {
+  const session = await auth.api.getSession({ headers: await headers() });
+  const isLoggedIn = Boolean(session?.user);
+
   return (
     <header className="border-b border-[color:var(--color-border)] bg-white">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
@@ -67,23 +77,32 @@ export function MarketingHeader() {
            * à séparer). */}
           <span aria-hidden className="hidden h-5 w-px bg-[color:var(--color-border)] sm:block" />
 
-          {/* Desktop : Connexion + Inscription. Mobile : dans le burger
+          {/* Desktop : si déjà connecté → un seul CTA "Tableau de bord".
+           * Sinon Connexion + Inscription. Mobile : dans le burger
            * (cf. MarketingMobileNav). Note : magic-link crée le user à
            * la 1ʳᵉ connexion donc /login gère les deux cas, mais on
            * dissocie l'intention UX (?mode=signup côté Inscription). */}
           <div className="hidden items-center gap-3 sm:flex">
-            <Link
-              href="/login"
-              className="text-sm font-medium text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]"
-            >
-              Connexion
-            </Link>
-            <LinkButton href="/login?mode=signup" variant="primary" size="sm">
-              Inscription
-            </LinkButton>
+            {isLoggedIn ? (
+              <LinkButton href="/app/dashboard" variant="primary" size="sm">
+                Tableau de bord
+              </LinkButton>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="text-sm font-medium text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]"
+                >
+                  Connexion
+                </Link>
+                <LinkButton href="/login?mode=signup" variant="primary" size="sm">
+                  Inscription
+                </LinkButton>
+              </>
+            )}
           </div>
 
-          <MarketingMobileNav />
+          <MarketingMobileNav isLoggedIn={isLoggedIn} />
         </div>
       </div>
     </header>

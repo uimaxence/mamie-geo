@@ -18,7 +18,7 @@ const NAV_LINKS = [
   { href: "/#faq", label: "FAQ" },
 ];
 
-export function MarketingMobileNav() {
+export function MarketingMobileNav({ isLoggedIn = false }: { isLoggedIn?: boolean }) {
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
 
@@ -55,16 +55,24 @@ export function MarketingMobileNav() {
           </nav>
 
           <div className="mt-auto flex flex-col gap-3 border-t border-[color:var(--color-border)] pt-4">
-            <Link
-              href="/login"
-              onClick={close}
-              className="rounded-[var(--radius-md)] px-3 py-2.5 text-[15px] font-medium text-[color:var(--color-ink-soft)] transition hover:bg-[color:var(--color-gray-50)] hover:text-[color:var(--color-ink)]"
-            >
-              Connexion
-            </Link>
-            <LinkButton href="/login?mode=signup" variant="primary" size="md" onClick={close}>
-              Inscription
-            </LinkButton>
+            {isLoggedIn ? (
+              <LinkButton href="/app/dashboard" variant="primary" size="md" onClick={close}>
+                Tableau de bord
+              </LinkButton>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  onClick={close}
+                  className="rounded-[var(--radius-md)] px-3 py-2.5 text-[15px] font-medium text-[color:var(--color-ink-soft)] transition hover:bg-[color:var(--color-gray-50)] hover:text-[color:var(--color-ink)]"
+                >
+                  Connexion
+                </Link>
+                <LinkButton href="/login?mode=signup" variant="primary" size="md" onClick={close}>
+                  Inscription
+                </LinkButton>
+              </>
+            )}
           </div>
         </SheetContent>
       </Sheet>
