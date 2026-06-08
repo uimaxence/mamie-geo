@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import * as cheerio from "cheerio";
 import { runA11yChecks } from "./checks/a11y";
+import { runAiBotsChecks } from "./checks/ai-bots";
 import { runGeoChecks } from "./checks/geo";
 import { runMobileChecks } from "./checks/mobile";
 import { runOgTwitterChecks } from "./checks/og-twitter";
@@ -154,6 +155,7 @@ export async function runAudit(url: string): Promise<AuditResult> {
     ...runMobileChecks($),
     ...runPerfHtmlChecks($, htmlSizeKb, fetchResult.headers),
     ...runSitemapRobotsChecks(sitemapRobots),
+    ...runAiBotsChecks(robotsTxt),
     ...psiResult.checks,
   ];
 
