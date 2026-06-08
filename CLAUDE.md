@@ -535,7 +535,7 @@ Phasage acté le 2026-05-07 (cf. `09-decisions-journal.md` § 2026-05-07) :
 2. **Setup `BREVO_BLOG_LIST_ID`** : créer la liste "Newsletter blog" dans Brevo dashboard puis copier l'ID dans Vercel env vars → form inscription `/blog` actif + notification auto à chaque article publié.
 3. **Hard launch public** : DNS Brevo (DKIM/SPF/DMARC) + Stripe LIVE déjà configurés selon user. Reste communication (LinkedIn, communautés FR).
 4. **Drip d'éducation post-signup** (remplace ancien trial nurture J+3/J+10 — plus de trial auto en V0).
-5. **Items V0+ veille concurrence** (cf. doc 02 § V0+) : URL drill-down `/app/sources/[id]`, per-prompt cadence, ~~sources funnel 3 métriques (Apparition/Fréquence/Citation)~~ ✅ livré 2026-06-08, ~~pause/resume projects~~ ✅ livré 2026-06-08, save-as-PNG charts, ~~CSV export~~ ✅ livré 2026-06-08, multi-select brand filter, ~~comparison pages industrialisées~~ ✅ livré 2026-06-08, crawlabilité bots IA dans audit-technique, ~~régénérer prompts depuis profil~~ ✅ livré 2026-06-08.
+5. **Items V0+ veille concurrence** (cf. doc 02 § V0+) : ~~URL drill-down `/app/sources/[id]`~~ ✅ livré 2026-06-08, ~~per-prompt cadence~~ ✅ livré 2026-06-08, ~~sources funnel 3 métriques (Apparition/Fréquence/Citation)~~ ✅ livré 2026-06-08, ~~pause/resume projects~~ ✅ livré 2026-06-08, ~~save-as-PNG charts~~ ✅ livré 2026-06-08, ~~CSV export~~ ✅ livré 2026-06-08, ~~multi-select brand filter~~ ✅ livré 2026-06-08, ~~comparison pages industrialisées~~ ✅ livré 2026-06-08, ~~crawlabilité bots IA dans audit-technique~~ ✅ livré 2026-06-08, ~~régénérer prompts depuis profil~~ ✅ livré 2026-06-08.
 
 **Phase C livrée** (~~barré~~) :
 

@@ -205,10 +205,23 @@ export const prompts = pgTable(
     category: text(),
     language: text().notNull().default("fr"),
     isActive: boolean().notNull().default(true),
+    // V0+ per-prompt cadence (cf. doc 02 § V0+). `inherit` = suit la
+    // cadence du plan (default), daily/weekly/monthly overrident.
+    // Scheduler logic dans src/lib/scheduler/cadence-eligibility.ts.
+    cadence: text().notNull().default("inherit"),
     createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [index("idx_prompts_brand_active").on(t.brandId)],
+  (t) => [
+    index("idx_prompts_brand_active").on(t.brandId),
+    check(
+      "prompt_cadence_check",
+      sql`${t.cadence} IN ('inherit','daily','weekly','monthly')`,
+    ),
+  ],
 );
+
+export const PROMPT_CADENCES = ["inherit", "daily", "weekly", "monthly"] as const;
+export type PromptCadence = (typeof PROMPT_CADENCES)[number];
 
 // ──────────────────────────────────────────────────────────────────────
 // Runs (1 prompt × 1 LLM × 1 date planifiée)

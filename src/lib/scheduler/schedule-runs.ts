@@ -2,8 +2,11 @@ import { randomUUID } from "node:crypto";
 import { and, eq, inArray, isNull } from "drizzle-orm";
 import { db } from "@/db/client";
 import { brands, prompts, runs, workspaces } from "@/db/schema";
+import type { PromptCadence } from "@/db/schema";
 import { getConfiguredLLMs, type LLMValue } from "@/lib/llm";
+import { quotasFor } from "@/lib/plans/quotas";
 import { enqueue } from "@/lib/queue";
+import { isPromptEligibleToday } from "./cadence-eligibility";
 
 // Coeur de la logique scheduler — partagé entre :
 //   - le cron quotidien `/api/cron/schedule-runs` (tous workspaces actifs)
@@ -73,17 +76,30 @@ async function enqueueForPrompts(promptRows: { promptId: string }[]): Promise<Sc
 }
 
 /**
- * Variante cron quotidien : tous les workspaces dont le plan est dans
- * `eligiblePlans` (filtré au préalable par cadence + jour de la semaine).
+ * Variante cron quotidien : on remonte tous les prompts actifs des plans
+ * éligibles avec leur cadence individuelle, puis on filtre côté Node
+ * via `isPromptEligibleToday()`. Pas de filtre SQL sur la cadence — la
+ * logique mixte plan+prompt est plus claire en JS qu'en CASE WHEN.
+ *
+ * `eligiblePlans` est passé pour exclure d'entrée tous les plans qui ne
+ * tournent JAMAIS sur la fenêtre courante (ex: dimanche → on exclut les
+ * plans weekly pour économiser un SELECT inutile sur tous les workspaces
+ * Solo). Mais à l'intérieur d'un plan daily, on inspecte chaque prompt
+ * pour respecter sa cadence individuelle.
  */
 export async function scheduleRunsForEligiblePlans(
   eligiblePlans: readonly string[],
+  now: Date = new Date(),
 ): Promise<ScheduleSummary> {
   if (eligiblePlans.length === 0) {
     return { promptsScanned: 0, jobsEnqueued: 0, runsCreated: 0, skipped: 0 };
   }
   const activePrompts = await db
-    .select({ promptId: prompts.id })
+    .select({
+      promptId: prompts.id,
+      cadence: prompts.cadence,
+      plan: workspaces.plan,
+    })
     .from(prompts)
     .innerJoin(brands, eq(brands.id, prompts.brandId))
     .innerJoin(workspaces, eq(workspaces.id, brands.workspaceId))
@@ -95,7 +111,16 @@ export async function scheduleRunsForEligiblePlans(
         inArray(workspaces.plan, eligiblePlans as string[]),
       ),
     );
-  return enqueueForPrompts(activePrompts);
+
+  const eligibleToday = activePrompts.filter((p) =>
+    isPromptEligibleToday({
+      now,
+      promptCadence: p.cadence as PromptCadence,
+      planCadence: quotasFor(p.plan).cadence,
+    }),
+  );
+
+  return enqueueForPrompts(eligibleToday);
 }
 
 /**

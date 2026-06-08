@@ -36,6 +36,13 @@
       "when": 1780908133707,
       "tag": "0004_salty_molten_man",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1780924442301,
+      "tag": "0005_per_prompt_cadence",
+      "breakpoints": true
     }
   ]
 }

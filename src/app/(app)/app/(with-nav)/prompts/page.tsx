@@ -22,7 +22,12 @@ export default async function PromptsPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-12 lg:px-10">
-      <PromptsList initialPrompts={data.prompts} plan={data.plan} maxPrompts={quotas.prompts} />
+      <PromptsList
+        initialPrompts={data.prompts}
+        plan={data.plan}
+        planCadence={quotas.cadence}
+        maxPrompts={quotas.prompts}
+      />
     </div>
   );
 }

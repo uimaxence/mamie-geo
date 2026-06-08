@@ -7,6 +7,8 @@ import { z } from "zod";
 export const PROMPT_CATEGORIES = ["commercial", "informational", "comparison"] as const;
 export type PromptCategory = (typeof PROMPT_CATEGORIES)[number];
 
+export const PROMPT_CADENCE_VALUES = ["inherit", "daily", "weekly", "monthly"] as const;
+
 /** Schéma pour la création d'un prompt. */
 export const createPromptSchema = z.object({
   text: z
@@ -16,9 +18,10 @@ export const createPromptSchema = z.object({
     .transform((s) => s.trim()),
   category: z.enum(PROMPT_CATEGORIES).optional().nullable(),
   isActive: z.boolean().default(true),
+  cadence: z.enum(PROMPT_CADENCE_VALUES).default("inherit"),
 });
 
-export type CreatePromptInput = z.infer<typeof createPromptSchema>;
+export type CreatePromptInput = z.input<typeof createPromptSchema>;
 
 /** Schéma pour l'édition d'un prompt (tous champs optionnels sauf id côté action). */
 export const updatePromptSchema = z.object({
@@ -30,6 +33,7 @@ export const updatePromptSchema = z.object({
     .optional(),
   category: z.enum(PROMPT_CATEGORIES).optional().nullable(),
   isActive: z.boolean().optional(),
+  cadence: z.enum(PROMPT_CADENCE_VALUES).optional(),
 });
 
 export type UpdatePromptInput = z.infer<typeof updatePromptSchema>;

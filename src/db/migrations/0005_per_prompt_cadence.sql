@@ -1,0 +1,2 @@
+ALTER TABLE "prompts" ADD COLUMN "cadence" text DEFAULT 'inherit' NOT NULL;--> statement-breakpoint
+ALTER TABLE "prompts" ADD CONSTRAINT "prompt_cadence_check" CHECK ("prompts"."cadence" IN ('inherit','daily','weekly','monthly'));

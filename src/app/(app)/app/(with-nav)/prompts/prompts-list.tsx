@@ -60,10 +60,16 @@ const FILTER_OPTIONS = [
 interface PromptsListProps {
   initialPrompts: PromptRow[];
   plan: string;
+  planCadence: "daily" | "weekly";
   maxPrompts: number;
 }
 
-export function PromptsList({ initialPrompts, plan, maxPrompts }: PromptsListProps) {
+export function PromptsList({
+  initialPrompts,
+  plan,
+  planCadence,
+  maxPrompts,
+}: PromptsListProps) {
   const router = useRouter();
   const [filter, setFilter] = useState<FilterMode>("all");
   const [page, setPage] = useState(1);
@@ -277,6 +283,7 @@ export function PromptsList({ initialPrompts, plan, maxPrompts }: PromptsListPro
                 <tr className="border-b border-[color:var(--color-border)]">
                   <Th>Prompt</Th>
                   <Th>Catégorie</Th>
+                  <Th>Cadence</Th>
                   <Th>Actif</Th>
                   <Th>Runs success</Th>
                   <Th align="right">Dernier run</Th>
@@ -304,6 +311,11 @@ export function PromptsList({ initialPrompts, plan, maxPrompts }: PromptsListPro
                       ) : (
                         <span className="type-meta">—</span>
                       )}
+                    </Td>
+                    <Td>
+                      <Badge tone={p.cadence === "inherit" ? "neutral" : "accent"}>
+                        {cadenceShortLabel(p.cadence)}
+                      </Badge>
                     </Td>
                     <Td>
                       <Switch
@@ -393,6 +405,7 @@ export function PromptsList({ initialPrompts, plan, maxPrompts }: PromptsListPro
       {/* Create dialog */}
       <PromptFormDialog
         mode="create"
+        planCadence={planCadence}
         open={createOpen}
         onOpenChange={setCreateOpen}
         onSubmit={async (data) => {
@@ -413,6 +426,7 @@ export function PromptsList({ initialPrompts, plan, maxPrompts }: PromptsListPro
         <PromptFormDialog
           mode="edit"
           initial={editPrompt}
+          planCadence={planCadence}
           open
           onOpenChange={(o) => !o && setEditPrompt(null)}
           onSubmit={async (data) => {
@@ -470,6 +484,20 @@ function Td({ children, align = "left" }: { children: React.ReactNode; align?: "
       {children}
     </td>
   );
+}
+
+function cadenceShortLabel(cadence: string): string {
+  switch (cadence) {
+    case "daily":
+      return "Quotidien";
+    case "weekly":
+      return "Hebdo";
+    case "monthly":
+      return "Mensuel";
+    case "inherit":
+    default:
+      return "Plan";
+  }
 }
 
 function formatRelative(date: Date): string {

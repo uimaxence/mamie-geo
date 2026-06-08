@@ -23,6 +23,7 @@ export interface PromptRow {
   category: string | null;
   language: string;
   isActive: boolean;
+  cadence: string;
   createdAt: Date;
   /** Dernier run.executedAt (success ou failed), null si jamais run */
   lastRunAt: Date | null;
@@ -57,6 +58,7 @@ export async function listPrompts(userId: string): Promise<PromptListResult | nu
       category: prompts.category,
       language: prompts.language,
       isActive: prompts.isActive,
+      cadence: prompts.cadence,
       createdAt: prompts.createdAt,
       lastRunAt: sql<Date | null>`MAX(${runs.executedAt})`.as("last_run_at"),
       lastStatus: sql<string | null>`(

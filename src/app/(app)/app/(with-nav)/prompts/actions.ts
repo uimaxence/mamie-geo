@@ -60,8 +60,19 @@ export async function createPrompt(raw: CreatePromptInput): Promise<ActionResult
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Données invalides" };
   }
 
-  // Quota check
   const quotas = quotasFor(ctx.workspace.plan);
+
+  // Garde-fou anti-abus : un plan en cadence weekly (Solo) ne peut pas
+  // override un prompt en daily, sinon il consommerait 7× ses runs
+  // facturés. inherit/weekly/monthly restent autorisés.
+  if (quotas.cadence === "weekly" && parsed.data.cadence === "daily") {
+    return {
+      ok: false,
+      error:
+        "Le plan Solo (cadence hebdomadaire) ne permet pas de cadence prompt quotidienne. Passe en Starter ou choisis hebdo/mensuel.",
+    };
+  }
+
   if (quotas.prompts !== Number.POSITIVE_INFINITY) {
     const count = await db.$count(prompts, eq(prompts.brandId, ctx.brand.id));
     if (count >= quotas.prompts) {
@@ -77,6 +88,7 @@ export async function createPrompt(raw: CreatePromptInput): Promise<ActionResult
       category: parsed.data.category ?? null,
       language: "fr",
       isActive: parsed.data.isActive,
+      cadence: parsed.data.cadence,
     })
     .returning({ id: prompts.id });
 
@@ -101,10 +113,24 @@ export async function updatePrompt(
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Données invalides" };
   }
 
+  // Même garde-fou que createPrompt : empêche un plan weekly de
+  // s'auto-promote vers daily via update.
+  if (parsed.data.cadence === "daily") {
+    const planCadence = quotasFor(ctx.workspace.plan).cadence;
+    if (planCadence === "weekly") {
+      return {
+        ok: false,
+        error:
+          "Le plan Solo (cadence hebdomadaire) ne permet pas de cadence prompt quotidienne. Passe en Starter ou choisis hebdo/mensuel.",
+      };
+    }
+  }
+
   const updates: Partial<typeof prompts.$inferInsert> = {};
   if (parsed.data.text !== undefined) updates.text = parsed.data.text;
   if (parsed.data.category !== undefined) updates.category = parsed.data.category;
   if (parsed.data.isActive !== undefined) updates.isActive = parsed.data.isActive;
+  if (parsed.data.cadence !== undefined) updates.cadence = parsed.data.cadence;
 
   if (Object.keys(updates).length === 0) {
     return { ok: true, id: promptId };

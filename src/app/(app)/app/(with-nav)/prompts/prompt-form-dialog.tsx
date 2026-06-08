@@ -12,7 +12,11 @@ import {
   Field,
   Switch,
 } from "@/components/ui";
-import { PROMPT_CATEGORIES, type CreatePromptInput } from "@/lib/prompts/schemas";
+import {
+  PROMPT_CADENCE_VALUES,
+  PROMPT_CATEGORIES,
+  type CreatePromptInput,
+} from "@/lib/prompts/schemas";
 
 // Form Dialog réutilisé pour create / edit prompts.
 // Le state initial est calé sur les props au 1er mount via useState.
@@ -20,9 +24,13 @@ import { PROMPT_CATEGORIES, type CreatePromptInput } from "@/lib/prompts/schemas
 // l'appelant doit utiliser `key={prompt.id}` pour remount l'instance.
 // Cf. https://react.dev/learn/you-might-not-need-an-effect
 
+type Cadence = (typeof PROMPT_CADENCE_VALUES)[number];
+
 interface PromptFormDialogProps {
   mode: "create" | "edit";
-  initial?: { text: string; category: string | null; isActive: boolean };
+  initial?: { text: string; category: string | null; isActive: boolean; cadence?: string };
+  /** Cadence du plan workspace, utilisée pour désactiver `daily` côté UI sur Solo. */
+  planCadence?: "daily" | "weekly";
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSubmit: (data: CreatePromptInput) => Promise<{ ok: boolean; error?: string }>;
@@ -31,6 +39,7 @@ interface PromptFormDialogProps {
 export function PromptFormDialog({
   mode,
   initial,
+  planCadence,
   open,
   onOpenChange,
   onSubmit,
@@ -38,8 +47,15 @@ export function PromptFormDialog({
   const [text, setText] = useState(initial?.text ?? "");
   const [category, setCategory] = useState<string>(initial?.category ?? "");
   const [isActive, setIsActive] = useState<boolean>(initial?.isActive ?? true);
+  const [cadence, setCadence] = useState<Cadence>(
+    (initial?.cadence as Cadence | undefined) ?? "inherit",
+  );
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+
+  // Plans en cadence weekly (Solo) ne peuvent pas override en daily, sinon
+  // ils consommeraient 7× les runs facturés. Géré côté serveur + masqué ici.
+  const dailyDisabled = planCadence === "weekly";
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -49,6 +65,7 @@ export function PromptFormDialog({
         text,
         category: category ? (category as (typeof PROMPT_CATEGORIES)[number]) : null,
         isActive,
+        cadence,
       });
       if (!result.ok) setError(result.error ?? "Erreur inconnue");
     });
@@ -90,6 +107,31 @@ export function PromptFormDialog({
               <option value="commercial">Commercial</option>
               <option value="informational">Informationnel</option>
               <option value="comparison">Comparaison</option>
+            </select>
+          </Field>
+
+          <Field
+            label="Cadence"
+            hint={
+              dailyDisabled
+                ? "Plan Solo : cadence quotidienne désactivée. Passe en Starter pour la débloquer."
+                : "Indépendante de la cadence du plan. Hérite par défaut."
+            }
+          >
+            <select
+              value={cadence}
+              onChange={(e) => setCadence(e.target.value as Cadence)}
+              className="w-full rounded-[var(--radius-md)] border border-[color:var(--color-border-strong)] bg-white px-3 py-2 text-sm text-[color:var(--color-ink)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-ink)] focus-visible:ring-offset-1"
+            >
+              <option value="inherit">
+                Héritage du plan
+                {planCadence ? ` (${planCadence === "daily" ? "quotidien" : "hebdomadaire"})` : ""}
+              </option>
+              <option value="daily" disabled={dailyDisabled}>
+                Quotidien
+              </option>
+              <option value="weekly">Hebdomadaire (lundis)</option>
+              <option value="monthly">Mensuel (1er du mois)</option>
             </select>
           </Field>
 
