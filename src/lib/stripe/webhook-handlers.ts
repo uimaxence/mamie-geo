@@ -5,6 +5,7 @@ import { subscriptionEvents, workspaceMembers, workspaces } from "@/db/schema";
 import { logCronEvent } from "@/lib/cron-logger";
 import { sendTransactional } from "@/lib/email";
 import { renderPaymentFailed } from "@/lib/email/templates/payment-failed";
+import { renderTrialExpired } from "@/lib/email/templates/trial-expired";
 import { renderWelcomePaid } from "@/lib/email/templates/welcome-paid";
 import { env } from "@/lib/env";
 import { planToMrr } from "@/lib/plans/mrr";
@@ -105,10 +106,11 @@ export async function handleCheckoutCompleted(
   const { getStripe } = await import("@/lib/stripe/client");
   const subscription = await getStripe().subscriptions.retrieve(subscriptionId);
   const priceId = subscription.items.data[0]?.price.id;
-  const plan = priceId ? planFromPriceId(priceId) : null;
-  if (!plan) {
+  const match = priceId ? planFromPriceId(priceId) : null;
+  if (!match) {
     throw new Error(`Price ID inconnu après checkout: ${priceId ?? "(null)"}`);
   }
+  const plan = match.plan;
 
   const ws = await findWorkspaceByCustomer(customerId);
   if (!ws) {
@@ -117,14 +119,28 @@ export async function handleCheckoutCompleted(
 
   const periodStart = firstItemPeriodStart(subscription);
   const periodEnd = firstItemPeriodEnd(subscription);
+
+  // Détection trial : Stripe pose `trial_end` quand la session a été créée
+  // avec `subscription_data.trial_period_days`. Dans ce cas, on garde
+  // workspace.plan = "trialing" (les quotas restent à 0/0 jusqu'à conversion
+  // ou trial_will_end) et on enregistre trialEndsAt pour piloter le picker
+  // urgence + emails J+10/J+13. La carte est déjà collectée par Stripe →
+  // au passage trial→active, handleSubscriptionUpdated bumpera plan au
+  // bon tier.
+  // cf. doc 09 § 2026-06-08 (réintroduction trial 14j avec carte requise).
+  const trialEnd = subscription.trial_end;
+  const isTrialing = subscription.status === "trialing" && typeof trialEnd === "number";
+  const planToSet = isTrialing ? "trialing" : plan;
+  const trialEndsAt = isTrialing && trialEnd ? new Date(trialEnd * 1000) : null;
+
   await db
     .update(workspaces)
     .set({
-      plan,
+      plan: planToSet,
       stripeSubscriptionId: subscriptionId,
       currentPeriodStart: periodStart,
       currentPeriodEnd: periodEnd,
-      trialEndsAt: null,
+      trialEndsAt,
       hardCapHitAt: null,
       updatedAt: new Date(),
     })
@@ -132,8 +148,9 @@ export async function handleCheckoutCompleted(
 
   // Lance immédiatement le premier batch de runs — UX "wow" pour ne pas
   // que l'utilisateur attende le prochain cron (jusqu'à 24h, ou jusqu'à
-  // lundi pour Solo). Idempotence via queue idempotency_key.
-  // cf. doc 09 § 2026-05-14 — décision "run immédiat post-checkout".
+  // lundi pour Solo). Idempotence via queue idempotency_key. PENDANT LE
+  // TRIAL on schedule aussi : la carte est posée, donc on peut consommer
+  // le LLM (l'user paiera au trial_end). cf. doc 09 § 2026-05-14 + 2026-06-08.
   let immediateRuns = 0;
   try {
     const result = await scheduleRunsForWorkspace(ws.id);
@@ -141,6 +158,7 @@ export async function handleCheckoutCompleted(
     logCronEvent({
       event: "post_checkout_runs_scheduled",
       workspaceId: ws.id,
+      trialing: isTrialing,
       ...result,
     });
   } catch (error) {
@@ -154,6 +172,9 @@ export async function handleCheckoutCompleted(
     });
   }
 
+  // Email de bienvenue. Pendant le trial : copy différente (cf. template,
+  // pour V0 on garde welcome-paid avec le plan acheté — le user voit le
+  // plan qu'il a choisi). On enverra l'email "trial-started" en V1 si besoin.
   await trySendEmail(
     session.customer_details?.email ?? null,
     renderWelcomePaid({
@@ -168,19 +189,32 @@ export async function handleCheckoutCompleted(
   const ownerUserId = await findWorkspaceOwnerUserId(ws.id);
   if (ownerUserId) {
     await captureServerEvent({
-      event: "subscription_activated",
+      event: isTrialing ? "trial_started" : "subscription_activated",
       distinctId: ownerUserId,
-      ctx: { workspaceId: ws.id, plan },
-      properties: { plan, from_plan: ws.plan, immediate_runs_enqueued: immediateRuns },
+      ctx: { workspaceId: ws.id, plan: planToSet },
+      properties: {
+        plan,
+        from_plan: ws.plan,
+        immediate_runs_enqueued: immediateRuns,
+        billing_cycle: match.cycle,
+        trial_ends_at: trialEndsAt?.toISOString() ?? null,
+      },
     });
   }
   await groupServer({
     groupType: "workspace",
     groupKey: ws.id,
-    properties: { plan, mrr: planToMrr(plan), name: ws.name, slug: ws.slug },
+    properties: {
+      plan: planToSet,
+      // Pendant trial, MRR effectif = 0 (mais on note le plan acheté).
+      mrr: isTrialing ? 0 : planToMrr(plan),
+      name: ws.name,
+      slug: ws.slug,
+      trial_ends_at: trialEndsAt?.toISOString() ?? null,
+    },
   });
 
-  return { workspaceId: ws.id, fromPlan: ws.plan, toPlan: plan };
+  return { workspaceId: ws.id, fromPlan: ws.plan, toPlan: planToSet };
 }
 
 // ─────────────────────────────────────────────────────────────────────
@@ -196,10 +230,11 @@ export async function handleSubscriptionUpdated(
   if (!customerId) throw new Error("subscription.updated sans customer");
 
   const priceId = subscription.items.data[0]?.price.id;
-  const plan = priceId ? planFromPriceId(priceId) : null;
-  if (!plan) {
+  const match = priceId ? planFromPriceId(priceId) : null;
+  if (!match) {
     throw new Error(`Price ID inconnu lors d'un update: ${priceId ?? "(null)"}`);
   }
+  const plan = match.plan;
 
   const ws = await findWorkspaceByCustomer(customerId);
   if (!ws) {
@@ -210,18 +245,85 @@ export async function handleSubscriptionUpdated(
 
   // Stripe envoie `cancel_at_period_end` quand le user demande l'annulation
   // depuis le portal — on garde le plan actif jusqu'à `subscription.deleted`.
+  // Pendant le trial, status=trialing → on garde plan="trialing" jusqu'à
+  // ce que Stripe bascule status=active à trial_end. Transition détectée
+  // ici : si ws.plan était "trialing" ET subscription.status="active",
+  // on fire l'event "trial_converted_paid".
+  const isStillTrialing = subscription.status === "trialing";
+  const planToSet = isStillTrialing ? "trialing" : plan;
+  const trialJustEnded = ws.plan === "trialing" && subscription.status === "active";
+  const trialEndsAt = isStillTrialing && subscription.trial_end
+    ? new Date(subscription.trial_end * 1000)
+    : null;
+
   await db
     .update(workspaces)
     .set({
-      plan,
+      plan: planToSet,
       stripeSubscriptionId: subscription.id,
       currentPeriodStart: firstItemPeriodStart(subscription),
       currentPeriodEnd: firstItemPeriodEnd(subscription),
+      trialEndsAt,
       updatedAt: new Date(),
     })
     .where(eq(workspaces.id, ws.id));
 
-  return { workspaceId: ws.id, fromPlan: ws.plan, toPlan: plan };
+  if (trialJustEnded) {
+    const ownerUserId = await findWorkspaceOwnerUserId(ws.id);
+    if (ownerUserId) {
+      await captureServerEvent({
+        event: "trial_converted_paid",
+        distinctId: ownerUserId,
+        ctx: { workspaceId: ws.id, plan },
+        properties: { plan, billing_cycle: match.cycle, mrr: planToMrr(plan) },
+      });
+    }
+    await groupServer({
+      groupType: "workspace",
+      groupKey: ws.id,
+      properties: { plan, mrr: planToMrr(plan), trial_ends_at: null },
+    });
+  }
+
+  return { workspaceId: ws.id, fromPlan: ws.plan, toPlan: planToSet };
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// customer.subscription.trial_will_end
+// Envoyé par Stripe 3 jours avant la fin du trial. On capture l'event
+// pour PostHog (segmentation des users qui vont bientôt expirer) +
+// laisse le cron quotidien envoyer le mail (J-3).
+// ─────────────────────────────────────────────────────────────────────
+
+export async function handleTrialWillEnd(
+  subscription: Stripe.Subscription,
+): Promise<HandlerResult> {
+  const customerId =
+    typeof subscription.customer === "string" ? subscription.customer : subscription.customer?.id;
+  if (!customerId) throw new Error("subscription.trial_will_end sans customer");
+
+  const ws = await findWorkspaceByCustomer(customerId);
+  if (!ws) return { workspaceId: null, fromPlan: null, toPlan: null };
+
+  const ownerUserId = await findWorkspaceOwnerUserId(ws.id);
+  if (ownerUserId) {
+    const priceId = subscription.items.data[0]?.price.id;
+    const match = priceId ? planFromPriceId(priceId) : null;
+    await captureServerEvent({
+      event: "trial_will_end_3d",
+      distinctId: ownerUserId,
+      ctx: { workspaceId: ws.id, plan: ws.plan },
+      properties: {
+        plan_after_trial: match?.plan ?? null,
+        billing_cycle: match?.cycle ?? null,
+        trial_ends_at: subscription.trial_end
+          ? new Date(subscription.trial_end * 1000).toISOString()
+          : null,
+      },
+    });
+  }
+
+  return { workspaceId: ws.id, fromPlan: ws.plan, toPlan: ws.plan };
 }
 
 // ─────────────────────────────────────────────────────────────────────
@@ -239,31 +341,56 @@ export async function handleSubscriptionDeleted(
   const ws = await findWorkspaceByCustomer(customerId);
   if (!ws) return { workspaceId: null, fromPlan: null, toPlan: "expired" };
 
+  // Cas où on annule pendant le trial : le user n'a jamais été facturé,
+  // distinction qu'on note dans l'event pour PostHog.
+  const wasInTrial = ws.plan === "trialing" && ws.trialEndsAt !== null;
+
   await db
     .update(workspaces)
     .set({
-      plan: "expired",
+      plan: wasInTrial ? "canceled" : "expired",
       stripeSubscriptionId: null,
+      trialEndsAt: null,
       updatedAt: new Date(),
     })
     .where(eq(workspaces.id, ws.id));
 
+  // Email de trial expiré : trial s'est terminé sans conversion (carte
+  // déclinée OU cancel explicite pendant le trial). Pattern reprise en
+  // 1 clic via portal. Sent best-effort, n'échoue pas le webhook.
+  if (wasInTrial) {
+    const recipientEmail = subscription.metadata?.email ?? null;
+    await trySendEmail(
+      recipientEmail,
+      renderTrialExpired({
+        variant: "expired",
+        workspaceName: ws.name,
+        reactivateUrl: `${env.NEXT_PUBLIC_APP_URL}/app/settings#billing`,
+      }),
+      "trial_expired",
+    );
+  }
+
   const ownerUserId = await findWorkspaceOwnerUserId(ws.id);
   if (ownerUserId) {
     await captureServerEvent({
-      event: "subscription_canceled",
+      event: wasInTrial ? "trial_canceled" : "subscription_canceled",
       distinctId: ownerUserId,
       ctx: { workspaceId: ws.id, plan: ws.plan },
-      properties: { from_plan: ws.plan },
+      properties: { from_plan: ws.plan, was_in_trial: wasInTrial },
     });
   }
   await groupServer({
     groupType: "workspace",
     groupKey: ws.id,
-    properties: { plan: "expired", mrr: null },
+    properties: { plan: wasInTrial ? "canceled" : "expired", mrr: 0, trial_ends_at: null },
   });
 
-  return { workspaceId: ws.id, fromPlan: ws.plan, toPlan: "expired" };
+  return {
+    workspaceId: ws.id,
+    fromPlan: ws.plan,
+    toPlan: wasInTrial ? "canceled" : "expired",
+  };
 }
 
 // ─────────────────────────────────────────────────────────────────────
@@ -325,8 +452,9 @@ export async function handleInvoicePaid(invoice: Stripe.Invoice): Promise<Handle
   if (ws.plan === "past_due") {
     const priceField = invoice.lines.data[0]?.pricing?.price_details?.price;
     const priceId = typeof priceField === "string" ? priceField : (priceField?.id ?? null);
-    const plan = priceId ? planFromPriceId(priceId) : null;
-    if (plan) {
+    const match = priceId ? planFromPriceId(priceId) : null;
+    if (match) {
+      const plan = match.plan;
       await db
         .update(workspaces)
         .set({ plan, hardCapHitAt: null, updatedAt: new Date() })

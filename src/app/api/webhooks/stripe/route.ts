@@ -9,6 +9,7 @@ import {
   handlePaymentFailed,
   handleSubscriptionDeleted,
   handleSubscriptionUpdated,
+  handleTrialWillEnd,
   recordSubscriptionEvent,
 } from "@/lib/stripe/webhook-handlers";
 
@@ -27,6 +28,7 @@ const HANDLED_EVENTS = new Set<string>([
   "checkout.session.completed",
   "customer.subscription.updated",
   "customer.subscription.deleted",
+  "customer.subscription.trial_will_end",
   "invoice.paid",
   "invoice.payment_failed",
 ]);
@@ -71,6 +73,9 @@ export async function POST(request: NextRequest) {
         break;
       case "customer.subscription.deleted":
         result = await handleSubscriptionDeleted(event.data.object);
+        break;
+      case "customer.subscription.trial_will_end":
+        result = await handleTrialWillEnd(event.data.object);
         break;
       case "invoice.payment_failed":
         result = await handlePaymentFailed(event.data.object);

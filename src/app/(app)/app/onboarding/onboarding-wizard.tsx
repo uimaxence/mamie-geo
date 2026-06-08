@@ -95,7 +95,7 @@ export function OnboardingWizard({
           prompts_count: payload.prompts.length,
           competitors_count: payload.competitors.length,
         });
-        router.push(redirectTarget);
+        router.push(`${redirectTarget}${redirectTarget.includes("?") ? "&" : "?"}onboarded=1`);
         router.refresh();
       } catch (err) {
         posthog.captureException(err);
@@ -124,7 +124,7 @@ export function OnboardingWizard({
           domain: state.domain.trim(),
         });
         posthog.capture("onboarding_skipped");
-        router.push(redirectTarget);
+        router.push(`${redirectTarget}${redirectTarget.includes("?") ? "&" : "?"}onboarded=1`);
         router.refresh();
       } catch (err) {
         posthog.captureException(err);

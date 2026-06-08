@@ -161,6 +161,51 @@ haut et l'entrée "2026-05-05 — Réponses aux 10 questions de bootstrap".
 
 ### Décisions enregistrées
 
+#### 2026-06-08 — Refonte funnel conversion : plan picker post-onboarding + sidebar Subscribe + trial 14j avec carte requise (lève la décision 2026-05-14)
+
+**Contexte** : Le funnel actuel est passif. Après signup magic-link et onboarding wizard, le user atterrit sur `/app/dashboard` avec `workspace.plan="trialing"` (quotas 0/0) et un seul signal de conversion : un `<UpgradeBanner>` discret en haut. Aucun moment "obligatoire" de décision. Le user peut rester en trialing indéfiniment, churn silencieux.
+
+Inspiré par Waalaxy (screenshots Discover Waalaxy modal post-signup + sidebar Subscribe card), on veut transformer le funnel en pattern actif : modal plan picker dès la fin de l'onboarding + sidebar "Débloque toutes les features" persistante + emails de relance pendant le trial.
+
+**Options considérées** :
+
+- A : Statu quo (banner passif + garantie 14j refund) — conv estimée 5-15 %, friction faible
+- B : Trial SANS carte + free quota auto-débloqué 14j — conv ~5-15 %, ~$3-15 LLM/user gaspillé (la raison du refus 2026-05-14)
+- C : Trial AVEC carte requise (Stripe `trial_period_days: 14`) — conv ~50-70 %, pas de risque LLM (la carte est posée)
+- D : Pas de trial du tout, juste le picker + sidebar card pour le paid direct — conv inconnue
+
+**Choix** : C — trial 14j avec carte requise, levée explicite de la condition "quand capital disponible et conversion rate de la garantie 14j stabilisé" de la décision 2026-05-14.
+
+**Justification** :
+
+- Le doc 09 § 2026-05-14 a refusé le trial 7j SANS carte parce que ~$300/100 signups non convertis. Mais a explicitement laissé ouverte la porte au trial AVEC carte : *"Trial 7j avec carte requise (mode `trial_period_days` natif Stripe) à reconsidérer quand capital disponible et conversion rate de la garantie 14j stabilisé."*
+- Avec carte requise, **pas de risque LLM** : la carte est collectée au checkout, l'user n'est pas facturé pendant 14 j, puis Stripe bascule auto en active (sauf annulation explicite via portail). Si le user ne convertit pas, soit il annule explicitement, soit la carte est facturée. Zéro perte sèche LLM.
+- La condition "capital disponible" est ainsi neutralisée : avec card requise, il n'y a rien à débloquer en termes de tréso.
+- Le picker post-onboarding + sidebar card crée un **moment de décision actif** au lieu d'un signal passif. Standard SaaS (Vercel, Linear, Cal.com, Waalaxy).
+- Annuel pré-sélectionné (Save 20 %, badge cf. ANNUAL_DISCOUNT_PCT existant) → ARPU + LTV ↑ dès J0.
+
+**Adaptations vs Waalaxy littéral** :
+
+- **Pas de loss-aversion dark pattern** ("Are you sure you want to skip free trial?" + ✗ rouges + "like landing on Mars without oxygen") — clash brand "Mamie" + risque image LinkedIn FR (cible SEO freelances repère le dark pattern instantanément).
+- **Tone hybride** : sobre au signup (X classique, microcopy honnête), pushy en fin de trial (bandeau urgence J-2 + variant "expired" sans X mais avec lien "plus tard 24h"). Reste sobre = "ton essai se termine dans X jours, choisis maintenant" plutôt que "tu vas tout perdre".
+
+**Conséquences attendues** :
+
+- 1 moment de conversion actif au lieu d'un banner ignorable
+- Trial avec carte → conv ~50-70 % (vs garantie 14j actuelle estimée 5-15 %)
+- LTV ↑ grâce annuel pré-sélectionné
+- Funnel mesurable de bout en bout (events PostHog `plan_picker_opened`, `plan_picker_skipped`, `plan_picker_billing_cycle_toggled`, `plan_picker_trial_started`, `sidebar_subscribe_card_clicked`, `trial_started`, `trial_will_end_3d`, `trial_converted_paid`, `trial_canceled`, `trial_email_sent`)
+- 2 emails de relance pendant le trial (J-4 + J-1) + 1 email post-expiry envoyé immédiatement depuis le webhook
+- Préservation de la "garantie remboursement 14 jours" post-paiement (coexiste avec le trial, à expliciter sur /pricing FAQ V0+)
+
+**À revisiter** :
+
+- Quand on aura **20+ checkout initiés** mesurés, comparer le taux trial-to-paid avec et sans annuel par défaut. Si annuel ne convertit pas plus, repasser à mensuel par défaut.
+- Si **< 50 % conversion trial→paid** observée, itérer le copy du picker et des emails J-4/J-1 (a/b test via `useFeatureFlag` déjà scaffold).
+- Setup manuel restant côté Stripe Dashboard : créer 3 nouveaux Prices annuels (`STRIPE_PRICE_*_ANNUAL`) à monthly × 12 × 0,8. Sans ces env vars, le picker fallback gracieusement sur le cycle mensuel (priceIdForPlan log un warn et utilise le price mensuel).
+
+---
+
 #### 2026-06-08 — Instrumentation PostHog exhaustive (autocapture + session replay + ~40 events custom) avant trafic
 
 **Contexte** : Le wizard PostHog (commit `e66dd07`) a câblé 15 events business critiques (login, onboarding, brand CRUD, run manuel, public audit, Stripe webhook), un reverse-proxy `/ingest` sur `mamie-geo.fr`, et un identify minimal sur l'app authentifiée. Mais : pas d'autocapture, pas de pageviews, pas de session replay, identify ne porte pas le contexte workspace (plan/role/brand_count), pas de Groups Analytics, et 0 event sur les CRUD app (prompts/competitors/audits), les CSV exports, le time-range dashboard, les quotas hits, l'upgrade banner. Avec lancement public imminent et trafic encore nul, c'est le moment de poser l'instrumentation complète pour que les funnels d'acquisition / activation / conversion / rétention collectent dès le 1er visiteur.

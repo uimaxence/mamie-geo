@@ -23,6 +23,9 @@ export interface SidebarData {
     /** Timestamp du hard-cap LLM hit, non null = workspace gelé,
      *  utilisé par UpgradeBanner pour afficher le statut. */
     hardCapHitAt: Date | null;
+    /** Fin du trial 14j Stripe, non null = workspace en trial avec carte
+     *  posée. Alimente le countdown sidebar + variants picker. */
+    trialEndsAt: Date | null;
   };
   brands: Array<{ id: string; name: string; domain: string }>;
   currentBrandId: string;
@@ -47,6 +50,7 @@ export const loadSidebarData = cache(async (): Promise<SidebarData | null> => {
       plan: workspaces.plan,
       slug: workspaces.slug,
       hardCapHitAt: workspaces.hardCapHitAt,
+      trialEndsAt: workspaces.trialEndsAt,
     })
     .from(workspaceMembers)
     .innerJoin(workspaces, eq(workspaces.id, workspaceMembers.workspaceId))
@@ -75,6 +79,7 @@ export const loadSidebarData = cache(async (): Promise<SidebarData | null> => {
       plan: ws.plan,
       slug: ws.slug,
       hardCapHitAt: ws.hardCapHitAt,
+      trialEndsAt: ws.trialEndsAt,
     },
     brands: brandsRows,
     // V0 : 1 seule brand par workspace, on prend la plus ancienne. V1

@@ -265,7 +265,79 @@ la doc devient un cimetière.
 
 ## 9. État du projet (snapshot — 2026-06-08)
 
-> Mise à jour 2026-06-08 (soir) — Instrumentation PostHog exhaustive
+> Mise à jour 2026-06-08 (nuit) — Refonte funnel conversion : picker
+> post-onboarding + sidebar Subscribe + trial 14j carte requise
+>
+> **Funnel actif vs banner passif** (cf. doc 09 § 2026-06-08 refonte
+> funnel) : le user post-onboarding voit désormais le `<PlanPickerModal>`
+> (3 cards Solo/Starter/Pro, toggle Annuel/Mensuel avec annuel
+> pré-sélectionné + badge "Save 20 %", CTA "Démarrer mon essai 14
+> jours") au lieu de juste un `<UpgradeBanner>` ignorable. 3 variants :
+> "default" (post-onboarding ou via sidebar), "urgent" (J-2 avant fin
+> de trial, bandeau orange + countdown), "expired" (post-expiration, X
+> retiré, lien "plus tard 24h" seul). Dismiss en sessionStorage (1×/
+> session) ou localStorage TTL 24h (variant expired).
+>
+> **Sidebar Subscribe card** : nouvelle card en bas de la sidebar app
+> (entre nav et UserMenu), pattern Vercel/Linear/Waalaxy. 4 variants
+> selon plan : "default" (trialing sans carte, bleu brand), "trial"
+> (trialing avec carte > J+3, sobre), "urgent" (trial ≤ J+3, warning),
+> "expired" (error). Clic dispatch un CustomEvent
+> `mamie:open-plan-picker` que le trigger écoute. S'efface dès que
+> plan ∈ {solo, starter, pro, agency, enterprise}.
+>
+> **Trial 14j avec carte requise** : lève la condition "quand capital
+> disponible" de la décision 2026-05-14 — avec carte requise, pas de
+> risque LLM (la carte est posée au checkout, l'user n'est pas facturé
+> pendant 14 j, puis Stripe bascule auto en active sauf annulation).
+> `openCheckout(plan, cycle, { trial })` ajoute `subscription_data: {
+> trial_period_days: 14, trial_settings: { end_behavior: {
+> missing_payment_method: "pause" } } }` + `payment_method_collection:
+> "always"` pour forcer la collecte de carte. `handleCheckoutCompleted`
+> détecte `subscription.status === "trialing"` et garde le workspace
+> en plan="trialing" avec `trialEndsAt` rempli (table workspaces
+> colonne déjà existante depuis Sprint 0, non utilisée jusqu'ici).
+> `handleSubscriptionUpdated` détecte la transition trial → active et
+> fire l'event PostHog `trial_converted_paid`. Nouveau handler
+> `handleTrialWillEnd` câblé sur `customer.subscription.trial_will_end`
+> (Stripe envoie 3 j avant la fin) : capture event PostHog +
+> envoi email J-3.
+>
+> **Stripe Prices annuels** : `priceIdForPlan(plan, cycle)` supporte
+> `cycle="annual"` via 3 nouvelles env vars optionnelles
+> (`STRIPE_PRICE_SOLO_ANNUAL`, `STRIPE_PRICE_STARTER_ANNUAL`,
+> `STRIPE_PRICE_PRO_ANNUAL`). Fallback gracieux sur le mensuel si
+> l'annuel manque (avec console.warn). Helper `annualBillingAvailable()`
+> renvoie true uniquement si les 3 sont configurés.
+> `planFromPriceId(priceId)` renvoie désormais `{ plan, cycle }` au
+> lieu de juste `plan` — 3 call sites webhook handlers mis à jour pour
+> destructurer `match.plan`. Setup manuel restant : créer les 3 Prices
+> dans Stripe Dashboard (calcul : monthlyEur × 12 × 0,8 → 95,90 / 470 /
+> 1 430 € HT/an) et ajouter les env vars en prod + local.
+>
+> **Emails de relance trial** : 2 templates `trial-reminder.ts`
+> (variants J-4 = "Plus que 4 jours d'essai" + J-1 = "Demain ton
+> abonnement démarre") + 1 template `trial-expired.ts` envoyé
+> immédiatement depuis `handleSubscriptionDeleted` quand le trial est
+> annulé. Pattern HTML inline + text fallback existant
+> ([welcome-paid.ts](src/lib/email/templates/welcome-paid.ts)) à
+> recopier. Nouveau cron `/api/cron/trial-emails` (08:00 UTC daily,
+> ajouté à vercel.json) scanne les workspaces en trial avec
+> `trialEndsAt` proche, calcule daysToEnd, idempotence via events
+> kind=`trial_email_sent` payload.template + capture event PostHog
+> `trial_email_sent`.
+>
+> **Nouveaux events PostHog** (au-dessus des ~40 captés au commit
+> e85b017) : `plan_picker_opened` (trigger, variant, trial_days_left,
+> plan), `plan_picker_skipped` (variant, reason), `plan_picker_billing_
+> cycle_toggled` (from, to, variant), `plan_picker_trial_started` (plan,
+> billing_cycle, trigger), `sidebar_subscribe_card_clicked` (plan,
+> variant), `trial_started` (plan, billing_cycle, trial_ends_at),
+> `trial_will_end_3d` (depuis webhook), `trial_converted_paid` (plan,
+> billing_cycle, mrr), `trial_canceled` (was_in_trial=true depuis
+> webhook), `trial_email_sent` (template, days_to_end).
+>
+> Précédente (2026-06-08 soir) — Instrumentation PostHog exhaustive
 > avant trafic
 >
 > **Couverture analytics complète** (cf. doc 09 § 2026-06-08

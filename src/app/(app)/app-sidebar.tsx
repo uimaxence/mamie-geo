@@ -27,6 +27,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui";
 import { Logo } from "@/components/marketing/logo";
+import { SidebarSubscribeCard } from "@/components/app/sidebar-subscribe-card";
 import type { SidebarData } from "./app-sidebar-data";
 
 // Sidebar app : logo Mamie GEO (top), nav sections (middle), user menu
@@ -100,6 +101,12 @@ function SidebarInner({ data, onNavigate }: { data: SidebarData; onNavigate?: ()
           criticalIssuesCount={data.criticalIssuesCount}
         />
       </nav>
+
+      {/* Subscribe card pour plans non-actifs (trialing/expired/canceled) */}
+      <SidebarSubscribeCard
+        plan={data.workspace.plan}
+        trialEndsAt={data.workspace.trialEndsAt?.toISOString() ?? null}
+      />
 
       {/* Bottom, user menu */}
       <div className="border-t border-[color:var(--color-border)] p-3">

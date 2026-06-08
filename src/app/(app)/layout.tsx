@@ -6,7 +6,9 @@ import { db } from "@/db/client";
 import { brands, prompts, user as userTable, workspaces } from "@/db/schema";
 import { getUserContext } from "@/lib/auth/user-context";
 import { planToMrr } from "@/lib/plans/mrr";
+import { PlanPickerModalTrigger } from "@/components/app/plan-picker-modal-trigger";
 import { PostHogUserIdentify } from "@/components/app/posthog-user-identify";
+import { Suspense } from "react";
 import { Toaster, TooltipProvider } from "@/components/ui";
 
 // Layout du route group (app). Vérifie l'auth, toute route /app/*
@@ -29,6 +31,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const ctx = await getUserContext(session.user.id);
 
   let identifyProps: React.ComponentProps<typeof PostHogUserIdentify> | null = null;
+  let trialEndsAt: string | null = null;
   if (ctx) {
     const brandRows = await db
       .select({ id: brands.id })
@@ -40,7 +43,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         ? db.$count(prompts, inArray(prompts.brandId, brandIds))
         : Promise.resolve(0),
       db
-        .select({ createdAt: workspaces.createdAt })
+        .select({ createdAt: workspaces.createdAt, trialEndsAt: workspaces.trialEndsAt })
         .from(workspaces)
         .where(eq(workspaces.id, ctx.workspace.id))
         .limit(1),
@@ -50,6 +53,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         .where(eq(userTable.id, session.user.id))
         .limit(1),
     ]);
+    trialEndsAt = wsRows[0]?.trialEndsAt?.toISOString() ?? null;
     identifyProps = {
       userId: session.user.id,
       email: session.user.email,
@@ -69,6 +73,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   return (
     <TooltipProvider delayDuration={250} skipDelayDuration={100}>
       {identifyProps && <PostHogUserIdentify {...identifyProps} />}
+      {ctx && (
+        <Suspense fallback={null}>
+          <PlanPickerModalTrigger plan={ctx.workspace.plan} trialEndsAt={trialEndsAt} />
+        </Suspense>
+      )}
       <div className="min-h-screen bg-white">{children}</div>
       <Toaster />
     </TooltipProvider>

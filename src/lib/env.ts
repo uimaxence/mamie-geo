@@ -59,6 +59,13 @@ const schema = z.object({
   STRIPE_PRICE_SOLO: z.string().min(1).optional(),
   STRIPE_PRICE_STARTER: z.string().min(1).optional(),
   STRIPE_PRICE_PRO: z.string().min(1).optional(),
+  // Prices annuels (cf. doc 09 § 2026-06-08 réintroduction trial 14j carte
+  // requise + facturation annuelle pré-sélectionnée). Optionnels au boot
+  // pour ne pas casser preview avant config Stripe Dashboard. Si manquants
+  // au runtime, le picker n'expose que le cycle mensuel.
+  STRIPE_PRICE_SOLO_ANNUAL: z.string().min(1).optional(),
+  STRIPE_PRICE_STARTER_ANNUAL: z.string().min(1).optional(),
+  STRIPE_PRICE_PRO_ANNUAL: z.string().min(1).optional(),
 
   CRON_SECRET: z.string().min(16),
   ADMIN_ALERT_EMAIL: z.string().email(),
