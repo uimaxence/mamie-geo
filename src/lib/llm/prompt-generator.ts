@@ -25,6 +25,13 @@ export interface PromptSuggestionInput {
   // des prompts où la marque ET les concurrents sont plausibles dans la
   // réponse. Sinon, prompts plus génériques sur la catégorie.
   competitors?: readonly string[];
+  // Aliases marque (ex: "Mamie GEO" + "MamieGEO" + "mamie-geo") — utilisés
+  // par Haiku comme contexte enrichi sur les variations de nommage.
+  aliases?: readonly string[];
+  // Prompts déjà trackés — passés à Haiku pour qu'il ÉVITE les doublons
+  // et génère des questions complémentaires. Permet une vraie « régénération
+  // depuis profil » plutôt qu'une suggestion isolée.
+  existingPrompts?: readonly string[];
   // Nombre de prompts à générer (default 5, max 10)
   count?: number;
 }
@@ -157,13 +164,37 @@ function buildUserPrompt(input: PromptSuggestionInput, count: number): string {
       ? `Concurrents directs : ${input.competitors.join(", ")}.`
       : "Pas de liste de concurrents fournie — génère des prompts qui couvrent la catégorie générale.";
 
+  const aliasBlock =
+    input.aliases && input.aliases.length > 0
+      ? `Alias / variations du nom : ${input.aliases.join(", ")}.`
+      : null;
+
+  // Bloc des prompts déjà trackés. On les expose explicitement à Haiku
+  // avec une consigne « ne propose RIEN d'équivalent ». Truncation à 25
+  // entries pour rester sous la limite de tokens (input.length max ~280
+  // chars × 25 = 7000 chars).
+  const existingBlock =
+    input.existingPrompts && input.existingPrompts.length > 0
+      ? [
+          "",
+          "Prompts DÉJÀ trackés (à NE PAS reproposer, même paraphrasés) :",
+          ...input.existingPrompts.slice(0, 25).map((p, i) => `${i + 1}. ${p}`),
+          "",
+          "Tes suggestions doivent être COMPLÉMENTAIRES : couvrir d'autres angles, étapes du parcours, ou personas que la liste ci-dessus ne couvre pas encore.",
+        ].join("\n")
+      : null;
+
   return [
     `Marque cible : ${input.brandName}`,
     `Domaine : ${input.domain}`,
+    aliasBlock,
     competitorBlock,
+    existingBlock,
     "",
     `Génère ${count} questions, en ${input.language === "fr" ? "français" : "anglais"}, que les prospects de cette marque posent (ou poseraient) à ChatGPT/Claude/Le Chat avant d'envisager de la contacter ou d'acheter chez elle.`,
-  ].join("\n");
+  ]
+    .filter((line): line is string => line !== null)
+    .join("\n");
 }
 
 function parseToolInput(raw: unknown, expectedCount: number): string[] {

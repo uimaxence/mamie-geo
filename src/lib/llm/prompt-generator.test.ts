@@ -116,4 +116,64 @@ describe("createAnthropicPromptGenerator", () => {
       createAnthropicPromptGenerator({ apiKey: "test-key", model: "claude-fictif-9-9" }),
     ).toThrow(/Tarif inconnu/);
   });
+
+  it("injecte les prompts existants et aliases dans le user message", async () => {
+    const cassette = await loadCassette("prompt-suggestion");
+    let capturedBody: string | undefined;
+    const fakeFetch = vi.fn(async (_url: unknown, init: unknown) => {
+      capturedBody =
+        typeof init === "object" && init !== null && "body" in init
+          ? String((init as { body: unknown }).body)
+          : undefined;
+      return new Response(JSON.stringify(cassette), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      });
+    }) as unknown as typeof fetch;
+
+    const generator = createAnthropicPromptGenerator({ apiKey: "test-key", fetch: fakeFetch });
+
+    await generator.suggest({
+      brandName: "Mamie GEO",
+      domain: "mamie-geo.fr",
+      language: "fr",
+      aliases: ["MamieGEO", "mamie-geo"],
+      existingPrompts: ["Quels sont les meilleurs outils GEO ?", "Comment tracker ChatGPT ?"],
+    });
+
+    expect(capturedBody).toBeDefined();
+    expect(capturedBody).toContain("Alias / variations du nom");
+    expect(capturedBody).toContain("MamieGEO");
+    expect(capturedBody).toContain("Prompts DÉJÀ trackés");
+    expect(capturedBody).toContain("Quels sont les meilleurs outils GEO");
+    expect(capturedBody).toContain("COMPLÉMENTAIRES");
+  });
+
+  it("tronque la liste des prompts existants à 25 entrées", async () => {
+    const cassette = await loadCassette("prompt-suggestion");
+    let capturedBody: string | undefined;
+    const fakeFetch = vi.fn(async (_url: unknown, init: unknown) => {
+      capturedBody =
+        typeof init === "object" && init !== null && "body" in init
+          ? String((init as { body: unknown }).body)
+          : undefined;
+      return new Response(JSON.stringify(cassette), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      });
+    }) as unknown as typeof fetch;
+
+    const generator = createAnthropicPromptGenerator({ apiKey: "test-key", fetch: fakeFetch });
+
+    const existing = Array.from({ length: 40 }, (_, i) => `prompt numero ${i + 1}`);
+    await generator.suggest({
+      brandName: "X",
+      domain: "x.fr",
+      language: "fr",
+      existingPrompts: existing,
+    });
+
+    expect(capturedBody).toContain("prompt numero 25");
+    expect(capturedBody).not.toContain("prompt numero 26");
+  });
 });

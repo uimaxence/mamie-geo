@@ -8,7 +8,7 @@ import { competitors, prompts } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { getUserContext } from "@/lib/auth/user-context";
 import { getPostHogClient, shutdownPostHog } from "@/lib/posthog-server";
-import { quotaReached, quotasFor, type PlanKey } from "@/lib/plans/quotas";
+import { quotaReached, quotasFor, type PlanKey, type QuotaReachedError } from "@/lib/plans/quotas";
 import {
   createPromptSchema,
   updatePromptSchema,
@@ -167,26 +167,37 @@ export interface SuggestResult {
 }
 
 /**
- * Wrapper sur `suggestPrompts()` de l'onboarding : charge le contexte
- * workspace/brand de l'user et passe à l'helper Haiku. Les prompts
- * suggérés ne sont PAS insérés en BDD, l'UI doit afficher les
- * suggestions et l'user valide avant insertion (via createPrompt).
+ * Wrapper sur `suggestPrompts()` de l'onboarding : régénère des prompts
+ * depuis le profil complet (brand + aliases + concurrents + prompts
+ * existants). Haiku reçoit la liste des prompts déjà trackés et est
+ * instruit de proposer des questions COMPLÉMENTAIRES (pas de doublons,
+ * pas de paraphrases). Les suggestions ne sont PAS insérées en BDD,
+ * l'UI affiche et l'user valide via createPrompt / bulkAddPrompts.
  */
 export async function suggestMorePrompts(): Promise<SuggestResult | ActionError> {
   const { ctx, userId } = await getCtxOrThrow();
 
-  // Charge les concurrents pour informer la suggestion LLM
   const competitorsRows = await db
     .select({ name: competitors.name })
     .from(competitors)
     .where(eq(competitors.brandId, ctx.brand.id));
   const competitorNames = competitorsRows.map((c) => c.name);
 
+  const existingRows = await db
+    .select({ text: prompts.text })
+    .from(prompts)
+    .where(eq(prompts.brandId, ctx.brand.id));
+  const existingTexts = existingRows.map((r) => r.text);
+
   const posthog = getPostHogClient();
   posthog.capture({
     distinctId: userId,
     event: "prompt_ai_suggestions_requested",
-    properties: { source: "prompts_page" },
+    properties: {
+      source: "prompts_page",
+      existing_count: existingTexts.length,
+      competitors_count: competitorNames.length,
+    },
   });
   await shutdownPostHog();
 
@@ -195,10 +206,74 @@ export async function suggestMorePrompts(): Promise<SuggestResult | ActionError>
       brandName: ctx.brand.name,
       domain: ctx.brand.domain,
       competitors: competitorNames,
+      aliases: ctx.brand.aliases,
+      existingPrompts: existingTexts,
     });
     return { ok: true, prompts: result.prompts, costUsd: result.costUsd };
   } catch (err) {
     const message = err instanceof Error ? err.message : "Suggestion indisponible";
     return { ok: false, error: message };
   }
+}
+
+// ─── BULK ADD ────────────────────────────────────────────────────────
+
+export interface BulkAddResult {
+  ok: true;
+  added: number;
+  skipped: number;
+  /** Si quota atteint en cours de boucle, on stoppe et on remonte le détail. */
+  quotaReached?: QuotaReachedError;
+}
+
+/**
+ * Insère plusieurs prompts d'un coup. Utilisé par le bouton « Tout ajouter »
+ * après une suggestion IA. Respecte le quota du plan : s'arrête dès qu'il
+ * est atteint et renvoie le compteur (added + skipped). Pas de transaction
+ * — chaque INSERT est isolé pour qu'une violation de constraint n'annule
+ * pas les précédentes.
+ */
+export async function bulkAddPrompts(texts: string[]): Promise<BulkAddResult | ActionError> {
+  const { ctx } = await getCtxOrThrow();
+
+  const cleaned = Array.from(
+    new Set(texts.map((t) => t.trim()).filter((t) => t.length >= 5 && t.length <= 500)),
+  );
+  if (cleaned.length === 0) {
+    return { ok: false, error: "Aucun prompt valide à ajouter" };
+  }
+
+  const quotas = quotasFor(ctx.workspace.plan);
+  const current = await db.$count(prompts, eq(prompts.brandId, ctx.brand.id));
+  const remaining =
+    quotas.prompts === Number.POSITIVE_INFINITY
+      ? Number.POSITIVE_INFINITY
+      : Math.max(0, quotas.prompts - current);
+
+  let added = 0;
+  let skipped = 0;
+  let quotaError: QuotaReachedError | undefined;
+
+  for (const text of cleaned) {
+    if (added >= remaining) {
+      quotaError = quotaReached(
+        "prompts",
+        current + added,
+        quotas.prompts,
+        ctx.workspace.plan as PlanKey,
+      );
+      skipped = cleaned.length - added;
+      break;
+    }
+    await db.insert(prompts).values({
+      brandId: ctx.brand.id,
+      text,
+      language: "fr",
+      isActive: true,
+    });
+    added += 1;
+  }
+
+  revalidatePath("/app/prompts");
+  return { ok: true, added, skipped, quotaReached: quotaError };
 }

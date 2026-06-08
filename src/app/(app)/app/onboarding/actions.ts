@@ -254,9 +254,11 @@ const suggestSchema = z.object({
     .max(120)
     .regex(/^[a-z0-9.-]+\.[a-z]{2,}$/i),
   competitors: z.array(z.string().min(1).max(80)).max(10).default([]),
+  aliases: z.array(z.string().min(1).max(80)).max(10).default([]),
+  existingPrompts: z.array(z.string().min(1).max(500)).max(50).default([]),
 });
 
-export type SuggestPromptsInput = z.infer<typeof suggestSchema>;
+export type SuggestPromptsInput = z.input<typeof suggestSchema>;
 
 export interface SuggestPromptsResult {
   prompts: string[];
@@ -284,6 +286,8 @@ export async function suggestPrompts(raw: SuggestPromptsInput): Promise<SuggestP
     domain: data.domain,
     language: "fr",
     competitors: data.competitors.length > 0 ? data.competitors : undefined,
+    aliases: data.aliases.length > 0 ? data.aliases : undefined,
+    existingPrompts: data.existingPrompts.length > 0 ? data.existingPrompts : undefined,
     count: 5,
   });
 

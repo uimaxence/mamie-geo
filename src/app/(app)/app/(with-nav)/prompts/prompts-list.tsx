@@ -33,6 +33,7 @@ import {
   toast,
 } from "@/components/ui";
 import {
+  bulkAddPrompts,
   createPrompt,
   deletePrompt,
   suggestMorePrompts,
@@ -138,6 +139,30 @@ export function PromptsList({ initialPrompts, plan, maxPrompts }: PromptsListPro
     });
   }
 
+  function handleBulkAdd() {
+    if (!suggestions || suggestions.length === 0) return;
+    startTransition(async () => {
+      const result = await bulkAddPrompts(suggestions);
+      if ("added" in result) {
+        if (result.added > 0) {
+          toast.success(
+            `${result.added} prompt${result.added > 1 ? "s ajoutés" : " ajouté"}` +
+              (result.skipped > 0 ? ` (${result.skipped} ignoré(s), quota atteint)` : ""),
+          );
+        }
+        if (result.quotaReached) {
+          toast.error(
+            `Quota ${result.quotaReached.max} prompts atteint sur le plan ${result.quotaReached.plan}.`,
+          );
+        }
+        setSuggestions(null);
+        router.refresh();
+      } else {
+        toast.error(result.error);
+      }
+    });
+  }
+
   return (
     <>
       <header className="flex flex-wrap items-end justify-between gap-6">
@@ -150,7 +175,11 @@ export function PromptsList({ initialPrompts, plan, maxPrompts }: PromptsListPro
         <div className="flex flex-wrap items-center gap-3">
           <Button variant="secondary" onClick={handleSuggest} disabled={suggesting}>
             <Sparkles size={14} strokeWidth={2} />
-            {suggesting ? "Génération…" : "Suggérer via IA"}
+            {suggesting
+              ? "Génération…"
+              : initialPrompts.length > 0
+                ? "Régénérer depuis profil"
+                : "Suggérer via IA"}
           </Button>
           <Button variant="primary" onClick={() => setCreateOpen(true)}>
             <Plus size={14} strokeWidth={2.2} />
@@ -159,18 +188,34 @@ export function PromptsList({ initialPrompts, plan, maxPrompts }: PromptsListPro
         </div>
       </header>
 
-      {/* Suggestions IA : liste éphémère, click pour ajouter */}
+      {/* Suggestions IA : liste éphémère, click pour ajouter une à la fois,
+       * ou "Tout ajouter" pour bulk insert. Régénération depuis le profil
+       * complet (brand + aliases + concurrents + prompts existants) ; les
+       * doublons des prompts déjà trackés sont évités par Haiku. */}
       {suggestions && suggestions.length > 0 && (
         <section className="mt-8 rounded-[var(--radius-xl)] border border-dashed border-[color:var(--color-border-strong)] bg-[color:var(--color-gray-50)] p-5">
-          <div className="flex items-center justify-between">
-            <p className="type-eyebrow">Suggestions IA</p>
-            <button
-              type="button"
-              onClick={() => setSuggestions(null)}
-              className="text-xs text-[color:var(--color-muted)] hover:text-[color:var(--color-ink)]"
-            >
-              Fermer
-            </button>
+          <div className="flex items-center justify-between gap-3">
+            <p className="type-eyebrow">
+              Suggestions IA · {suggestions.length} prompt{suggestions.length > 1 ? "s" : ""}
+            </p>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={handleBulkAdd}
+                disabled={pending || suggestions.length === 0}
+              >
+                <Plus size={12} strokeWidth={2.2} />
+                {pending ? "Ajout…" : "Tout ajouter"}
+              </Button>
+              <button
+                type="button"
+                onClick={() => setSuggestions(null)}
+                className="text-xs text-[color:var(--color-muted)] hover:text-[color:var(--color-ink)]"
+              >
+                Fermer
+              </button>
+            </div>
           </div>
           <ul className="mt-4 flex flex-col gap-2">
             {suggestions.map((text) => (
