@@ -1,4 +1,4 @@
-import { Badge, CornerFrame, Section, StatusDot } from "@/components/ui";
+import { CornerFrame, Section } from "@/components/ui";
 import { TrackedLinkButton } from "@/components/marketing/tracked-link-button";
 import { HeroDataShowcase } from "./hero-data-showcase";
 import { HeroLLMRotator } from "./hero-llm-rotator";
@@ -9,15 +9,15 @@ import { HeroLLMRotator } from "./hero-llm-rotator";
 // data tiltées sous les CTAs (mini-charts + tooltips), desktop only.
 // PR 2026-05-20 : pattern signature retiré (fausse bonne idée après tests),
 // l'identité visuelle s'appuie sur logo + couleur + CornerFrame.
+// PR 2026-06-08 : badge "Beta · Generative Engine Optimization" retiré
+// (revendiquait une autorité sans preuve). À remplacer par un vrai trust
+// signal quand on aura des logos clients / chiffres concrets.
 
 export function Hero() {
   return (
     <Section pad="xl" className="relative overflow-hidden">
       <CornerFrame className="relative mx-auto max-w-3xl">
         <div className="flex flex-col items-center px-2 text-center sm:px-6">
-          <Badge tone="accent" icon={<StatusDot tone="accent" pulse />} className="mb-8">
-            Beta · Generative Engine Optimization
-          </Badge>
           <h1 className="type-display">
             Sache enfin si <HeroLLMRotator /> parle de toi.
           </h1>

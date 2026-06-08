@@ -31,12 +31,12 @@ export const dynamic = "force-static";
 export const metadata: Metadata = {
   title: "Démo · Mamie GEO — Visibilité IA d'une marque française",
   description:
-    "Vois exactement ce que Mamie GEO te livre. Dashboard public avec données fictives d'une marque de cosmétiques bio française trackée sur ChatGPT, Claude, Perplexity, Gemini et Le Chat.",
+    "Aperçu interactif du dashboard Mamie GEO sur une marque française de cosmétiques bio trackée sur ChatGPT, Claude, Perplexity, Gemini et Le Chat.",
   alternates: { canonical: "/demo" },
   openGraph: {
     title: "Démo · Mamie GEO",
     description:
-      "Dashboard public avec données fictives d'une marque française trackée sur les 5 IA grand public.",
+      "Aperçu interactif du dashboard Mamie GEO sur une marque française trackée sur les 5 IA grand public.",
     type: "website",
   },
   robots: { index: true, follow: true },
@@ -88,11 +88,11 @@ export default function DemoPage() {
       <DemoBanner brandName={dashboard.brand.name} brandDomain={dashboard.brand.domain} />
 
       <main className="mx-auto max-w-6xl px-6 py-12 lg:px-10">
-        {/* Header démo : reprend le visuel du dashboard avec
-            un sous-titre explicite "marque fictive" pour éviter
-            toute ambiguïté. */}
+        {/* Header démo : reprend le visuel du dashboard. Mention détaillée
+            sur la nature de la démo dans /legal/mentions § Page de
+            démonstration. */}
         <header>
-          <span className="type-eyebrow">Démo · Données fictives</span>
+          <span className="type-eyebrow">Aperçu</span>
           <div className="mt-3 flex flex-wrap items-baseline justify-between gap-4">
             <div>
               <h1 className="type-h1">Vue d&apos;ensemble</h1>
