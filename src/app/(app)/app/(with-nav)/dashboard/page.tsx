@@ -5,6 +5,7 @@ import { auth } from "@/lib/auth";
 import { computeDelta, getDashboardData, getVisibilityTrend } from "@/lib/dashboard/queries";
 import { Card, Stat } from "@/components/ui";
 import { BreakdownBars } from "@/components/charts/breakdown-bars";
+import { DownloadableChart } from "@/components/charts/downloadable-chart";
 import { LLM_COLORS, LLM_LABELS } from "@/components/charts/llm-colors";
 import { BatchesTable } from "@/components/app/batches-table";
 import { deriveSourcesFunnelRatios } from "@/lib/metrics/sources-funnel";
@@ -156,7 +157,11 @@ export default async function DashboardPage() {
           </div>
         </div>
         <div className="mt-6">
-          <BreakdownBars segments={breakdownSegments} mode="absolute" />
+          <DownloadableChart filename="visibilite-par-llm">
+            <div className="p-4">
+              <BreakdownBars segments={breakdownSegments} mode="absolute" />
+            </div>
+          </DownloadableChart>
         </div>
       </section>
 

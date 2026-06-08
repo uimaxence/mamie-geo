@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { Sparkles } from "lucide-react";
 import { SegmentedControl, type SegmentedControlOption } from "@/components/ui";
+import { DownloadableChart } from "@/components/charts/downloadable-chart";
 import { LineChart, type LineChartDatum } from "@/components/charts/line-chart";
 
 // Section "Évolution" du dashboard, avec un SegmentedControl pour
@@ -96,23 +97,27 @@ export function TrendSection({
           size="sm"
         />
       </div>
-      <div className="relative mt-6">
-        <LineChart data={scaffold} series={effectiveSeries} />
-        {isSparse && (
-          <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-            <div className="flex items-center gap-2 rounded-full border border-[color:var(--color-border)] bg-white/85 px-4 py-2 text-sm text-[color:var(--color-ink-soft)] shadow-[var(--shadow-sm)] backdrop-blur-sm">
-              <Sparkles size={14} className="text-[color:var(--color-accent)]" />
-              <span>
-                Données en cours de collecte,{" "}
-                <span className="font-medium text-[color:var(--color-ink)]">
-                  {fullTrend.length === 0
-                    ? "le premier run remplit la courbe"
-                    : `${fullTrend.length} jour${fullTrend.length > 1 ? "s" : ""} sur ${SPARSE_THRESHOLD} requis`}
-                </span>
-              </span>
-            </div>
+      <div className="mt-6">
+        <DownloadableChart filename={`visibilite-evolution-${range}`}>
+          <div className="relative p-4">
+            <LineChart data={scaffold} series={effectiveSeries} />
+            {isSparse && (
+              <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                <div className="flex items-center gap-2 rounded-full border border-[color:var(--color-border)] bg-white/85 px-4 py-2 text-sm text-[color:var(--color-ink-soft)] shadow-[var(--shadow-sm)] backdrop-blur-sm">
+                  <Sparkles size={14} className="text-[color:var(--color-accent)]" />
+                  <span>
+                    Données en cours de collecte,{" "}
+                    <span className="font-medium text-[color:var(--color-ink)]">
+                      {fullTrend.length === 0
+                        ? "le premier run remplit la courbe"
+                        : `${fullTrend.length} jour${fullTrend.length > 1 ? "s" : ""} sur ${SPARSE_THRESHOLD} requis`}
+                    </span>
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
-        )}
+        </DownloadableChart>
       </div>
     </section>
   );
