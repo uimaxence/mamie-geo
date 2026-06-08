@@ -40,3 +40,13 @@ Thumbs.db
 
 # Claude Code local (settings perso + worktrees)
 .claude/
+
+# Working / scratch files (screenshots, drafts perso, exports)
+src/assets/
+
+# Markdown — ignoré par défaut pour éviter de versionner les rapports
+# IA (wizards, plans, notes scratch). Les .md essentiels du projet
+# (CLAUDE.md, README.md, geo-project/*.md, blog/README.md) restent
+# trackés car gitignore n'affecte que les fichiers non encore versionnés.
+# Pour ajouter un nouveau .md intentionnellement : `git add -f <fichier>`.
+*.md
