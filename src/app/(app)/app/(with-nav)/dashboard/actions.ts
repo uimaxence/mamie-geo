@@ -8,6 +8,7 @@ import { db } from "@/db/client";
 import { brands, prompts, runs, workspaceMembers, workspaces } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import type { LLMValue } from "@/lib/llm";
+import { getPostHogClient, shutdownPostHog } from "@/lib/posthog-server";
 import { enqueue } from "@/lib/queue";
 
 // Server Action pour le bouton "Lancer un run" du dashboard. Même logique
@@ -80,6 +81,14 @@ export async function triggerRunNow(): Promise<TriggerResult> {
       runsCreated += 1;
     }
   }
+
+  const posthog = getPostHogClient();
+  posthog.capture({
+    distinctId: session.user.id,
+    event: "run_triggered_manually",
+    properties: { jobs_enqueued: jobsEnqueued, runs_created: runsCreated },
+  });
+  await shutdownPostHog();
 
   // Force le re-render du dashboard côté client après l'action
   revalidatePath("/app/dashboard");

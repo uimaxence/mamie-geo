@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Asterisk, ArrowLeft, Mail } from "lucide-react";
+import posthog from "posthog-js";
 import { authClient } from "@/lib/auth-client";
 import { Button, Field, Input } from "@/components/ui";
 import { Logo } from "@/components/marketing/logo";
@@ -58,7 +59,9 @@ export function LoginContent({ googleEnabled }: { googleEnabled: boolean }) {
         return;
       }
       setStatus("sent");
+      posthog.capture("magic_link_requested", { email, is_signup: isSignup });
     } catch (error) {
+      posthog.captureException(error);
       console.error("[login] fetch error:", error);
       setStatus("error");
       setErrorMessage(
@@ -90,6 +93,7 @@ export function LoginContent({ googleEnabled }: { googleEnabled: boolean }) {
     if (googleStatus === "sending") return;
     setGoogleStatus("sending");
     setErrorMessage(null);
+    posthog.capture("google_signin_clicked");
     try {
       // signIn.social redirige vers l'écran de consentement Google.
       // Better Auth gère le callback côté /api/auth/callback/google
@@ -98,9 +102,7 @@ export function LoginContent({ googleEnabled }: { googleEnabled: boolean }) {
     } catch (error) {
       console.error("[login] Google OAuth error:", error);
       setGoogleStatus("idle");
-      setErrorMessage(
-        error instanceof Error ? error.message : "Erreur Google sign-in inattendue.",
-      );
+      setErrorMessage(error instanceof Error ? error.message : "Erreur Google sign-in inattendue.");
     }
   }
 
@@ -232,10 +234,7 @@ function IdleState({
         </>
       )}
 
-      <form
-        onSubmit={onSubmit}
-        className={`flex flex-col gap-5 ${googleEnabled ? "" : "mt-8"}`}
-      >
+      <form onSubmit={onSubmit} className={`flex flex-col gap-5 ${googleEnabled ? "" : "mt-8"}`}>
         <Field label="Adresse email">
           <Input
             type="email"

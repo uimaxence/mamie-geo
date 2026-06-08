@@ -9,6 +9,25 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   // Routes `.mdx` traitées comme des pages App Router. cf. PR 10a.
   pageExtensions: ["ts", "tsx", "mdx"],
+  // Requis par PostHog pour les trailing slash des API requests.
+  skipTrailingSlashRedirect: true,
+  // Reverse proxy PostHog EU — réduit le blocage par les ad-blockers.
+  async rewrites() {
+    return [
+      {
+        source: "/ingest/static/:path*",
+        destination: "https://eu-assets.i.posthog.com/static/:path*",
+      },
+      {
+        source: "/ingest/array/:path*",
+        destination: "https://eu-assets.i.posthog.com/array/:path*",
+      },
+      {
+        source: "/ingest/:path*",
+        destination: "https://eu.i.posthog.com/:path*",
+      },
+    ];
+  },
   // Redirect défensif mamie-seo.fr → mamie-geo.fr (le redirect principal
   // est configuré DNS-level via Vercel Domains ; ce hook est un filet de
   // sécurité au cas où une requête atteindrait l'app avec le mauvais host).

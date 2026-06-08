@@ -9,6 +9,7 @@ import { db } from "@/db/client";
 import { brands, workspaceMembers, workspaces } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { logCronEvent } from "@/lib/cron-logger";
+import { getPostHogClient, shutdownPostHog } from "@/lib/posthog-server";
 import { quotasFor, type PlanKey } from "@/lib/plans/quotas";
 
 // Server action : crée une nouvelle marque (brand) dans le workspace de
@@ -116,6 +117,14 @@ export async function createBrand(input: CreateBrandInput): Promise<CreateBrandR
     domain: data.domain,
   });
 
+  const posthog = getPostHogClient();
+  posthog.capture({
+    distinctId: session.user.id,
+    event: "brand_created",
+    properties: { plan: ws.plan },
+  });
+  await shutdownPostHog();
+
   // Invalide tout le segment /app pour que la sidebar et les data
   // dépendantes (loadSidebarData, dashboard, prompts, etc.) rechargent.
   revalidatePath("/app", "layout");
@@ -171,6 +180,10 @@ export async function pauseBrand(brandId: string): Promise<PauseBrandResult> {
     userId: session.user.id,
   });
 
+  const posthog = getPostHogClient();
+  posthog.capture({ distinctId: session.user.id, event: "brand_paused" });
+  await shutdownPostHog();
+
   revalidatePath("/app", "layout");
   return { ok: true, pausedAt: now };
 }
@@ -189,6 +202,10 @@ export async function resumeBrand(brandId: string): Promise<PauseBrandResult> {
     brandId,
     userId: session.user.id,
   });
+
+  const posthog = getPostHogClient();
+  posthog.capture({ distinctId: session.user.id, event: "brand_resumed" });
+  await shutdownPostHog();
 
   revalidatePath("/app", "layout");
   return { ok: true, pausedAt: null };

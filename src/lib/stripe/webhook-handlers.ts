@@ -7,6 +7,7 @@ import { sendTransactional } from "@/lib/email";
 import { renderPaymentFailed } from "@/lib/email/templates/payment-failed";
 import { renderWelcomePaid } from "@/lib/email/templates/welcome-paid";
 import { env } from "@/lib/env";
+import { getPostHogClient, shutdownPostHog } from "@/lib/posthog-server";
 import { scheduleRunsForWorkspace } from "@/lib/scheduler/schedule-runs";
 import { planFromPriceId } from "@/lib/stripe/products";
 
@@ -144,6 +145,14 @@ export async function handleCheckoutCompleted(
     "welcome_paid",
   );
 
+  const posthog = getPostHogClient();
+  posthog.capture({
+    distinctId: ws.id,
+    event: "subscription_activated",
+    properties: { plan, from_plan: ws.plan, immediate_runs_enqueued: immediateRuns },
+  });
+  await shutdownPostHog();
+
   return { workspaceId: ws.id, fromPlan: ws.plan, toPlan: plan };
 }
 
@@ -212,6 +221,14 @@ export async function handleSubscriptionDeleted(
     })
     .where(eq(workspaces.id, ws.id));
 
+  const posthog = getPostHogClient();
+  posthog.capture({
+    distinctId: ws.id,
+    event: "subscription_canceled",
+    properties: { from_plan: ws.plan },
+  });
+  await shutdownPostHog();
+
   return { workspaceId: ws.id, fromPlan: ws.plan, toPlan: "expired" };
 }
 
@@ -241,6 +258,14 @@ export async function handlePaymentFailed(invoice: Stripe.Invoice): Promise<Hand
     }),
     "payment_failed",
   );
+
+  const posthog = getPostHogClient();
+  posthog.capture({
+    distinctId: ws.id,
+    event: "payment_failed",
+    properties: { from_plan: ws.plan },
+  });
+  await shutdownPostHog();
 
   return { workspaceId: ws.id, fromPlan: ws.plan, toPlan: "past_due" };
 }

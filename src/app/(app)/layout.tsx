@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
+import { PostHogUserIdentify } from "@/components/app/posthog-user-identify";
 import { Toaster, TooltipProvider } from "@/components/ui";
 
 // Layout du route group (app). Vérifie l'auth, toute route /app/*
@@ -18,6 +19,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <TooltipProvider delayDuration={250} skipDelayDuration={100}>
+      <PostHogUserIdentify userId={session.user.id} email={session.user.email} />
       <div className="min-h-screen bg-white">{children}</div>
       <Toaster />
     </TooltipProvider>

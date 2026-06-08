@@ -7,6 +7,7 @@ import { db } from "@/db/client";
 import { competitors, prompts } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { getUserContext } from "@/lib/auth/user-context";
+import { getPostHogClient, shutdownPostHog } from "@/lib/posthog-server";
 import { quotaReached, quotasFor, type PlanKey } from "@/lib/plans/quotas";
 import {
   createPromptSchema,
@@ -172,7 +173,7 @@ export interface SuggestResult {
  * suggestions et l'user valide avant insertion (via createPrompt).
  */
 export async function suggestMorePrompts(): Promise<SuggestResult | ActionError> {
-  const { ctx } = await getCtxOrThrow();
+  const { ctx, userId } = await getCtxOrThrow();
 
   // Charge les concurrents pour informer la suggestion LLM
   const competitorsRows = await db
@@ -180,6 +181,14 @@ export async function suggestMorePrompts(): Promise<SuggestResult | ActionError>
     .from(competitors)
     .where(eq(competitors.brandId, ctx.brand.id));
   const competitorNames = competitorsRows.map((c) => c.name);
+
+  const posthog = getPostHogClient();
+  posthog.capture({
+    distinctId: userId,
+    event: "prompt_ai_suggestions_requested",
+    properties: { source: "prompts_page" },
+  });
+  await shutdownPostHog();
 
   try {
     const result = await suggestFromOnboarding({

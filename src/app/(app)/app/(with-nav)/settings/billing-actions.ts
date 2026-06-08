@@ -7,6 +7,7 @@ import { workspaces } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { getUserContext } from "@/lib/auth/user-context";
 import { env } from "@/lib/env";
+import { getPostHogClient, shutdownPostHog } from "@/lib/posthog-server";
 import { getStripe } from "@/lib/stripe/client";
 import { isPurchasablePlan, type PurchasablePlan } from "@/lib/stripe/plan-catalog";
 import { priceIdForPlan } from "@/lib/stripe/products";
@@ -28,14 +29,24 @@ export interface BillingActionError {
 export type BillingActionResult = BillingActionOk | BillingActionError;
 
 async function getCtxOrError(): Promise<
-  | { ctx: Awaited<ReturnType<typeof getUserContext>>; userEmail: string; userName?: string }
+  | {
+      ctx: Awaited<ReturnType<typeof getUserContext>>;
+      userId: string;
+      userEmail: string;
+      userName?: string;
+    }
   | { error: string }
 > {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) return { error: "Non authentifié" };
   const ctx = await getUserContext(session.user.id);
   if (!ctx) return { error: "Aucun workspace" };
-  return { ctx, userEmail: session.user.email, userName: session.user.name ?? undefined };
+  return {
+    ctx,
+    userId: session.user.id,
+    userEmail: session.user.email,
+    userName: session.user.name ?? undefined,
+  };
 }
 
 export async function openCheckout(plan: PurchasablePlan): Promise<BillingActionResult> {
@@ -43,7 +54,7 @@ export async function openCheckout(plan: PurchasablePlan): Promise<BillingAction
 
   const got = await getCtxOrError();
   if ("error" in got) return { ok: false, error: got.error };
-  const { ctx, userEmail, userName } = got;
+  const { ctx, userId, userEmail, userName } = got;
   if (!ctx) return { ok: false, error: "Aucun workspace" };
 
   const stripe = getStripe();
@@ -84,6 +95,11 @@ export async function openCheckout(plan: PurchasablePlan): Promise<BillingAction
   });
 
   if (!checkout.url) return { ok: false, error: "Échec création session" };
+
+  const posthog = getPostHogClient();
+  posthog.capture({ distinctId: userId, event: "checkout_initiated", properties: { plan } });
+  await shutdownPostHog();
+
   return { ok: true, url: checkout.url };
 }
 

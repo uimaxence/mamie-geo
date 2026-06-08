@@ -7,6 +7,7 @@ import { renderTechnicalAuditEmail } from "@/lib/email/templates/technical-audit
 import { auditEmailSchema, auditUrlSchema } from "@/lib/audit/schemas";
 import { runAudit } from "@/lib/audit/run";
 import { checkRateLimit, getReport, storeReport } from "@/lib/audit/cache";
+import { getPostHogClient, shutdownPostHog } from "@/lib/posthog-server";
 import type { AuditResult } from "@/lib/audit/types";
 
 // Server actions /outils/audit-technique :
@@ -55,6 +56,18 @@ export async function runAuditAction(rawUrl: string): Promise<AuditResult> {
       scoreGlobal: result.report.scoreGlobal,
       psiUnavailable: result.report.psiUnavailable,
     });
+    const posthog = getPostHogClient();
+    posthog.capture({
+      distinctId: ip,
+      event: "public_audit_completed",
+      properties: {
+        url,
+        score_global: result.report.scoreGlobal,
+        psi_unavailable: result.report.psiUnavailable,
+        duration_ms: durationMs,
+      },
+    });
+    await shutdownPostHog();
   } else {
     logCronEvent({
       level: "warn",
@@ -105,6 +118,14 @@ export async function sendFullReportEmail(
       url: report.url,
       scoreGlobal: report.scoreGlobal,
     });
+    const posthog = getPostHogClient();
+    posthog.identify({ distinctId: parsed.data.email, properties: { email: parsed.data.email } });
+    posthog.capture({
+      distinctId: parsed.data.email,
+      event: "public_audit_report_email_submitted",
+      properties: { url: report.url, score_global: report.scoreGlobal },
+    });
+    await shutdownPostHog();
     return { ok: true };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);

@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Sparkles, X } from "lucide-react";
+import posthog from "posthog-js";
 import { Badge, Button, Field, Input } from "@/components/ui";
 import { quickSetup, submitOnboarding, suggestPrompts, type OnboardingInput } from "./actions";
 
@@ -90,9 +91,14 @@ export function OnboardingWizard({
     startTransition(async () => {
       try {
         await submitOnboarding(payload);
+        posthog.capture("onboarding_completed", {
+          prompts_count: payload.prompts.length,
+          competitors_count: payload.competitors.length,
+        });
         router.push(redirectTarget);
         router.refresh();
       } catch (err) {
+        posthog.captureException(err);
         setError(err instanceof Error ? err.message : "Erreur inconnue");
       }
     });
@@ -117,9 +123,11 @@ export function OnboardingWizard({
           brandName: state.brandName.trim(),
           domain: state.domain.trim(),
         });
+        posthog.capture("onboarding_skipped");
         router.push(redirectTarget);
         router.refresh();
       } catch (err) {
+        posthog.captureException(err);
         setError(err instanceof Error ? err.message : "Erreur inconnue");
       }
     });
@@ -334,6 +342,7 @@ function Step3({ state, setState }: { state: WizardState; setState: (s: WizardSt
       );
       return;
     }
+    posthog.capture("prompt_ai_suggestions_requested", { source: "onboarding" });
     startSuggesting(async () => {
       try {
         const result = await suggestPrompts({
