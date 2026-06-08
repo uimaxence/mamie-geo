@@ -21,12 +21,20 @@ export interface SourceListItem {
 }
 
 /**
- * Liste les URLs citées au moins une fois dans un run success de la
- * brand, classées par nombre de citations décroissant. Une URL peut
- * apparaître dans plusieurs runs (différents prompts ou différents
- * jours) et par plusieurs LLMs.
+ * Liste les URLs citées au moins une fois dans un run success d'une ou
+ * plusieurs brands, classées par nombre de citations décroissant. Une
+ * URL peut apparaître dans plusieurs runs (différents prompts ou
+ * différents jours) et par plusieurs LLMs. Accepte un array de brandIds
+ * pour le filtre multi-brand côté /app/sources (V0+).
  */
-export async function listCitedSources(brandId: string): Promise<SourceListItem[]> {
+export async function listCitedSources(brandIds: string[]): Promise<SourceListItem[]> {
+  if (brandIds.length === 0) return [];
+
+  const idList = sql.join(
+    brandIds.map((id) => sql`${id}`),
+    sql.raw(", "),
+  );
+
   const rows = await db.execute<{
     url: string;
     title: string | null;
@@ -43,7 +51,7 @@ export async function listCitedSources(brandId: string): Promise<SourceListItem[
     FROM runs r
     INNER JOIN prompts p ON p.id = r.prompt_id
     CROSS JOIN LATERAL jsonb_array_elements(r.parsed_citations) src
-    WHERE p.brand_id = ${brandId}
+    WHERE p.brand_id IN (${idList})
       AND r.status = 'success'
       AND r.parsed_citations IS NOT NULL
       AND src ? 'url'
@@ -71,10 +79,18 @@ export interface SourceRunRow {
 }
 
 /**
- * Détail d'une URL : tous les runs success de la brand où cette URL
- * apparaît dans parsed_citations. Utilisé par /app/sources/[id].
+ * Détail d'une URL : tous les runs success des brands listées où cette
+ * URL apparaît dans parsed_citations. Utilisé par /app/sources/[id]
+ * avec le même filtre multi-brand que la page liste.
  */
-export async function getSourceRuns(brandId: string, url: string): Promise<SourceRunRow[]> {
+export async function getSourceRuns(brandIds: string[], url: string): Promise<SourceRunRow[]> {
+  if (brandIds.length === 0) return [];
+
+  const idList = sql.join(
+    brandIds.map((id) => sql`${id}`),
+    sql.raw(", "),
+  );
+
   const rows = await db.execute<{
     run_id: string;
     llm: string;
@@ -93,7 +109,7 @@ export async function getSourceRuns(brandId: string, url: string): Promise<Sourc
     FROM runs r
     INNER JOIN prompts p ON p.id = r.prompt_id
     CROSS JOIN LATERAL jsonb_array_elements(r.parsed_citations) src
-    WHERE p.brand_id = ${brandId}
+    WHERE p.brand_id IN (${idList})
       AND r.status = 'success'
       AND r.parsed_citations IS NOT NULL
       AND src->>'url' = ${url}

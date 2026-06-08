@@ -2,35 +2,75 @@ import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Globe, ChevronRight } from "lucide-react";
+import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { getUserContext } from "@/lib/auth/user-context";
+import { db } from "@/db/client";
+import { brands as brandsTable, workspaceMembers } from "@/db/schema";
 import { Badge, EmptyState } from "@/components/ui";
+import { BrandMultiSelect } from "@/components/app/brand-multi-select";
 import { LLM_LABELS } from "@/components/charts/llm-colors";
 import { encodeSourceSlug, listCitedSources } from "@/lib/sources/queries";
+import { parseBrandIdsFromSearchParam } from "@/lib/sources/brand-filter";
 
-// Page /app/sources — V0+ URL drill-down. Liste toutes les URLs citées
-// au moins une fois par un LLM dans les runs success de la brand
-// courante, classées par citation_count desc. Click → /app/sources/[id]
-// pour le détail (runs où l'URL apparaît, prompts, LLMs).
+// Page /app/sources — V0+ URL drill-down + multi-brand filter. Liste
+// toutes les URLs citées au moins une fois par un LLM dans les runs
+// success des brands sélectionnées (filtre URL `?brands=id1,id2`,
+// default = all). Click → /app/sources/[id] pour le détail.
 
 export const dynamic = "force-dynamic";
 
-export default async function SourcesPage() {
+interface PageProps {
+  searchParams: Promise<{ brands?: string | string[] }>;
+}
+
+export default async function SourcesPage({ searchParams }: PageProps) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) redirect("/login");
 
   const ctx = await getUserContext(session.user.id);
   if (!ctx) redirect("/app/onboarding");
 
-  const sources = await listCitedSources(ctx.brand.id);
+  // Charge toutes les brands du workspace pour le filtre multi-select.
+  // Une seule requête : on remonte au workspaceId via la membership de
+  // l'user, puis on liste les brands du workspace.
+  const membership = await db
+    .select({ workspaceId: workspaceMembers.workspaceId })
+    .from(workspaceMembers)
+    .where(eq(workspaceMembers.userId, session.user.id))
+    .limit(1);
+  const workspaceId = membership[0]?.workspaceId;
+  const workspaceBrands = workspaceId
+    ? await db
+        .select({ id: brandsTable.id, name: brandsTable.name, domain: brandsTable.domain })
+        .from(brandsTable)
+        .where(eq(brandsTable.workspaceId, workspaceId))
+        .orderBy(brandsTable.createdAt)
+    : [];
+
+  const params = await searchParams;
+  const selectedBrandIds = parseBrandIdsFromSearchParam(
+    params.brands,
+    workspaceBrands.map((b) => b.id),
+  );
+
+  const sources = await listCitedSources(selectedBrandIds);
+
+  const headerLabel =
+    selectedBrandIds.length === workspaceBrands.length
+      ? ctx.brand.name
+      : `${selectedBrandIds.length} marque${selectedBrandIds.length > 1 ? "s" : ""}`;
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-12 lg:px-10">
-      <header>
-        <h1 className="type-h1">Sources citées</h1>
-        <p className="type-meta mt-2">
-          URLs que les LLMs ont récupérées dans leurs réponses sur {ctx.brand.name}.
-        </p>
+      <header className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 className="type-h1">Sources citées</h1>
+          <p className="type-meta mt-2">
+            URLs que les LLMs ont récupérées dans leurs réponses sur {headerLabel}.
+          </p>
+        </div>
+        <BrandMultiSelect brands={workspaceBrands} />
       </header>
 
       {sources.length === 0 ? (

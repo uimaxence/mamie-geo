@@ -2,11 +2,15 @@ import { headers } from "next/headers";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { ArrowLeft, ExternalLink } from "lucide-react";
+import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { getUserContext } from "@/lib/auth/user-context";
+import { db } from "@/db/client";
+import { brands as brandsTable, workspaceMembers } from "@/db/schema";
 import { Badge } from "@/components/ui";
 import { LLM_LABELS } from "@/components/charts/llm-colors";
 import { decodeSourceSlug, getSourceRuns } from "@/lib/sources/queries";
+import { parseBrandIdsFromSearchParam } from "@/lib/sources/brand-filter";
 
 // Page /app/sources/[id] — détail d'une URL citée. [id] = base64url(url).
 // Liste tous les runs success où l'URL apparaît dans parsed_citations,
@@ -16,9 +20,10 @@ export const dynamic = "force-dynamic";
 
 interface PageProps {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ brands?: string | string[] }>;
 }
 
-export default async function SourceDetailPage({ params }: PageProps) {
+export default async function SourceDetailPage({ params, searchParams }: PageProps) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) redirect("/login");
 
@@ -29,7 +34,29 @@ export default async function SourceDetailPage({ params }: PageProps) {
   const url = decodeSourceSlug(id);
   if (!url) notFound();
 
-  const runs = await getSourceRuns(ctx.brand.id, url);
+  // Reprend le même filtre brands que la liste pour cohérence : l'user
+  // qui a sélectionné « brand A + B » dans /app/sources doit voir le
+  // détail filtré sur ces 2 brands. Si rien dans searchParams, on
+  // remonte toutes les brands du workspace.
+  const membership = await db
+    .select({ workspaceId: workspaceMembers.workspaceId })
+    .from(workspaceMembers)
+    .where(eq(workspaceMembers.userId, session.user.id))
+    .limit(1);
+  const workspaceId = membership[0]?.workspaceId;
+  const workspaceBrandIds = workspaceId
+    ? (
+        await db
+          .select({ id: brandsTable.id })
+          .from(brandsTable)
+          .where(eq(brandsTable.workspaceId, workspaceId))
+      ).map((r) => r.id)
+    : [ctx.brand.id];
+
+  const sp = await searchParams;
+  const selectedBrandIds = parseBrandIdsFromSearchParam(sp.brands, workspaceBrandIds);
+
+  const runs = await getSourceRuns(selectedBrandIds, url);
   if (runs.length === 0) notFound();
 
   let host: string;
