@@ -23,10 +23,15 @@
 **Composants** (raffinement 2026-05-11 sur refs designme/taap) :
 
 - **Boutons** : tous en **`rounded-pill`** (full radius). Variant `primary` (**noir plein**, CTA principal — c'est ça le langage designme/taap, pas le bleu), `secondary` (blanc + bordure gris-300, hover gris-50), `ghost` (transparent, hover gris-100). Le variant `accent` (bleu plein) est conservé pour des **cas marginaux décoratifs** mais ne doit jamais être le CTA principal.
-- **Cards** : fond blanc, bordure 1px `gray-200`, **radius `xl` (20px)**, pas d'ombre par défaut. Padding interne généreux (`px-6 py-6`).
+- **Cards** : fond blanc, bordure 1px `gray-200`, **radius `xl` (12px depuis 2026-06-09, était 20px)**, pas d'ombre par défaut. Padding interne généreux (`px-6 py-6`).
 - **Sections** : composant `<Section variant="default" | "tinted">` pour alterner fond blanc et fond `gray-50`. Pattern central des deux refs — crée le rythme visuel sans cards inutiles.
 - **Badges** : fond `gray-100` neutre par défaut. Variants light bg pour status (success/warning/error). Variant `accent` (bleu brand très faible `#eaf4ff`) gardé pour ponctuel (badge plan, badge beta) — comme le badge vert pastel "Fonctionnalités" de taap.
-- **Inputs** : bordure `gray-300`, focus ring noir sobre, radius `md` (10px).
+- **Inputs** : bordure `gray-300`, focus ring noir sobre, radius `md` (6px depuis 2026-06-09, était 10px).
+- **Échelle de border-radius** (resserrée 2026-06-09, cf. doc 09) : `sm 4px · md 6px · lg 8px · xl 12px · pill 9999px`. Tokens `--radius-*` dans `globals.css`. Avant : `6 / 10 / 16 / 20`. Resserrement global pour un rendu plus net/technique (Linear, Vercel, dashboards SEO des refs), l'app paraissait trop « molle ». Les boutons restent `pill`.
+- **Visualisation de score** (3 primitifs `src/components/ui/`, posés 2026-06-09 pour la refonte audit, réutilisables dashboard) :
+  - `<ScoreRing value size strokeWidth suffix />` — anneau SVG, chiffre coloré au centre, arc animé 0→valeur au montage. Couleur via `scoreColor()` (`src/lib/audit/score.ts`, seuils ≥80 vert / ≥60 ambre / <60 rouge).
+  - `<SegmentBar segments={[{value, tone, label}]} />` — barre proportionnelle segmentée (répartition critiques/avertissements/bons points). Tones `critical | warning | success | neutral`.
+  - `<ScoreBar label value hint />` — sous-score : label + chiffre coloré + barre de progression + légende.
 - **Touches « fancy »** observées chez designme à envisager pour PR 8+ : frame monitor avec cross hairs corners pour les screenshots dashboard, timecodes décoratifs en footer, speech bubbles dessinées au stylo pour humaniser (taap).
 
 ### Patterns de personnalité (update 2026-05-11 — refs Mobbin/Dribbble)
@@ -81,6 +86,40 @@ Quatre patterns visuels supplémentaires entrés dans le design system pour les 
    - Couleurs reprises de la palette pastel ou de `LLM_COLORS` selon le contexte — pas de couleur arbitraire.
 
 **Règle d'usage** : pas plus de **2 patterns dashboard différents par section visible** (au-dessus du fold). Un dashboard surchargé en visualisations devient illisible. Privilégier `Stat` en haut, **1 graphique principal** (Line / Area / Bar), et listes/tableaux en dessous.
+
+### Patterns liste & contenu (update 2026-06-09 — issus de /app/conseils)
+
+Quatre patterns réutilisables ailleurs dans l'app (introduits sur la page « Conseils GEO », cf. doc 09 § 2026-06-09) :
+
+1. **Tableau avec ligne d'invitation finale** (réf. `AuditedUrlsSection` dans `conseils-view.tsx`, calqué sur la table concurrents `citations/`) :
+   - Dernière `<tr>` du `<tbody>` = un `<Link>` plein largeur (`colSpan`) avec pastille `+` (`bg-accent-faint`) et libellé d'ajout.
+   - **Un seul composant gère le vide ET le peuplé** : libellé « Auditer ta première URL » quand 0 ligne, « Auditer une autre URL » sinon. Évite de maintenir un `<EmptyState>` séparé + un bouton d'ajout séparé.
+2. **Lignes de tableau cliquables via stretched-link** :
+   - `<tr className="group relative …">` + dans la cellule principale `<Link className="… after:absolute after:inset-0">` → **toute la ligne** devient cliquable sans envelopper `<tr>` dans un `<a>` (invalide en HTML).
+   - Affordance : `ArrowRight` en dernière cellule qui fonce au `group-hover` (`group-hover:text-ink`).
+3. **Accordéon éducatif / liste de leviers** (réf. cartes `TipCard`) :
+   - Carte = `<Collapsible>` autonome (trigger + content fondus par un `border-t` à l'ouverture, même carte — pas de cassure visuelle).
+   - Trigger **scannable** : ancrage gauche (numéro carré ou icône) + titre + badge de catégorie + **résumé une ligne visible même replié** (la « réponse immédiate »). Détail (corps, puces, callout « À retenir ») au dépli. Premier item ouvert par défaut pour amorcer la lecture.
+4. **Seuils ScoreBadge** : `≥ 80` → tone `success`, `≥ 60` → `warning`, sinon `error`. À garder identiques partout où un score /100 est affiché (cohérence avec le `ScoreRing` des audits).
+
+**Anti-pattern acté ici** : ne pas empiler un `pill`/badge « mis en avant » sur **chaque** carte d'une liste — un marqueur d'emphase posé partout ne distingue plus rien. Réserver l'emphase (badge plein, bandeau, couleur saturée) aux éléments qui portent réellement une info différenciante.
+
+### Layout app — conteneur & système de blocs (update 2026-06-09)
+
+Avant ce passage, seul le dashboard exploitait une grille multi-colonnes ; toutes les autres pages app étaient en **pile verticale** et les largeurs de conteneur divergeaient (`max-w-2xl/3xl/5xl/6xl` au hasard). Harmonisation actée :
+
+**Conteneur unique — `<PageContainer>`** (`src/components/ui/page-container.tsx`) :
+- Toute page `(app)/app/(with-nav)/*` a un `<PageContainer>` en racine (jamais un `div mx-auto max-w-… px-… py-…` à la main). Centralise largeur + padding (`px-6 py-12 lg:px-10`).
+- 3 largeurs : `default` = `max-w-6xl` (vues principales : dashboard, audits, citations, prompts, conseils, runs) · `narrow` = `max-w-3xl` (réglages / lecture dense) · `form` = `max-w-2xl` (formulaires).
+- `PageHeader` obligatoire en tête de chaque page (plus de `<h1>` brut ni de `<header>` maison) — sauf les pages « détail/show » dont le hero est déjà une carte riche (ex. `/app/audits/[id]` : la carte ScoreRing fait office de header, pas de PageHeader redondant par-dessus).
+
+**Système de blocs (ne pas tout empiler verticalement)** :
+- Blocs côte à côte : `grid items-start gap-4 lg:grid-cols-2` (ou `lg:grid-cols-[1.4fr_1fr]` pour un bloc dominant). `items-start` évite qu'une carte courte s'étire à la hauteur de sa voisine.
+- Regrouper par **thème** plutôt qu'une longue liste plate : ex. `/app/conseils` rend les 10 leviers en **4 cartes d'axe** (Visibilité Google / Marque / Contenu / Multi-plateforme) en grille 2×2, pas une pile de 10.
+- **Tables, listes principales et matrices restent pleine largeur** — jamais coincées dans une colonne étroite.
+- **Exception largeur étroite** : une page `narrow` (réglages) aux champs denses reste en **une seule colonne** — y forcer du 2-col cramerait les grilles de champs. Le multi-colonnes est pour les pages larges.
+
+**Continuité éducation ↔ outil** : `/app/conseils` (éducation) et `/app/audits` (outil) se renvoient l'un vers l'autre par un bloc cross-link, plutôt que de dupliquer la donnée (le tableau d'URLs auditées vit **uniquement** sur `/app/audits`).
 
 **Mentions de marque dans l'app** (update 2026-05-12) :
 

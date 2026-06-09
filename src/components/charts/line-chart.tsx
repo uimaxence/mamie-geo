@@ -32,7 +32,7 @@ export function LineChart({
 }) {
   return (
     <ResponsiveContainer width="100%" height={height}>
-      <RechartsLineChart data={data} margin={{ top: 12, right: 16, left: 0, bottom: 8 }}>
+      <RechartsLineChart data={data} margin={{ top: 16, right: 16, left: 0, bottom: 8 }}>
         <CartesianGrid stroke="var(--color-border)" strokeDasharray="2 2" vertical={false} />
         <XAxis
           dataKey="date"
@@ -63,12 +63,16 @@ export function LineChart({
           itemStyle={{ color: "white" }}
           cursor={{ stroke: "var(--color-border-strong)", strokeWidth: 1 }}
         />
+        {/* Légende déplacée en BAS du chart (2026-06-09) : le top-right est
+         * occupé par le bouton « PNG » du <DownloadableChart>, garder les
+         * deux en collision rendait la légende illisible (cf. bug screen
+         * Max). Bottom-left, classique sur les line charts multi-séries. */}
         <Legend
-          verticalAlign="top"
-          align="right"
+          verticalAlign="bottom"
+          align="left"
           iconType="circle"
           iconSize={8}
-          wrapperStyle={{ fontSize: 12, paddingBottom: 12 }}
+          wrapperStyle={{ fontSize: 12, paddingTop: 16, paddingLeft: 36 }}
         />
         {series.map((llm) => (
           <Line

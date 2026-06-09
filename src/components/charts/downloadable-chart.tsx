@@ -54,13 +54,18 @@ export function DownloadableChart({
 
   return (
     <div className="relative">
+      {/* Bouton PNG positionné À L'INTÉRIEUR du chart (top-right). Avant 2026-06-08
+       * il était en `-top-10` (40 px au-dessus du container), ce qui le faisait
+       * chevaucher le <SegmentedControl> du header de section. Maintenant il flotte
+       * dans le coin top-right du chart, semi-transparent au repos pour ne pas
+       * polluer le visuel, opaque au hover. */}
       <button
         type="button"
         onClick={handleDownload}
         disabled={busy}
         aria-label="Télécharger en PNG"
         title="Télécharger en PNG"
-        className="absolute right-0 -top-10 z-10 inline-flex items-center gap-1.5 rounded-[var(--radius-pill)] border border-[color:var(--color-border)] bg-white px-3 py-1.5 text-xs font-medium text-[color:var(--color-ink-soft)] shadow-[var(--shadow-sm)] transition hover:bg-[color:var(--color-gray-50)] hover:text-[color:var(--color-ink)] disabled:cursor-not-allowed disabled:opacity-50"
+        className="absolute right-3 top-3 z-10 inline-flex items-center gap-1.5 rounded-[var(--radius-pill)] border border-[color:var(--color-border)] bg-white/85 px-3 py-1.5 text-xs font-medium text-[color:var(--color-ink-soft)] shadow-[var(--shadow-sm)] backdrop-blur-sm transition hover:bg-white hover:text-[color:var(--color-ink)] disabled:cursor-not-allowed disabled:opacity-50"
       >
         <Download size={12} strokeWidth={2.2} />
         {busy ? "Export…" : "PNG"}

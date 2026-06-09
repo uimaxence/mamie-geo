@@ -2,6 +2,11 @@ import type { ComponentType } from "react";
 import { CoverSlide } from "@/components/admin/visuals/seo-vs-geo/cover-slide";
 import { TableSlide } from "@/components/admin/visuals/seo-vs-geo/table-slide";
 import { CtaSlide } from "@/components/admin/visuals/seo-vs-geo/cta-slide";
+import { CoverSlide as GeminiCoverSlide } from "@/components/admin/visuals/etre-cite-par-gemini/cover-slide";
+import { BotsSlide as GeminiBotsSlide } from "@/components/admin/visuals/etre-cite-par-gemini/bots-slide";
+import { RobotsSlide as GeminiRobotsSlide } from "@/components/admin/visuals/etre-cite-par-gemini/robots-slide";
+import { ExtractionSlide as GeminiExtractionSlide } from "@/components/admin/visuals/etre-cite-par-gemini/extraction-slide";
+import { CtaSlide as GeminiCtaSlide } from "@/components/admin/visuals/etre-cite-par-gemini/cta-slide";
 
 // Registry des visuels marketing (LinkedIn carousels, OG images, blog
 // covers). Source de vérité pour /app/admin/visuals.
@@ -56,6 +61,21 @@ export const VISUALS: VisualMeta[] = [
       { key: "cover", label: "Cover hook (40 %)", Component: CoverSlide },
       { key: "table", label: "Tableau comparatif", Component: TableSlide },
       { key: "cta", label: "CTA test gratuit", Component: CtaSlide },
+    ],
+  },
+  {
+    slug: "etre-cite-par-gemini",
+    title: "Être cité par Gemini — Carousel 5 slides",
+    description:
+      "Carousel LinkedIn d'amplification du post Gemini (2026-06-09), DA bleu nuit dédiée (hors persona chaude Mamie) : cover hook + schéma Googlebot ≠ Google-Extended + erreur robots.txt + 3 réflexes d'extraction + CTA guide complet. Accents vert (OK) / orange (attention).",
+    format: FORMATS.linkedinPortrait,
+    postedOn: "2026-06-09",
+    slides: [
+      { key: "cover", label: "Cover hook", Component: GeminiCoverSlide },
+      { key: "bots", label: "Googlebot ≠ Google-Extended", Component: GeminiBotsSlide },
+      { key: "robots", label: "Erreur robots.txt", Component: GeminiRobotsSlide },
+      { key: "extraction", label: "3 réflexes d'extraction", Component: GeminiExtractionSlide },
+      { key: "cta", label: "CTA guide complet", Component: GeminiCtaSlide },
     ],
   },
 ];

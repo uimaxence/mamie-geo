@@ -3,14 +3,15 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
+  BookOpen,
   Cog,
-  Globe,
   LayoutDashboard,
+  LifeBuoy,
+  Lightbulb,
   ListChecks,
   LogOut,
   MessageSquareQuote,
   Receipt,
-  Users,
   Wrench,
   type LucideIcon,
 } from "lucide-react";
@@ -28,6 +29,12 @@ import {
 } from "@/components/ui";
 import { Logo } from "@/components/marketing/logo";
 import { SidebarSubscribeCard } from "@/components/app/sidebar-subscribe-card";
+import {
+  CAL_SUPPORT_CONFIG,
+  CAL_SUPPORT_LINK,
+  CAL_SUPPORT_NAMESPACE,
+} from "@/components/app/cal-support-embed";
+import { capture } from "@/lib/posthog-client";
 import type { SidebarData } from "./app-sidebar-data";
 
 // Sidebar app : logo Mamie GEO (top), nav sections (middle), user menu
@@ -49,9 +56,13 @@ interface NavItem {
 const NAV: NavItem[] = [
   { href: "/app/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/app/prompts", label: "Prompts", icon: MessageSquareQuote },
-  { href: "/app/sources", label: "Sources", icon: Globe },
-  { href: "/app/competitors", label: "Concurrents", icon: Users },
+  // 2026-06-08 (cf. doc 09) : fusion Sources + Concurrents dans une
+  // seule entrée « Citations » avec deux tabs internes.
+  { href: "/app/citations", label: "Citations", icon: BookOpen },
   { href: "/app/audits", label: "Audits techniques", icon: Wrench },
+  // Contenu éducatif evergreen (10 leviers GEO), distinct de l'audit
+  // par-URL : la plupart des leviers sont off-page (branding, avis…).
+  { href: "/app/conseils", label: "Conseils GEO", icon: Lightbulb },
   { href: "/app/runs", label: "Runs", icon: ListChecks },
   { href: "/app/settings", label: "Réglages", icon: Cog },
 ];
@@ -72,7 +83,7 @@ export function AppSidebar({ data, mode = "desktop", onNavigate }: AppSidebarPro
     return <SidebarInner data={data} onNavigate={onNavigate} />;
   }
   return (
-    <aside className="hidden md:flex md:flex-col md:w-56 md:shrink-0 md:border-r md:border-[color:var(--color-border)] md:bg-white md:h-screen md:sticky md:top-0">
+    <aside className="hidden md:flex md:flex-col md:w-56 md:shrink-0 md:border-r md:border-[color:var(--color-border)] md:bg-white md:h-[calc(100vh-3rem)] md:sticky md:top-12">
       <SidebarInner data={data} onNavigate={onNavigate} />
     </aside>
   );
@@ -156,7 +167,7 @@ function SidebarNav({
                   active ? "text-[color:var(--color-ink)]" : "text-[color:var(--color-muted)]"
                 }
               />
-              <span className="flex-1">{item.label}</span>
+              <span className="flex-1 truncate whitespace-nowrap">{item.label}</span>
               {showCriticalBadge && (
                 <Badge
                   tone="error"
@@ -210,6 +221,22 @@ function UserMenu({ email, plan }: { email: string; plan: string }) {
             <Receipt size={14} strokeWidth={2} />
             Facturation
           </Link>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        {/* Support : ouvre la modal Cal.com (réservation d'un créneau).
+            Les attributs data-cal-* sont captés par le listener délégué
+            posé par <CalSupportEmbed> dans le layout (app). */}
+        <DropdownMenuItem asChild>
+          <button
+            type="button"
+            data-cal-namespace={CAL_SUPPORT_NAMESPACE}
+            data-cal-link={CAL_SUPPORT_LINK}
+            data-cal-config={CAL_SUPPORT_CONFIG}
+            onClick={() => capture("support_cal_opened", { source: "user_menu" })}
+          >
+            <LifeBuoy size={14} strokeWidth={2} />
+            Contacter le support
+          </button>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem danger onSelect={handleSignOut} disabled={pending}>

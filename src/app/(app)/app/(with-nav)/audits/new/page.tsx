@@ -1,9 +1,11 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { Wrench } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { getDashboardData } from "@/lib/dashboard/queries";
 import { getAuditUsage } from "@/lib/audits/counters";
 import { quotasFor } from "@/lib/plans/quotas";
+import { PageContainer, PageHeader } from "@/components/ui";
 import { NewAuditForm } from "./new-audit-form";
 
 // /app/audits/new, formulaire de lancement d'un audit on-demand.
@@ -26,19 +28,12 @@ export default async function NewAuditPage() {
     : `https://${data.brand.domain}`;
 
   return (
-    <div className="mx-auto max-w-2xl px-6 py-12">
-      <header>
-        <span className="type-eyebrow">Audit technique</span>
-        <h1 className="type-h1 mt-2">Lancer un nouvel audit.</h1>
-        <p className="type-body mt-2 text-sm text-[color:var(--color-ink-soft)]">
-          Choisis l&apos;URL à analyser. L&apos;audit prend ~10 secondes et consomme 1 unité de ton
-          quota mensuel (
-          <span className="font-medium text-[color:var(--color-ink)]">
-            {usage.auditsCount}/{Number.isFinite(usage.maxAudits) ? usage.maxAudits : "∞"}
-          </span>{" "}
-          utilisés ce mois).
-        </p>
-      </header>
+    <PageContainer width="form">
+      <PageHeader
+        icon={Wrench}
+        title="Lancer un nouvel audit"
+        summary={`~10 secondes par audit · ${usage.auditsCount}/${Number.isFinite(usage.maxAudits) ? usage.maxAudits : "∞"} utilisés ce mois`}
+      />
 
       <div className="mt-10">
         <NewAuditForm
@@ -49,6 +44,6 @@ export default async function NewAuditPage() {
           canBatchCompetitors={quotas.comparisonCompetitors > 0}
         />
       </div>
-    </div>
+    </PageContainer>
   );
 }

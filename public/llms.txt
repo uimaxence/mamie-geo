@@ -1,0 +1,49 @@
+# Mamie GEO
+
+> SaaS francophone de Generative Engine Optimization. Mamie GEO mesure quotidiennement la visibilité d'une marque dans ChatGPT, Claude, Perplexity, Gemini et Le Chat (Mistral), et livre des recommandations actionnables. Cible : freelances SEO, PME marketing, agences SEO/marketing francophones. Hébergement EU (Frankfurt), conforme RGPD.
+
+Le produit suit chaque jour les réponses générées par cinq moteurs IA majeurs sur des prompts définis par l'utilisateur, détecte les citations de marque (regex + scoring LLM), agrège les sources citées, calcule un score de visibilité (0–100), une part de voix et un sentiment (positif / neutre / négatif). Trois plans publics : Solo 9,99 €/mois, Starter 49 €/mois, Pro 149 €/mois. Pas d'essai gratuit automatique — garantie remboursement 14 jours.
+
+## Comprendre le produit
+
+- [Accueil](https://mamie-geo.fr/): pitch, démonstration des cinq IA trackées, preview live du dashboard, garanties.
+- [Tarifs](https://mamie-geo.fr/pricing): Solo / Starter / Pro / Enterprise, quotas prompts, LLMs inclus par plan, FAQ pricing.
+- [Démo](https://mamie-geo.fr/demo): tour du dashboard sur une marque exemple, sans inscription.
+- [À propos](https://mamie-geo.fr/about): histoire, mission, équipe, hébergement EU.
+
+## Outils gratuits
+
+- [Test de visibilité IA](https://mamie-geo.fr/outils/test-visibilite-ia): formulaire qui mesure en direct si une marque est citée dans 1 réponse ChatGPT + 1 réponse Claude. Sans inscription.
+- [Audit technique AI-readiness](https://mamie-geo.fr/outils/audit-technique): 30+ checks SEO + GEO + accessibilité + performance sur une URL. Couvre llms.txt, schema.org, FAQPage JSON-LD, autorité E-E-A-T, crawlabilité des bots IA (GPTBot, ClaudeBot, PerplexityBot, Google-Extended). Score 0–100 sur 4 axes, recommandations priorisées.
+
+## Référence GEO (blog éducatif)
+
+- [Qu'est-ce que le GEO (Generative Engine Optimization) ?](https://mamie-geo.fr/blog/quest-ce-que-le-geo): définition, écart vs SEO classique, métriques officielles (apparition, fréquence, citation).
+- [État de la visibilité IA en France 2026](https://mamie-geo.fr/blog/etat-visibilite-ia-france-2026): étude sectorielle, parts de voix par vertical, méthodes de tracking.
+- [Mamie GEO vs Profound](https://mamie-geo.fr/blog/mamie-geo-vs-profound): comparatif avec le leader US ($500/mois min) — pricing, LLMs trackés, langue.
+- [Mamie GEO vs Peec AI](https://mamie-geo.fr/blog/mamie-geo-vs-peec-ai): comparatif avec le concurrent EU direct — modèle prompts vs credits, langue.
+- [Mamie GEO vs Otterly](https://mamie-geo.fr/blog/mamie-geo-vs-otterly): add-on Semrush vs suite autonome dédiée GEO.
+- [Mamie GEO vs Rankscale](https://mamie-geo.fr/blog/mamie-geo-vs-rankscale): credit-based agence vs flat-prompts PME/freelance.
+- [Pourquoi tracker sa visibilité IA avant même de l'optimiser](https://mamie-geo.fr/blog/pourquoi-tracker-visibilite-ia): méthodologie GEO baseline-first.
+
+## Vocabulaire métier officiel
+
+- **Score de visibilité IA** — note 0–100 par LLM, par marque, par jour. Formule : `positionWeight × sentimentWeight × 100`.
+- **Part de voix** — pourcentage de citations qui vont à la marque vs ses concurrents sur un prompt ou un cluster.
+- **Sentiment** — qualitatif sur comment la marque est citée : `positive` / `neutral` / `negative` / `absent`.
+- **Apparition** — pourcentage de réponses où la source apparaît dans le set de retrieval.
+- **Fréquence** — nombre moyen d'apparitions par réponse.
+- **Citation** — pourcentage des apparitions qui deviennent une citation explicite.
+
+## Légal
+
+- [Mentions légales](https://mamie-geo.fr/legal/mentions-legales)
+- [CGV](https://mamie-geo.fr/legal/cgv)
+- [Confidentialité](https://mamie-geo.fr/legal/privacy)
+- [Cookies](https://mamie-geo.fr/legal/cookies)
+
+## Optional
+
+- [Comparatifs détaillés](https://mamie-geo.fr/vs): pages comparatives indexables (vs Profound, vs Peec AI, vs Otterly, vs Rankscale).
+- [Sitemap XML](https://mamie-geo.fr/sitemap.xml)
+- [Robots.txt](https://mamie-geo.fr/robots.txt)

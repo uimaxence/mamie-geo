@@ -1,18 +1,23 @@
 import { headers } from "next/headers";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { ArrowLeft, ExternalLink } from "lucide-react";
+import { ArrowLeft, ExternalLink, Lightbulb } from "lucide-react";
 import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { getUserContext } from "@/lib/auth/user-context";
 import { db } from "@/db/client";
-import { brands as brandsTable, workspaceMembers } from "@/db/schema";
-import { Badge } from "@/components/ui";
+import { brands as brandsTable, competitors as competitorsTable, workspaceMembers } from "@/db/schema";
+import { Badge, Card, EntityTypeBadge, Stat } from "@/components/ui";
 import { LLM_LABELS } from "@/components/charts/llm-colors";
 import { decodeSourceSlug, getSourceRuns } from "@/lib/sources/queries";
 import { parseBrandIdsFromSearchParam } from "@/lib/sources/brand-filter";
+import { classifySource } from "@/lib/sources/classify";
+import type { EntityType } from "@/components/ui";
 
-// Page /app/sources/[id] — détail d'une URL citée. [id] = base64url(url).
+// Page /app/citations/sources/[id] — détail d'une URL citée (drill-down
+// depuis l'onglet Sources). [id] = base64url(url). Migrée à la DA
+// actuelle 2026-06-09 (Card/Stat partagés, radius resserré, tag de
+// type) — elle datait d'avant la refonte Citations.
 // Liste tous les runs success où l'URL apparaît dans parsed_citations,
 // avec prompt + LLM + date, plus la répartition par LLM.
 
@@ -35,7 +40,7 @@ export default async function SourceDetailPage({ params, searchParams }: PagePro
   if (!url) notFound();
 
   // Reprend le même filtre brands que la liste pour cohérence : l'user
-  // qui a sélectionné « brand A + B » dans /app/sources doit voir le
+  // qui a sélectionné « brand A + B » dans /app/citations doit voir le
   // détail filtré sur ces 2 brands. Si rien dans searchParams, on
   // remonte toutes les brands du workspace.
   const membership = await db
@@ -56,7 +61,13 @@ export default async function SourceDetailPage({ params, searchParams }: PagePro
   const sp = await searchParams;
   const selectedBrandIds = parseBrandIdsFromSearchParam(sp.brands, workspaceBrandIds);
 
-  const runs = await getSourceRuns(selectedBrandIds, url);
+  const [runs, competitorDomainRows] = await Promise.all([
+    getSourceRuns(selectedBrandIds, url),
+    db
+      .select({ domain: competitorsTable.domain })
+      .from(competitorsTable)
+      .where(eq(competitorsTable.brandId, ctx.brand.id)),
+  ]);
   if (runs.length === 0) notFound();
 
   let host: string;
@@ -65,6 +76,11 @@ export default async function SourceDetailPage({ params, searchParams }: PagePro
   } catch {
     host = url;
   }
+
+  const type = classifySource(host, {
+    brandDomain: ctx.brand.domain,
+    competitorDomains: competitorDomainRows.map((c) => c.domain),
+  });
 
   // Répartition par LLM pour le résumé en tête de page.
   const byLlm = new Map<string, number>();
@@ -84,16 +100,21 @@ export default async function SourceDetailPage({ params, searchParams }: PagePro
   return (
     <div className="mx-auto max-w-4xl px-6 py-12 lg:px-10">
       <Link
-        href="/app/sources"
+        href="/app/citations?tab=sources"
         className="inline-flex items-center gap-1.5 text-sm font-medium text-[color:var(--color-muted)] hover:text-[color:var(--color-ink)]"
       >
         <ArrowLeft size={14} strokeWidth={2.2} />
-        Retour aux sources
+        Retour aux citations
       </Link>
 
       <header className="mt-6">
-        <p className="type-eyebrow text-[color:var(--color-ink-soft)]">{host}</p>
-        <h1 className="type-h1 mt-2 break-words">{latestTitle ?? url}</h1>
+        <div className="flex flex-wrap items-center gap-2">
+          <p className="type-eyebrow text-[color:var(--color-ink-soft)]">{host}</p>
+          <EntityTypeBadge type={type} />
+        </div>
+        <h1 className="mt-2 break-words text-xl font-semibold tracking-tight text-[color:var(--color-ink)]">
+          {latestTitle ?? url}
+        </h1>
         <a
           href={url}
           target="_blank"
@@ -105,21 +126,28 @@ export default async function SourceDetailPage({ params, searchParams }: PagePro
         </a>
       </header>
 
+      <WhyItMatters type={type} />
+
       <section className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <Stat label="Citations totales" value={String(runs.length)} />
-        <Stat
-          label="Prompts distincts"
-          value={String(distinctPromptCount)}
-          hint={`sur ${runs.length} apparition${runs.length > 1 ? "s" : ""}`}
-        />
-        <Stat
-          label="Dernière citation"
-          value={lastCitedAt ? formatRelative(lastCitedAt) : "—"}
-        />
+        <Card className="p-5">
+          <Stat label="Citations totales" value={String(runs.length)} />
+        </Card>
+        <Card className="p-5">
+          <Stat
+            label="Prompts distincts"
+            value={String(distinctPromptCount)}
+            hint={`sur ${runs.length} apparition${runs.length > 1 ? "s" : ""}`}
+          />
+        </Card>
+        <Card className="p-5">
+          <Stat label="Dernière citation" value={lastCitedAt ? formatRelative(lastCitedAt) : "—"} />
+        </Card>
       </section>
 
       <section className="mt-10">
-        <h2 className="type-h2">Répartition par LLM</h2>
+        <h2 className="text-base font-semibold tracking-tight text-[color:var(--color-ink)]">
+          Répartition par LLM
+        </h2>
         <div className="mt-4 flex flex-wrap gap-2">
           {llmBreakdown.map(([llm, count]) => (
             <span
@@ -136,7 +164,9 @@ export default async function SourceDetailPage({ params, searchParams }: PagePro
       </section>
 
       <section className="mt-10">
-        <h2 className="type-h2">Historique des citations</h2>
+        <h2 className="text-base font-semibold tracking-tight text-[color:var(--color-ink)]">
+          Historique des citations
+        </h2>
         <ul className="mt-4 flex flex-col gap-3">
           {runs.map((r) => (
             <li
@@ -161,14 +191,25 @@ export default async function SourceDetailPage({ params, searchParams }: PagePro
   );
 }
 
-function Stat({ label, value, hint }: { label: string; value: string; hint?: string }) {
+// Encart "pourquoi cette source compte", contextuel au type. Donne le
+// sens GEO de la page courante plutôt que de laisser l'user deviner.
+function WhyItMatters({ type }: { type: EntityType }) {
+  const message =
+    type === "you"
+      ? "C'est ton domaine. Les IA te citent déjà comme source sur ton marché — continue à publier pour renforcer cette présence."
+      : type === "competitor"
+        ? "C'est un concurrent suivi. Les IA le citent comme référence sur ton marché : regarde quels contenus le font remonter."
+        : "Être mentionné sur cette page peut améliorer ta visibilité : c'est une des sources que les IA jugent crédibles sur ton marché.";
+
   return (
-    <div className="rounded-[var(--radius-xl)] border border-[color:var(--color-border)] bg-white p-5">
-      <p className="type-eyebrow text-[color:var(--color-muted)]">{label}</p>
-      <p className="mt-2 type-tabular text-2xl font-semibold text-[color:var(--color-ink)]">
-        {value}
-      </p>
-      {hint && <p className="type-meta mt-1">{hint}</p>}
+    <div className="mt-6 flex items-start gap-2.5 rounded-[var(--radius-lg)] border border-[color:var(--color-border)] bg-[color:var(--color-gray-50)] px-4 py-3">
+      <Lightbulb
+        size={16}
+        strokeWidth={2}
+        className="mt-0.5 shrink-0 text-[color:var(--color-accent)]"
+        aria-hidden
+      />
+      <p className="text-[0.8125rem] leading-relaxed text-[color:var(--color-ink-soft)]">{message}</p>
     </div>
   );
 }

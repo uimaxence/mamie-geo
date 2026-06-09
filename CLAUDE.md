@@ -263,9 +263,32 @@ la doc devient un cimetière.
 
 ---
 
-## 9. État du projet (snapshot — 2026-06-08)
+## 9. État du projet (snapshot — 2026-06-09)
 
-> Mise à jour 2026-06-08 (nuit) — Refonte funnel conversion : picker
+> Mise à jour 2026-06-09 — Refonte UI rapport d'audit + radius global
+> resserré (cf. doc 09 § 2026-06-09 refonte UI audit)
+>
+> **Border-radius global resserré** : tokens `--radius-*` dans
+> `globals.css` passent de `6/10/16/20` à `4/6/8/12` (pill inchangé).
+> Touche toute l'app (cards xl 20→12, inputs md 10→6, etc.). Boutons
+> restent `pill`. Rendu plus net/technique (Linear/Vercel).
+>
+> **3 primitifs de visualisation de score** dans `src/components/ui/`
+> (exportés par l'index, réutilisables dashboard) : `<ScoreRing>`
+> (anneau SVG, arc animé 0→valeur au montage, client), `<SegmentBar>`
+> (barre proportionnelle segmentée par sévérité, server), `<ScoreBar>`
+> (sous-score en barre + pastille colorée, server). Couleur via
+> `scoreColor()` centralisé dans `src/lib/audit/score.ts` (≥80 vert /
+> ≥60 ambre / <60 rouge), qui remplace 3 copies dupliquées (détail,
+> liste, comparaison).
+>
+> **`/app/audits/[id]`** : header refait — ScoreRing 128px + URL/méta
+> + pills d'issues colorées empilées + SegmentBar + 4 ScoreBar (au lieu
+> du gros chiffre nu + 4 cards « chiffre nu »). Liste de checks
+> (`ChecksBySeverity`) inchangée. **`/app/audits`** liste : chiffre de
+> score remplacé par un mini ScoreRing 52px par ligne.
+>
+> Précédente (2026-06-08 nuit) — Refonte funnel conversion : picker
 > post-onboarding + sidebar Subscribe + trial 14j carte requise
 >
 > **Funnel actif vs banner passif** (cf. doc 09 § 2026-06-08 refonte

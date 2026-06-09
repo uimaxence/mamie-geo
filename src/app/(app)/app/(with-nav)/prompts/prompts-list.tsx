@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 import {
   EllipsisVertical,
+  ListChecks,
   MessageSquareQuote,
   Pencil,
   Pause,
@@ -27,6 +28,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
   EmptyState,
+  PageHeader,
   Pagination,
   SegmentedControl,
   Switch,
@@ -171,28 +173,27 @@ export function PromptsList({
 
   return (
     <>
-      <header className="flex flex-wrap items-end justify-between gap-6">
-        <div>
-          <h1 className="type-h1">Prompts trackés</h1>
-          <p className="type-meta mt-2">
-            Plan {plan} · {quotaText}
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <Button variant="secondary" onClick={handleSuggest} disabled={suggesting}>
-            <Sparkles size={14} strokeWidth={2} />
-            {suggesting
-              ? "Génération…"
-              : initialPrompts.length > 0
-                ? "Régénérer depuis profil"
-                : "Suggérer via IA"}
-          </Button>
-          <Button variant="primary" onClick={() => setCreateOpen(true)}>
-            <Plus size={14} strokeWidth={2.2} />
-            Ajouter un prompt
-          </Button>
-        </div>
-      </header>
+      <PageHeader
+        icon={ListChecks}
+        title="Prompts trackés"
+        summary={`Plan ${plan} · ${quotaText}`}
+        right={
+          <>
+            <Button variant="secondary" onClick={handleSuggest} disabled={suggesting}>
+              <Sparkles size={14} strokeWidth={2} />
+              {suggesting
+                ? "Génération…"
+                : initialPrompts.length > 0
+                  ? "Régénérer depuis profil"
+                  : "Suggérer via IA"}
+            </Button>
+            <Button variant="primary" onClick={() => setCreateOpen(true)}>
+              <Plus size={14} strokeWidth={2.2} />
+              Ajouter un prompt
+            </Button>
+          </>
+        }
+      />
 
       {/* Suggestions IA : liste éphémère, click pour ajouter une à la fois,
        * ou "Tout ajouter" pour bulk insert. Régénération depuis le profil

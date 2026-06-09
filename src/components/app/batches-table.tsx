@@ -7,6 +7,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
   EmptyState,
+  GlossaryInfo,
   Tooltip,
   TooltipContent,
   TooltipProvider,
@@ -96,7 +97,10 @@ function HeaderRow({ showPromptColumn }: { showPromptColumn: boolean }) {
       <span className="type-eyebrow w-24">Exécuté</span>
       <span className="type-eyebrow w-32">IA</span>
       <span className="type-eyebrow w-16 text-right">Citée</span>
-      <span className="type-eyebrow w-24 text-right">Sentiment</span>
+      <span className="type-eyebrow inline-flex w-24 items-center justify-end gap-1.5">
+        Sentiment
+        <GlossaryInfo term="sentiment" ariaLabel="Définition : sentiment" />
+      </span>
     </div>
   );
 }

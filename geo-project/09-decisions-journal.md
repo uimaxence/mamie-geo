@@ -161,6 +161,136 @@ haut et l'entrée "2026-05-05 — Réponses aux 10 questions de bootstrap".
 
 ### Décisions enregistrées
 
+#### 2026-06-09 — Harmonisation layout app : `<PageContainer>` + système de blocs multi-colonnes + dé-dup Conseils/Audit
+
+**Contexte** : sur retour Max (« mettre sur plusieurs colonnes, pas tout les uns sur les autres », réf. layout d'un dashboard SaaS), audit des layouts de toutes les pages `(app)/app/(with-nav)/*`. Constats : seul le dashboard exploitait une grille multi-colonnes ; le reste en pile verticale ; largeurs de conteneur incohérentes (`max-w-2xl/3xl/5xl/6xl` mélangées) ; `runs` (et la page `audits/[id]` selon l'audit) en `<h1>`/`<header>` brut sans `PageHeader` ; et un **doublon** : le tableau d'URLs auditées ajouté la veille sur `/app/conseils` recoupait `/app/audits`.
+
+**Options considérées** : (a) merger Conseils dans l'onglet Audit ; (b) garder séparé + dé-dupliquer. Pour le layout : (a) au cas par cas ; (b) une primitive de conteneur partagée + convention de blocs documentée.
+
+**Choix** (validés par Max) : **séparer + dé-dupliquer**, **leviers en 4 blocs par axe**, **sweep d'harmonisation complet**.
+
+**Détail** :
+- **Primitive `<PageContainer width="default|narrow|form">`** (`src/components/ui/page-container.tsx`, exportée par l'index) = `mx-auto px-6 py-12 lg:px-10` + largeur (`6xl/3xl/2xl`). Appliquée à toutes les pages app (audits, audits/new, audits/compare, runs, settings, citations, prompts, conseils) → fin des largeurs divergentes.
+- **`PageHeader` partout** : `runs` passe de `<h1>` brut à `<PageHeader>`. Exception assumée : `audits/[id]` garde sa carte ScoreRing comme hero (un PageHeader par-dessus serait redondant) — page déjà refondue le 2026-06-09 et laissée intacte.
+- **Convention de blocs** : `grid items-start gap-4 lg:grid-cols-2` ; tables/listes en pleine largeur ; pages `narrow` (réglages) restent mono-colonne (champs denses). Cf. doc 10 § « Layout app ».
+- **Conseils refondu** : 10 leviers → **4 cartes d'axe** (grille 2×2) ; intro 2-col (cadrage | légende des axes) ; clôture 2-col (synthèse | bloc CTA audit). **Tableau d'URLs supprimé** (vit sur `/app/audits`) → page repassée statique. Cross-link réciproque Conseils ↔ Audits.
+
+**Conséquences attendues** : continuité visuelle entre toutes les pages, plus de pile verticale unique, un seul endroit pour la liste d'audits. `<PageContainer>` réutilisable pour toute nouvelle page app.
+
+**À revisiter** : si une page large (citations, prompts) gagne à passer ses tables en 2-col (peu probable sur du tabulaire) ; statut live pass/fail par levier auditable (cf. entrée Conseils GEO ci-dessous).
+
+#### 2026-06-09 — Lien « Contacter le support » → réservation Cal.com
+
+**Contexte** : besoin de rassurer le client (canal de contact direct pour discuter d'un problème). Pas de helpdesk en V0.
+
+**Choix** : item « Contacter le support » dans le menu utilisateur de la sidebar app, qui ouvre une modal de réservation Cal.com (`mc.maxence/support-mamie-geo`, namespace `support-mamie-geo`, brand `#339CFF`).
+
+**Détail** :
+- Embed **element-click** Cal.com (snippet officiel verbatim), injecté via `next/script` `afterInteractive` dans `<CalSupportEmbed>`, monté une fois dans le layout `(app)`. **Pas de dépendance npm** (`@calcom/embed-react` évité) — le loader vanilla suffit.
+- Le déclencheur est un `<button data-cal-link data-cal-namespace data-cal-config>` dans le `DropdownMenuItem` ; le listener délégué de Cal capte le clic. Constantes `CAL_SUPPORT_*` exportées depuis `cal-support-embed.tsx` pour garder lien/namespace/config synchronisés.
+- Nouvel event PostHog `support_cal_opened` (`source: "user_menu"`).
+- **Setup** : le lien suppose que l'event type Cal `support-mamie-geo` existe sur le compte `mc.maxence`. Si on change de handle/event, mettre à jour les constantes.
+
+**À revisiter** : si volume de support > gérable en 1:1, basculer vers un vrai canal (email dédié / Crisp / helpdesk).
+
+#### 2026-06-09 — Refonte UI rapport d'audit + resserrement du border-radius global
+
+**Contexte** : Max trouve la page audit technique (`/app/audits/[id]`) « ennuyeuse, plate, pas assez gamifiée », et juge le border-radius global de l'app trop arrondi (« mou »). Il fournit 7 screens de dashboards SEO/SaaS/HR comme références à en tirer des conventions et améliorer la DA globale.
+
+**Conventions tirées des screens** : score en anneau/jauge circulaire coloré (pas un chiffre nu), barre de synthèse segmentée colorée par sévérité en tête de liste, pills d'issues colorées (point + compteur + libellé), sous-scores en barres de progression avec pastille colorée, radius plus serrés.
+
+**Options considérées** :
+- A — refonte cosmétique de la seule card de score.
+- B — refonte complète du rapport (anneau animé + barre segmentée + sous-scores en barres + pills) avec primitifs réutilisables + resserrement radius global.
+
+**Choix** : B (validé par Max via picker : radius « serré » + refonte « complète »).
+
+**Détail** :
+- **Radius global resserré** dans `globals.css` : `sm 6→4 · md 10→6 · lg 16→8 · xl 20→12` (pill inchangé). Touche toute l'app (cards, inputs, dialogs, badges…) via les tokens `--radius-*`. Boutons restent `pill`.
+- **3 primitifs UI** posés dans `src/components/ui/`, exportés par l'index, réutilisables au dashboard : `<ScoreRing>` (anneau SVG, arc animé 0→valeur au montage, client component), `<SegmentBar>` (barre proportionnelle segmentée, server), `<ScoreBar>` (sous-score en barre, server).
+- **Helper `scoreColor()`** centralisé dans `src/lib/audit/score.ts` (seuils ≥80 vert / ≥60 ambre / <60 rouge) — élimine 3 duplications (détail, liste, comparaison). Le lead magnet marketing garde son scale 75/50 distinct.
+- **`/app/audits/[id]`** : header refait (ScoreRing 128px + URL/méta + pills d'issues empilées + SegmentBar + 4 ScoreBar). Liste de checks (`ChecksBySeverity`) inchangée fonctionnellement, bénéficie du nouveau radius.
+- **`/app/audits`** (liste) : chiffre de score nu remplacé par un mini `<ScoreRing>` 52px par ligne (cohérence).
+
+**Conséquences attendues** : rapport plus « vivant »/lisible d'un coup d'œil, DA app plus nette. Primitifs prêts à resservir (dashboard visibilité 0-100, part de voix).
+
+**À revisiter** : si le dashboard adopte ScoreRing, vérifier que le scale 80/60 convient aux scores de visibilité (sinon paramétrer les seuils).
+
+#### 2026-06-09 — Page « Conseils GEO » (10 leviers) en route dédiée, pas dans l'audit technique
+
+**Contexte** : un post carrousel LinkedIn (Amandine Bart, « SEO sans migraine ») détaille 10 facteurs pour être cité par les IA (influence Google, branding, SEO YouTube, plateformes d'avis, comparatifs, structure, intention de recherche, E-E-A-T, fin du générique, fraîcheur). Bon matériel d'éducation produit. Question : en faire un onglet de l'audit technique ou une page à part ?
+
+**Options considérées** :
+- A — intégrer les 10 leviers comme section/onglet dans `/app/audits/[id]`.
+- B — route dédiée `/app/conseils` (nouvelle entrée sidebar).
+
+**Choix** : B.
+
+**Justification** : l'audit technique est **automatique et par-URL** (FAQPage, llms.txt, title, E-E-A-T on-page…). Or 8 des 10 leviers sont **off-page et stratégiques** (branding, mentions, YouTube, avis, comparatifs, expérience réelle) — non détectables par un crawl. Les noyer dans un rapport par-URL crée une confusion mentale (« sur quelle URL ? »). En page dédiée, c'est un playbook evergreen qui sert le **drip d'éducation post-signup** (tâche restante V0+) et donne du contexte au-dessus de l'audit.
+
+**Conséquences attendues** (état final après itérations design) :
+- Nouveau route group `(with-nav)/conseils` : `page.tsx` (**server dynamique** — charge les audits via `listAudits`) + `conseils-view.tsx` (accordéon + tableau).
+- Contenu structuré dans `src/lib/geo-advice.ts` (10 leviers + 4 axes + synthèse + flag `auditable`), réutilisable (newsletter, blog, drip email). Chiffres attribués à l'étude Ahrefs, formulés au conditionnel.
+- **Accordéon** : 1 carte = `<Collapsible>` autonome, trigger scannable (numéro + titre + badge d'axe + résumé une ligne), détail au dépli (corps + puces + callout « À retenir » + cross-link `appHint` vers la feature qui actionne le levier). Premier levier ouvert par défaut.
+- **Tableau « Vérifie tes pages »** en bas : les URLs réellement auditées de la workspace (URL · ScoreBadge /100 · dernier audit), lignes cliquables (stretched-link) → `/app/audits/[id]`, + **ligne d'invitation finale** `+ Auditer une URL` → `/app/audits/new` (gère vide ET ajout). Intro « X des 10 leviers vérifiables par l'audit ».
+- Entrée sidebar « Conseils GEO » (icône Lightbulb) après « Audits techniques ».
+- Patterns réutilisables documentés dans **doc 10 § Patterns liste & contenu (2026-06-09)**.
+
+**Itérations design (tracées pour mémoire — Max a piloté plusieurs allers-retours)** :
+1. Badge « Impact élevé/moyen » posé sur **chaque** carte → rejeté : un marqueur d'emphase sur toutes les lignes ne distingue plus rien (acté en anti-pattern doc 10).
+2. Pill plein « chiffre clé » (88 %, 2,5×…) inline sur quelques leviers → puis demandé en **bandeau sous la carte** (réf. « POSTED 3 DAY AGO » des cards Hopin), effet « carte sous la carte ».
+3. Bandeau re-câblé sur l'**audit** (« vérifié par l'audit »), puis remplacé par le **tableau d'URLs auditées** : plus concret (vraie data + CTA détail + invitation) qu'un marqueur statique. Bandeau par-carte et effet pile retirés ; cartes à plat avec ombre douce.
+
+**À revisiter** : (a) si traction, exposer une version publique SEO sur le marketing (`/guides/...`) plutôt que derrière l'auth ; (b) brancher un **statut live** pass/fail par levier auditable une fois le mapping levier→checks d'audit posé (aujourd'hui le flag `auditable` est statique).
+
+#### 2026-06-08 — Veille Peec AI exhaustive (docs.peec.ai) + ajout de 5 features V1 + polish UI app inspiré
+
+**Contexte** : Précédente veille concurrence sur Peec datait du 2026-05-11 (snapshot rapide site marketing). Le concurrent EU principal a publié depuis une documentation produit complète (docs.peec.ai) qui révèle plusieurs concepts non couverts par notre roadmap V0+/V1. Parallèlement, observation : notre `/app/*` est fonctionnellement équivalent mais visuellement moins « premium » que les screens Peec — densité d'info, hiérarchie typo et badges colorés sur valeurs métriques.
+
+Lecture exhaustive de 3 pages : `docs.peec.ai/intro-to-peec-ai`, `/understanding-your-performance`, `/brand-insights`. Plus reco transverse du rapport veille 2026-05-11 + workduo.ai pricing breakdown.
+
+**Findings produit (non couverts V0+)** :
+
+1. **Performance Matrix** — matrice configurable `axe X × axe Y` parmi {Topics, Models, Geographies, Competitors} × métrique {Visibility, Sentiment, Position, SoV}. Vue très puissante pour les agences/PME, inédite chez nous.
+2. **Rankings Table avec sélecteur de dimension** — "By AI Model / By topic / By tag" — permet de pivoter la même table sans changer de page.
+3. **Domain Types classification** — chaque domaine source labellisé Editorial / Corporate / UGC / Reference / Institutional. Ring chart "% par type" en synthèse. Très visuel en démo et trivial à coder (1 LLM call/source mensuel).
+4. **Volume (Beta)** — search volume estimé par prompt (très low → very high), barre colorée. Branche probablement DataForSEO ou équivalent.
+5. **Query Fanouts** — sub-queries que ChatGPT exécute pendant son web search. Niche mais signal différenciant pour les SEO-friendly users.
+6. **Brand Visibility vs Source Visibility** — distinction explicite formalisée ("Spot gaps") : tu peux être source citée sans être nommée comme marque, ou nommée sans être source. On a la data, pas la viz.
+7. **Strongest/Weakest model par marque** — info dérivée triviale, super utile en debrief.
+8. **Recent Chats en double format** — cards en overview, tableau en page prompt. Cohérence narration pas anodine.
+9. **Mode plein écran sur matrices/charts complexes** — pattern UX simple à brancher avec un Dialog.
+
+**Findings UX/UI** :
+
+- Pattern « header inline avec résumé » : `Overview · Attio's Visibility trending up by 5.2% this month` au lieu de juste un h1 — densité d'info ×2 sans encombrement.
+- 3 micro-KPIs en haut-droite (Visibility 3/14 ↓ · Sentiment 2/14 ↑ · Position 5/14 ↑) — snapshot deltas instant.
+- Top bar avec filtres globaux pills (brand · date range · tag · model) persistants entre pages — gros gap chez nous (`SegmentedControl` est local à `<TrendSection>` uniquement).
+- Tables avec mini-badges colorés inline `| 86` (barre verticale colorée + chiffre tabulaire) — encode la dimension métrique visuellement, pas que du texte.
+- Sidebar avec eyebrow « Pages » avant les items + item actif avec fond `bg-gray-100` léger.
+- Cards : radius ~16px (proche de notre `--radius-xl` 20px, OK), padding plus aéré côté Peec.
+
+**Choix** :
+
+A. **Documentation** : findings consolidés dans cette entrée (référentiel veille à jour). Reco V1 enrichies dans doc 02 (ajout Performance Matrix + Domain Types + Volume prompts + Brand vs Source Visibility + Strongest/Weakest model).
+
+B. **UI app polish ciblé** (sans refondre toute l'identité Airbnb-like, juste densifier) :
+- Nouveau composant `<PageHeader title summary kpis />` réutilisable, pattern Peec "name · summary inline + KPIs deltas à droite". Câblé d'abord sur `/app/dashboard`.
+- Ajustement padding `<Card>` (p-6 par défaut) et taille `type-stat` (réduire de 2.25rem → 2rem) pour mieux respirer.
+- Mini-badge coloré inline (`<MetricBadge tone value />`) pour encoder les valeurs métriques dans les tables — pattern "| 86" Peec.
+
+**Hors périmètre** : Performance Matrix, filtres globaux pills, ring chart Domain Types, Volume DataForSEO, Query Fanouts — sont des features V1, pas du polish. Ajoutés à doc 02 § V1 mais pas codés ici.
+
+**Conséquences attendues** :
+
+- V1 enrichie de 5 features priorisées (Performance Matrix, Domain Types, Volume, Brand vs Source gap, Strongest/Weakest model) → backlog clair pour mois 3-6.
+- Dashboard `/app/dashboard` visuellement plus dense et premium sans rupture identitaire.
+- Pattern `<PageHeader>` réutilisable extensible aux 8+ pages app restantes.
+
+**À revisiter** : 2026-07-15 — après 4 semaines de prod sur la nouvelle UI dashboard, mesurer si l'engagement (time on dashboard, scroll depth, retours commerciaux) justifie d'étendre le pattern à toutes les pages app.
+
+---
+
 #### 2026-06-08 — Refonte funnel conversion : plan picker post-onboarding + sidebar Subscribe + trial 14j avec carte requise (lève la décision 2026-05-14)
 
 **Contexte** : Le funnel actuel est passif. Après signup magic-link et onboarding wizard, le user atterrit sur `/app/dashboard` avec `workspace.plan="trialing"` (quotas 0/0) et un seul signal de conversion : un `<UpgradeBanner>` discret en haut. Aucun moment "obligatoire" de décision. Le user peut rester en trialing indéfiniment, churn silencieux.

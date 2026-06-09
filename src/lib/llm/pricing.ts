@@ -86,6 +86,16 @@ export const MISTRAL_PRICING: Record<string, ModelPricing> = {
     outputPerMtok: 6.6, // ~€6/Mtok
     webSearchPerCall: 0, // pas de web_search natif en V0+
   },
+  // Mistral Small 3 — modèle économique EU pour les jobs internes (prompt
+  // generation, audit summaries). Ajouté 2026-06-09 pour basculer
+  // suggestPrompts() de Haiku ($1/$5) vers ~$0.22/$0.66, soit -85% sur
+  // ces appels. Garde le tracking + scoring sur leurs modèles dédiés
+  // (Haiku pour scoring, providers natifs pour tracking).
+  "mistral-small-latest": {
+    inputPerMtok: 0.22, // ~€0.20/Mtok
+    outputPerMtok: 0.66, // ~€0.60/Mtok
+    webSearchPerCall: 0,
+  },
 };
 
 export function computeCost(

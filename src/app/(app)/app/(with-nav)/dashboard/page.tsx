@@ -1,9 +1,9 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { Activity, Eye, Flame, Layers, PieChart, Quote, Users } from "lucide-react";
+import { Activity, Eye, Flame, Home, Layers, PieChart, Quote, Users } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { computeDelta, getDashboardData, getVisibilityTrend } from "@/lib/dashboard/queries";
-import { Card, Stat } from "@/components/ui";
+import { Card, PageHeader, Stat } from "@/components/ui";
 import { BreakdownBars } from "@/components/charts/breakdown-bars";
 import { DownloadableChart } from "@/components/charts/downloadable-chart";
 import { LLM_COLORS, LLM_LABELS } from "@/components/charts/llm-colors";
@@ -79,19 +79,28 @@ export default async function DashboardPage() {
         visibilityScore={visibilityScore}
         trackedLlms={data.metricsToday.length}
       />
-      {/* Header simple : titre de page + action principale.
-       * L'identité (workspace, brand, plan, domaine) est portée par la
-       * sidebar, pas la peine de la répéter ici. */}
-      <header className="flex flex-wrap items-center justify-between gap-6">
-        <h1 className="type-h1">Vue d&apos;ensemble</h1>
-        <TriggerRunForm />
-      </header>
+      {/* Header pattern Peec docs (2026-06-08, cf. doc 09) : titre + summary
+       * inline dynamique (insight calculé sur le delta J-7) + slot droit
+       * pour l'action principale. L'identité (workspace, brand, plan,
+       * domaine) est portée par la sidebar. */}
+      <PageHeader
+        icon={Home}
+        title="Vue d'ensemble"
+        summary={buildDashboardSummary({
+          hasRunsToday,
+          scoreDelta,
+          totalRuns: agg.totalRuns,
+          llmsCount: agg.llmsCount,
+        })}
+        right={<TriggerRunForm />}
+      />
 
       {/* 4 Stats, agrégées tous-LLMs (cf. PR6 2026-05-18). */}
       <section className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card className="p-5">
+        <Card className="p-6">
           <Stat
             label="Score de visibilité"
+            glossaryTerm="visibility-score"
             value={hasRunsToday ? visibilityScore.toFixed(1) : "—"}
             icon={Flame}
             iconTone="orange"
@@ -103,18 +112,20 @@ export default async function DashboardPage() {
             }
           />
         </Card>
-        <Card className="p-5">
+        <Card className="p-6">
           <Stat
             label="Marque citée"
+            glossaryTerm="marque-citee"
             value={hasRunsToday ? `${agg.brandCitedCount}/${agg.totalRuns}` : "—"}
             icon={Activity}
             iconTone="green"
             hint="runs tous LLMs aujourd'hui"
           />
         </Card>
-        <Card className="p-5">
+        <Card className="p-6">
           <Stat
             label="Top concurrent"
+            glossaryTerm="top-concurrent"
             value={agg.topCompetitor?.name ?? "—"}
             icon={Users}
             iconTone="purple"
@@ -125,9 +136,10 @@ export default async function DashboardPage() {
             }
           />
         </Card>
-        <Card className="p-5">
+        <Card className="p-6">
           <Stat
             label="Part de voix"
+            glossaryTerm="part-de-voix"
             value={hasRunsToday ? `${agg.partDeVoix.toFixed(1)}%` : "—"}
             icon={PieChart}
             iconTone="blue"
@@ -204,6 +216,33 @@ export default async function DashboardPage() {
   );
 }
 
+// Construit le résumé inline du <PageHeader> dashboard à partir de la
+// data du jour. Insight prioritaire : delta du score visibilité vs J-7,
+// fallback "X runs aujourd'hui" si pas d'historique exploitable.
+function buildDashboardSummary({
+  hasRunsToday,
+  scoreDelta,
+  totalRuns,
+  llmsCount,
+}: {
+  hasRunsToday: boolean;
+  scoreDelta: number | null;
+  totalRuns: number;
+  llmsCount: number;
+}): string {
+  if (!hasRunsToday) {
+    return "Aucun run aujourd'hui · le cron quotidien se déclenche à 06:00 UTC";
+  }
+  const llmSuffix = llmsCount > 1 ? "s" : "";
+  if (scoreDelta === null) {
+    return `${totalRuns} run${totalRuns > 1 ? "s" : ""} aujourd'hui sur ${llmsCount} LLM${llmSuffix}`;
+  }
+  const abs = Math.abs(scoreDelta).toFixed(1).replace(".", ",");
+  if (scoreDelta > 0.5) return `Score en hausse de ${abs} % vs J-7`;
+  if (scoreDelta < -0.5) return `Score en baisse de ${abs} % vs J-7`;
+  return `Score stable vs J-7 · ${totalRuns} run${totalRuns > 1 ? "s" : ""} sur ${llmsCount} LLM${llmSuffix}`;
+}
+
 function FunnelSourcesSection({
   totalRuns,
   retrievedCount,
@@ -235,18 +274,20 @@ function FunnelSourcesSection({
         </div>
       </div>
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <Card className="p-5">
+        <Card className="p-6">
           <Stat
             label="Apparition"
+            glossaryTerm="apparition"
             value={hasData ? `${ratios.apparitionPct.toFixed(1)}%` : "—"}
             icon={Eye}
             iconTone="blue"
             hint={hasData ? `${retrievedCount}/${totalRuns} réponses` : "en attente de données"}
           />
         </Card>
-        <Card className="p-5">
+        <Card className="p-6">
           <Stat
             label="Fréquence"
+            glossaryTerm="frequence"
             value={hasData ? ratios.frequence.toFixed(2) : "—"}
             icon={Layers}
             iconTone="purple"
@@ -257,9 +298,10 @@ function FunnelSourcesSection({
             }
           />
         </Card>
-        <Card className="p-5">
+        <Card className="p-6">
           <Stat
             label="Citation"
+            glossaryTerm="citation"
             value={hasData ? `${ratios.citationPct.toFixed(1)}%` : "—"}
             icon={Quote}
             iconTone="green"

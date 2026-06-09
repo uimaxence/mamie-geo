@@ -6,10 +6,19 @@ import { ArrowLeft, GitCompare } from "lucide-react";
 import { db } from "@/db/client";
 import { technicalAudits } from "@/db/schema";
 import { auth } from "@/lib/auth";
-import { Badge, Banner, Card, EmptyState, LinkButton } from "@/components/ui";
+import {
+  Badge,
+  Banner,
+  Card,
+  EmptyState,
+  LinkButton,
+  PageContainer,
+  PageHeader,
+} from "@/components/ui";
 import { PageViewTracker } from "@/components/app/page-view-tracker";
 import { getDashboardData } from "@/lib/dashboard/queries";
 import { quotasFor } from "@/lib/plans/quotas";
+import { scoreColor } from "@/lib/audit/score";
 import type { SubScore } from "@/lib/audit/types";
 import { listAudits } from "../actions";
 import { CompetitorsBatchButton } from "./competitors-batch-button";
@@ -81,7 +90,7 @@ export default async function ComparePage({ searchParams }: PageProps) {
   const competitorRows = latestRows.filter((r) => r.isCompetitor);
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-12 lg:px-10">
+    <PageContainer>
       <PageViewTracker
         event="audit_compare_viewed"
         properties={{
@@ -97,14 +106,13 @@ export default async function ComparePage({ searchParams }: PageProps) {
         Retour aux audits
       </Link>
 
-      <header className="mt-6">
-        <span className="type-eyebrow">Comparaison concurrents</span>
-        <h1 className="type-h1 mt-2">Comment tu te situes vs tes concurrents.</h1>
-        <p className="type-body mt-2 max-w-2xl text-sm text-[color:var(--color-ink-soft)]">
-          Audite tes concurrents en batch (1 audit par domaine). La matrice affiche le score par
-          catégorie pour identifier où tu es devant et où tu dois progresser.
-        </p>
-      </header>
+      <div className="mt-6">
+        <PageHeader
+          icon={GitCompare}
+          title="Comparaison concurrents"
+          summary="Audite tes concurrents en batch · matrice score par catégorie pour repérer ton positionnement"
+        />
+      </div>
 
       {batchStarted === "1" && (
         <Banner tone="info" className="mt-8">
@@ -153,7 +161,7 @@ export default async function ComparePage({ searchParams }: PageProps) {
                 <tr className="border-t-4 border-[color:var(--color-border)]">
                   <td
                     colSpan={6}
-                    className="px-4 py-2 text-xs uppercase tracking-wider text-[color:var(--color-muted)]"
+                    className="px-4 py-2 text-[0.8125rem] font-medium text-[color:var(--color-muted)]"
                   >
                     Concurrents
                   </td>
@@ -166,7 +174,7 @@ export default async function ComparePage({ searchParams }: PageProps) {
           </table>
         </Card>
       )}
-    </div>
+    </PageContainer>
   );
 }
 
@@ -217,7 +225,7 @@ function CompareRow({
 
 function LockedView({ plan }: { plan: string }) {
   return (
-    <div className="mx-auto max-w-2xl px-6 py-12">
+    <PageContainer width="form">
       <Link
         href="/app/audits"
         className="inline-flex items-center gap-2 text-sm text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]"
@@ -225,26 +233,19 @@ function LockedView({ plan }: { plan: string }) {
         <ArrowLeft size={14} />
         Retour aux audits
       </Link>
-      <header className="mt-6">
+      <div className="mt-6 flex flex-col gap-4">
         <Badge tone="accent">Réservé Starter & plus</Badge>
-        <h1 className="type-h1 mt-3">Comparaison concurrents.</h1>
-        <p className="type-body mt-3 text-sm text-[color:var(--color-ink-soft)]">
-          Audite en batch les domaines de tes concurrents pour voir où tu es devant et où tu dois
-          progresser. Disponible à partir du plan Starter (3 concurrents) et Pro (10 concurrents).
-        </p>
-        <p className="type-meta mt-2">Plan actuel : {plan}</p>
-      </header>
+        <PageHeader
+          icon={GitCompare}
+          title="Comparaison concurrents"
+          summary={`Audite en batch tes concurrents · disponible Starter (3) et Pro (10) · plan actuel : ${plan}`}
+        />
+      </div>
       <div className="mt-8">
         <LinkButton href="/pricing" variant="primary" size="lg">
           Voir les plans →
         </LinkButton>
       </div>
-    </div>
+    </PageContainer>
   );
-}
-
-function scoreColor(score: number): string {
-  if (score >= 80) return "#16a34a";
-  if (score >= 60) return "#d97706";
-  return "#dc2626";
 }

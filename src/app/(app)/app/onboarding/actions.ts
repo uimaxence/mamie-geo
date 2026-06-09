@@ -10,7 +10,11 @@ import { brands, competitors, prompts, runs, workspaceMembers, workspaces } from
 import { auth } from "@/lib/auth";
 import { logCronEvent } from "@/lib/cron-logger";
 import { env } from "@/lib/env";
-import { createAnthropicPromptGenerator } from "@/lib/llm/prompt-generator";
+import {
+  createAnthropicPromptGenerator,
+  createMistralPromptGenerator,
+  type PromptGenerator,
+} from "@/lib/llm/prompt-generator";
 import { enqueue } from "@/lib/queue";
 
 // Server action : crée workspace + brand + concurrents + prompts en
@@ -276,11 +280,21 @@ export async function suggestPrompts(raw: SuggestPromptsInput): Promise<SuggestP
   }
   const data = parsed.data;
 
-  if (!env.ANTHROPIC_API_KEY) {
-    throw new Error("ANTHROPIC_API_KEY manquant, suggestion indisponible");
-  }
+  // Bascule 2026-06-09 (cf. doc 09) : Mistral Small 3 par défaut (EU,
+  // ~5× moins cher que Haiku sur ce use case JSON-only), fallback Haiku
+  // si la clé Mistral n'est pas configurée. Le scoring reste sur Haiku
+  // (besoin de fidélité tool_use stricte) — c'est uniquement le générateur
+  // de prompts qui bascule.
+  const generator: PromptGenerator = env.MISTRAL_API_KEY
+    ? createMistralPromptGenerator({ apiKey: env.MISTRAL_API_KEY })
+    : env.ANTHROPIC_API_KEY
+      ? createAnthropicPromptGenerator({ apiKey: env.ANTHROPIC_API_KEY })
+      : (() => {
+          throw new Error(
+            "Aucun provider LLM configuré pour la suggestion (MISTRAL_API_KEY ou ANTHROPIC_API_KEY requis)",
+          );
+        })();
 
-  const generator = createAnthropicPromptGenerator({ apiKey: env.ANTHROPIC_API_KEY });
   const result = await generator.suggest({
     brandName: data.brandName,
     domain: data.domain,

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { auth } from "@/lib/auth";
-import { Badge, Card } from "@/components/ui";
+import { Badge, Card, ScoreBar, ScoreRing, SegmentBar } from "@/components/ui";
 import { PageViewTracker } from "@/components/app/page-view-tracker";
 import { getDashboardData } from "@/lib/dashboard/queries";
 import type { CheckResult, SubScore } from "@/lib/audit/types";
@@ -76,56 +76,55 @@ export default async function AuditDetailPage({ params }: PageProps) {
         Retour aux audits
       </Link>
 
-      {/* Header score */}
-      <Card className="mt-6 p-8">
-        <div className="flex flex-col items-start gap-6 sm:flex-row sm:items-center sm:justify-between">
-          <div>
+      {/* Header score — anneau + répartition par sévérité + sous-scores */}
+      <Card className="mt-6 p-6 shadow-[var(--shadow-sm)] sm:p-8">
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
+          <ScoreRing value={audit.scoreGlobal} size={128} />
+
+          <div className="min-w-0 flex-1">
             <p className="type-eyebrow flex items-center gap-2">
               <span>Score global</span>
               {audit.isCompetitor && <Badge tone="neutral">concurrent</Badge>}
             </p>
-            <div className="mt-3 flex items-baseline gap-3">
-              <span className="type-stat text-7xl" style={{ color: scoreColor(audit.scoreGlobal) }}>
-                {audit.scoreGlobal}
-              </span>
-              <span className="type-h2 text-[color:var(--color-muted)]">/100</span>
-            </div>
-            <p className="type-meta mt-3 font-mono">{audit.url}</p>
+            <p className="mt-2 truncate font-mono text-sm text-[color:var(--color-ink)]">
+              {audit.url}
+            </p>
             <p className="type-meta mt-1">
               Audité {formatDate(audit.fetchedAt)} · HTTP {audit.httpStatus}
               {audit.psiUnavailable && " · PSI indisponible"}
             </p>
           </div>
-          <div className="text-right">
-            <p className="text-sm text-[color:var(--color-ink-soft)]">
-              <strong className="text-[color:var(--color-error)]">{critical.length}</strong>{" "}
-              critique{critical.length > 1 ? "s" : ""}
-            </p>
-            <p className="mt-1 text-sm text-[color:var(--color-ink-soft)]">
-              <strong className="text-[color:var(--color-warning)]">{warnings.length}</strong>{" "}
-              avertissement{warnings.length > 1 ? "s" : ""}
-            </p>
-            <p className="mt-1 text-sm text-[color:var(--color-ink-soft)]">
-              <strong className="text-[color:var(--color-success)]">{info.length}</strong> info
-              & bons points
-            </p>
+
+          <div className="flex shrink-0 flex-col gap-2">
+            <IssuePill tone="critical" count={critical.length} singular="critique" plural="critiques" />
+            <IssuePill
+              tone="warning"
+              count={warnings.length}
+              singular="avertissement"
+              plural="avertissements"
+            />
+            <IssuePill tone="success" count={info.length} singular="bon point" plural="info & bons points" />
           </div>
         </div>
 
-        <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {/* Barre de répartition critiques / avertissements / bons points */}
+        <SegmentBar
+          className="mt-6"
+          segments={[
+            { value: critical.length, tone: "critical", label: `${critical.length} critiques` },
+            { value: warnings.length, tone: "warning", label: `${warnings.length} avertissements` },
+            { value: info.length, tone: "success", label: `${info.length} bons points` },
+          ]}
+        />
+
+        <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
           {subScores.map((sub) => (
-            <div
+            <ScoreBar
               key={sub.category}
-              className="rounded-[var(--radius-lg)] border border-[color:var(--color-border)] p-4"
-            >
-              <p className="type-eyebrow">{CATEGORY_LABEL[sub.category]}</p>
-              <p className="type-stat mt-1.5 text-3xl" style={{ color: scoreColor(sub.score) }}>
-                {sub.score}
-              </p>
-              <p className="type-meta mt-1">
-                {sub.passed}/{sub.total} checks validés
-              </p>
-            </div>
+              label={CATEGORY_LABEL[sub.category]}
+              value={sub.score}
+              hint={`${sub.passed}/${sub.total} checks validés`}
+            />
           ))}
         </div>
       </Card>
@@ -135,10 +134,34 @@ export default async function AuditDetailPage({ params }: PageProps) {
   );
 }
 
-function scoreColor(score: number): string {
-  if (score >= 80) return "#16a34a";
-  if (score >= 60) return "#d97706";
-  return "#dc2626";
+// Pastille d'issue colorée (point + compteur + libellé), pattern des
+// pills « 2 Critical / 8 high » des screens d'inspiration.
+function IssuePill({
+  tone,
+  count,
+  singular,
+  plural,
+}: {
+  tone: "critical" | "warning" | "success";
+  count: number;
+  singular: string;
+  plural: string;
+}) {
+  const styles = {
+    critical: { dot: "#dc2626", bg: "var(--color-error-bg)" },
+    warning: { dot: "#d97706", bg: "var(--color-warning-bg)" },
+    success: { dot: "#16a34a", bg: "var(--color-success-bg)" },
+  }[tone];
+  return (
+    <span
+      className="inline-flex items-center gap-2 rounded-[var(--radius-pill)] px-3 py-1 text-sm text-[color:var(--color-ink-soft)]"
+      style={{ backgroundColor: styles.bg }}
+    >
+      <span aria-hidden className="size-2 shrink-0 rounded-full" style={{ backgroundColor: styles.dot }} />
+      <strong className="text-[color:var(--color-ink)] tabular-nums">{count}</strong>
+      {count > 1 ? plural : singular}
+    </span>
+  );
 }
 
 function formatDate(date: Date): string {

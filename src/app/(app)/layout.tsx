@@ -8,6 +8,7 @@ import { getUserContext } from "@/lib/auth/user-context";
 import { planToMrr } from "@/lib/plans/mrr";
 import { PlanPickerModalTrigger } from "@/components/app/plan-picker-modal-trigger";
 import { PostHogUserIdentify } from "@/components/app/posthog-user-identify";
+import { CalSupportEmbed } from "@/components/app/cal-support-embed";
 import { Suspense } from "react";
 import { Toaster, TooltipProvider } from "@/components/ui";
 
@@ -80,6 +81,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       )}
       <div className="min-h-screen bg-white">{children}</div>
       <Toaster />
+      <CalSupportEmbed />
     </TooltipProvider>
   );
 }

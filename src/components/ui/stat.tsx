@@ -1,6 +1,8 @@
 import { TrendingDown, TrendingUp, type LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { GlossaryInfo } from "./glossary-info";
+import type { GlossaryTerm } from "@/lib/glossary";
 
 // Stat enrichie, pattern inspiré des dashboards modernes :
 //   ┌────────────────────────────────────┐
@@ -41,6 +43,10 @@ export interface StatProps {
   icon?: LucideIcon;
   iconTone?: IconTone;
   delta?: StatDelta | null;
+  /** Terme du glossaire à expliquer en hover sur le label (icône info à droite du label). */
+  glossaryTerm?: GlossaryTerm;
+  /** Définition libre, utilisée si on veut un texte custom hors glossaire. */
+  tooltip?: string;
 }
 
 const valueToneClass: Record<NonNullable<StatProps["tone"]>, string> = {
@@ -69,11 +75,23 @@ export function Stat({
   icon: Icon,
   iconTone = "neutral",
   delta,
+  glossaryTerm,
+  tooltip,
 }: StatProps) {
+  const hasGlossary = Boolean(glossaryTerm || tooltip);
   return (
     <div className="flex flex-col gap-2.5">
       <div className="flex items-start justify-between gap-3">
-        <span className="type-eyebrow">{label}</span>
+        <span className="type-eyebrow inline-flex items-center gap-1.5">
+          {label}
+          {hasGlossary && (
+            <GlossaryInfo
+              term={glossaryTerm}
+              definition={tooltip}
+              ariaLabel={`Définition : ${label}`}
+            />
+          )}
+        </span>
         {Icon && (
           <span
             aria-hidden

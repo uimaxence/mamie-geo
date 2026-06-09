@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { listPrompts } from "@/lib/prompts/queries";
 import { quotasFor } from "@/lib/plans/quotas";
+import { PageContainer } from "@/components/ui";
 import { PromptsList } from "./prompts-list";
 
 // Page /app/prompts, liste + CRUD des prompts trackés.
@@ -21,13 +22,13 @@ export default async function PromptsPage() {
   const quotas = quotasFor(data.plan);
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-12 lg:px-10">
+    <PageContainer>
       <PromptsList
         initialPrompts={data.prompts}
         plan={data.plan}
         planCadence={quotas.cadence}
         maxPrompts={quotas.prompts}
       />
-    </div>
+    </PageContainer>
   );
 }

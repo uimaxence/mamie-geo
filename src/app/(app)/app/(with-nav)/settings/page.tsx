@@ -5,7 +5,8 @@ import { db } from "@/db/client";
 import { brands, workspaceMembers, workspaces } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { getDashboardData } from "@/lib/dashboard/queries";
-import { Badge, Card, CardBody, CardHeader } from "@/components/ui";
+import { Settings as SettingsIcon } from "lucide-react";
+import { Badge, Card, CardBody, CardHeader, PageContainer, PageHeader } from "@/components/ui";
 import { AccountDangerZone } from "./account-danger-zone";
 import { BillingSection } from "./billing-section";
 import { BrandAliasesForm } from "./brand-aliases-form";
@@ -59,11 +60,12 @@ export default async function SettingsPage({ searchParams }: PageProps) {
     .limit(1);
 
   return (
-    <main className="mx-auto max-w-3xl px-6 py-12">
-      <header>
-        <span className="type-eyebrow">Réglages</span>
-        <h1 className="type-h1 mt-2">Ton compte et ton workspace.</h1>
-      </header>
+    <PageContainer width="narrow">
+      <PageHeader
+        icon={SettingsIcon}
+        title="Réglages"
+        summary="Ton compte, ton workspace, ta marque trackée et ton abonnement"
+      />
 
       {checkout === "success" && (
         <div className="mt-6 rounded-[var(--radius-xl)] border border-[color:var(--color-success)]/20 bg-[color:var(--color-success-bg)] px-5 py-4">
@@ -232,7 +234,7 @@ export default async function SettingsPage({ searchParams }: PageProps) {
           <AccountDangerZone userEmail={session.user.email} />
         </section>
       </div>
-    </main>
+    </PageContainer>
   );
 }
 

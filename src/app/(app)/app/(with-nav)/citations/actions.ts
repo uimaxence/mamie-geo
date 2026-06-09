@@ -16,9 +16,11 @@ import {
   type UpdateCompetitorInput,
 } from "@/lib/competitors/schemas";
 
-// Server actions /app/competitors, CRUD.
-// Toutes les actions vérifient l'auth user → brand. Le quota concurrents
-// est enforced par plan (5 Starter / 10 Pro / illimité Agency).
+// Server actions concurrents (CRUD), portées par la route /app/citations
+// depuis 2026-06-08 (cf. doc 09 — fusion Sources + Concurrents en
+// 1 entrée sidebar). Toutes les actions vérifient l'auth user → brand.
+// Le quota concurrents est enforced par plan (5 Starter / 10 Pro /
+// illimité Agency).
 
 export interface ActionOk {
   ok: true;
@@ -95,7 +97,7 @@ export async function createCompetitor(raw: CreateCompetitorInput): Promise<Acti
     },
   });
 
-  revalidatePath("/app/competitors");
+  revalidatePath("/app/citations");
   return { ok: true, id: newId };
 }
 
@@ -134,7 +136,7 @@ export async function updateCompetitor(
     properties: { competitor_id: competitorId, fields_updated: Object.keys(updates) },
   });
 
-  revalidatePath("/app/competitors");
+  revalidatePath("/app/citations");
   return { ok: true, id: competitorId };
 }
 
@@ -156,6 +158,6 @@ export async function deleteCompetitor(competitorId: string): Promise<ActionResu
     properties: { competitor_id: competitorId },
   });
 
-  revalidatePath("/app/competitors");
+  revalidatePath("/app/citations");
   return { ok: true };
 }

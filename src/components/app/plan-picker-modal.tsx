@@ -264,11 +264,16 @@ function PlanPickerCard({
         </span>
         <span className="text-xs text-[color:var(--color-muted)]">€ HT/mois</span>
       </div>
-      {cycle === "annual" && (
-        <p className="type-meta mt-1 text-[color:var(--color-success)]">
-          −{ANNUAL_DISCOUNT_PCT} % vs mensuel
-        </p>
-      )}
+      {/* Toujours rendu (même en mensuel, invisible) pour réserver sa hauteur
+          et éviter que les cards changent de taille au toggle de cycle. */}
+      <p
+        className={`type-meta mt-1 text-[color:var(--color-success)] ${
+          cycle === "annual" ? "" : "invisible"
+        }`}
+        aria-hidden={cycle !== "annual"}
+      >
+        −{ANNUAL_DISCOUNT_PCT} % vs mensuel
+      </p>
 
       <ul className="mt-4 flex flex-col gap-2">
         {plan.features.slice(0, 4).map((feature) => (

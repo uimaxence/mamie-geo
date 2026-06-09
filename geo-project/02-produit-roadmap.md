@@ -135,6 +135,12 @@ Vocabulaire adopté en miroir du standard marché (Peec AI a popularisé ce funn
 
 Les 3 métriques composent un funnel : `Apparition → Fréquence → Citation`. À surfacer dans le dashboard sources, les exports CSV et le rapport hebdo (cf. doc 03 § Schéma BDD pour les colonnes `retrieved_count`, `retrievals_total`, `citations_count` à ajouter à `citation_metrics_daily`).
 
+### Source
+
+- **Définition** — *page web (URL/domaine) qu'une IA est allée consulter pendant qu'elle répondait à un prompt de ton marché*. Extraite de `runs.parsed_citations`. Y être présent (ou être soi-même ce site) augmente la probabilité d'être cité — c'est le levier GEO concret derrière l'onglet Sources de `/app/citations`.
+- **Pourquoi c'est utile** — l'IA source ses réponses depuis ces pages : connaître les sources de ton segment dit *où aller te faire mentionner*. La première question est « ton domaine apparaît-il parmi les sources ? ». Sinon, c'est ton principal gap.
+- **Type de source** — une source peut être : ta marque (`Vous`), un concurrent (`Concurrent`), une référence (Wikipedia), de l'UGC (Reddit), de l'éditorial (presse) ou autre. Le tag `Vous`/`Concurrent` est exact (on a les domaines en base) ; le reste est heuristique en attendant le classifier LLM V1 (cf. § Domain Types classification).
+
 ### Termes à NE PAS utiliser (équivalents anglais)
 
 - ❌ « AI Visibility Score » → ✅ **Score de visibilité IA**
@@ -167,6 +173,7 @@ Le V0 a livré la promesse de base (tracker + dashboard + audit gratuit + billin
 | **Save-as-PNG sur charts**                               | Drop direct dans Slack/deck client. Effet « felt » côté agence = partage = bouche-à-oreille.                   | Wrapper sur Recharts (LineChart, BarChart, AreaChart) — comptabiliser 1-2 j (pas trivial avec SSR + theming) |
 | **CSV export** ✅ livré 2026-06-08                       | Gap V0 (listé P0 mais code absent). Endpoints `/api/export/runs.csv`, `/api/export/metrics.csv`.               | UTF-8 BOM, RFC 4180, scope workspace, plage 90j par défaut, query params `?from/to/brandId`. Bouton dans `/app/settings`. |
 | **Pause/Resume projects** ✅ livré 2026-06-08            | Agence saisonnière / audit one-shot : pause le tracking sans perdre le setup, credits ne sont plus consommés.  | Champ `brands.paused_at TIMESTAMPTZ NULL` + index partiel `idx_brands_active` (WHERE paused_at IS NULL) + skip dans scheduler (cf. lib/scheduler/schedule-runs.ts) + toggle UI dans `/app/settings`. |
+| **Page « Conseils GEO » (10 leviers)** ✅ livré 2026-06-09 | Éducation produit evergreen + amorce du drip post-signup. Off-page (branding, avis, YouTube…) que l'audit par-URL ne couvre pas. Cf. doc 09 § 2026-06-09. | Route `(with-nav)/conseils` (server static + accordéon `conseils-view.tsx`) + contenu structuré `src/lib/geo-advice.ts` (10 leviers, 4 axes, synthèse) + cross-links vers audit/citations + entrée sidebar (Lightbulb). |
 
 ### Hors périmètre V0+
 
@@ -214,6 +221,17 @@ Une fois que le Tracker tourne et que les clients comprennent leur position, ils
 | **Query fan-out tracking**                             | Traque les « sub-queries » que ChatGPT/consorts fan-out en interne. Plus profond que « ma marque apparaît-elle ». Vraie valeur démo agence. | Mode « advanced view » réservé tier Pro/Agence.                        |
 | **« État du GEO francophone 2027 » report annuel**     | Lead magnet + autorité de catégorie + relais presse FR. Basé sur la data collectée en V0 / V0+.                                | Cf. doc 06 § Lead magnets. Publication début 2027.                     |
 | **Tier credit-based « Power » (optionnel)**            | Doc 09 a tranché flat-prompts en V0. À reconsidérer V1 si demande client agence claire pour piloter finement engines × prompts × cadence. | Pas un acquis. Validation après 6 mois de data des plans flat actuels. |
+
+### Ajouts V1 issus de la veille Peec docs 2026-06-08 (cf. doc 09)
+
+| Feature                                                | Pourquoi                                                                                                                                                                                          | Notes                                                                                                                                                                |
+| ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Performance Matrix configurable**                    | Matrice axe X × axe Y parmi {Topics, Models, Geographies, Competitors} × {Visibility, Sentiment, Position, Part de voix}. Vue puissante pour repérer les gaps modèle/topic. Inédit chez nous.       | Composant heatmap réutilisable. Mode plein-écran via Dialog. Réservé Pro+ (Solo et Starter gardent le dashboard simple).                                              |
+| **Domain Types classification** (Editorial / Corporate / UGC / Reference / Institutional) | Classement automatique des domaines sources cités + ring chart « % par type » en synthèse. Très visuel en démo. La data existe (`sources` déjà loggé V0+), il manque le label + viz. | Pipeline 1 LLM call (Haiku) par nouveau domaine + cache permanent. Affichage : table « Domains » avec colonne Type colorée + ring chart `Domains by Type`.            |
+| **Volume estimé par prompt** (Beta-style)              | Search volume relatif (« very low » → « very high ») affiché à côté de chaque prompt suggéré et dans la liste prompts existants. Transforme la suggestion IA en argument SEO sérieux (cible SEO).  | Branche DataForSEO ou équivalent EU. Coût ~30 €/mois pour ~100 prompts/mois. Affichage barre colorée 5 niveaux, pas un chiffre absolu (pas fiable de toute façon). |
+| **Brand Visibility vs Source Visibility (Spot gaps)**  | Vue dédiée qui croise « marque nommée dans la réponse » et « domaine cité comme source ». Cas typique : domaine cité régulièrement mais marque jamais nommée → opportunité de branding éditorial.   | Page `/app/sources/gaps` ou onglet sur `/app/sources`. Liste les sources où on est cité sans être nommé + l'inverse. Repris du pattern Peec « Spot gaps ».            |
+| **Strongest / Weakest model par marque**               | Info dérivée triviale (max/min `visibilityScore` par LLM sur 30 j). Affichée en pill sur la card brand. Super utile en debrief commercial agence (« Tu performes mieux sur Claude que sur ChatGPT »). | 2 nouveaux champs sur le query `getDashboardData`. Affichage : 2 pills à côté du brand name dans `<AppTopBar>` ou en sub-line sur la stat Visibility.                |
+| **Rankings Table avec sélecteur de dimension**         | Sélecteur « By AI Model / By Topic / By Tag » qui pivote la même table. Évite de multiplier les pages. Pattern Peec Brand Insights.                                                              | Composant `<RankingsTable dimension={...}>` réutilisable. Une fois Topics + Tags landed (V0+ tardif → V1 ?), branchable directement.                                  |
 
 ---
 

@@ -4,7 +4,16 @@ import { notFound, redirect } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { getPromptDetail } from "@/lib/prompts/queries";
-import { Badge, Card, EmptyState, Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui";
+import {
+  Badge,
+  Card,
+  EmptyState,
+  GlossaryInfo,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui";
 import { BreakdownBars } from "@/components/charts/breakdown-bars";
 import { LLM_COLORS, LLM_LABELS } from "@/components/charts/llm-colors";
 import { BatchesTable } from "@/components/app/batches-table";
@@ -73,12 +82,18 @@ export default async function PromptDetailPage({ params }: { params: Promise<{ i
       {/* 4 stats agrégées */}
       <section className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card className="p-5">
-          <p className="type-eyebrow">Runs success (30 j)</p>
+          <p className="type-eyebrow inline-flex items-center gap-1.5">
+            Runs success (30 j)
+            <GlossaryInfo term="runs" ariaLabel="Définition : runs" />
+          </p>
           <p className="type-stat mt-3">{detail.totals.totalRuns}</p>
           <p className="type-meta mt-2">tous LLMs confondus</p>
         </Card>
         <Card className="p-5">
-          <p className="type-eyebrow">Marque citée</p>
+          <p className="type-eyebrow inline-flex items-center gap-1.5">
+            Marque citée
+            <GlossaryInfo term="marque-citee" ariaLabel="Définition : marque citée" />
+          </p>
           <p className="type-stat mt-3">
             {detail.totals.brandCited}
             <span className="text-base font-normal text-[color:var(--color-muted)]">
@@ -89,14 +104,20 @@ export default async function PromptDetailPage({ params }: { params: Promise<{ i
           <p className="type-meta mt-2">taux : {detail.totals.citationRate.toFixed(0)} %</p>
         </Card>
         <Card className="p-5">
-          <p className="type-eyebrow">Sentiment dominant</p>
+          <p className="type-eyebrow inline-flex items-center gap-1.5">
+            Sentiment dominant
+            <GlossaryInfo term="sentiment" ariaLabel="Définition : sentiment" />
+          </p>
           <div className="mt-3">
             <Badge tone={sentimentDisplay.tone}>{sentimentDisplay.label}</Badge>
           </div>
           <p className="type-meta mt-3">via Claude Haiku 4.5</p>
         </Card>
         <Card className="p-5">
-          <p className="type-eyebrow">Top concurrent</p>
+          <p className="type-eyebrow inline-flex items-center gap-1.5">
+            Top concurrent
+            <GlossaryInfo term="top-concurrent" ariaLabel="Définition : top concurrent" />
+          </p>
           <p className="type-h3 mt-3">{detail.topCompetitors[0]?.name ?? "—"}</p>
           <p className="type-meta mt-2">
             {detail.topCompetitors[0]
