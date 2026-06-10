@@ -265,7 +265,17 @@ la doc devient un cimetière.
 
 ## 9. État du projet (snapshot — 2026-06-09)
 
-> Mise à jour 2026-06-10 (suite) — Ranking concurrentiel étapes 1+2
+> Mise à jour 2026-06-10 (fin de journée) — Ranking suite (cf. doc 09) :
+> **hint de fiabilité auto-extinguible** sur l'onglet Classement (ligne
+> discrète Info tant que `dataDays < RANKING_RELIABLE_AFTER_DAYS` = 14,
+> piloté par la donnée, disparaît seul), **étape 3 livrée** (`position`
+> par concurrent dans le tool schema scoring, parsing lénient pour les
+> anciens payloads — la donnée s'accumule, prééminence branchable plus
+> tard), **bouton « Suivre »** sur les marques détectées du classement
+> (réutilise la server action `createCompetitor`, event
+> `ranking_discovered_tracked`).
+>
+> Précédente (2026-06-10, suite) — Ranking concurrentiel étapes 1+2
 > livrées (cf. doc 09 § 2026-06-10 ranking) : onglet **« Classement »**
 > sur `/app/citations` (`?tab=ranking`) — leaderboard 30 j toi +
 > concurrents trackés + marques détectées non suivies (cap 5), filtre

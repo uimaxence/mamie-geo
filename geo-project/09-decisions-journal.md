@@ -161,6 +161,19 @@ haut et l'entrée "2026-05-05 — Réponses aux 10 questions de bootstrap".
 
 ### Décisions enregistrées
 
+#### 2026-06-10 — Ranking suite : hint de fiabilité auto-extinguible, étape 3 (position concurrents), Suivre depuis le classement
+
+**Contexte** : demande Max — le classement doit afficher « un petit trigger discret » indiquant que les résultats gagnent en pertinence avec le temps, qui disparaît quand les données suffisent. + carte blanche sur les features pertinentes.
+
+**Choix** :
+- **Hint de fiabilité piloté par la donnée** (pas de dismiss manuel ni localStorage) : `getRankingData` renvoie `dataDays` (jours distincts avec ≥ 1 run sur la fenêtre courante) ; l'onglet Classement affiche une ligne discrète (texte muted + icône Info, volontairement pas un Banner) « Classement encore jeune (N jours de données)… compte environ 14 jours. Ce message disparaîtra de lui-même » tant que `dataDays < RANKING_RELIABLE_AFTER_DAYS` (= 14, constante exportée dans `ranking.ts` ; 2 cycles hebdo complets pour lisser les prompts en cadence weekly). Au-delà : rien à nettoyer, le hint s'éteint seul.
+- **Étape 3 livrée** (cf. doc 02) : champ `position` (`first_paragraph|middle|end`) ajouté aux `competitorsMentioned` du tool schema scoring (requis côté schema, parsing **lénient** côté code : les payloads pré-2026-06-10 et les omissions du modèle restent valides, champ simplement absent). Type `ScoringMentionPosition`. La donnée s'accumule sans coût marginal ; le ranking de prééminence sera branchable plus tard.
+- **« Suivre » direct depuis le classement** : les lignes « détectée » portent un bouton pill `+ Suivre` qui appelle la server action `createCompetitor` existante (quota + RBAC déjà gérés dedans) → toast + refresh. Ferme la boucle découverte → tracking sans passer par l'onglet Concurrents. Event PostHog `ranking_discovered_tracked` (name, rank).
+
+**Conséquences attendues** : l'utilisateur comprend pourquoi le classement bouge au début sans être pollué ensuite ; la position concurrents commence à s'accumuler dès le prochain scoring ; le passage détectée → suivie devient 1 clic.
+
+**À revisiter** : seuil 14 j à ajuster avec les retours ; étape 4 (scoring systématique) toujours à trancher.
+
 #### 2026-06-10 — Ranking concurrentiel étapes 1+2 : onglet Classement sur /app/citations, zéro migration
 
 **Contexte** : Max valide les étapes 1+2 de l'analyse ranking (cf. doc 02 § Ranking concurrentiel). L'analyse prévoyait une nouvelle table `competitor_metrics_daily` pour l'historisation.
