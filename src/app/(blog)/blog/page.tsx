@@ -9,6 +9,7 @@ export const metadata: Metadata = {
   title: "Blog",
   description:
     "Méthodes, études et tutoriels pour mesurer et améliorer la visibilité de ta marque dans ChatGPT, Claude, Perplexity, Gemini et Le Chat de Mistral.",
+  alternates: { canonical: "/blog" },
 };
 
 // Index blog, liste les articles publiés via le registry filesystem

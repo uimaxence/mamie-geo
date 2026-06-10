@@ -161,6 +161,46 @@ haut et l'entrée "2026-05-05 — Réponses aux 10 questions de bootstrap".
 
 ### Décisions enregistrées
 
+#### 2026-06-10 — Audit indexation GSC : host canonique non-www + neutralisation des clones .vercel.app
+
+**Contexte** : Max signale des pages non indexées dans Search Console. Audit
+du setup d'indexation. Constat : **incohérence de host canonique**. Vercel
+sert `www.mamie-geo.fr` comme domaine primaire (Production) et redirige
+`mamie-geo.fr` → www en **307**, alors que tout le code (sitemap, robots
+`Host`, `metadataBase`, balises canonical) déclare le **non-www** comme
+canonique. Résultat : chaque URL du sitemap (non-www) est une « Page avec
+redirection » → non indexée (cf. doc GSC). En plus, 2 domaines `.vercel.app`
+servent le site complet en 200 **sans `X-Robots-Tag: noindex`** :
+`mamie-geo.vercel.app` (projet `mamie-geo`) et `mamie-geo-gg22.vercel.app`
+(2e projet Vercel branché sur le repo) → clones indexables en doublon.
+Enfin, `/`, `/pricing`, `/outils/*`, `/blog`, `/legal/*` n'émettaient aucune
+balise canonical auto-référente.
+
+**Choix** :
+- Host canonique = **`mamie-geo.fr` (non-www)**, conforme à CLAUDE.md (« un
+  seul domaine mamie-geo.fr »). Action manuelle Vercel : inverser le primaire
+  (www → redirige vers apex en 308, apex servi en direct).
+- `next.config.ts` `headers()` : `X-Robots-Tag: noindex, nofollow` sur tout
+  host `(.*\.)?vercel\.app` → neutralise les 2 clones d'un coup.
+- Projet `mamie-geo-gg22` : à supprimer / déconnecter du repo (clone non
+  maîtrisé) — action Max.
+- Canonical auto-référente ajoutée sur les 6 pages qui n'en avaient pas
+  (home + pricing + 2 outils + blog index + 4 légales via `export const
+  metadata` MDX). Résolue via `metadataBase` → pointe vers l'apex quel que
+  soit le host servi, consolide tout vers `mamie-geo.fr`.
+
+**Justification** : le fix Vercel (host primaire) est ce qui débloque
+réellement l'indexation ; les canonicals + noindex sont la ceinture défensive
+qui garantit la consolidation même si un autre host est crawlé.
+
+**Conséquences attendues** : après bascule du primaire + re-soumission du
+sitemap dans GSC, les statuts « Page avec redirection » / « Page en double »
+doivent se résorber (validation GSC ~2 semaines).
+
+**À revisiter** : vérifier dans GSC sous ~2 semaines que les pages passent
+« Dans l'index ». Si `mamie-geo-gg22` réapparaît, couper le déploiement à la
+source.
+
 #### 2026-06-10 — Ranking suite : hint de fiabilité auto-extinguible, étape 3 (position concurrents), Suivre depuis le classement
 
 **Contexte** : demande Max — le classement doit afficher « un petit trigger discret » indiquant que les résultats gagnent en pertinence avec le temps, qui disparaît quand les données suffisent. + carte blanche sur les features pertinentes.
