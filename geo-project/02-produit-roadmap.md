@@ -231,7 +231,24 @@ Une fois que le Tracker tourne et que les clients comprennent leur position, ils
 | **Volume estimé par prompt** (Beta-style)              | Search volume relatif (« very low » → « very high ») affiché à côté de chaque prompt suggéré et dans la liste prompts existants. Transforme la suggestion IA en argument SEO sérieux (cible SEO).  | Branche DataForSEO ou équivalent EU. Coût ~30 €/mois pour ~100 prompts/mois. Affichage barre colorée 5 niveaux, pas un chiffre absolu (pas fiable de toute façon). |
 | **Brand Visibility vs Source Visibility (Spot gaps)**  | Vue dédiée qui croise « marque nommée dans la réponse » et « domaine cité comme source ». Cas typique : domaine cité régulièrement mais marque jamais nommée → opportunité de branding éditorial.   | Page `/app/sources/gaps` ou onglet sur `/app/sources`. Liste les sources où on est cité sans être nommé + l'inverse. Repris du pattern Peec « Spot gaps ».            |
 | **Strongest / Weakest model par marque**               | Info dérivée triviale (max/min `visibilityScore` par LLM sur 30 j). Affichée en pill sur la card brand. Super utile en debrief commercial agence (« Tu performes mieux sur Claude que sur ChatGPT »). | 2 nouveaux champs sur le query `getDashboardData`. Affichage : 2 pills à côté du brand name dans `<AppTopBar>` ou en sub-line sur la stat Visibility.                |
-| **Rankings Table avec sélecteur de dimension**         | Sélecteur « By AI Model / By Topic / By Tag » qui pivote la même table. Évite de multiplier les pages. Pattern Peec Brand Insights.                                                              | Composant `<RankingsTable dimension={...}>` réutilisable. Une fois Topics + Tags landed (V0+ tardif → V1 ?), branchable directement.                                  |
+| **Rankings Table avec sélecteur de dimension**         | Sélecteur « By AI Model / By Topic / By Tag » qui pivote la même table. Évite de multiplier les pages. Pattern Peec Brand Insights.                                                              | Composant `<RankingsTable dimension={...}>` réutilisable. Une fois Topics + Tags landed (V0+ tardif → V1 ?), branchable directement. **→ Analyse de faisabilité détaillée ci-dessous (2026-06-10).**                                  |
+
+### Ranking concurrentiel — analyse de faisabilité (2026-06-10, demandé par Max)
+
+Objectif : classement marque vs concurrents (« qui est le plus visible dans les IA sur tes prompts »), rang #1..N + évolution dans le temps. Constat clé : **l'essentiel des données existe déjà** dans `runs.parsedBrands.scoring` (`brandMentioned` / `brandPosition` / `brandSentiment` + `competitorsMentioned[{name, sentiment}]`) — le scoring Haiku capture déjà les concurrents à chaque run scoré.
+
+Plan par étapes, du gratuit vers le payant :
+
+| Étape | Quoi | Coût LLM | Effort |
+| ----- | ---- | -------- | ------ |
+| **1. Leaderboard fenêtre** ✅ livré 2026-06-10 | Rank global + par LLM sur 30 j, tri par mentions, ligne marque highlightée + marques détectées non suivies (cap 5). Onglet « Classement » sur `/app/citations`. | **0 €** (pure agrégation des payloads existants) | 1 PR |
+| **2. Historisation du rang** ✅ livré 2026-06-10 (delta J-7) | **Pas de nouvelle table** : découverte à l'implémentation, `citation_metrics_daily.competitors_data` (jsonb) historisait déjà les mentions concurrents par jour × LLM depuis la Phase A. Le ranking lit cette colonne ; delta de rang vs fenêtre décalée J-7 affiché dans le leaderboard. Chart « évolution du rang » **reporté** (le wrapper LineChart est câblé couleurs LLM, à généraliser quand l'historique aura quelques semaines de données). | **0 €** | 1 PR, zéro migration |
+| **3. Position par concurrent** | Ajouter `position` aux `competitorsMentioned` dans le tool schema scoring → ranking de prééminence (qui est cité en premier dans la réponse). | **≈ 0** (même appel Haiku, +qq tokens output) | petite PR |
+| **4. Scoring systématique** (à trancher) | Aujourd'hui le pre-screening regex **skippe l'appel scoring quand aucune cible trackée n'est détectée** (cas réel mamie-vege : 60/61 runs skippés) → les marques citées « à ta place » sont perdues. Supprimer le skip = découverte de concurrents non trackés (« marques détectées », bouton tracker) + ranking exhaustif même quand tu es invisible. | Surcoût ~$0,003/run aujourd'hui skippé : Starter (~2 250 runs/mois) ≈ **+7 $/mois** worst case, Pro ≈ +22 $ | PR + décision pricing |
+
+Mitigations étape 4 si les marges coincent : gate Starter+ (Solo garde le ranking fenêtre), ou échantillonnage (scoring complet 1 jour/semaine).
+
+Dépendance UX : quand un concurrent n'est jamais cité, `/app/citations` affiche des « — » muets — le ranking devra rendre ce cas explicite (« jamais cité sur la fenêtre »), sinon même frustration.
 
 ---
 

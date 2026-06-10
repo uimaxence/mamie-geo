@@ -265,7 +265,71 @@ la doc devient un cimetière.
 
 ## 9. État du projet (snapshot — 2026-06-09)
 
-> Mise à jour 2026-06-09 — Refonte UI rapport d'audit + radius global
+> Mise à jour 2026-06-10 (suite) — Ranking concurrentiel étapes 1+2
+> livrées (cf. doc 09 § 2026-06-10 ranking) : onglet **« Classement »**
+> sur `/app/citations` (`?tab=ranking`) — leaderboard 30 j toi +
+> concurrents trackés + marques détectées non suivies (cap 5), filtre
+> par LLM, delta de rang vs J-7. **Zéro migration** : découverte à
+> l'implémentation, `citation_metrics_daily.competitors_data`
+> historisait déjà les mentions concurrents par jour × LLM depuis la
+> Phase A — le ranking ne fait que lire cette colonne. `computeRanking()`
+> pure dans `src/lib/competitors/ranking.ts` (7 tests) +
+> `getRankingData()` dans queries.ts. Events `ranking_viewed` /
+> `ranking_scope_changed`. Étapes 3 (position par concurrent) et 4
+> (scoring systématique, ~$0,003/run skippé) restent à trancher ;
+> chart évolution du rang reporté.
+>
+> Précédente (2026-06-10) — Refonte page Conseils + analyse ranking :
+>
+> **`/app/conseils` refondu en plan d'action priorisé** (cf. doc 09 §
+> 2026-06-10) : la grille 2×2 par axe (colonnes 1/3/5/1 → trous blancs)
+> devient 2 sections pleine largeur triées par impact (« Commence ici »
+> 6 leviers fort impact / « Ensuite » 4 compléments), numérotées 01-10,
+> axe conservé en badge par levier + légende chips dans l'intro. Nouvel
+> export `GEO_TIPS_BY_PRIORITY` dans `src/lib/geo-advice.ts`. Doc 10 §
+> Layout app amendé : regroupement thématique seulement si les groupes
+> sont équilibrés, sinon liste priorisée.
+>
+> **Analyse feature ranking concurrentiel** ajoutée dans doc 02 §
+> « Ranking concurrentiel — analyse de faisabilité » : étapes 1-3
+> (leaderboard fenêtre, historisation `competitor_metrics_daily`,
+> position par concurrent) à coût LLM ≈ 0 car `parsedBrands.scoring`
+> capture déjà les concurrents ; étape 4 (scoring systématique, lever
+> le skip regex) à ~$0,003/run skippé, à trancher.
+>
+> **Diagnostic données concurrents vides** (`/app/citations`) : pas un
+> bug — vérifié en DB, 60/61 runs mamie-vege skippés par le
+> pre-screening regex (aucune cible trackée mentionnée) et le seul run
+> scoré ne cite pas les concurrents trackés. Les « — » = zéro citation
+> réelle. UX à améliorer (empty state explicite) + étape 4 du ranking
+> adresserait la découverte des marques citées à la place.
+>
+> Précédente (2026-06-09 soir) — Sweep cohérence UX/UI issu d'un audit
+> global du site (cf. doc 09 § 2026-06-09 sweep cohérence + doc 10 §
+> Layout app) :
+>
+> **`<PageContainer>` désormais appliqué à 100 % des pages app** :
+> nouvelle largeur `detail` (`max-w-5xl`) pour les pages détail d'entité.
+> `dashboard` → `default`, `audits/[id]` / `prompts/[id]` / `runs/[id]`
+> → `detail` (fini les paddings hardcodés et les `<main>` imbriqués —
+> le layout `(with-nav)` fournit déjà le `<main>`).
+>
+> **Tables responsive** : `/app/prompts` et la table concurrents de
+> `/app/citations` masquent leurs colonnes secondaires sous `md`
+> (`hidden md:table-cell`) et n'appliquent leur `min-w` qu'à partir de
+> `md` → plus de scroll horizontal forcé en portrait mobile. Convention
+> documentée dans doc 10.
+>
+> **Divers** : nav marketing 100 % FR (« Fonctionnalités » remplace
+> « Features » dans header/burger/footer), badge `EntityTypeBadge`
+> « Vous » → « Toi » (tutoiement partout), « Enqueue en cours… » →
+> « Lancement… », focus rings ajoutés sur les boutons icône du wizard
+> onboarding, dialog suppression de compte en liste à puces scannable.
+> Écartés après vérification : « contraste gray-400 sur fond noir »
+> (faux positif, ~8:1 AAA), confirmation d'export CSV, toasts de
+> pagination (over-engineering).
+>
+> Précédente (2026-06-09) — Refonte UI rapport d'audit + radius global
 > resserré (cf. doc 09 § 2026-06-09 refonte UI audit)
 >
 > **Border-radius global resserré** : tokens `--radius-*` dans

@@ -161,6 +161,64 @@ haut et l'entrée "2026-05-05 — Réponses aux 10 questions de bootstrap".
 
 ### Décisions enregistrées
 
+#### 2026-06-10 — Ranking concurrentiel étapes 1+2 : onglet Classement sur /app/citations, zéro migration
+
+**Contexte** : Max valide les étapes 1+2 de l'analyse ranking (cf. doc 02 § Ranking concurrentiel). L'analyse prévoyait une nouvelle table `competitor_metrics_daily` pour l'historisation.
+
+**Découverte à l'implémentation** : `citation_metrics_daily.competitors_data` (jsonb) **historisait déjà** les mentions concurrents par jour × LLM (name + citationCount + sentiments), upsertée par le worker recompute depuis la Phase A (`aggregateVisibility`). Personne ne lisait cette colonne côté produit.
+
+**Choix** : pas de nouvelle table ni migration — le ranking lit `competitors_data`. Chart « évolution du rang » reporté (LineChart câblé couleurs LLM, à généraliser plus tard) ; le delta J-7 couvre le besoin immédiat.
+
+**Détail livré** :
+- **`computeRanking()`** pure dans `src/lib/competitors/ranking.ts` (7 tests) : agrège `brandCitedCount` (toi) + `competitors_data` (concurrents trackés matchés par name+aliases normalisés via `normalizeBrandToken` partagé avec metrics.ts, sinon « marques détectées » cap top 5), fenêtre 30 j + rang précédent sur fenêtre décalée J-7 (null si pas d'historique — pas de backfill, même politique que le funnel sources).
+- **`getRankingData()`** dans `src/lib/competitors/queries.ts` : 1 SELECT sur `citation_metrics_daily` (37 jours), classements pré-calculés tous-LLMs + par LLM.
+- **Onglet « Classement »** (3e tab `/app/citations`, deep-linkable `?tab=ranking`, icône Trophy) : SegmentedControl Tous/par LLM, table Rang / Marque (favicon + badge Toi / « détectée, non suivie ») / delta ↑↓ / Citations / Apparition. Ligne « toi » toujours présente même à 0 mention, avec libellé explicite « jamais citée sur la fenêtre » (réponse au diagnostic des « — » muets du 2026-06-10). Footer renvoyant vers l'onglet Concurrents pour tracker les marques détectées.
+- **Events PostHog** : `ranking_viewed` (window_days, total_runs, entries) + `ranking_scope_changed` (from, to).
+
+**Conséquences attendues** : première vue « qui domine » sans coût LLM marginal ; les marques détectées non suivies deviennent visibles (cas mamie-vege : concurrents trackés à 0 mais Vegan Pratique & co citées). Le delta J-7 s'activera tout seul dès 7 jours de données.
+
+**À revisiter** : étape 3 (position par concurrent dans le tool schema scoring) et étape 4 (scoring systématique, lever le skip regex — décision pricing) restent à trancher ; chart évolution du rang quand l'historique sera dense.
+
+#### 2026-06-10 — Refonte page Conseils : plan d'action priorisé (tri par impact) au lieu de la grille par axe
+
+**Contexte** : retour Max (screenshot) sur `/app/conseils` : « trop le bordel les espaces blancs, on n'y comprend rien, peut-être un kanban ? un meilleur tri ? le plus pertinent et actionnable pour l'utilisateur ». La grille 2×2 par axe (actée la veille) répartissait les 10 leviers en colonnes de 1/3/5/1 → trous blancs massifs et ordre de lecture ambigu. L'intro 2-col souffrait du même déséquilibre de hauteurs.
+
+**Options considérées** : (a) kanban 4 colonnes (une par axe) ; (b) masonry CSS columns ; (c) liste pleine largeur triée par impact.
+
+**Choix** : (c). Le kanban hérite du même déséquilibre 1/3/5/1 (verticalement cette fois) et ses colonnes étroites sont incompatibles avec les items dépliables ; le masonry comble les trous mais casse l'ordre de lecture. Le tri par impact répond littéralement à la demande « le plus pertinent et actionnable » : la page devient un **plan d'action ordonné**, pas un sommaire thématique.
+
+**Détail** :
+- 2 sections pleine largeur : « Commence ici — leviers à impact fort » (6 leviers) puis « Ensuite — pour aller plus loin » (4 leviers), numérotation continue 01-10 dans l'ordre de lecture.
+- Le champ `impact: "high" | "medium"` existait déjà dans `GEO_TIPS` (inutilisé en rendu) — nouvel export `GEO_TIPS_BY_PRIORITY` dans `src/lib/geo-advice.ts`.
+- L'axe ne pilote plus le layout mais reste visible : badge coloré par levier + légende compacte (4 chips × compteur) intégrée à la carte d'intro, désormais pleine largeur.
+- Items dépliables, callouts « À retenir », `appHint` et bloc de clôture 2-col inchangés.
+- Doc 10 § Layout app mis à jour (l'exemple « Conseils en 4 cartes d'axe 2×2 » est remplacé : le regroupement thématique reste valable quand les groupes sont équilibrés, sinon trier par priorité).
+
+**Conséquences attendues** : zéro espace perdu, ordre de lecture évident, la page devient une checklist actionnable (cohérente avec le drip d'éducation post-signup).
+
+**À revisiter** : statut live pass/fail par levier auditable (déjà noté le 2026-06-09) — la liste priorisée s'y prête encore mieux (checklist).
+
+#### 2026-06-09 — Sweep cohérence UX/UI (audit global) : PageContainer partout, tables responsive, microcopy tutoiement
+
+**Contexte** : audit UX/UI global du site (marketing + app) mené par Claude à la demande de Max. Deux passes d'exploration (marketing/blog d'un côté, app authentifiée de l'autre) puis vérification manuelle de chaque finding — plusieurs faux positifs écartés (ex. le contraste gray-400 sur fond noir de la FinalCTA est en réalité ~8:1 AAA, fix délibéré du 2026-05-26 conservé).
+
+**Options considérées** : (a) gros lot incluant breadcrumbs, lexique loading centralisé, confirmation d'export CSV ; (b) lot resserré sur les incohérences avérées, le reste écarté ou reporté.
+
+**Choix** : lot resserré (b). Écartés volontairement : confirmation avant export CSV (un download n'a pas à être confirmé), toasts sur pagination client-side (action instantanée, feedback inutile), lexique `LOADING_STATES` centralisé (over-engineering pour 5 libellés — on corrige juste le jargon).
+
+**Détail livré** :
+
+- **Nav marketing francisée** : « Features » → « Fonctionnalités » dans le header desktop, le burger mobile et le footer (seul libellé EN restant dans une nav 100 % FR).
+- **`<PageContainer>` complété et appliqué aux 4 dernières pages hors-convention** : nouvelle largeur `detail` (`max-w-5xl`) pour les pages détail d'entité. `dashboard` (était `div` hardcodé 6xl) → `default` ; `audits/[id]` et `prompts/[id]` (5xl hardcodé) + `runs/[id]` (4xl hardcodé, passe à 5xl) → `detail`. Bonus : `prompts/[id]` et `runs/[id]` rendaient un `<main>` local alors que le layout `(with-nav)` en fournit déjà un → `<main>` imbriqué invalide HTML, corrigé par la migration.
+- **Tables responsive** (`/app/prompts`, table concurrents de `/app/citations`) : colonnes secondaires en `hidden md:table-cell` (prompts : Catégorie/Cadence/Runs success/Dernier run ; concurrents : Type/Top LLM/Dernière) + `min-w` de table appliqué seulement dès `md`. En portrait mobile : Prompt + Actif + Actions (resp. Marque + Citations + Apparition + Actions), plus de scroll horizontal forcé. Les helpers locaux `Th`/`Td` de prompts-list acceptent désormais `className`.
+- **A11y clavier** : focus ring (`focus-visible:ring-2` ink, pattern des DropdownMenuTrigger existants) sur les boutons icône « Retirer concurrent / Retirer prompt » du wizard onboarding qui n'en avaient aucun.
+- **Microcopy** : badge `EntityTypeBadge` « Vous » → « Toi » (toute l'app tutoie, y compris « vs toi » dans la même table) ; « Enqueue en cours… » (jargon technique EN) → « Lancement… » dans le dialog de run manuel.
+- **Dialog suppression de compte scannable** : le paragraphe de 4 lignes listant les données perdues devient liste à puces + ligne remboursement séparée (action irréversible = lecture en 2 s).
+
+**Conséquences attendues** : plus aucune page app hors `<PageContainer>` (convention « une page = un PageContainer » désormais vraie à 100 %), app utilisable en portrait mobile sur les 2 tables principales, tutoiement cohérent partout.
+
+**À revisiter** : breadcrumbs sur pages détail (reporté — le lien « Retour » suffit tant que la hiérarchie reste à 2 niveaux) ; variant card-layout mobile pour les tables si les colonnes masquées manquent aux users (attendre feedback).
+
 #### 2026-06-09 — Harmonisation layout app : `<PageContainer>` + système de blocs multi-colonnes + dé-dup Conseils/Audit
 
 **Contexte** : sur retour Max (« mettre sur plusieurs colonnes, pas tout les uns sur les autres », réf. layout d'un dashboard SaaS), audit des layouts de toutes les pages `(app)/app/(with-nav)/*`. Constats : seul le dashboard exploitait une grille multi-colonnes ; le reste en pile verticale ; largeurs de conteneur incohérentes (`max-w-2xl/3xl/5xl/6xl` mélangées) ; `runs` (et la page `audits/[id]` selon l'audit) en `<h1>`/`<header>` brut sans `PageHeader` ; et un **doublon** : le tableau d'URLs auditées ajouté la veille sur `/app/conseils` recoupait `/app/audits`.

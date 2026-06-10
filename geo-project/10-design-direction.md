@@ -109,13 +109,23 @@ Quatre patterns réutilisables ailleurs dans l'app (introduits sur la page « Co
 Avant ce passage, seul le dashboard exploitait une grille multi-colonnes ; toutes les autres pages app étaient en **pile verticale** et les largeurs de conteneur divergeaient (`max-w-2xl/3xl/5xl/6xl` au hasard). Harmonisation actée :
 
 **Conteneur unique — `<PageContainer>`** (`src/components/ui/page-container.tsx`) :
-- Toute page `(app)/app/(with-nav)/*` a un `<PageContainer>` en racine (jamais un `div mx-auto max-w-… px-… py-…` à la main). Centralise largeur + padding (`px-6 py-12 lg:px-10`).
-- 3 largeurs : `default` = `max-w-6xl` (vues principales : dashboard, audits, citations, prompts, conseils, runs) · `narrow` = `max-w-3xl` (réglages / lecture dense) · `form` = `max-w-2xl` (formulaires).
+- Toute page `(app)/app/(with-nav)/*` a un `<PageContainer>` en racine (jamais un `div mx-auto max-w-… px-… py-…` à la main, jamais un `<main>` local — le layout `(with-nav)` fournit déjà le `<main>`). Centralise largeur + padding (`px-6 py-12 lg:px-10`).
+- 4 largeurs (sweep 2026-06-09 : `detail` ajoutée, dernières pages hardcodées migrées) : `default` = `max-w-6xl` (vues principales : dashboard, audits, citations, prompts, conseils, runs) · `detail` = `max-w-5xl` (pages détail d'une entité : `runs/[id]`, `prompts/[id]`, `audits/[id]`) · `narrow` = `max-w-3xl` (réglages / lecture dense) · `form` = `max-w-2xl` (formulaires).
 - `PageHeader` obligatoire en tête de chaque page (plus de `<h1>` brut ni de `<header>` maison) — sauf les pages « détail/show » dont le hero est déjà une carte riche (ex. `/app/audits/[id]` : la carte ScoreRing fait office de header, pas de PageHeader redondant par-dessus).
+
+**Tables responsive (convention 2026-06-09)** :
+- Une table app doit rester lisible en portrait mobile **sans scroll horizontal forcé** : les colonnes secondaires passent en `hidden md:table-cell` (header `<th>` ET cellules `<td>`), et un éventuel `min-w-[…]` de table ne s'applique qu'à partir de `md` (`md:min-w-[760px]`).
+- On garde en mobile les colonnes qui permettent d'identifier la ligne et d'agir : ex. `/app/prompts` → Prompt + Actif + Actions ; table concurrents → Marque + Citations + Apparition + Actions.
+- `overflow-x-auto` sur le wrapper reste en filet de sécurité, pas comme solution principale.
+
+**Microcopy app (rappels, sweep 2026-06-09)** :
+- **Tutoiement partout**, y compris les badges (« Toi », pas « Vous ») — l'app dit déjà « vs toi », « ta marque ».
+- Pas de jargon technique EN dans les libellés visibles : « Lancement… », pas « Enqueue en cours… ». Côté marketing, la nav est 100 % FR (« Fonctionnalités », pas « Features »).
+- Dialogs d'action irréversible : impacts en **liste à puces** scannable, pas en paragraphe.
 
 **Système de blocs (ne pas tout empiler verticalement)** :
 - Blocs côte à côte : `grid items-start gap-4 lg:grid-cols-2` (ou `lg:grid-cols-[1.4fr_1fr]` pour un bloc dominant). `items-start` évite qu'une carte courte s'étire à la hauteur de sa voisine.
-- Regrouper par **thème** plutôt qu'une longue liste plate : ex. `/app/conseils` rend les 10 leviers en **4 cartes d'axe** (Visibilité Google / Marque / Contenu / Multi-plateforme) en grille 2×2, pas une pile de 10.
+- Regrouper par **thème** quand les groupes sont équilibrés ; si les groupes ont des tailles très inégales (ex. axes Conseils à 1/3/5/1 leviers), une grille par groupe crée des trous — préférer alors une **liste pleine largeur triée par priorité**, le thème restant visible en badge par item (cf. doc 09 § 2026-06-10 refonte Conseils).
 - **Tables, listes principales et matrices restent pleine largeur** — jamais coincées dans une colonne étroite.
 - **Exception largeur étroite** : une page `narrow` (réglages) aux champs denses reste en **une seule colonne** — y forcer du 2-col cramerait les grilles de champs. Le multi-colonnes est pour les pages larges.
 
