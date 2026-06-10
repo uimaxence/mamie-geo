@@ -217,13 +217,23 @@ export const GEO_TIPS: GeoTip[] = [
 ];
 
 // Leviers regroupés par axe, dans l'ordre des axes (google → marque →
-// contenu → multi). Utilisé par la page Conseils pour rendre 4 blocs
-// thématiques en grille plutôt qu'une pile verticale unique.
+// contenu → multi). Sert de légende (compteurs par axe) sur la page
+// Conseils — le rendu principal est trié par impact, pas par axe (la
+// grille par axe donnait des colonnes 1/3/5/1 pleines de vide, cf. doc
+// 09 § 2026-06-10).
 export const GEO_TIPS_BY_AXIS: Array<{ axis: GeoAxisMeta; tips: GeoTip[] }> = (
   Object.values(GEO_AXES) as GeoAxisMeta[]
 )
   .map((axis) => ({ axis, tips: GEO_TIPS.filter((t) => t.axis === axis.id) }))
   .filter((group) => group.tips.length > 0);
+
+// Tri « par où commencer » : leviers à impact fort d'abord (dans l'ordre
+// éditorial n), puis les compléments. Alimente les 2 sections de la page
+// Conseils — l'utilisateur lit un plan d'action ordonné, pas un sommaire.
+export const GEO_TIPS_BY_PRIORITY: { high: GeoTip[]; medium: GeoTip[] } = {
+  high: GEO_TIPS.filter((t) => t.impact === "high"),
+  medium: GEO_TIPS.filter((t) => t.impact === "medium"),
+};
 
 // Synthèse finale : les ingrédients que combinent les contenus les
 // plus cités (reprend la conclusion du post, reformulée).

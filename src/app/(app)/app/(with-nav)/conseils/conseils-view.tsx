@@ -12,105 +12,136 @@ import {
   PageHeader,
 } from "@/components/ui";
 import {
+  GEO_AXES,
   GEO_CONCLUSION,
   GEO_TIPS,
   GEO_TIPS_BY_AXIS,
-  type GeoAxisMeta,
+  GEO_TIPS_BY_PRIORITY,
   type GeoTip,
 } from "@/lib/geo-advice";
 
-// Vue /app/conseils : 10 leviers GEO regroupés en 4 blocs thématiques
-// (un par axe), disposés en grille 2 colonnes — layout en blocs plutôt
-// qu'une pile verticale (cf. doc 10 § Layout app). Chaque levier est un
-// item dépliable (résumé visible, détail au clic). Le suivi des URLs
-// auditées vit sur /app/audits ; ici juste un bloc CTA (pas de doublon).
+// Vue /app/conseils : 10 leviers GEO rendus en plan d'action priorisé
+// (2 sections pleine largeur : impact fort puis compléments), numérotés
+// dans l'ordre de lecture. Refonte 2026-06-10 : l'ancienne grille 2×2
+// par axe donnait des colonnes 1/3/5/1 leviers → trous blancs et ordre
+// de lecture illisible (cf. doc 09). L'axe reste visible via un badge
+// par levier. Chaque levier est un item dépliable (résumé visible,
+// détail au clic). Le suivi des URLs auditées vit sur /app/audits ;
+// ici juste un bloc CTA (pas de doublon).
 
 const AUDITABLE_COUNT = GEO_TIPS.filter((t) => t.auditable).length;
 
 export function ConseilsView() {
+  const { high, medium } = GEO_TIPS_BY_PRIORITY;
+
   return (
     <>
       <PageHeader
         icon={Lightbulb}
         title="Conseils GEO"
-        summary="10 leviers pour devenir une source citée par les IA"
+        summary="10 leviers pour devenir une source citée par les IA, dans l'ordre où les traiter"
       />
 
       <IntroBlock />
 
-      <div className="mt-6 grid items-start gap-4 lg:grid-cols-2">
-        {GEO_TIPS_BY_AXIS.map(({ axis, tips }) => (
-          <AxisCard key={axis.id} axis={axis} tips={tips} />
-        ))}
-      </div>
+      <TipsSection
+        eyebrow="Commence ici"
+        title="Les leviers à impact fort"
+        description="Le socle. Tant que ces leviers ne sont pas en place, les suivants rapportent peu."
+        tips={high}
+        startIndex={1}
+      />
+
+      <TipsSection
+        eyebrow="Ensuite"
+        title="Pour aller plus loin"
+        description="Des compléments qui élargissent ta surface de citation une fois le socle posé."
+        tips={medium}
+        startIndex={high.length + 1}
+      />
 
       <ClosingBlock />
     </>
   );
 }
 
-// Bloc d'intro en 2 colonnes : cadrage à gauche, légende des 4 axes
-// (avec compteur de leviers) à droite — sert de carte de lecture.
+// Intro pleine largeur : cadrage + légende des 4 axes (chips avec
+// compteur) sur la même carte — pas de 2-col ici, les hauteurs des
+// deux contenus divergent trop (c'était une source de vide).
 function IntroBlock() {
   return (
-    <div className="mt-8 grid items-start gap-4 lg:grid-cols-[1.4fr_1fr]">
-      <div className="rounded-[var(--radius-xl)] border border-[color:var(--color-border)] bg-white p-6">
-        <p className="text-[0.9375rem] leading-relaxed text-[color:var(--color-ink-soft)]">
-          Le SEO IA n&apos;est plus seulement une affaire de blog. Être cité par ChatGPT, Perplexity
-          ou Gemini se joue sur un mélange de{" "}
-          <strong className="font-semibold text-[color:var(--color-ink)]">
-            SEO, de branding et de réputation
-          </strong>
-          . Ces 10 leviers se rangent en 4 axes.
-        </p>
-      </div>
-      <div className="rounded-[var(--radius-xl)] border border-[color:var(--color-border)] bg-[color:var(--color-bg)] p-6">
-        <p className="type-eyebrow">Les 4 axes</p>
-        <ul className="mt-3 flex flex-col gap-2.5">
-          {GEO_TIPS_BY_AXIS.map(({ axis, tips }) => (
-            <li key={axis.id} className="flex items-center justify-between gap-3">
-              <Badge tone={axis.tone}>{axis.label}</Badge>
-              <span className="text-[0.8125rem] tabular-nums text-[color:var(--color-muted)]">
-                {tips.length} levier{tips.length > 1 ? "s" : ""}
-              </span>
-            </li>
-          ))}
-        </ul>
+    <div className="mt-8 rounded-[var(--radius-xl)] border border-[color:var(--color-border)] bg-white p-6">
+      <p className="max-w-3xl text-[0.9375rem] leading-relaxed text-[color:var(--color-ink-soft)]">
+        Le SEO IA n&apos;est plus seulement une affaire de blog. Être cité par ChatGPT, Perplexity
+        ou Gemini se joue sur un mélange de{" "}
+        <strong className="font-semibold text-[color:var(--color-ink)]">
+          SEO, de branding et de réputation
+        </strong>
+        . Ces 10 leviers couvrent 4 axes&nbsp;:
+      </p>
+      <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
+        {GEO_TIPS_BY_AXIS.map(({ axis, tips }) => (
+          <span key={axis.id} className="inline-flex items-center gap-1.5">
+            <Badge tone={axis.tone}>{axis.label}</Badge>
+            <span className="text-[0.8125rem] tabular-nums text-[color:var(--color-muted)]">
+              ×{tips.length}
+            </span>
+          </span>
+        ))}
       </div>
     </div>
   );
 }
 
-// Carte d'un axe : en-tête (badge coloré + compteur) puis la liste de
-// ses leviers en items dépliables.
-function AxisCard({ axis, tips }: { axis: GeoAxisMeta; tips: GeoTip[] }) {
+// Section de leviers : en-tête (eyebrow + titre + description) puis une
+// carte pleine largeur contenant les leviers en rows dépliables
+// numérotées — zéro espace perdu, ordre de lecture évident.
+function TipsSection({
+  eyebrow,
+  title,
+  description,
+  tips,
+  startIndex,
+}: {
+  eyebrow: string;
+  title: string;
+  description: string;
+  tips: GeoTip[];
+  startIndex: number;
+}) {
   return (
-    <Card className="overflow-hidden">
-      <div className="flex items-center justify-between gap-3 px-5 py-4">
-        <Badge tone={axis.tone}>{axis.label}</Badge>
-        <span className="text-[0.8125rem] tabular-nums text-[color:var(--color-muted)]">
-          {tips.length} levier{tips.length > 1 ? "s" : ""}
-        </span>
+    <section className="mt-10">
+      <p className="type-eyebrow">{eyebrow}</p>
+      <div className="mt-1 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+        <h2 className="type-h3 text-base">{title}</h2>
+        <p className="text-sm text-[color:var(--color-muted)]">{description}</p>
       </div>
-      <ul className="divide-y divide-[color:var(--color-border)] border-t border-[color:var(--color-border)]">
-        {tips.map((tip) => (
-          <TipItem key={tip.slug} tip={tip} />
-        ))}
-      </ul>
-    </Card>
+      <Card className="mt-4 overflow-hidden">
+        <ul className="divide-y divide-[color:var(--color-border)]">
+          {tips.map((tip, i) => (
+            <TipItem key={tip.slug} tip={tip} order={startIndex + i} />
+          ))}
+        </ul>
+      </Card>
+    </section>
   );
 }
 
-function TipItem({ tip }: { tip: GeoTip }) {
+function TipItem({ tip, order }: { tip: GeoTip; order: number }) {
+  const axis = GEO_AXES[tip.axis];
   return (
     <li>
       <Collapsible>
-        <CollapsibleTrigger className="group flex w-full items-start gap-3 px-5 py-4 text-left transition-colors hover:bg-[color:var(--color-gray-50)]">
+        <CollapsibleTrigger className="group flex w-full items-start gap-4 px-5 py-4 text-left transition-colors hover:bg-[color:var(--color-gray-50)]">
+          <span className="mt-0.5 w-6 shrink-0 text-right text-[0.8125rem] font-medium tabular-nums text-[color:var(--color-faint)]">
+            {String(order).padStart(2, "0")}
+          </span>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
               <h3 className="text-[0.9375rem] font-semibold text-[color:var(--color-ink)]">
                 {tip.title}
               </h3>
+              <Badge tone={axis.tone}>{axis.label}</Badge>
               {tip.auditable && (
                 <span className="inline-flex items-center gap-1 text-[0.6875rem] font-medium text-[color:var(--color-accent)]">
                   <ShieldCheck size={12} strokeWidth={2.2} />
@@ -128,7 +159,8 @@ function TipItem({ tip }: { tip: GeoTip }) {
         </CollapsibleTrigger>
 
         <CollapsibleContent>
-          <div className="space-y-4 px-5 pb-5">
+          {/* pl-15 = aligné sur le contenu du trigger (numéro 24px + gap 16px + padding 20px) */}
+          <div className="space-y-4 pb-5 pl-[60px] pr-5">
             {tip.body.map((para, i) => (
               <p key={i} className="text-sm leading-relaxed text-[color:var(--color-ink-soft)]">
                 {para}
@@ -186,7 +218,7 @@ function TipItem({ tip }: { tip: GeoTip }) {
 // (remplace l'ancien tableau d'URLs — celui-ci vit sur /app/audits).
 function ClosingBlock() {
   return (
-    <div className="mt-8 grid items-start gap-4 lg:grid-cols-2">
+    <div className="mt-10 grid items-start gap-4 lg:grid-cols-2">
       <div className="rounded-[var(--radius-xl)] border border-[color:var(--color-border)] bg-[color:var(--color-bg)] p-6">
         <h2 className="type-h3 text-base">En résumé</h2>
         <p className="mt-2 text-[0.9375rem] leading-relaxed text-[color:var(--color-ink-soft)]">
