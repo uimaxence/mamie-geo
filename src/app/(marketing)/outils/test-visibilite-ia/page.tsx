@@ -9,6 +9,7 @@ export const metadata: Metadata = {
   title: "Test gratuit de visibilité IA",
   description:
     "Reçois un audit personnalisé gratuit de la visibilité de ta marque dans ChatGPT, Claude, Perplexity, Gemini et Le Chat de Mistral. Sous 24h, par email, sans carte bancaire.",
+  alternates: { canonical: "/outils/test-visibilite-ia" },
 };
 
 // Lead magnet "Test ma visibilité IA", formulaire de capture

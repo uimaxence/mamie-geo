@@ -28,6 +28,21 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  // Empêche l'indexation des domaines techniques *.vercel.app (preview ET
+  // production auto-assignés type `mamie-geo.vercel.app`). Vercel ne pose
+  // PAS de noindex sur les .vercel.app de production → sans ça, Google peut
+  // indexer un clone complet du site en doublon du domaine canonique
+  // mamie-geo.fr. Le seul host indexable est mamie-geo.fr.
+  // cf. doc 09 § 2026-06-10 (audit indexation GSC).
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "(.*\\.)?vercel\\.app" }],
+        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
+      },
+    ];
+  },
   // Redirect défensif mamie-seo.fr → mamie-geo.fr (le redirect principal
   // est configuré DNS-level via Vercel Domains ; ce hook est un filet de
   // sécurité au cas où une requête atteindrait l'app avec le mauvais host).

@@ -9,6 +9,7 @@ export const metadata: Metadata = {
   title: "Audit technique gratuit, SEO + GEO sans IA",
   description:
     "Audit technique de ton site en 10 secondes : 30+ checks SEO classique + signaux GEO (FAQPage, llms.txt, E-E-A-T) + Core Web Vitals. Gratuit, sans inscription, sans IA.",
+  alternates: { canonical: "/outils/audit-technique" },
 };
 
 // Lead magnet additionnel, audit technique sans LLM. Différenciateur

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { BottomFade } from "@/components/ui";
 import { AuditTeaser } from "./_sections/audit-teaser";
 import { FAQ } from "./_sections/faq";
@@ -16,6 +17,13 @@ import { SansAvec } from "./_sections/sans-avec";
 import { TesConcurrentsPasToi } from "./_sections/tes-concurrents-pas-toi";
 import { TesOutils } from "./_sections/tes-outils";
 import { TrustStrip } from "./_sections/trust-strip";
+
+// Canonical auto-référente sur l'apex mamie-geo.fr (résolu via metadataBase
+// du root layout) : consolide vers le domaine canonique quel que soit le
+// host servi (www, *.vercel.app). cf. doc 09 § 2026-06-10 (audit indexation).
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
 
 // Home, orchestrateur. Chaque section vit dans _sections/.
 // PR 12b : BottomFade ajouté (effet d'ambiance fixed bottom).
