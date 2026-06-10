@@ -187,6 +187,9 @@ export interface RankingData {
   deltaDays: number;
   /** Runs success de la fenêtre courante, tous LLMs (dénominateur). */
   totalRuns: number;
+  /** Jours distincts avec ≥ 1 run sur la fenêtre courante — pilote le
+   *  hint de fiabilité (cf. RANKING_RELIABLE_AFTER_DAYS). */
+  dataDays: number;
   /** LLMs présents dans la fenêtre courante, pour le filtre. */
   llms: LLMValue[];
   /** Classement tous LLMs confondus. */
@@ -275,6 +278,7 @@ export async function getRankingData(
     windowDays,
     deltaDays,
     totalRuns: currentRows.reduce((sum, r) => sum + r.totalRuns, 0),
+    dataDays: new Set(currentRows.filter((r) => r.totalRuns > 0).map((r) => r.date)).size,
     llms,
     all: computeRanking(base),
     byLlm: Object.fromEntries(llms.map((llm) => [llm, computeRanking({ ...base, llm })])),

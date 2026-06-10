@@ -65,6 +65,15 @@ export interface ComputeRankingOptions {
 
 const DEFAULT_MAX_DISCOVERED = 5;
 
+/**
+ * Nombre de jours de données à partir duquel le classement est considéré
+ * fiable. En dessous, l'UI affiche un hint discret « résultats encore
+ * jeunes » qui disparaît de lui-même une fois le seuil atteint (cf.
+ * doc 09 § 2026-06-10 ranking suite). 14 j = 2 cycles hebdo complets,
+ * assez pour lisser les prompts en cadence weekly.
+ */
+export const RANKING_RELIABLE_AFTER_DAYS = 14;
+
 export function computeRanking(options: ComputeRankingOptions): RankingEntry[] {
   const { windowDays, deltaDays, brand, competitors, now } = options;
   const maxDiscovered = options.maxDiscovered ?? DEFAULT_MAX_DISCOVERED;

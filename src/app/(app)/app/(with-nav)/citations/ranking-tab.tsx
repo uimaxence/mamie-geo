@@ -1,23 +1,34 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { ArrowDown, ArrowUp, Minus, Trophy } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState, useTransition } from "react";
+import { ArrowDown, ArrowUp, Info, Minus, Plus, Trophy } from "lucide-react";
+import { toast } from "sonner";
 import { Badge, EmptyState, EntityTypeBadge, SegmentedControl } from "@/components/ui";
 import { BrandFavicon } from "@/components/app/brand-favicon";
 import { LLM_LABELS } from "@/components/charts/llm-colors";
 import { capture } from "@/lib/posthog-client";
 import type { RankingData } from "@/lib/competitors/queries";
-import type { RankingEntry } from "@/lib/competitors/ranking";
+import { RANKING_RELIABLE_AFTER_DAYS, type RankingEntry } from "@/lib/competitors/ranking";
+import { createCompetitor } from "./actions";
 
 // Onglet Classement de /app/citations (cf. doc 02 § Ranking, étapes 1+2).
 // Leaderboard marque + concurrents trackés + marques détectées, trié par
 // mentions sur la fenêtre, avec delta de rang vs J-7 et filtre par LLM.
 // Données pré-calculées côté serveur (getRankingData) — zéro appel LLM.
+// Tant que l'historique est < RANKING_RELIABLE_AFTER_DAYS jours, un hint
+// discret précise que le classement est encore jeune — il disparaît de
+// lui-même quand les données suffisent (piloté par la donnée, rien à
+// stocker côté client).
 
 type Scope = "all" | string;
 
 export function RankingTab({ data }: { data: RankingData }) {
+  const router = useRouter();
   const [scope, setScope] = useState<Scope>("all");
+  const [pending, startTransition] = useTransition();
+  // Marque détectée en cours d'ajout (désactive son bouton Suivre).
+  const [addingKey, setAddingKey] = useState<string | null>(null);
 
   useEffect(() => {
     capture("ranking_viewed", {
@@ -51,6 +62,23 @@ export function RankingTab({ data }: { data: RankingData }) {
     capture("ranking_scope_changed", { from: scope, to: next });
   }
 
+  function handleTrack(entry: RankingEntry) {
+    setAddingKey(entry.key);
+    startTransition(async () => {
+      const result = await createCompetitor({ name: entry.name, aliases: [] });
+      if (result.ok) {
+        toast.success(`${entry.name} ajouté aux concurrents suivis`);
+        capture("ranking_discovered_tracked", { name: entry.name, rank: entry.rank });
+        router.refresh();
+      } else {
+        toast.error(result.error);
+      }
+      setAddingKey(null);
+    });
+  }
+
+  const isYoung = data.dataDays < RANKING_RELIABLE_AFTER_DAYS;
+
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -65,6 +93,20 @@ export function RankingTab({ data }: { data: RankingData }) {
           {data.windowDays} derniers jours · delta vs J-{data.deltaDays}
         </span>
       </div>
+
+      {/* Hint de fiabilité : visible tant que l'historique est jeune,
+       * disparaît seul au-delà du seuil — volontairement discret (texte
+       * muted, pas un Banner). */}
+      {isYoung && (
+        <p className="mt-3 flex items-start gap-1.5 text-[0.8125rem] text-[color:var(--color-muted)]">
+          <Info size={13} strokeWidth={2} aria-hidden className="mt-0.5 shrink-0" />
+          <span>
+            Classement encore jeune ({data.dataDays} jour{data.dataDays > 1 ? "s" : ""} de données)
+            : les résultats gagnent en fiabilité au fil des runs quotidiens, compte environ{" "}
+            {RANKING_RELIABLE_AFTER_DAYS} jours. Ce message disparaîtra de lui-même.
+          </span>
+        </p>
+      )}
 
       <div className="mt-4 overflow-x-auto rounded-[var(--radius-xl)] border border-[color:var(--color-border)] bg-white">
         <table className="w-full">
@@ -104,9 +146,20 @@ export function RankingTab({ data }: { data: RankingData }) {
                     </span>
                     {e.type === "you" && <EntityTypeBadge type="you" />}
                     {e.type === "discovered" && (
-                      <Badge tone="neutral" className="text-[11px]">
-                        détectée, non suivie
-                      </Badge>
+                      <>
+                        <Badge tone="neutral" className="text-[11px]">
+                          détectée
+                        </Badge>
+                        <button
+                          type="button"
+                          onClick={() => handleTrack(e)}
+                          disabled={pending}
+                          className="inline-flex items-center gap-1 rounded-[var(--radius-pill)] border border-[color:var(--color-border)] bg-white px-2 py-0.5 text-[0.6875rem] font-medium text-[color:var(--color-ink-soft)] transition hover:border-[color:var(--color-border-strong)] hover:text-[color:var(--color-ink)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-ink)] disabled:opacity-40"
+                        >
+                          <Plus size={11} strokeWidth={2.2} aria-hidden />
+                          {addingKey === e.key ? "Ajout…" : "Suivre"}
+                        </button>
+                      </>
                     )}
                   </div>
                 </Td>
@@ -139,7 +192,7 @@ export function RankingTab({ data }: { data: RankingData }) {
 
       <p className="type-meta mt-3">
         Les marques « détectées » sont citées par les IA dans les réponses à tes prompts mais pas
-        encore suivies — ajoute-les depuis l&apos;onglet Concurrents pour les suivre finement.
+        encore suivies — clique « Suivre » pour les ajouter à tes concurrents.
       </p>
     </div>
   );

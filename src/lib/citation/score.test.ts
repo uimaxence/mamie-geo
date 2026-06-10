@@ -127,4 +127,49 @@ describe("createAnthropicScoringClient", () => {
 
     expect(result.competitorsMentioned).toEqual([{ name: "Valid", sentiment: "positive" }]);
   });
+
+  it("parse la position des concurrents quand présente, l'omet sinon (compat anciens payloads)", async () => {
+    const cassette = {
+      id: "msg_03",
+      type: "message",
+      role: "assistant",
+      model: "claude-haiku-4-5-20251001",
+      stop_reason: "tool_use",
+      content: [
+        {
+          type: "tool_use",
+          id: "tu_02",
+          name: "report_scoring",
+          input: {
+            brandMentioned: true,
+            brandSentiment: "positive",
+            brandPosition: "middle",
+            competitorsMentioned: [
+              { name: "Profound", sentiment: "neutral", position: "first_paragraph" },
+              { name: "Peec AI", sentiment: "positive" }, // position omise
+              { name: "Athena", sentiment: "neutral", position: "absent" }, // hors enum mention
+            ],
+          },
+        },
+      ],
+      usage: { input_tokens: 100, output_tokens: 20, server_tool_use: null },
+    };
+    const client = createAnthropicScoringClient({
+      apiKey: "test-key",
+      fetch: fakeFetchFromCassette(cassette),
+    });
+
+    const result = await client.score({
+      rawText: "Test",
+      brand: { name: "X", aliases: [] },
+      competitors: [],
+      language: "fr",
+    });
+
+    expect(result.competitorsMentioned).toEqual([
+      { name: "Profound", sentiment: "neutral", position: "first_paragraph" },
+      { name: "Peec AI", sentiment: "positive" },
+      { name: "Athena", sentiment: "neutral" },
+    ]);
+  });
 });
