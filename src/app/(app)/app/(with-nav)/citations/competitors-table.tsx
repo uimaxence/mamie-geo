@@ -149,15 +149,18 @@ export function CompetitorsTable({
         </div>
       ) : (
         <div className="mt-4 overflow-x-auto rounded-[var(--radius-xl)] border border-[color:var(--color-border)] bg-white">
-          <table className="w-full min-w-[760px]">
+          {/* < md : colonnes secondaires (Type, Top LLM, Dernière) masquées
+           * pour tenir en portrait sans scroll horizontal. Le min-w ne
+           * s'applique qu'à partir de md, où toutes les colonnes existent. */}
+          <table className="w-full md:min-w-[760px]">
             <thead>
               <tr className="border-b border-[color:var(--color-border)]">
                 <Th className="w-[28%]">Marque</Th>
-                <Th className="w-[12%]">Type</Th>
+                <Th className="hidden w-[12%] md:table-cell">Type</Th>
                 <Th className="w-[14%] text-right">Citations</Th>
                 <Th className="w-[14%] text-right">Apparition</Th>
-                <Th className="w-[14%]">Top LLM</Th>
-                <Th className="w-[14%]">Dernière</Th>
+                <Th className="hidden w-[14%] md:table-cell">Top LLM</Th>
+                <Th className="hidden w-[14%] md:table-cell">Dernière</Th>
                 <Th className="w-12" aria-label="Actions" />
               </tr>
             </thead>
@@ -175,7 +178,7 @@ export function CompetitorsTable({
                       </span>
                     </div>
                   </Td>
-                  <Td>
+                  <Td className="hidden md:table-cell">
                     <EntityTypeBadge type="you" />
                   </Td>
                   <Td className="text-right tabular-nums">
@@ -195,10 +198,10 @@ export function CompetitorsTable({
                       <span className="text-[11px] text-[color:var(--color-muted)]">référence</span>
                     </div>
                   </Td>
-                  <Td>
+                  <Td className="hidden md:table-cell">
                     <Muted />
                   </Td>
-                  <Td>
+                  <Td className="hidden md:table-cell">
                     <Muted />
                   </Td>
                   <Td />
@@ -225,7 +228,7 @@ export function CompetitorsTable({
                       </div>
                     </div>
                   </Td>
-                  <Td>
+                  <Td className="hidden md:table-cell">
                     <EntityTypeBadge type="competitor" />
                   </Td>
                   <Td className="text-right tabular-nums">
@@ -252,7 +255,7 @@ export function CompetitorsTable({
                       </div>
                     )}
                   </Td>
-                  <Td>
+                  <Td className="hidden md:table-cell">
                     {c.topLlm ? (
                       <Badge tone="neutral" className="text-[11px]">
                         {LLM_LABELS[c.topLlm] ?? c.topLlm}
@@ -261,7 +264,7 @@ export function CompetitorsTable({
                       <Muted />
                     )}
                   </Td>
-                  <Td className="text-[0.8125rem] text-[color:var(--color-muted)]">
+                  <Td className="hidden text-[0.8125rem] text-[color:var(--color-muted)] md:table-cell">
                     {c.lastCitedAt ? formatRelative(c.lastCitedAt) : <Muted />}
                   </Td>
                   <Td>

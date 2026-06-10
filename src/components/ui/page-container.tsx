@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 // mélangées). Une page app = un <PageContainer> en racine, point.
 //
 //   default  6xl → vues principales (dashboard, audits, citations, conseils…)
+//   detail   5xl → pages détail d'une entité (run, prompt, audit)
 //   narrow   3xl → réglages / contenu de lecture
 //   form     2xl → formulaires (nouvel audit…)
 //
@@ -13,10 +14,11 @@ import { cn } from "@/lib/utils";
 // items-start` pour des blocs côte à côte ; les tables/listes principales
 // restent pleine largeur (cf. doc 10 § Layout app).
 
-type Width = "default" | "narrow" | "form";
+type Width = "default" | "detail" | "narrow" | "form";
 
 const widthClass: Record<Width, string> = {
   default: "max-w-6xl",
+  detail: "max-w-5xl",
   narrow: "max-w-3xl",
   form: "max-w-2xl",
 };

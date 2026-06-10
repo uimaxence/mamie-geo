@@ -11,7 +11,7 @@ import { Logo } from "@/components/marketing/logo";
 // affiche les liens + CTAs auth dans une Sheet slide-in.
 
 const NAV_LINKS = [
-  { href: "/#how-it-works", label: "Features" },
+  { href: "/#how-it-works", label: "Fonctionnalités" },
   { href: "/demo", label: "Démo" },
   { href: "/pricing", label: "Tarif" },
   { href: "/blog", label: "Blog" },

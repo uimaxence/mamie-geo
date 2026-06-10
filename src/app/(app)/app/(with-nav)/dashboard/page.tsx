@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { Activity, Eye, Flame, Home, Layers, PieChart, Quote, Users } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { computeDelta, getDashboardData, getVisibilityTrend } from "@/lib/dashboard/queries";
-import { Card, PageHeader, Stat } from "@/components/ui";
+import { Card, PageContainer, PageHeader, Stat } from "@/components/ui";
 import { BreakdownBars } from "@/components/charts/breakdown-bars";
 import { DownloadableChart } from "@/components/charts/downloadable-chart";
 import { LLM_COLORS, LLM_LABELS } from "@/components/charts/llm-colors";
@@ -73,7 +73,7 @@ export default async function DashboardPage() {
   );
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-12 lg:px-10">
+    <PageContainer>
       <DashboardTracker
         hasRuns={hasRunsToday}
         visibilityScore={visibilityScore}
@@ -212,7 +212,7 @@ export default async function DashboardPage() {
         />
       </section>
 
-    </div>
+    </PageContainer>
   );
 }
 

@@ -293,7 +293,7 @@ function Step2({ state, setState }: { state: WizardState; setState: (s: WizardSt
               onClick={() => removeCompetitor(idx)}
               disabled={state.competitors.length <= 1}
               aria-label="Retirer concurrent"
-              className="flex size-9 shrink-0 items-center justify-center rounded-[var(--radius-md)] border border-[color:var(--color-border)] bg-white text-[color:var(--color-muted)] transition hover:bg-[color:var(--color-gray-50)] disabled:opacity-40"
+              className="flex size-9 shrink-0 items-center justify-center rounded-[var(--radius-md)] border border-[color:var(--color-border)] bg-white text-[color:var(--color-muted)] transition hover:bg-[color:var(--color-gray-50)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-ink)] disabled:opacity-40"
             >
               <X size={14} />
             </button>
@@ -413,7 +413,7 @@ function Step3({ state, setState }: { state: WizardState; setState: (s: WizardSt
               onClick={() => removePrompt(idx)}
               disabled={state.prompts.length <= 3}
               aria-label="Retirer prompt"
-              className="flex size-9 shrink-0 items-center justify-center rounded-[var(--radius-md)] border border-[color:var(--color-border)] bg-white text-[color:var(--color-muted)] transition hover:bg-[color:var(--color-gray-50)] disabled:opacity-40"
+              className="flex size-9 shrink-0 items-center justify-center rounded-[var(--radius-md)] border border-[color:var(--color-border)] bg-white text-[color:var(--color-muted)] transition hover:bg-[color:var(--color-gray-50)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-ink)] disabled:opacity-40"
             >
               <X size={14} />
             </button>

@@ -116,11 +116,21 @@ function DeleteAccountDialog({ userEmail }: { userEmail: string }) {
           <DialogTitle>Supprimer définitivement {userEmail}&nbsp;?</DialogTitle>
           <DialogDescription>
             Cette action est <strong>irréversible</strong>. Tout ton historique sera perdu&nbsp;:
-            workspace, marque, concurrents, prompts, runs, métriques, audits. L&apos;abonnement
-            Stripe en cours est annulé immédiatement. Pour un remboursement (garantie 14&nbsp;jours),
-            contacte hello@mamie-geo.fr avant de supprimer.
           </DialogDescription>
         </DialogHeader>
+
+        {/* Liste à puces plutôt que paragraphe : une action irréversible
+         * doit être scannable en 2 secondes. */}
+        <ul className="flex flex-col gap-1 text-sm text-[color:var(--color-ink-soft)]">
+          <li>· Workspace, marque et concurrents</li>
+          <li>· Prompts, runs et métriques</li>
+          <li>· Audits techniques</li>
+          <li>· Abonnement Stripe annulé immédiatement</li>
+        </ul>
+        <p className="type-meta">
+          Pour un remboursement (garantie 14&nbsp;jours), contacte hello@mamie-geo.fr avant de
+          supprimer.
+        </p>
 
         <div className="flex flex-col gap-4">
           <label className="flex items-start gap-2.5 text-sm text-[color:var(--color-ink-soft)]">

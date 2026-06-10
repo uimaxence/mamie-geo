@@ -62,7 +62,7 @@ export function TriggerRunForm() {
             Annuler
           </Button>
           <Button variant="primary" onClick={handleConfirm} disabled={pending}>
-            {pending ? "Enqueue en cours…" : "Confirmer"}
+            {pending ? "Lancement…" : "Confirmer"}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -22,7 +22,9 @@ interface EntityTypeBadgeProps {
 
 const TYPE_CONFIG: Record<EntityType, { label: string; bg: string; text: string }> = {
   you: {
-    label: "Vous",
+    // "Toi" et pas "Vous" : toute l'app tutoie (cf. "vs toi" dans la même
+    // table Citations).
+    label: "Toi",
     bg: "bg-[color:var(--color-green-bg)]",
     text: "text-[color:var(--color-green)]",
   },

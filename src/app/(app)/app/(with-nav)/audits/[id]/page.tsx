@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { auth } from "@/lib/auth";
-import { Badge, Card, ScoreBar, ScoreRing, SegmentBar } from "@/components/ui";
+import { Badge, Card, PageContainer, ScoreBar, ScoreRing, SegmentBar } from "@/components/ui";
 import { PageViewTracker } from "@/components/app/page-view-tracker";
 import { getDashboardData } from "@/lib/dashboard/queries";
 import type { CheckResult, SubScore } from "@/lib/audit/types";
@@ -56,7 +56,7 @@ export default async function AuditDetailPage({ params }: PageProps) {
   );
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-12 lg:px-10">
+    <PageContainer width="detail">
       <PageViewTracker
         event="audit_viewed"
         properties={{
@@ -130,7 +130,7 @@ export default async function AuditDetailPage({ params }: PageProps) {
       </Card>
 
       <ChecksBySeverity critical={critical} warnings={warnings} info={info} />
-    </div>
+    </PageContainer>
   );
 }
 

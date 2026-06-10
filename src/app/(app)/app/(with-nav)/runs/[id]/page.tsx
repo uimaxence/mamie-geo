@@ -4,7 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import { ArrowLeft, ExternalLink } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { getRunDetail, type RunDetail } from "@/lib/dashboard/queries";
-import { Badge, Banner, Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui";
+import { Badge, Banner, PageContainer, Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui";
 import { RunStatusBadge } from "@/components/app/run-status-badge";
 
 // Page détail d'un run /app/runs/[id], réponse brute, citations
@@ -22,7 +22,7 @@ export default async function RunDetailPage({ params }: { params: Promise<{ id: 
   if (!run) notFound();
 
   return (
-    <main className="mx-auto max-w-4xl px-6 py-12">
+    <PageContainer width="detail">
       <Link
         href="/app/dashboard"
         className="type-eyebrow inline-flex items-center gap-1.5 hover:text-[color:var(--color-ink)]"
@@ -137,7 +137,7 @@ export default async function RunDetailPage({ params }: { params: Promise<{ id: 
         Run ID :{" "}
         <code className="rounded bg-[color:var(--color-gray-100)] px-1.5 py-0.5">{run.id}</code>
       </footer>
-    </main>
+    </PageContainer>
   );
 }
 

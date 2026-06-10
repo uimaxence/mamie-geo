@@ -9,6 +9,7 @@ import {
   Card,
   EmptyState,
   GlossaryInfo,
+  PageContainer,
   Tabs,
   TabsContent,
   TabsList,
@@ -57,7 +58,7 @@ export default async function PromptDetailPage({ params }: { params: Promise<{ i
   };
 
   return (
-    <main className="mx-auto max-w-5xl px-6 py-12">
+    <PageContainer width="detail">
       <Link
         href="/app/prompts"
         className="type-eyebrow inline-flex items-center gap-1.5 hover:text-[color:var(--color-ink)]"
@@ -195,6 +196,6 @@ export default async function PromptDetailPage({ params }: { params: Promise<{ i
           />
         </TabsContent>
       </Tabs>
-    </main>
+    </PageContainer>
   );
 }

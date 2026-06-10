@@ -281,13 +281,18 @@ export function PromptsList({
           <div className="mt-4 overflow-x-auto">
             <table className="w-full border-collapse text-left">
               <thead>
+                {/* < md : colonnes secondaires masquées pour tenir en
+                 * portrait sans scroll horizontal (Prompt + Actif + Actions
+                 * suffisent à piloter la liste depuis un téléphone). */}
                 <tr className="border-b border-[color:var(--color-border)]">
                   <Th>Prompt</Th>
-                  <Th>Catégorie</Th>
-                  <Th>Cadence</Th>
+                  <Th className="hidden md:table-cell">Catégorie</Th>
+                  <Th className="hidden md:table-cell">Cadence</Th>
                   <Th>Actif</Th>
-                  <Th>Runs success</Th>
-                  <Th align="right">Dernier run</Th>
+                  <Th className="hidden md:table-cell">Runs success</Th>
+                  <Th align="right" className="hidden md:table-cell">
+                    Dernier run
+                  </Th>
                   <Th align="right">Actions</Th>
                 </tr>
               </thead>
@@ -306,14 +311,14 @@ export function PromptsList({
                         {p.text}
                       </Link>
                     </Td>
-                    <Td>
+                    <Td className="hidden md:table-cell">
                       {p.category ? (
                         <Badge tone="neutral">{p.category}</Badge>
                       ) : (
                         <span className="type-meta">—</span>
                       )}
                     </Td>
-                    <Td>
+                    <Td className="hidden md:table-cell">
                       <Badge tone={p.cadence === "inherit" ? "neutral" : "accent"}>
                         {cadenceShortLabel(p.cadence)}
                       </Badge>
@@ -326,10 +331,10 @@ export function PromptsList({
                         aria-label={p.isActive ? "Mettre en pause" : "Activer"}
                       />
                     </Td>
-                    <Td>
+                    <Td className="hidden md:table-cell">
                       <span className="type-tabular text-sm">{p.successCount}</span>
                     </Td>
-                    <Td align="right">
+                    <Td align="right" className="hidden md:table-cell">
                       <span className="type-meta">
                         {p.lastRunAt ? formatRelative(p.lastRunAt) : "jamais"}
                       </span>
@@ -468,10 +473,18 @@ export function PromptsList({
   );
 }
 
-function Th({ children, align = "left" }: { children: React.ReactNode; align?: "left" | "right" }) {
+function Th({
+  children,
+  align = "left",
+  className = "",
+}: {
+  children: React.ReactNode;
+  align?: "left" | "right";
+  className?: string;
+}) {
   return (
     <th
-      className={`type-eyebrow py-2.5 px-3 ${align === "right" ? "text-right" : "text-left"}`}
+      className={`type-eyebrow py-2.5 px-3 ${align === "right" ? "text-right" : "text-left"} ${className}`}
       scope="col"
     >
       {children}
@@ -479,9 +492,19 @@ function Th({ children, align = "left" }: { children: React.ReactNode; align?: "
   );
 }
 
-function Td({ children, align = "left" }: { children: React.ReactNode; align?: "left" | "right" }) {
+function Td({
+  children,
+  align = "left",
+  className = "",
+}: {
+  children: React.ReactNode;
+  align?: "left" | "right";
+  className?: string;
+}) {
   return (
-    <td className={`py-3 px-3 align-middle ${align === "right" ? "text-right" : "text-left"}`}>
+    <td
+      className={`py-3 px-3 align-middle ${align === "right" ? "text-right" : "text-left"} ${className}`}
+    >
       {children}
     </td>
   );

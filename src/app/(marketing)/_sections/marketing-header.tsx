@@ -44,7 +44,7 @@ export async function MarketingHeader() {
               href="/#how-it-works"
               className="text-sm font-medium text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]"
             >
-              Features
+              Fonctionnalités
             </Link>
             <Link
               href="/demo"
