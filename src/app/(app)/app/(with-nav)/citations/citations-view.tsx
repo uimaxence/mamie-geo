@@ -2,21 +2,22 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { BookOpen, Globe, Users } from "lucide-react";
+import { BookOpen, Globe, Trophy, Users } from "lucide-react";
 import { PageHeader, Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui";
-import type { CompetitorRowWithMetrics } from "@/lib/competitors/queries";
+import type { CompetitorRowWithMetrics, RankingData } from "@/lib/competitors/queries";
 import type { BrandSelfMetrics, SuggestedCompetitor } from "@/lib/competitors/metrics";
 import type { SourceListItem } from "@/lib/sources/queries";
 import { CompetitorsTable } from "./competitors-table";
+import { RankingTab } from "./ranking-tab";
 import { SourcesTable } from "./sources-table";
 
-// Wrapper client de /app/citations : tabs Concurrents / Sources.
-// L'état actif est conservé dans l'URL (?tab=...) pour permettre le
-// deep-link + le bouton Retour navigateur. Le changement de tab utilise
+// Wrapper client de /app/citations : tabs Concurrents / Classement /
+// Sources. L'état actif est conservé dans l'URL (?tab=...) pour permettre
+// le deep-link + le bouton Retour navigateur. Le changement de tab utilise
 // `router.replace()` (shallow) — pas de re-fetch côté server, on garde
 // la data déjà chargée.
 
-type Tab = "competitors" | "sources";
+type Tab = "competitors" | "ranking" | "sources";
 
 interface CitationsViewProps {
   initialTab: Tab;
@@ -28,6 +29,7 @@ interface CitationsViewProps {
   competitorsTotalRuns: number;
   brandSelf: BrandSelfMetrics;
   suggestions: SuggestedCompetitor[];
+  ranking: RankingData;
   /** Domaines des concurrents suivis, pour tagger les sources. */
   competitorDomains: (string | null)[];
   workspaceBrands: Array<{ id: string; name: string; domain: string }>;
@@ -45,6 +47,7 @@ export function CitationsView({
   competitorsTotalRuns,
   brandSelf,
   suggestions,
+  ranking,
   competitorDomains,
   workspaceBrands,
   sources,
@@ -55,7 +58,8 @@ export function CitationsView({
   const [tab, setTab] = useState<Tab>(initialTab);
 
   function handleTabChange(value: string) {
-    const next = value === "sources" ? "sources" : "competitors";
+    const next: Tab =
+      value === "sources" ? "sources" : value === "ranking" ? "ranking" : "competitors";
     setTab(next);
     const params = new URLSearchParams(searchParams.toString());
     params.set("tab", next);
@@ -65,7 +69,9 @@ export function CitationsView({
   const summary =
     tab === "competitors"
       ? `Qui apparaît à côté de ${brand.name} dans les réponses IA`
-      : `Les pages où les IA vont chercher leurs réponses sur ${sourcesScopeLabel}`;
+      : tab === "ranking"
+        ? `Qui domine les réponses IA sur tes prompts`
+        : `Les pages où les IA vont chercher leurs réponses sur ${sourcesScopeLabel}`;
 
   return (
     <>
@@ -79,6 +85,10 @@ export function CitationsView({
             <span className="text-[color:var(--color-muted)] tabular-nums">
               {competitors.length}
             </span>
+          </TabsTrigger>
+          <TabsTrigger value="ranking">
+            <Trophy size={14} strokeWidth={2} />
+            Classement
           </TabsTrigger>
           <TabsTrigger value="sources">
             <Globe size={14} strokeWidth={2} />
@@ -98,6 +108,10 @@ export function CitationsView({
             brandSelf={brandSelf}
             suggestions={suggestions}
           />
+        </TabsContent>
+
+        <TabsContent value="ranking" className="mt-6">
+          <RankingTab data={ranking} />
         </TabsContent>
 
         <TabsContent value="sources" className="mt-6">

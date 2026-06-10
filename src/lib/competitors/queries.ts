@@ -1,9 +1,10 @@
 import { and, desc, eq, gte } from "drizzle-orm";
 import { db } from "@/db/client";
-import { competitors, prompts, runs } from "@/db/schema";
+import { citationMetricsDaily, competitors, prompts, runs } from "@/db/schema";
 import { getUserContext } from "@/lib/auth/user-context";
 import type { LLMValue } from "@/lib/llm";
 import type { ParsedBrandsPayload } from "@/lib/citation/types";
+import type { CompetitorAggregate } from "@/lib/metrics/visibility";
 import {
   aggregateSuggestedCompetitors,
   computeBrandSelfMetrics,
@@ -12,6 +13,7 @@ import {
   type CompetitorMetrics,
   type SuggestedCompetitor,
 } from "./metrics";
+import { computeRanking, type RankingDailyRow, type RankingEntry } from "./ranking";
 
 // Queries pour la page /app/citations (onglet Concurrents).
 
@@ -175,5 +177,106 @@ export async function listCompetitorsWithMetrics(
     windowDays,
     suggestions,
     brandSelf,
+  };
+}
+
+// ── Ranking concurrentiel (cf. doc 02 § Ranking, étapes 1+2) ──────────
+
+export interface RankingData {
+  windowDays: number;
+  deltaDays: number;
+  /** Runs success de la fenêtre courante, tous LLMs (dénominateur). */
+  totalRuns: number;
+  /** LLMs présents dans la fenêtre courante, pour le filtre. */
+  llms: LLMValue[];
+  /** Classement tous LLMs confondus. */
+  all: RankingEntry[];
+  /** Classement par LLM (clés = `llms`). */
+  byLlm: Record<string, RankingEntry[]>;
+}
+
+/**
+ * Classement marque + concurrents trackés + marques détectées sur la
+ * fenêtre `windowDays`, avec rang précédent (fenêtre décalée de
+ * `deltaDays`). Lit `citation_metrics_daily` — historisation déjà
+ * remplie quotidiennement par le worker recompute, zéro appel LLM.
+ */
+export async function getRankingData(
+  userId: string,
+  windowDays = 30,
+  deltaDays = 7,
+): Promise<RankingData | null> {
+  const ctx = await getUserContext(userId);
+  if (!ctx) return null;
+
+  const windowStart = new Date();
+  windowStart.setUTCDate(windowStart.getUTCDate() - (windowDays + deltaDays));
+  const windowStartIso = windowStart.toISOString().slice(0, 10);
+
+  const [competitorsRows, dailyRows] = await Promise.all([
+    db
+      .select({
+        id: competitors.id,
+        name: competitors.name,
+        aliases: competitors.aliases,
+        domain: competitors.domain,
+      })
+      .from(competitors)
+      .where(eq(competitors.brandId, ctx.brand.id)),
+    db
+      .select({
+        llm: citationMetricsDaily.llm,
+        date: citationMetricsDaily.date,
+        totalRuns: citationMetricsDaily.totalRuns,
+        brandCitedCount: citationMetricsDaily.brandCitedCount,
+        competitorsData: citationMetricsDaily.competitorsData,
+      })
+      .from(citationMetricsDaily)
+      .where(
+        and(
+          eq(citationMetricsDaily.brandId, ctx.brand.id),
+          gte(citationMetricsDaily.date, windowStartIso),
+        ),
+      ),
+  ]);
+
+  const rows: RankingDailyRow[] = dailyRows.map((r) => ({
+    llm: r.llm as LLMValue,
+    date: r.date,
+    totalRuns: r.totalRuns,
+    brandCitedCount: r.brandCitedCount,
+    competitorsData: r.competitorsData as CompetitorAggregate[] | null,
+  }));
+
+  const now = new Date();
+  const base = {
+    rows,
+    windowDays,
+    deltaDays,
+    brand: { name: ctx.brand.name, aliases: ctx.brand.aliases, domain: ctx.brand.domain },
+    competitors: competitorsRows.map((c) => ({
+      id: c.id,
+      name: c.name,
+      aliases: c.aliases ?? [],
+      domain: c.domain,
+    })),
+    now,
+  };
+
+  const currentStartIso = (() => {
+    const d = new Date(now);
+    d.setUTCDate(d.getUTCDate() - windowDays);
+    return d.toISOString().slice(0, 10);
+  })();
+  const currentRows = rows.filter((r) => r.date > currentStartIso);
+  const llms = [...new Set(currentRows.map((r) => r.llm))];
+
+  return {
+    windowDays,
+    deltaDays,
+    totalRuns: currentRows.reduce((sum, r) => sum + r.totalRuns, 0),
+    llms,
+    all: computeRanking(base),
+    byLlm: Object.fromEntries(llms.map((llm) => [llm, computeRanking({ ...base, llm })])),
   };
 }

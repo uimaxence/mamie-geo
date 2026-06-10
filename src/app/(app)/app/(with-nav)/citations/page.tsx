@@ -5,7 +5,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/db/client";
 import { brands as brandsTable, workspaceMembers } from "@/db/schema";
 import { getUserContext } from "@/lib/auth/user-context";
-import { listCompetitorsWithMetrics } from "@/lib/competitors/queries";
+import { getRankingData, listCompetitorsWithMetrics } from "@/lib/competitors/queries";
 import { listCitedSources } from "@/lib/sources/queries";
 import { parseBrandIdsFromSearchParam } from "@/lib/sources/brand-filter";
 import { quotasFor } from "@/lib/plans/quotas";
@@ -38,15 +38,17 @@ export default async function CitationsPage({ searchParams }: PageProps) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) redirect("/login");
 
-  const [ctx, competitorsResult, params] = await Promise.all([
+  const [ctx, competitorsResult, ranking, params] = await Promise.all([
     getUserContext(session.user.id),
     listCompetitorsWithMetrics(session.user.id, 30),
+    getRankingData(session.user.id, 30, 7),
     searchParams,
   ]);
 
-  if (!ctx || !competitorsResult) redirect("/app/onboarding");
+  if (!ctx || !competitorsResult || !ranking) redirect("/app/onboarding");
 
-  const initialTab = params.tab === "sources" ? "sources" : "competitors";
+  const initialTab =
+    params.tab === "sources" ? "sources" : params.tab === "ranking" ? "ranking" : "competitors";
 
   // Charge les brands du workspace pour le filtre multi-select côté
   // onglet Sources (logique reprise telle quelle de l'ancienne page).
@@ -84,6 +86,7 @@ export default async function CitationsPage({ searchParams }: PageProps) {
         competitorsTotalRuns={competitorsResult.totalRuns}
         brandSelf={competitorsResult.brandSelf}
         suggestions={competitorsResult.suggestions}
+        ranking={ranking}
         competitorDomains={competitorsResult.competitors.map((c) => c.domain)}
         workspaceBrands={workspaceBrands}
         sources={sources}

@@ -272,6 +272,13 @@ function normalize(s: string): string {
   return s.trim().toLowerCase().replace(/\s+/g, " ");
 }
 
+/**
+ * Normalisation de matching marque ↔ mention LLM (lower + collapse
+ * espaces), partagée avec le ranking (`ranking.ts`) pour garantir que
+ * les deux features matchent exactement pareil.
+ */
+export const normalizeBrandToken = normalize;
+
 function pickTopLlm(perLlm: Map<LLMValue, number>): LLMValue | null {
   if (perLlm.size === 0) return null;
   let bestLlm: LLMValue | null = null;
