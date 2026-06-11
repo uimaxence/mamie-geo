@@ -7,14 +7,14 @@
 
 ## Statut du projet
 
-| Champ                      | Valeur                 |
-| -------------------------- | ---------------------- |
-| Phase actuelle             | Pré-décision (analyse) |
-| Date de création           | Mai 2026               |
-| Décision GO / NO-GO prévue | Fin mai 2026           |
-| Lancement V0 (si GO)       | Juin 2026              |
-| Cible MRR mois 6           | 8 000 €                |
-| Cible MRR mois 12          | 25 000 €               |
+| Champ                      | Valeur                                          |
+| -------------------------- | ----------------------------------------------- |
+| Phase actuelle             | V0+ pré-lancement (Phases A/B/C livrées)        |
+| Date de création           | Mai 2026                                        |
+| Décision GO                | ✅ prise mai 2026, V0 en prod                   |
+| Lancement public (hard)    | À venir (reste : clé Perplexity, liste Brevo, Prices annuels Stripe, comm) |
+| Cible MRR mois 6           | 8 000 €                                         |
+| Cible MRR mois 12          | 25 000 €                                        |
 
 ---
 
@@ -51,7 +51,7 @@ Le marché GEO mondial passe de **1,48 Md$ en 2026 à 17 Md$ en 2034** (CAGR 45,
 |                       | Profound (US) | Peec AI (DE)   | **Mamie GEO**                    |
 | --------------------- | ------------- | -------------- | -------------------------------- |
 | Cible                 | Enterprise    | Mid-market EU  | **Freelance + PME + agences FR** |
-| Prix entrée           | $99-499       | €89            | **€49**                          |
+| Prix entrée           | $99-499       | €89            | **9,99 €**                       |
 | Couverture LLM        | 8             | 4-5            | **5 dont Le Chat**               |
 | UI / Support          | EN            | EN/multilingue | **FR-first**                     |
 | Hébergement           | US            | DE             | **France**                       |
@@ -59,11 +59,11 @@ Le marché GEO mondial passe de **1,48 Md$ en 2026 à 17 Md$ en 2034** (CAGR 45,
 
 ### La stratégie
 
-1. **Activer mamie-seo.fr** comme canal d'acquisition organique + média
-2. Lancer un **module Tracker** seul en V0 (8 semaines de dev)
-3. Pricing agressif : 49 € / 149 € / 399 € (Starter / Pro / Agence)
+1. **Activer mamie-seo.fr** comme canal d'acquisition organique + média (✅ redirigé 301 vers mamie-geo.fr)
+2. Lancer un **module Tracker** seul en V0 (✅ livré, 5 LLMs)
+3. Pricing : **Solo 9,99 € / Starter 49 € / Pro 149 €** (Agency hors grille publique depuis 2026-05-14, sur devis)
 4. Acquisition par contenu + outil gratuit viral + canal agence en marque blanche
-5. Décision GO-fullstop à 6 mois sur 3 critères (voir doc 08)
+5. Décision GATE 1 à 6 mois (critères doc 08)
 
 ### Le risque principal
 

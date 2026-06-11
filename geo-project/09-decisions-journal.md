@@ -161,1057 +161,510 @@ haut et l'entrée "2026-05-05 — Réponses aux 10 questions de bootstrap".
 
 ### Décisions enregistrées
 
+#### 2026-06-11 — Compression documentaire globale (CLAUDE.md + geo-project)
+
+**Contexte** : les 14 fichiers markdown pesaient ~525 KB ; CLAUDE.md (50 KB, chargé à chaque session Claude) empilait ~430 lignes d'historique « Précédente (…) » dupliquant ce journal ; plusieurs docs contredisaient l'état courant (trial, pricing, routes, faux ✅ blog).
+
+**Choix** : passe de compression sur tous les docs (-38 % global, 525 → 327 KB) avec règle dure « zéro perte décisionnelle » : décisions, dates, chiffres, noms de tables/fichiers/env vars, KPI, conditions d'arrêt et titres `##`/`###` conservés. CLAUDE.md § 9 devient un snapshot d'état courant **à remplacer, pas à empiler** (l'historique vit ici). Ce journal : 39 entrées conservées, corps compressés (-50 %). Mises à jour de fond au passage : trial 14 j carte requise propagé partout, routes réelles (`/app/citations`), schéma doc 03 complété (`technical_audits`, `audit_counters`, migrations 0000-0005), quotas alignés sur `quotas.ts`.
+
+**Conséquences attendues** : sessions Claude moins chères et plus rapides à amorcer ; docs à nouveau fiables comme source de vérité.
+
+**À revisiter** : si un détail historique manque, `git log` sur le doc concerné (rien n'est perdu côté git).
+
 #### 2026-06-10 — Audit indexation GSC : host canonique non-www + neutralisation des clones .vercel.app
 
-**Contexte** : Max signale des pages non indexées dans Search Console. Audit
-du setup d'indexation. Constat : **incohérence de host canonique**. Vercel
-sert `www.mamie-geo.fr` comme domaine primaire (Production) et redirige
-`mamie-geo.fr` → www en **307**, alors que tout le code (sitemap, robots
-`Host`, `metadataBase`, balises canonical) déclare le **non-www** comme
-canonique. Résultat : chaque URL du sitemap (non-www) est une « Page avec
-redirection » → non indexée (cf. doc GSC). En plus, 2 domaines `.vercel.app`
-servent le site complet en 200 **sans `X-Robots-Tag: noindex`** :
-`mamie-geo.vercel.app` (projet `mamie-geo`) et `mamie-geo-gg22.vercel.app`
-(2e projet Vercel branché sur le repo) → clones indexables en doublon.
-Enfin, `/`, `/pricing`, `/outils/*`, `/blog`, `/legal/*` n'émettaient aucune
-balise canonical auto-référente.
+**Contexte** : pages non indexées en GSC. Cause : Vercel servait `www.mamie-geo.fr` en primaire (redirect apex → www en 307) alors que sitemap, robots `Host`, `metadataBase` et canonicals déclarent le **non-www** → toutes les URLs du sitemap en « Page avec redirection ». En plus : 2 clones `.vercel.app` servis en 200 sans `X-Robots-Tag: noindex` (`mamie-geo.vercel.app` + `mamie-geo-gg22.vercel.app`, 2e projet Vercel branché sur le repo), et 6 pages sans canonical auto-référente.
 
 **Choix** :
-- Host canonique = **`mamie-geo.fr` (non-www)**, conforme à CLAUDE.md (« un
-  seul domaine mamie-geo.fr »). Action manuelle Vercel : inverser le primaire
-  (www → redirige vers apex en 308, apex servi en direct).
-- `next.config.ts` `headers()` : `X-Robots-Tag: noindex, nofollow` sur tout
-  host `(.*\.)?vercel\.app` → neutralise les 2 clones d'un coup.
-- Projet `mamie-geo-gg22` : à supprimer / déconnecter du repo (clone non
-  maîtrisé) — action Max.
-- Canonical auto-référente ajoutée sur les 6 pages qui n'en avaient pas
-  (home + pricing + 2 outils + blog index + 4 légales via `export const
-  metadata` MDX). Résolue via `metadataBase` → pointe vers l'apex quel que
-  soit le host servi, consolide tout vers `mamie-geo.fr`.
+- Host canonique = **`mamie-geo.fr` (non-www)**, conforme à CLAUDE.md. Action manuelle Vercel : inverser le primaire (www → apex en 308).
+- `next.config.ts` `headers()` : `X-Robots-Tag: noindex, nofollow` sur tout host `(.*\.)?vercel\.app` → neutralise les 2 clones.
+- Projet `mamie-geo-gg22` à supprimer / déconnecter du repo (action Max).
+- Canonicals auto-référentes ajoutées (home, pricing, 2 outils, blog index, légales via `export const metadata` MDX), résolues via `metadataBase` → consolident vers l'apex quel que soit le host servi.
 
-**Justification** : le fix Vercel (host primaire) est ce qui débloque
-réellement l'indexation ; les canonicals + noindex sont la ceinture défensive
-qui garantit la consolidation même si un autre host est crawlé.
+**Justification** : le fix host primaire débloque réellement l'indexation ; canonicals + noindex = ceinture défensive.
 
-**Conséquences attendues** : après bascule du primaire + re-soumission du
-sitemap dans GSC, les statuts « Page avec redirection » / « Page en double »
-doivent se résorber (validation GSC ~2 semaines).
+**Conséquences attendues** : après bascule + re-soumission sitemap, résorption « Page avec redirection » / « Page en double » (validation GSC ~2 semaines).
 
-**À revisiter** : vérifier dans GSC sous ~2 semaines que les pages passent
-« Dans l'index ». Si `mamie-geo-gg22` réapparaît, couper le déploiement à la
-source.
+**À revisiter** : vérifier GSC sous ~2 semaines (« Dans l'index »). Si `mamie-geo-gg22` réapparaît, couper le déploiement à la source.
 
 #### 2026-06-10 — Ranking suite : hint de fiabilité auto-extinguible, étape 3 (position concurrents), Suivre depuis le classement
 
-**Contexte** : demande Max — le classement doit afficher « un petit trigger discret » indiquant que les résultats gagnent en pertinence avec le temps, qui disparaît quand les données suffisent. + carte blanche sur les features pertinentes.
+**Contexte** : demande Max — hint discret « les résultats gagnent en pertinence avec le temps », auto-disparaissant, + carte blanche features.
 
 **Choix** :
-- **Hint de fiabilité piloté par la donnée** (pas de dismiss manuel ni localStorage) : `getRankingData` renvoie `dataDays` (jours distincts avec ≥ 1 run sur la fenêtre courante) ; l'onglet Classement affiche une ligne discrète (texte muted + icône Info, volontairement pas un Banner) « Classement encore jeune (N jours de données)… compte environ 14 jours. Ce message disparaîtra de lui-même » tant que `dataDays < RANKING_RELIABLE_AFTER_DAYS` (= 14, constante exportée dans `ranking.ts` ; 2 cycles hebdo complets pour lisser les prompts en cadence weekly). Au-delà : rien à nettoyer, le hint s'éteint seul.
-- **Étape 3 livrée** (cf. doc 02) : champ `position` (`first_paragraph|middle|end`) ajouté aux `competitorsMentioned` du tool schema scoring (requis côté schema, parsing **lénient** côté code : les payloads pré-2026-06-10 et les omissions du modèle restent valides, champ simplement absent). Type `ScoringMentionPosition`. La donnée s'accumule sans coût marginal ; le ranking de prééminence sera branchable plus tard.
-- **« Suivre » direct depuis le classement** : les lignes « détectée » portent un bouton pill `+ Suivre` qui appelle la server action `createCompetitor` existante (quota + RBAC déjà gérés dedans) → toast + refresh. Ferme la boucle découverte → tracking sans passer par l'onglet Concurrents. Event PostHog `ranking_discovered_tracked` (name, rank).
-
-**Conséquences attendues** : l'utilisateur comprend pourquoi le classement bouge au début sans être pollué ensuite ; la position concurrents commence à s'accumuler dès le prochain scoring ; le passage détectée → suivie devient 1 clic.
+- **Hint piloté par la donnée** (pas de dismiss manuel ni localStorage) : `getRankingData` renvoie `dataDays` (jours distincts avec ≥ 1 run sur la fenêtre) ; ligne discrète (texte muted + icône Info, volontairement pas un Banner) affichée tant que `dataDays < RANKING_RELIABLE_AFTER_DAYS` (= 14, constante exportée dans `ranking.ts` ; 2 cycles hebdo complets). S'éteint seul, rien à nettoyer.
+- **Étape 3 livrée** (cf. doc 02) : champ `position` (`first_paragraph|middle|end`) ajouté aux `competitorsMentioned` du tool schema scoring — requis côté schema, parsing **lénient** côté code (payloads pré-2026-06-10 et omissions du modèle valides). Type `ScoringMentionPosition`. La donnée s'accumule sans coût marginal ; ranking de prééminence branchable plus tard.
+- **Bouton pill `+ Suivre`** sur les lignes « détectée » du classement → server action `createCompetitor` existante (quota + RBAC inclus) → toast + refresh. Event PostHog `ranking_discovered_tracked` (name, rank).
 
 **À revisiter** : seuil 14 j à ajuster avec les retours ; étape 4 (scoring systématique) toujours à trancher.
 
 #### 2026-06-10 — Ranking concurrentiel étapes 1+2 : onglet Classement sur /app/citations, zéro migration
 
-**Contexte** : Max valide les étapes 1+2 de l'analyse ranking (cf. doc 02 § Ranking concurrentiel). L'analyse prévoyait une nouvelle table `competitor_metrics_daily` pour l'historisation.
+**Contexte** : Max valide les étapes 1+2 (cf. doc 02 § Ranking concurrentiel) ; l'analyse prévoyait une table `competitor_metrics_daily`.
 
-**Découverte à l'implémentation** : `citation_metrics_daily.competitors_data` (jsonb) **historisait déjà** les mentions concurrents par jour × LLM (name + citationCount + sentiments), upsertée par le worker recompute depuis la Phase A (`aggregateVisibility`). Personne ne lisait cette colonne côté produit.
+**Découverte à l'implémentation** : `citation_metrics_daily.competitors_data` (jsonb) **historisait déjà** les mentions concurrents par jour × LLM (name + citationCount + sentiments) depuis la Phase A (`aggregateVisibility`) — jamais lue côté produit.
 
-**Choix** : pas de nouvelle table ni migration — le ranking lit `competitors_data`. Chart « évolution du rang » reporté (LineChart câblé couleurs LLM, à généraliser plus tard) ; le delta J-7 couvre le besoin immédiat.
+**Choix** : zéro nouvelle table ni migration — le ranking lit `competitors_data`. Chart « évolution du rang » reporté ; le delta J-7 couvre le besoin.
 
 **Détail livré** :
-- **`computeRanking()`** pure dans `src/lib/competitors/ranking.ts` (7 tests) : agrège `brandCitedCount` (toi) + `competitors_data` (concurrents trackés matchés par name+aliases normalisés via `normalizeBrandToken` partagé avec metrics.ts, sinon « marques détectées » cap top 5), fenêtre 30 j + rang précédent sur fenêtre décalée J-7 (null si pas d'historique — pas de backfill, même politique que le funnel sources).
-- **`getRankingData()`** dans `src/lib/competitors/queries.ts` : 1 SELECT sur `citation_metrics_daily` (37 jours), classements pré-calculés tous-LLMs + par LLM.
-- **Onglet « Classement »** (3e tab `/app/citations`, deep-linkable `?tab=ranking`, icône Trophy) : SegmentedControl Tous/par LLM, table Rang / Marque (favicon + badge Toi / « détectée, non suivie ») / delta ↑↓ / Citations / Apparition. Ligne « toi » toujours présente même à 0 mention, avec libellé explicite « jamais citée sur la fenêtre » (réponse au diagnostic des « — » muets du 2026-06-10). Footer renvoyant vers l'onglet Concurrents pour tracker les marques détectées.
-- **Events PostHog** : `ranking_viewed` (window_days, total_runs, entries) + `ranking_scope_changed` (from, to).
+- `computeRanking()` pure dans `src/lib/competitors/ranking.ts` (7 tests) : agrège `brandCitedCount` (toi) + `competitors_data` (trackés matchés name+aliases via `normalizeBrandToken` partagé avec metrics.ts, sinon « marques détectées » cap top 5), fenêtre 30 j + rang précédent sur fenêtre décalée J-7 (null sans historique — pas de backfill, même politique que le funnel sources).
+- `getRankingData()` dans `src/lib/competitors/queries.ts` : 1 SELECT sur `citation_metrics_daily` (37 jours), classements tous-LLMs + par LLM.
+- Onglet « Classement » (3e tab `/app/citations`, deep-linkable `?tab=ranking`, icône Trophy) : SegmentedControl Tous/par LLM, table Rang / Marque (favicon + badge Toi / « détectée, non suivie ») / delta ↑↓ / Citations / Apparition. Ligne « toi » toujours présente même à 0 (« jamais citée sur la fenêtre »). Footer → onglet Concurrents.
+- Events PostHog : `ranking_viewed` (window_days, total_runs, entries) + `ranking_scope_changed` (from, to).
 
-**Conséquences attendues** : première vue « qui domine » sans coût LLM marginal ; les marques détectées non suivies deviennent visibles (cas mamie-vege : concurrents trackés à 0 mais Vegan Pratique & co citées). Le delta J-7 s'activera tout seul dès 7 jours de données.
+**Conséquences** : vue « qui domine » à coût LLM nul ; marques détectées non suivies visibles (cas mamie-vege). Delta J-7 actif dès 7 jours de données.
 
-**À revisiter** : étape 3 (position par concurrent dans le tool schema scoring) et étape 4 (scoring systématique, lever le skip regex — décision pricing) restent à trancher ; chart évolution du rang quand l'historique sera dense.
+**À revisiter** : étape 3 (livrée le jour même, cf. entrée précédente) ; étape 4 (scoring systématique, lever le skip regex — décision pricing) ; chart évolution du rang quand l'historique sera dense.
 
 #### 2026-06-10 — Refonte page Conseils : plan d'action priorisé (tri par impact) au lieu de la grille par axe
 
-**Contexte** : retour Max (screenshot) sur `/app/conseils` : « trop le bordel les espaces blancs, on n'y comprend rien, peut-être un kanban ? un meilleur tri ? le plus pertinent et actionnable pour l'utilisateur ». La grille 2×2 par axe (actée la veille) répartissait les 10 leviers en colonnes de 1/3/5/1 → trous blancs massifs et ordre de lecture ambigu. L'intro 2-col souffrait du même déséquilibre de hauteurs.
+**Contexte** : retour Max sur `/app/conseils` — la grille 2×2 par axe (colonnes 1/3/5/1, actée la veille) créait des trous blancs massifs et un ordre de lecture ambigu.
 
-**Options considérées** : (a) kanban 4 colonnes (une par axe) ; (b) masonry CSS columns ; (c) liste pleine largeur triée par impact.
+**Options considérées** : (a) kanban 4 colonnes / (b) masonry CSS / (c) liste pleine largeur triée par impact.
 
-**Choix** : (c). Le kanban hérite du même déséquilibre 1/3/5/1 (verticalement cette fois) et ses colonnes étroites sont incompatibles avec les items dépliables ; le masonry comble les trous mais casse l'ordre de lecture. Le tri par impact répond littéralement à la demande « le plus pertinent et actionnable » : la page devient un **plan d'action ordonné**, pas un sommaire thématique.
+**Choix** : (c). Le kanban hérite du déséquilibre, le masonry casse l'ordre de lecture. La page devient un **plan d'action ordonné**, pas un sommaire thématique.
 
-**Détail** :
-- 2 sections pleine largeur : « Commence ici — leviers à impact fort » (6 leviers) puis « Ensuite — pour aller plus loin » (4 leviers), numérotation continue 01-10 dans l'ordre de lecture.
-- Le champ `impact: "high" | "medium"` existait déjà dans `GEO_TIPS` (inutilisé en rendu) — nouvel export `GEO_TIPS_BY_PRIORITY` dans `src/lib/geo-advice.ts`.
-- L'axe ne pilote plus le layout mais reste visible : badge coloré par levier + légende compacte (4 chips × compteur) intégrée à la carte d'intro, désormais pleine largeur.
-- Items dépliables, callouts « À retenir », `appHint` et bloc de clôture 2-col inchangés.
-- Doc 10 § Layout app mis à jour (l'exemple « Conseils en 4 cartes d'axe 2×2 » est remplacé : le regroupement thématique reste valable quand les groupes sont équilibrés, sinon trier par priorité).
+**Détail** : 2 sections pleine largeur (« Commence ici — leviers à impact fort » 6 leviers / « Ensuite — pour aller plus loin » 4), numérotation continue 01-10 ; nouvel export `GEO_TIPS_BY_PRIORITY` dans `src/lib/geo-advice.ts` (le champ `impact: "high" | "medium"` existait déjà, inutilisé) ; axe conservé en badge par levier + légende chips (4 × compteur) dans l'intro pleine largeur ; items dépliables, callouts « À retenir », `appHint` inchangés. Doc 10 § Layout app amendé : regroupement thématique seulement si les groupes sont équilibrés, sinon trier par priorité.
 
-**Conséquences attendues** : zéro espace perdu, ordre de lecture évident, la page devient une checklist actionnable (cohérente avec le drip d'éducation post-signup).
-
-**À revisiter** : statut live pass/fail par levier auditable (déjà noté le 2026-06-09) — la liste priorisée s'y prête encore mieux (checklist).
+**À revisiter** : statut live pass/fail par levier auditable (cf. 2026-06-09) — la liste priorisée s'y prête (checklist).
 
 #### 2026-06-09 — Sweep cohérence UX/UI (audit global) : PageContainer partout, tables responsive, microcopy tutoiement
 
-**Contexte** : audit UX/UI global du site (marketing + app) mené par Claude à la demande de Max. Deux passes d'exploration (marketing/blog d'un côté, app authentifiée de l'autre) puis vérification manuelle de chaque finding — plusieurs faux positifs écartés (ex. le contraste gray-400 sur fond noir de la FinalCTA est en réalité ~8:1 AAA, fix délibéré du 2026-05-26 conservé).
+**Contexte** : audit UX/UI global (marketing + app), chaque finding vérifié manuellement — plusieurs faux positifs écartés (ex. contraste gray-400 de la FinalCTA en réalité ~8:1 AAA, fix délibéré du 2026-05-26 conservé).
 
-**Options considérées** : (a) gros lot incluant breadcrumbs, lexique loading centralisé, confirmation d'export CSV ; (b) lot resserré sur les incohérences avérées, le reste écarté ou reporté.
+**Options considérées** : (a) gros lot (breadcrumbs, lexique loading, confirmation export) / (b) lot resserré sur les incohérences avérées.
 
-**Choix** : lot resserré (b). Écartés volontairement : confirmation avant export CSV (un download n'a pas à être confirmé), toasts sur pagination client-side (action instantanée, feedback inutile), lexique `LOADING_STATES` centralisé (over-engineering pour 5 libellés — on corrige juste le jargon).
+**Choix** : (b). Écartés volontairement : confirmation avant export CSV, toasts sur pagination client-side, lexique `LOADING_STATES` centralisé (over-engineering pour 5 libellés).
 
 **Détail livré** :
+- Nav marketing francisée : « Features » → « Fonctionnalités » (header desktop, burger mobile, footer).
+- `<PageContainer>` appliqué à 100 % des pages app : nouvelle largeur `detail` (`max-w-5xl`) ; `dashboard` (div 6xl hardcodé) → `default` ; `audits/[id]`, `prompts/[id]` (5xl), `runs/[id]` (4xl → 5xl) → `detail`. Bonus : `<main>` imbriqués invalides corrigés (le layout `(with-nav)` fournit déjà le `<main>`).
+- Tables responsive (`/app/prompts`, concurrents `/app/citations`) : colonnes secondaires `hidden md:table-cell` (prompts : Catégorie/Cadence/Runs success/Dernier run ; concurrents : Type/Top LLM/Dernière) + `min-w` appliqué dès `md` seulement → plus de scroll horizontal en portrait mobile. Helpers `Th`/`Td` acceptent `className`.
+- A11y clavier : focus ring (`focus-visible:ring-2` ink) sur les boutons icône « Retirer » du wizard onboarding.
+- Microcopy : `EntityTypeBadge` « Vous » → « Toi » ; « Enqueue en cours… » → « Lancement… ».
+- Dialog suppression de compte : paragraphe → liste à puces + ligne remboursement séparée.
 
-- **Nav marketing francisée** : « Features » → « Fonctionnalités » dans le header desktop, le burger mobile et le footer (seul libellé EN restant dans une nav 100 % FR).
-- **`<PageContainer>` complété et appliqué aux 4 dernières pages hors-convention** : nouvelle largeur `detail` (`max-w-5xl`) pour les pages détail d'entité. `dashboard` (était `div` hardcodé 6xl) → `default` ; `audits/[id]` et `prompts/[id]` (5xl hardcodé) + `runs/[id]` (4xl hardcodé, passe à 5xl) → `detail`. Bonus : `prompts/[id]` et `runs/[id]` rendaient un `<main>` local alors que le layout `(with-nav)` en fournit déjà un → `<main>` imbriqué invalide HTML, corrigé par la migration.
-- **Tables responsive** (`/app/prompts`, table concurrents de `/app/citations`) : colonnes secondaires en `hidden md:table-cell` (prompts : Catégorie/Cadence/Runs success/Dernier run ; concurrents : Type/Top LLM/Dernière) + `min-w` de table appliqué seulement dès `md`. En portrait mobile : Prompt + Actif + Actions (resp. Marque + Citations + Apparition + Actions), plus de scroll horizontal forcé. Les helpers locaux `Th`/`Td` de prompts-list acceptent désormais `className`.
-- **A11y clavier** : focus ring (`focus-visible:ring-2` ink, pattern des DropdownMenuTrigger existants) sur les boutons icône « Retirer concurrent / Retirer prompt » du wizard onboarding qui n'en avaient aucun.
-- **Microcopy** : badge `EntityTypeBadge` « Vous » → « Toi » (toute l'app tutoie, y compris « vs toi » dans la même table) ; « Enqueue en cours… » (jargon technique EN) → « Lancement… » dans le dialog de run manuel.
-- **Dialog suppression de compte scannable** : le paragraphe de 4 lignes listant les données perdues devient liste à puces + ligne remboursement séparée (action irréversible = lecture en 2 s).
+**Conséquences** : convention « une page = un PageContainer » vraie à 100 %, app utilisable en portrait mobile, tutoiement cohérent.
 
-**Conséquences attendues** : plus aucune page app hors `<PageContainer>` (convention « une page = un PageContainer » désormais vraie à 100 %), app utilisable en portrait mobile sur les 2 tables principales, tutoiement cohérent partout.
-
-**À revisiter** : breadcrumbs sur pages détail (reporté — le lien « Retour » suffit tant que la hiérarchie reste à 2 niveaux) ; variant card-layout mobile pour les tables si les colonnes masquées manquent aux users (attendre feedback).
+**À revisiter** : breadcrumbs pages détail (reporté — « Retour » suffit à 2 niveaux) ; variant card-layout mobile pour les tables si les colonnes masquées manquent (attendre feedback).
 
 #### 2026-06-09 — Harmonisation layout app : `<PageContainer>` + système de blocs multi-colonnes + dé-dup Conseils/Audit
 
-**Contexte** : sur retour Max (« mettre sur plusieurs colonnes, pas tout les uns sur les autres », réf. layout d'un dashboard SaaS), audit des layouts de toutes les pages `(app)/app/(with-nav)/*`. Constats : seul le dashboard exploitait une grille multi-colonnes ; le reste en pile verticale ; largeurs de conteneur incohérentes (`max-w-2xl/3xl/5xl/6xl` mélangées) ; `runs` (et la page `audits/[id]` selon l'audit) en `<h1>`/`<header>` brut sans `PageHeader` ; et un **doublon** : le tableau d'URLs auditées ajouté la veille sur `/app/conseils` recoupait `/app/audits`.
+**Contexte** : retour Max (« plusieurs colonnes, pas tout les uns sur les autres »). Audit des layouts `(app)/app/(with-nav)/*` : largeurs incohérentes (`max-w-2xl/3xl/5xl/6xl`), `runs` en `<h1>` brut sans `PageHeader`, doublon tableau d'URLs auditées Conseils ↔ `/app/audits`.
 
-**Options considérées** : (a) merger Conseils dans l'onglet Audit ; (b) garder séparé + dé-dupliquer. Pour le layout : (a) au cas par cas ; (b) une primitive de conteneur partagée + convention de blocs documentée.
+**Options considérées** : merger Conseils dans Audit / séparer + dé-dupliquer ; layout au cas par cas / primitive partagée + convention.
 
-**Choix** (validés par Max) : **séparer + dé-dupliquer**, **leviers en 4 blocs par axe**, **sweep d'harmonisation complet**.
+**Choix** (validés Max) : séparer + dé-dupliquer, leviers en 4 blocs par axe, sweep d'harmonisation complet.
 
 **Détail** :
-- **Primitive `<PageContainer width="default|narrow|form">`** (`src/components/ui/page-container.tsx`, exportée par l'index) = `mx-auto px-6 py-12 lg:px-10` + largeur (`6xl/3xl/2xl`). Appliquée à toutes les pages app (audits, audits/new, audits/compare, runs, settings, citations, prompts, conseils) → fin des largeurs divergentes.
-- **`PageHeader` partout** : `runs` passe de `<h1>` brut à `<PageHeader>`. Exception assumée : `audits/[id]` garde sa carte ScoreRing comme hero (un PageHeader par-dessus serait redondant) — page déjà refondue le 2026-06-09 et laissée intacte.
-- **Convention de blocs** : `grid items-start gap-4 lg:grid-cols-2` ; tables/listes en pleine largeur ; pages `narrow` (réglages) restent mono-colonne (champs denses). Cf. doc 10 § « Layout app ».
-- **Conseils refondu** : 10 leviers → **4 cartes d'axe** (grille 2×2) ; intro 2-col (cadrage | légende des axes) ; clôture 2-col (synthèse | bloc CTA audit). **Tableau d'URLs supprimé** (vit sur `/app/audits`) → page repassée statique. Cross-link réciproque Conseils ↔ Audits.
+- Primitive `<PageContainer width="default|narrow|form">` (`src/components/ui/page-container.tsx`, exportée par l'index) = `mx-auto px-6 py-12 lg:px-10` + largeur (`6xl/3xl/2xl`). Appliquée à toutes les pages app.
+- `PageHeader` partout (`runs` migré). Exception assumée : `audits/[id]` garde sa carte ScoreRing en hero.
+- Convention de blocs : `grid items-start gap-4 lg:grid-cols-2` ; tables/listes pleine largeur ; pages `narrow` mono-colonne. Cf. doc 10 § « Layout app ».
+- Conseils refondu en 4 cartes d'axe 2×2 (superseded le 2026-06-10, cf. § Refonte page Conseils) ; tableau d'URLs supprimé (vit sur `/app/audits`), page repassée statique, cross-link réciproque Conseils ↔ Audits.
 
-**Conséquences attendues** : continuité visuelle entre toutes les pages, plus de pile verticale unique, un seul endroit pour la liste d'audits. `<PageContainer>` réutilisable pour toute nouvelle page app.
-
-**À revisiter** : si une page large (citations, prompts) gagne à passer ses tables en 2-col (peu probable sur du tabulaire) ; statut live pass/fail par levier auditable (cf. entrée Conseils GEO ci-dessous).
+**À revisiter** : 2-col sur tables larges (peu probable) ; statut live pass/fail par levier auditable.
 
 #### 2026-06-09 — Lien « Contacter le support » → réservation Cal.com
 
-**Contexte** : besoin de rassurer le client (canal de contact direct pour discuter d'un problème). Pas de helpdesk en V0.
+**Contexte** : besoin d'un canal de contact direct ; pas de helpdesk en V0.
 
-**Choix** : item « Contacter le support » dans le menu utilisateur de la sidebar app, qui ouvre une modal de réservation Cal.com (`mc.maxence/support-mamie-geo`, namespace `support-mamie-geo`, brand `#339CFF`).
+**Choix** : item « Contacter le support » dans le menu utilisateur sidebar → modal Cal.com (`mc.maxence/support-mamie-geo`, namespace `support-mamie-geo`, brand `#339CFF`).
 
-**Détail** :
-- Embed **element-click** Cal.com (snippet officiel verbatim), injecté via `next/script` `afterInteractive` dans `<CalSupportEmbed>`, monté une fois dans le layout `(app)`. **Pas de dépendance npm** (`@calcom/embed-react` évité) — le loader vanilla suffit.
-- Le déclencheur est un `<button data-cal-link data-cal-namespace data-cal-config>` dans le `DropdownMenuItem` ; le listener délégué de Cal capte le clic. Constantes `CAL_SUPPORT_*` exportées depuis `cal-support-embed.tsx` pour garder lien/namespace/config synchronisés.
-- Nouvel event PostHog `support_cal_opened` (`source: "user_menu"`).
-- **Setup** : le lien suppose que l'event type Cal `support-mamie-geo` existe sur le compte `mc.maxence`. Si on change de handle/event, mettre à jour les constantes.
+**Détail** : embed element-click Cal.com (snippet officiel) injecté via `next/script` `afterInteractive` dans `<CalSupportEmbed>`, monté une fois dans le layout `(app)`. Pas de dépendance npm (`@calcom/embed-react` évité). Trigger = `<button data-cal-link data-cal-namespace data-cal-config>` dans le `DropdownMenuItem`. Constantes `CAL_SUPPORT_*` exportées depuis `cal-support-embed.tsx`. Event PostHog `support_cal_opened` (`source: "user_menu"`). Setup : l'event type Cal `support-mamie-geo` doit exister sur le compte `mc.maxence`.
 
-**À revisiter** : si volume de support > gérable en 1:1, basculer vers un vrai canal (email dédié / Crisp / helpdesk).
+**À revisiter** : si volume support > gérable en 1:1, vrai canal (email dédié / Crisp / helpdesk).
 
 #### 2026-06-09 — Refonte UI rapport d'audit + resserrement du border-radius global
 
-**Contexte** : Max trouve la page audit technique (`/app/audits/[id]`) « ennuyeuse, plate, pas assez gamifiée », et juge le border-radius global de l'app trop arrondi (« mou »). Il fournit 7 screens de dashboards SEO/SaaS/HR comme références à en tirer des conventions et améliorer la DA globale.
+**Contexte** : Max juge `/app/audits/[id]` « plate, pas assez gamifiée » et le radius global trop arrondi (« mou ») ; 7 screens de référence fournis. Conventions tirées : score en anneau circulaire coloré, barre de synthèse segmentée par sévérité, pills d'issues, sous-scores en barres, radius serrés.
 
-**Conventions tirées des screens** : score en anneau/jauge circulaire coloré (pas un chiffre nu), barre de synthèse segmentée colorée par sévérité en tête de liste, pills d'issues colorées (point + compteur + libellé), sous-scores en barres de progression avec pastille colorée, radius plus serrés.
+**Options considérées** : A refonte cosmétique de la card score / B refonte complète + primitifs réutilisables + radius global.
 
-**Options considérées** :
-- A — refonte cosmétique de la seule card de score.
-- B — refonte complète du rapport (anneau animé + barre segmentée + sous-scores en barres + pills) avec primitifs réutilisables + resserrement radius global.
-
-**Choix** : B (validé par Max via picker : radius « serré » + refonte « complète »).
+**Choix** : B (validé Max via picker : radius « serré » + refonte « complète »).
 
 **Détail** :
-- **Radius global resserré** dans `globals.css` : `sm 6→4 · md 10→6 · lg 16→8 · xl 20→12` (pill inchangé). Touche toute l'app (cards, inputs, dialogs, badges…) via les tokens `--radius-*`. Boutons restent `pill`.
-- **3 primitifs UI** posés dans `src/components/ui/`, exportés par l'index, réutilisables au dashboard : `<ScoreRing>` (anneau SVG, arc animé 0→valeur au montage, client component), `<SegmentBar>` (barre proportionnelle segmentée, server), `<ScoreBar>` (sous-score en barre, server).
-- **Helper `scoreColor()`** centralisé dans `src/lib/audit/score.ts` (seuils ≥80 vert / ≥60 ambre / <60 rouge) — élimine 3 duplications (détail, liste, comparaison). Le lead magnet marketing garde son scale 75/50 distinct.
-- **`/app/audits/[id]`** : header refait (ScoreRing 128px + URL/méta + pills d'issues empilées + SegmentBar + 4 ScoreBar). Liste de checks (`ChecksBySeverity`) inchangée fonctionnellement, bénéficie du nouveau radius.
-- **`/app/audits`** (liste) : chiffre de score nu remplacé par un mini `<ScoreRing>` 52px par ligne (cohérence).
-
-**Conséquences attendues** : rapport plus « vivant »/lisible d'un coup d'œil, DA app plus nette. Primitifs prêts à resservir (dashboard visibilité 0-100, part de voix).
+- Radius global `globals.css` : `sm 6→4 · md 10→6 · lg 16→8 · xl 20→12` (pill inchangé). Touche toute l'app via les tokens `--radius-*`. Boutons restent `pill`.
+- 3 primitifs UI dans `src/components/ui/` (exportés par l'index, réutilisables dashboard) : `<ScoreRing>` (anneau SVG, arc animé au montage, client), `<SegmentBar>` (server), `<ScoreBar>` (server).
+- `scoreColor()` centralisé dans `src/lib/audit/score.ts` (≥80 vert / ≥60 ambre / <60 rouge) — remplace 3 duplications (détail, liste, comparaison). Le lead magnet marketing garde son scale 75/50.
+- `/app/audits/[id]` : header refait (ScoreRing 128px + URL/méta + pills d'issues empilées + SegmentBar + 4 ScoreBar). `ChecksBySeverity` inchangé.
+- `/app/audits` liste : chiffre nu → mini ScoreRing 52px par ligne.
 
 **À revisiter** : si le dashboard adopte ScoreRing, vérifier que le scale 80/60 convient aux scores de visibilité (sinon paramétrer les seuils).
 
 #### 2026-06-09 — Page « Conseils GEO » (10 leviers) en route dédiée, pas dans l'audit technique
 
-**Contexte** : un post carrousel LinkedIn (Amandine Bart, « SEO sans migraine ») détaille 10 facteurs pour être cité par les IA (influence Google, branding, SEO YouTube, plateformes d'avis, comparatifs, structure, intention de recherche, E-E-A-T, fin du générique, fraîcheur). Bon matériel d'éducation produit. Question : en faire un onglet de l'audit technique ou une page à part ?
+**Contexte** : carrousel LinkedIn (Amandine Bart, « SEO sans migraine ») — 10 facteurs pour être cité par les IA. Onglet de l'audit ou page à part ?
 
-**Options considérées** :
-- A — intégrer les 10 leviers comme section/onglet dans `/app/audits/[id]`.
-- B — route dédiée `/app/conseils` (nouvelle entrée sidebar).
+**Options considérées** : A section/onglet dans `/app/audits/[id]` / B route dédiée `/app/conseils`.
 
-**Choix** : B.
+**Choix** : B. L'audit est **automatique et par-URL** ; 8 des 10 leviers sont **off-page et stratégiques** (branding, mentions, YouTube, avis, comparatifs…) non détectables par crawl. Page dédiée = playbook evergreen servant le drip d'éducation post-signup.
 
-**Justification** : l'audit technique est **automatique et par-URL** (FAQPage, llms.txt, title, E-E-A-T on-page…). Or 8 des 10 leviers sont **off-page et stratégiques** (branding, mentions, YouTube, avis, comparatifs, expérience réelle) — non détectables par un crawl. Les noyer dans un rapport par-URL crée une confusion mentale (« sur quelle URL ? »). En page dédiée, c'est un playbook evergreen qui sert le **drip d'éducation post-signup** (tâche restante V0+) et donne du contexte au-dessus de l'audit.
+**Détail (état final après itérations)** :
+- Route `(with-nav)/conseils` : `page.tsx` (server dynamique, `listAudits`) + `conseils-view.tsx`.
+- Contenu dans `src/lib/geo-advice.ts` (10 leviers + 4 axes + synthèse + flag `auditable`), réutilisable (newsletter, blog, drip). Chiffres attribués à l'étude Ahrefs, au conditionnel.
+- Accordéon `<Collapsible>` par levier (numéro + titre + badge d'axe + résumé ; détail = corps + puces + callout « À retenir » + cross-link `appHint`). Premier levier ouvert par défaut.
+- Tableau « Vérifie tes pages » : URLs auditées de la workspace (URL · ScoreBadge /100 · dernier audit), lignes cliquables → `/app/audits/[id]` + ligne `+ Auditer une URL` → `/app/audits/new`.
+- Entrée sidebar « Conseils GEO » (icône Lightbulb). Patterns documentés doc 10 § Patterns liste & contenu (2026-06-09).
 
-**Conséquences attendues** (état final après itérations design) :
-- Nouveau route group `(with-nav)/conseils` : `page.tsx` (**server dynamique** — charge les audits via `listAudits`) + `conseils-view.tsx` (accordéon + tableau).
-- Contenu structuré dans `src/lib/geo-advice.ts` (10 leviers + 4 axes + synthèse + flag `auditable`), réutilisable (newsletter, blog, drip email). Chiffres attribués à l'étude Ahrefs, formulés au conditionnel.
-- **Accordéon** : 1 carte = `<Collapsible>` autonome, trigger scannable (numéro + titre + badge d'axe + résumé une ligne), détail au dépli (corps + puces + callout « À retenir » + cross-link `appHint` vers la feature qui actionne le levier). Premier levier ouvert par défaut.
-- **Tableau « Vérifie tes pages »** en bas : les URLs réellement auditées de la workspace (URL · ScoreBadge /100 · dernier audit), lignes cliquables (stretched-link) → `/app/audits/[id]`, + **ligne d'invitation finale** `+ Auditer une URL` → `/app/audits/new` (gère vide ET ajout). Intro « X des 10 leviers vérifiables par l'audit ».
-- Entrée sidebar « Conseils GEO » (icône Lightbulb) après « Audits techniques ».
-- Patterns réutilisables documentés dans **doc 10 § Patterns liste & contenu (2026-06-09)**.
+**Itérations design (mémo)** : badge « Impact » sur chaque carte rejeté (anti-pattern doc 10 : emphase partout = rien ne ressort) ; pill « chiffre clé » inline → bandeau sous carte → remplacé par le tableau d'URLs auditées (plus concret).
 
-**Itérations design (tracées pour mémoire — Max a piloté plusieurs allers-retours)** :
-1. Badge « Impact élevé/moyen » posé sur **chaque** carte → rejeté : un marqueur d'emphase sur toutes les lignes ne distingue plus rien (acté en anti-pattern doc 10).
-2. Pill plein « chiffre clé » (88 %, 2,5×…) inline sur quelques leviers → puis demandé en **bandeau sous la carte** (réf. « POSTED 3 DAY AGO » des cards Hopin), effet « carte sous la carte ».
-3. Bandeau re-câblé sur l'**audit** (« vérifié par l'audit »), puis remplacé par le **tableau d'URLs auditées** : plus concret (vraie data + CTA détail + invitation) qu'un marqueur statique. Bandeau par-carte et effet pile retirés ; cartes à plat avec ombre douce.
-
-**À revisiter** : (a) si traction, exposer une version publique SEO sur le marketing (`/guides/...`) plutôt que derrière l'auth ; (b) brancher un **statut live** pass/fail par levier auditable une fois le mapping levier→checks d'audit posé (aujourd'hui le flag `auditable` est statique).
+**À revisiter** : (a) version publique SEO (`/guides/...`) si traction ; (b) statut live pass/fail par levier une fois le mapping levier→checks posé (flag `auditable` statique aujourd'hui).
 
 #### 2026-06-08 — Veille Peec AI exhaustive (docs.peec.ai) + ajout de 5 features V1 + polish UI app inspiré
 
-**Contexte** : Précédente veille concurrence sur Peec datait du 2026-05-11 (snapshot rapide site marketing). Le concurrent EU principal a publié depuis une documentation produit complète (docs.peec.ai) qui révèle plusieurs concepts non couverts par notre roadmap V0+/V1. Parallèlement, observation : notre `/app/*` est fonctionnellement équivalent mais visuellement moins « premium » que les screens Peec — densité d'info, hiérarchie typo et badges colorés sur valeurs métriques.
+**Contexte** : veille Peec précédente du 2026-05-11. Lecture exhaustive de docs.peec.ai (`intro-to-peec-ai`, `/understanding-your-performance`, `/brand-insights`) + reco rapport 2026-05-11 + workduo.ai pricing. Notre `/app/*` est fonctionnellement équivalent mais moins « premium » (densité, hiérarchie typo, badges colorés).
 
-Lecture exhaustive de 3 pages : `docs.peec.ai/intro-to-peec-ai`, `/understanding-your-performance`, `/brand-insights`. Plus reco transverse du rapport veille 2026-05-11 + workduo.ai pricing breakdown.
+**Findings produit (non couverts V0+)** : 1. Performance Matrix (axe X × Y parmi Topics/Models/Geographies/Competitors × métrique Visibility/Sentiment/Position/SoV) ; 2. Rankings Table avec sélecteur de dimension (By AI Model / topic / tag) ; 3. Domain Types classification (Editorial/Corporate/UGC/Reference/Institutional + ring chart, ~1 LLM call/source mensuel) ; 4. Volume (Beta) — search volume par prompt (DataForSEO probable) ; 5. Query Fanouts (sub-queries du web search ChatGPT) ; 6. Brand Visibility vs Source Visibility (« Spot gaps » — on a la data, pas la viz) ; 7. Strongest/Weakest model par marque ; 8. Recent Chats en double format (cards overview / table page prompt) ; 9. Mode plein écran sur matrices/charts.
 
-**Findings produit (non couverts V0+)** :
-
-1. **Performance Matrix** — matrice configurable `axe X × axe Y` parmi {Topics, Models, Geographies, Competitors} × métrique {Visibility, Sentiment, Position, SoV}. Vue très puissante pour les agences/PME, inédite chez nous.
-2. **Rankings Table avec sélecteur de dimension** — "By AI Model / By topic / By tag" — permet de pivoter la même table sans changer de page.
-3. **Domain Types classification** — chaque domaine source labellisé Editorial / Corporate / UGC / Reference / Institutional. Ring chart "% par type" en synthèse. Très visuel en démo et trivial à coder (1 LLM call/source mensuel).
-4. **Volume (Beta)** — search volume estimé par prompt (très low → very high), barre colorée. Branche probablement DataForSEO ou équivalent.
-5. **Query Fanouts** — sub-queries que ChatGPT exécute pendant son web search. Niche mais signal différenciant pour les SEO-friendly users.
-6. **Brand Visibility vs Source Visibility** — distinction explicite formalisée ("Spot gaps") : tu peux être source citée sans être nommée comme marque, ou nommée sans être source. On a la data, pas la viz.
-7. **Strongest/Weakest model par marque** — info dérivée triviale, super utile en debrief.
-8. **Recent Chats en double format** — cards en overview, tableau en page prompt. Cohérence narration pas anodine.
-9. **Mode plein écran sur matrices/charts complexes** — pattern UX simple à brancher avec un Dialog.
-
-**Findings UX/UI** :
-
-- Pattern « header inline avec résumé » : `Overview · Attio's Visibility trending up by 5.2% this month` au lieu de juste un h1 — densité d'info ×2 sans encombrement.
-- 3 micro-KPIs en haut-droite (Visibility 3/14 ↓ · Sentiment 2/14 ↑ · Position 5/14 ↑) — snapshot deltas instant.
-- Top bar avec filtres globaux pills (brand · date range · tag · model) persistants entre pages — gros gap chez nous (`SegmentedControl` est local à `<TrendSection>` uniquement).
-- Tables avec mini-badges colorés inline `| 86` (barre verticale colorée + chiffre tabulaire) — encode la dimension métrique visuellement, pas que du texte.
-- Sidebar avec eyebrow « Pages » avant les items + item actif avec fond `bg-gray-100` léger.
-- Cards : radius ~16px (proche de notre `--radius-xl` 20px, OK), padding plus aéré côté Peec.
+**Findings UX/UI** : header inline avec résumé (`Overview · Visibility trending up 5.2%`) ; 3 micro-KPIs deltas en haut-droite ; filtres globaux pills persistants entre pages (gros gap chez nous) ; mini-badges colorés inline `| 86` ; sidebar avec eyebrow « Pages » + item actif `bg-gray-100` ; cards radius ~16px, padding plus aéré.
 
 **Choix** :
+- A. Findings consolidés ici + reco V1 enrichies dans doc 02 (Performance Matrix, Domain Types, Volume prompts, Brand vs Source Visibility, Strongest/Weakest model).
+- B. Polish UI ciblé sans refonte identitaire : `<PageHeader title summary kpis />` réutilisable (câblé sur `/app/dashboard`), padding `<Card>` p-6, `type-stat` 2.25rem → 2rem, `<MetricBadge tone value />` pattern « | 86 ».
 
-A. **Documentation** : findings consolidés dans cette entrée (référentiel veille à jour). Reco V1 enrichies dans doc 02 (ajout Performance Matrix + Domain Types + Volume prompts + Brand vs Source Visibility + Strongest/Weakest model).
+**Hors périmètre** : Performance Matrix, filtres globaux pills, ring chart Domain Types, Volume DataForSEO, Query Fanouts = features V1 (doc 02), pas codées ici.
 
-B. **UI app polish ciblé** (sans refondre toute l'identité Airbnb-like, juste densifier) :
-- Nouveau composant `<PageHeader title summary kpis />` réutilisable, pattern Peec "name · summary inline + KPIs deltas à droite". Câblé d'abord sur `/app/dashboard`.
-- Ajustement padding `<Card>` (p-6 par défaut) et taille `type-stat` (réduire de 2.25rem → 2rem) pour mieux respirer.
-- Mini-badge coloré inline (`<MetricBadge tone value />`) pour encoder les valeurs métriques dans les tables — pattern "| 86" Peec.
-
-**Hors périmètre** : Performance Matrix, filtres globaux pills, ring chart Domain Types, Volume DataForSEO, Query Fanouts — sont des features V1, pas du polish. Ajoutés à doc 02 § V1 mais pas codés ici.
-
-**Conséquences attendues** :
-
-- V1 enrichie de 5 features priorisées (Performance Matrix, Domain Types, Volume, Brand vs Source gap, Strongest/Weakest model) → backlog clair pour mois 3-6.
-- Dashboard `/app/dashboard` visuellement plus dense et premium sans rupture identitaire.
-- Pattern `<PageHeader>` réutilisable extensible aux 8+ pages app restantes.
-
-**À revisiter** : 2026-07-15 — après 4 semaines de prod sur la nouvelle UI dashboard, mesurer si l'engagement (time on dashboard, scroll depth, retours commerciaux) justifie d'étendre le pattern à toutes les pages app.
+**À revisiter** : 2026-07-15 — après 4 semaines de prod, mesurer si l'engagement justifie d'étendre `<PageHeader>` aux 8+ pages app restantes.
 
 ---
 
 #### 2026-06-08 — Refonte funnel conversion : plan picker post-onboarding + sidebar Subscribe + trial 14j avec carte requise (lève la décision 2026-05-14)
 
-**Contexte** : Le funnel actuel est passif. Après signup magic-link et onboarding wizard, le user atterrit sur `/app/dashboard` avec `workspace.plan="trialing"` (quotas 0/0) et un seul signal de conversion : un `<UpgradeBanner>` discret en haut. Aucun moment "obligatoire" de décision. Le user peut rester en trialing indéfiniment, churn silencieux.
+**Contexte** : funnel passif — post-onboarding, `workspace.plan="trialing"` (quotas 0/0) et un seul signal : `<UpgradeBanner>` ignorable ; trialing indéfini possible. Inspiration Waalaxy (modal post-signup + sidebar Subscribe card).
 
-Inspiré par Waalaxy (screenshots Discover Waalaxy modal post-signup + sidebar Subscribe card), on veut transformer le funnel en pattern actif : modal plan picker dès la fin de l'onboarding + sidebar "Débloque toutes les features" persistante + emails de relance pendant le trial.
+**Options considérées** : A statu quo (conv ~5-15 %) / B trial SANS carte (~$3-15 LLM/user gaspillé — raison du refus 2026-05-14) / C trial AVEC carte requise (conv ~50-70 %, zéro risque LLM) / D picker sans trial.
 
-**Options considérées** :
+**Choix** : C — trial 14 j avec carte requise. Levée explicite de la condition « quand capital disponible » du 2026-05-14 : la carte est posée au checkout, l'user n'est pas facturé 14 j, Stripe bascule auto en active sauf annulation → zéro perte sèche LLM, rien à financer. Annuel pré-sélectionné (Save 20 %, `ANNUAL_DISCOUNT_PCT` existant) → ARPU/LTV ↑ dès J0. Picker post-onboarding + sidebar card = moment de décision actif (standard Vercel/Linear/Cal.com/Waalaxy).
 
-- A : Statu quo (banner passif + garantie 14j refund) — conv estimée 5-15 %, friction faible
-- B : Trial SANS carte + free quota auto-débloqué 14j — conv ~5-15 %, ~$3-15 LLM/user gaspillé (la raison du refus 2026-05-14)
-- C : Trial AVEC carte requise (Stripe `trial_period_days: 14`) — conv ~50-70 %, pas de risque LLM (la carte est posée)
-- D : Pas de trial du tout, juste le picker + sidebar card pour le paid direct — conv inconnue
+**Adaptations vs Waalaxy littéral** : pas de dark pattern loss-aversion (clash brand « Mamie » + la cible SEO FR le repère) ; ton hybride — sobre au signup (X classique, microcopy honnête), pushy en fin de trial (bandeau urgence J-2 + variant « expired » sans X mais lien « plus tard 24h »).
 
-**Choix** : C — trial 14j avec carte requise, levée explicite de la condition "quand capital disponible et conversion rate de la garantie 14j stabilisé" de la décision 2026-05-14.
-
-**Justification** :
-
-- Le doc 09 § 2026-05-14 a refusé le trial 7j SANS carte parce que ~$300/100 signups non convertis. Mais a explicitement laissé ouverte la porte au trial AVEC carte : *"Trial 7j avec carte requise (mode `trial_period_days` natif Stripe) à reconsidérer quand capital disponible et conversion rate de la garantie 14j stabilisé."*
-- Avec carte requise, **pas de risque LLM** : la carte est collectée au checkout, l'user n'est pas facturé pendant 14 j, puis Stripe bascule auto en active (sauf annulation explicite via portail). Si le user ne convertit pas, soit il annule explicitement, soit la carte est facturée. Zéro perte sèche LLM.
-- La condition "capital disponible" est ainsi neutralisée : avec card requise, il n'y a rien à débloquer en termes de tréso.
-- Le picker post-onboarding + sidebar card crée un **moment de décision actif** au lieu d'un signal passif. Standard SaaS (Vercel, Linear, Cal.com, Waalaxy).
-- Annuel pré-sélectionné (Save 20 %, badge cf. ANNUAL_DISCOUNT_PCT existant) → ARPU + LTV ↑ dès J0.
-
-**Adaptations vs Waalaxy littéral** :
-
-- **Pas de loss-aversion dark pattern** ("Are you sure you want to skip free trial?" + ✗ rouges + "like landing on Mars without oxygen") — clash brand "Mamie" + risque image LinkedIn FR (cible SEO freelances repère le dark pattern instantanément).
-- **Tone hybride** : sobre au signup (X classique, microcopy honnête), pushy en fin de trial (bandeau urgence J-2 + variant "expired" sans X mais avec lien "plus tard 24h"). Reste sobre = "ton essai se termine dans X jours, choisis maintenant" plutôt que "tu vas tout perdre".
-
-**Conséquences attendues** :
-
-- 1 moment de conversion actif au lieu d'un banner ignorable
-- Trial avec carte → conv ~50-70 % (vs garantie 14j actuelle estimée 5-15 %)
-- LTV ↑ grâce annuel pré-sélectionné
-- Funnel mesurable de bout en bout (events PostHog `plan_picker_opened`, `plan_picker_skipped`, `plan_picker_billing_cycle_toggled`, `plan_picker_trial_started`, `sidebar_subscribe_card_clicked`, `trial_started`, `trial_will_end_3d`, `trial_converted_paid`, `trial_canceled`, `trial_email_sent`)
-- 2 emails de relance pendant le trial (J-4 + J-1) + 1 email post-expiry envoyé immédiatement depuis le webhook
-- Préservation de la "garantie remboursement 14 jours" post-paiement (coexiste avec le trial, à expliciter sur /pricing FAQ V0+)
+**Conséquences attendues** : conv trial ~50-70 % vs 5-15 % ; funnel mesurable via events PostHog `plan_picker_opened`, `plan_picker_skipped`, `plan_picker_billing_cycle_toggled`, `plan_picker_trial_started`, `sidebar_subscribe_card_clicked`, `trial_started`, `trial_will_end_3d`, `trial_converted_paid`, `trial_canceled`, `trial_email_sent` ; 2 emails de relance (J-4 + J-1) + 1 post-expiry depuis le webhook ; garantie remboursement 14 j conservée post-paiement (à expliciter /pricing FAQ V0+).
 
 **À revisiter** :
-
-- Quand on aura **20+ checkout initiés** mesurés, comparer le taux trial-to-paid avec et sans annuel par défaut. Si annuel ne convertit pas plus, repasser à mensuel par défaut.
-- Si **< 50 % conversion trial→paid** observée, itérer le copy du picker et des emails J-4/J-1 (a/b test via `useFeatureFlag` déjà scaffold).
-- Setup manuel restant côté Stripe Dashboard : créer 3 nouveaux Prices annuels (`STRIPE_PRICE_*_ANNUAL`) à monthly × 12 × 0,8. Sans ces env vars, le picker fallback gracieusement sur le cycle mensuel (priceIdForPlan log un warn et utilise le price mensuel).
+- À 20+ checkouts initiés : comparer trial-to-paid avec/sans annuel par défaut ; repasser mensuel si l'annuel ne convertit pas plus.
+- Si < 50 % conversion trial→paid : itérer copy picker + emails J-4/J-1 (a/b via `useFeatureFlag` scaffold).
+- Setup Stripe restant : créer les 3 Prices annuels (`STRIPE_PRICE_SOLO_ANNUAL` / `STARTER` / `PRO`, monthly × 12 × 0,8). Sans ces env vars, fallback gracieux mensuel (warn).
 
 ---
 
 #### 2026-06-08 — Instrumentation PostHog exhaustive (autocapture + session replay + ~40 events custom) avant trafic
 
-**Contexte** : Le wizard PostHog (commit `e66dd07`) a câblé 15 events business critiques (login, onboarding, brand CRUD, run manuel, public audit, Stripe webhook), un reverse-proxy `/ingest` sur `mamie-geo.fr`, et un identify minimal sur l'app authentifiée. Mais : pas d'autocapture, pas de pageviews, pas de session replay, identify ne porte pas le contexte workspace (plan/role/brand_count), pas de Groups Analytics, et 0 event sur les CRUD app (prompts/competitors/audits), les CSV exports, le time-range dashboard, les quotas hits, l'upgrade banner. Avec lancement public imminent et trafic encore nul, c'est le moment de poser l'instrumentation complète pour que les funnels d'acquisition / activation / conversion / rétention collectent dès le 1er visiteur.
+**Contexte** : wizard initial (commit `e66dd07`) = 15 events business + reverse-proxy `/ingest` + identify minimal. Manquaient : autocapture, pageviews, session replay, identify enrichi (plan/role/brand_count), Groups Analytics, events CRUD/exports/quotas/banner. Lancement imminent + trafic nul = moment idéal.
 
-**Options considérées** :
+**Options considérées** : A MVP analytics (4 events critiques) / B couverture funnels (10 events) / C couverture exhaustive (~40 events + replay + Groups + scaffolding flags).
 
-- A : MVP analytics (autocapture + pageviews + identify enrichi + 4 events critiques manquants)
-- B : Couverture funnels (10 events sur les 4 funnels clés acquisition / activation / paid / lead magnet)
-- C : Couverture exhaustive (~40 events business, session replay, Groups Analytics, person/group properties, scaffolding feature flags)
+**Choix** : C. Justification : trafic nul = zéro pollution rétroactive ; coût marginal faible (helpers one-liner) ; replay + `person_profiles: "always"` = funnels reconstructibles rétroactivement ; PostHog EU + proxy first-party + masquage PII (`input[type=email|password]` + convention `[data-private]`) + mention `/legal/privacy` → opt-in implicite défensible sans banner cookie (approche Linear/Vercel, ePrivacy compliant).
 
-**Choix** : C — couverture exhaustive.
+**Conséquences** :
+- Funnel complet marketing → signup → onboarding → first_run_completed → first_metric_viewed → paid → churn ; Groups Analytics workspace (plan, mrr, brand_count, prompt_count) ; replays pour user research.
+- **Bug fix Stripe webhook** : `subscription_activated/canceled/payment_failed` utilisaient `ws.id` comme `distinctId` → merge personne cassé. Corrigé via `findWorkspaceOwnerUserId()`, `ws.id` déplacé dans `groups.workspace`.
+- Helpers réutilisables : `TrackedLinkButton`, `PageViewTracker`, `ArticleAnalytics` (scroll depth dédupliqué), `DashboardTracker`, `UpgradeBannerLink`, `useFeatureFlag(key)` client + `isFeatureEnabled()` serveur.
+- Webhook Brevo `/api/webhooks/brevo` scaffold (inerte tant que Brevo dashboard pas configuré) → permettra `weekly_recap_email_clicked`.
+- Privacy policy enrichie d'une section « Analytics produit » (PostHog sous-traitant EU, masquage PII, droit de retrait email).
 
-**Justification** : (1) trafic nul = aucun risque de pollution rétroactive ; (2) le coût marginal d'ajouter 30 events vs 4 est faible (helpers réutilisables `captureServerEvent` / `<TrackedLinkButton>` / `<PageViewTracker>` rendent chaque event en one-liner) ; (3) avec session replay activé et `person_profiles: "always"`, on peut littéralement regarder les 20 premiers visiteurs interagir et reconstruire des funnels rétroactivement même sans event custom ; (4) PostHog EU-hosted + reverse proxy first-party + masquage PII (`input[type=email|password]` + convention `[data-private]`) + mention claire dans `/legal/privacy` → opt-in implicite défensible juridiquement sans banner cookie (approche Linear / Vercel, ePrivacy compliant).
-
-**Conséquences attendues** :
-
-- Pipeline complet pour mesurer : funnel marketing → signup → onboarding → first_run_completed → first_metric_viewed → conversion paid → churn signals
-- Groups Analytics workspace (plan, mrr, brand_count, prompt_count) → cohort retention par tier de revenu
-- Session replays disponibles pour user research qualitative dès les premiers visiteurs
-- Privacy policy V0 enrichie d'une section "Analytics produit" (PostHog sous-traitant EU, masquage PII, droit de retrait via email)
-- Bug fix Stripe webhook : les events `subscription_activated/canceled/payment_failed` utilisaient `ws.id` comme `distinctId` → empêchait le merge personne PostHog. Corrigé : lookup `findWorkspaceOwnerUserId()` pour rattacher au profil utilisateur, `ws.id` mis dans `groups.workspace`.
-- Helpers introduits réutilisables pour V0+ : `TrackedLinkButton`, `PageViewTracker`, `ArticleAnalytics` (scroll depth dédupliqué), `DashboardTracker`, `UpgradeBannerLink`, scaffold `useFeatureFlag(key)` côté client + `isFeatureEnabled()` côté serveur pour futurs A/B tests pricing.
-- Webhook Brevo `/api/webhooks/brevo` scaffold (inerte tant que Brevo dashboard pas configuré pour POST l'event `click` → permettra `weekly_recap_email_clicked`).
-
-**À revisiter** : Quand on atteint 1000 events/jour, vérifier sur PostHog Insights que les funnels et cohorts sont exploitables. Si manque granularité → ajouter events. Si trop de bruit → consolider.
+**À revisiter** : à 1000 events/jour, vérifier l'exploitabilité des funnels/cohorts ; ajuster la granularité (ajouter ou consolider).
 
 ---
 
 #### 2026-06-03 — Pivot brand color terracotta `#C5532E` → bleu logo `#329CFF` + admin visuels LinkedIn
 
-**Contexte** : La couleur du logo Mamie GEO est un bleu cobalt `#329CFF` depuis la décision 2026-05-13. Mais le doc 10 et l'app utilisent encore le terracotta `#C5532E` comme `--color-accent` (badges, liens, hover, CTAs accent, gradient AI, gradient warm panel login, avatars workspace). Le double signal "bleu logo + accent terracotta" crée une dissonance brand : la marque dit "bleu" via son logo, le produit dit "orange" via ses accents.
+**Contexte** : logo bleu cobalt `#329CFF` (décision 2026-05-13) mais accent app/doc 10 encore terracotta `#C5532E` → dissonance brand (« la marque dit bleu, le produit dit orange »).
 
-À l'occasion de la création d'un générateur de visuels LinkedIn (post 2026-06-02 sur l'amplification de l'article geo-vs-seo), Max acte le pivot brand complet vers le bleu logo.
+**Options considérées** : A statu quo / B bleu sur visuels LinkedIn seulement / C sweep brand complet.
 
-**Options considérées** :
-- A) Ne rien changer (le terracotta reste l'accent) — rejeté, dissonance brand persistante.
-- B) Visuel LinkedIn uniquement en bleu, code stable terracotta — hybride, risque de figer la dissonance.
-- C) **Sweep brand complet** : `--color-accent` aliasé sur le bleu brand, gradients warm refactorés en gradients cool, gradient AI recomposé sans terracotta, emails et docs alignés.
+**Choix** : C — sweep complet.
+- Tokens `--color-accent*` **conservés comme aliases** pointant sur le bleu (pas de rename des 22 fichiers utilisant `text-accent` / `bg-accent-faint` / `tone="accent"`).
+- `card-hover-warm` et `gradient-warm-panel` gardent leur nom historique, valeurs basculées en dégradés bleus (pêche → bleu pâle ; panel login orange → bleu clair).
+- `--gradient-ai` : `terracotta → purple → bleu` devient `bleu → purple → pink`. Reste autorisé sur boutons actions IA ; interdit en hero/fond large maintenu (doc 10 nuancé).
+- 4 templates email mis à jour (audit-score-drop, payment-failed, technical-audit-report…). Doc 10 ~7 § mis à jour (archive « Direction A — éditorial chaud » intacte).
 
-**Choix** : Option C — sweep complet.
+**Livré dans le même PR** : page admin protégée `/app/admin/visuals` (guard email Max) + premier visuel tableau comparatif SEO vs GEO 1080×1350 portrait (post LinkedIn 2026-06-02) + bouton « Télécharger PNG » via `html-to-image` (dep ajoutée).
 
-**Justification** :
-- Cohérence brand univoque (logo + accents + CTAs alignés sur le bleu).
-- Les tokens `--color-accent*` sont **conservés comme aliases** (pointent sur le bleu) pour ne pas casser les 22 fichiers qui les référencent — pas de rename invasif des classes Tailwind `text-accent` / `bg-accent-faint` / `tone="accent"`.
-- Les classes `card-hover-warm` et `gradient-warm-panel` gardent leur nom historique (refactor lourd inutile) mais leurs valeurs basculent en bleu (le nom devient un héritage interne, pas un engagement visuel).
-- Le gradient AI passe de `terracotta → purple → bleu` à `bleu → purple → pink` (signature IA distinctive, cohérente avec les codes ChatGPT/Anthropic, ancrée sur le bleu brand).
-
-**Conséquences attendues** :
-- Tous les badges `tone="accent"`, status dots, charts AreaChart de référence, hover liens, etc., basculent en bleu automatiquement via les aliases CSS.
-- Les pages marketing avec `card-hover-warm` (tes-outils, how-it-works, pour-qui, sans-avec) voient leur halo de hover passer de pêche à bleu pâle.
-- Le panel login (`gradient-warm-panel`) bascule d'un dégradé orange chaud à un dégradé bleu clair.
-- 4 templates email mis à jour (audit-score-drop, payment-failed, technical-audit-report).
-- Doc 10 (design direction) : ~7 paragraphes mis à jour. La section archivée "Direction A — Éditorial chaud" qui mentionne le terracotta reste intacte (archive historique).
-- Doc 09 : cette entrée.
-- L'item "anti-pattern gradient violet/bleu en hero" du doc 10 est nuancé : le `--gradient-ai` brand reste autorisé sur boutons d'actions IA (audit, suggérer prompts), mais l'interdit en hero/fond large reste.
-
-**Livré dans le même PR** :
-- Page admin protégée `/app/admin/visuals` (guard sur rôle/email Max — réutilisée pour future production de visuels marketing).
-- Premier visuel : tableau comparatif SEO vs GEO 1080×1350 portrait pour post LinkedIn du 2026-06-02.
-- Bouton "Télécharger PNG" via `html-to-image` (dep ajoutée).
-
-**À revisiter** : si les retours sur le bleu trop saturé reviennent (le `#329CFF` est cobalt vif), envisager `#1d7ee5` (`--color-primary-dim`) comme nouvelle valeur de `--color-accent` pour adoucir.
+**À revisiter** : si retours « bleu trop saturé », envisager `#1d7ee5` (`--color-primary-dim`) comme valeur d'accent.
 
 #### 2026-06-05 (soir) — Raffinement DA carrousels v2 : fond blanc + bleu brand primaire, marguerite retirée
 
-**Contexte** : Le carrousel SEO vs GEO livré en début d'après-midi (commit `c3b92e3`, DA persona « Mamie » v1) est validé par Max sur le principe (« c'est pas trop mal, je vais garder ça »), mais le retour à chaud après visualisation pointe 5 axes d'amélioration pour les **prochains** carrousels :
+**Contexte** : carrousel SEO vs GEO v1 (commit `c3b92e3`, persona Mamie) validé sur le principe, mais 5 retours Max pour les **prochains** carrousels : (1) corps trop petits en vignette feed mobile, (2) contrastes insuffisants, (3) préférer fond blanc classique, (4) bleu brand `#329CFF` en couleur principale, (5) pas de fleur (marguerite kitsch). Synthèse : « simplifier et rendre ça plus pro ».
 
-1. Certaines tailles corps trop petites (illisibles en vignette LinkedIn feed mobile)
-2. Contrastes de couleurs pas toujours suffisants
-3. Préférence pour **fond blanc classique** plutôt que crème/terracotta plein
-4. Bleu brand `#329CFF` à utiliser comme couleur principale (pas juste accent)
-5. **Pas de fleur** (marguerite trop kitsch)
+**Décision** : ne pas refaire le carrousel v1 (gardé en historique) ; raffiner `linkedindesign.md` en **v2** pour tous les prochains visuels :
+- § 2 Palette : blanc `#FFFFFF` fond par défaut (~80 % des slides), crème/sable occasionnels (1-2 slides max), **bleu brand promu primaire visible sur chaque slide** (logo + 1 accent typo + CTA + dots), terracotta/miel/sauge/rose en accents secondaires jamais en fond plein (sauf 1 slide CTA exceptionnelle). Contraste AAA visé, AA minimum strict, blanc sur bleu brand uniquement en titres ≥ 24 px bold.
+- § 3 Typo : minima relevés (corps ≥ 32 px, corps large 40-48, label 24-28, hook 120-150) + test vignette ~135×168 px obligatoire avant publication.
+- § 4 Formes : **marguerite-signature retirée**, plus de festons/stickers (washi-tape, tampon, fleurs vintage). Identité = logo bleu + palette restreinte + Fraunces. Accents autorisés : flèches `→`, coches `✓✗` en pills, pastilles rondes/icônes Lucide.
+- § 8 : 4 techniques (surligneur miel, mot en bleu, italique Fraunces, pill-étiquette) ; souligné manuscrit retiré, Caveat en usage rare.
+- § 11/12 : anti-patterns ajoutés (marguerite/stickers, Caveat déco, corps < 32 px, blanc sur miel/sauge) + prompt réutilisable refondu.
 
-Synthèse Max : « simplifier et rendre ça plus pro ».
+**Code conservé** : carrousel v1 en l'état ; primitives `<Daisy>` / `<Highlight>` / `<BrandHeader>` / `<SlideShell>` restent dans `_primitives/` — `<Daisy>` à ne plus instancier (supprimer quand le carrousel v1 sera refait/archivé) ; thème `white` manquant à ajouter dans `tokens.ts` au prochain carrousel.
 
-**Décision** : ne **pas** refaire le carrousel actuel (kept as is, c'est la v1 historique du système), mais raffiner `linkedindesign.md` en **v2** pour cadrer tous les prochains visuels.
+**Risque** : se rapprocher trop de la DA app (blanc + bleu + Inter) — Fraunces + accents chauds ponctuels doivent rester perceptibles pour ne pas dissoudre le dual-DA.
 
-**Changements documentés dans linkedindesign.md v2** :
-
-- **§ 2 Palette** : pivot vers `Blanc #FFFFFF` en fond par défaut (~80 % des slides). Crème/sable rétrogradés à fond occasionnel (1-2 slides max par carrousel pour rythmer). **Bleu brand `#329CFF` promu couleur primaire visible sur chaque slide** (logo + 1 accent typo + CTA + dots). Terracotta/miel/sauge/rose deviennent accents secondaires — **pas en fond plein** sauf 1 slide CTA finale exceptionnelle. Règles de contraste durcies (viser AAA, AA minimum strict, blanc sur bleu brand uniquement en titres ≥ 24 px bold).
-
-- **§ 3 Typographie** : tailles min relevées (corps 32+ vs 28-32 v1, corps large 40-48 vs 36-40, label 24-28 vs 22-24, hook 120-150 vs 110-140). Règle dure ajoutée : tout texte non-footer ≥ 32 px, test obligatoire en vignette ~135×168 px avant publication.
-
-- **§ 4 Système de formes** : **marguerite-signature retirée**. Plus de bord festonné, plus de stickers (washi-tape, tampon « FAIT MAISON », fleurs vintage). L'identité passe désormais par 3 éléments : **logo bleu brand + palette restreinte + typo Fraunces**. Seuls accents géométriques autorisés : flèches `→`, coches `✓✗` dans pills, pastilles rondes pour chiffres/icônes Lucide.
-
-- **§ 8 Mise en valeur** : 4 techniques v2 (surligneur miel, mot en bleu brand, italique Fraunces, pill-étiquette). Souligné manuscrit retiré (kitsch). Caveat demoted en usage rare significatif.
-
-- **§ 11 Anti-patterns** : ajouts « marguerite/stickers en général », « Caveat en déco gratuite », « texte corps < 32 px », « texte blanc sur miel/sauge ».
-
-- **§ 12 Prompt réutilisable** : refondu pour refléter v2 (fond blanc défaut, bleu brand primaire, pas de marguerite/stickers).
-
-**Code conservé en l'état** :
-- Le carrousel SEO vs GEO actuel reste sur le système v1 (fond terracotta + crème, marguerite déco, surligneur miel). Pas de refonte demandée.
-- Les primitives `<Daisy>`, `<Highlight>`, `<BrandHeader>`, `<SlideShell>` restent dans `src/components/admin/visuals/_primitives/`. `<Daisy>` ne devrait plus être instanciée dans les **nouveaux** slides ; à supprimer définitivement le jour où le carrousel SEO vs GEO sera lui-même refait/archivé.
-- Le `<SlideShell>` actuel propose 5 thèmes de fond (cream/sand/terracotta/honey/sage) — il manque un thème `white` pour la v2. À ajouter dans `tokens.ts` au prochain carrousel.
-
-**Conséquences** :
-- Les nouveaux carrousels seront plus sobres, plus lisibles, plus pro.
-- Le brand bleu `#329CFF` devient le marqueur visuel central des carrousels (au lieu du terracotta v1).
-- Le ton « Mamie » chaleureux survit principalement via la **typo serif Fraunces** (qui reste signature) et les **accents miel/terracotta ponctuels** (pas en fond).
-- Risque : se rapprocher trop de la DA app (blanc + bleu brand + Inter). Garder un œil sur la distinction — Fraunces + accents chauds ponctuels doivent rester perceptibles pour ne pas dissoudre le dual-DA en mono-DA déguisé.
-
-**À revisiter** :
-- Premier carrousel v2 : observer si la lisibilité en vignette est effectivement meilleure.
-- Si après 3-4 carrousels v2 la frontière app/marketing devient floue, ré-évaluer (renforcer un accent visuel propre aux carrousels, ou assumer la fusion progressive).
+**À revisiter** : lisibilité vignette du premier carrousel v2 ; si après 3-4 carrousels la frontière app/marketing devient floue, ré-évaluer (renforcer un accent propre ou assumer la fusion).
 
 #### 2026-06-05 — Refonte DA carrousels LinkedIn → persona « Mamie » (chaude, marguerite, Fraunces) — dual-DA acté
 
-**Contexte** : Le système carrousel acté la veille (« Unified-like » : crème `#fff4d6` + vagues bleu brand + Inter 800 + brand pill ink) restait fonctionnel mais trop proche d'un SaaS générique. Max rédige `geo-project/linkedindesign.md`, brief complet de génération visuelle pour les carrousels LinkedIn ancré sur la persona « Mamie » (chaud, manuscrit, motif marguerite, serif). Demande : refaire entièrement les visuels en s'appuyant sur ce brief.
+**Contexte** : Max rédige `geo-project/linkedindesign.md` (persona « Mamie » : chaud, manuscrit, marguerite, serif) et demande la refonte complète des visuels. Tension apparente avec le pivot bleu 2026-06-03 et doc 10 (Inter unique, pas d'italique).
 
-**Tension à résoudre** : la persona Mamie (terracotta + serif + manuscrit) entre apparemment en collision avec la décision brand bleu logo du 2026-06-03 (« sweep terracotta → bleu ») et avec doc 10 qui interdit l'italique et impose Inter unique.
+**Options considérées** : A étendre la persona Mamie à tout le site/app (rejeté, casse la cohérence SaaS) / B ignorer le brief (rejeté) / C dual-DA.
 
-**Résolution** : **dual-DA assumé**.
-- **App `(app)/*` + site marketing** (home, pricing, blog, login) : reste en direction Airbnb-like minimaliste actée 2026-05-07/05-11 — Inter unique, blanc + nuances de gris, bleu brand `#329CFF` accent ponctuel. **Aucun changement.** Le SaaS doit rester froid, data-driven, premium-startup.
-- **Carrousels LinkedIn + visuels marketing externes** (OG images V1+, blog covers V1+) : DA persona « Mamie » selon `linkedindesign.md` — palette chaude (crème/sable/encre/terracotta/miel/sauge/rose), typo Fraunces + Hanken + Caveat, motif marguerite, surligneur miel, gabarits Lego.
+**Choix** : C — **dual-DA assumé** :
+- App `(app)/*` + site marketing : Airbnb-like minimaliste inchangé (Inter, blanc + gris, bleu `#329CFF` accent ponctuel). **Aucun changement.**
+- Carrousels LinkedIn + visuels marketing externes (OG V1+, blog covers V1+) : persona Mamie selon `linkedindesign.md` — palette chaude (crème/sable/encre/terracotta/miel/sauge/rose), typo Fraunces + Hanken + Caveat, marguerite, surligneur miel.
+- **Bleu brand `#329CFF` reste primaire dans les carrousels** (confirmé Max) : logo sur fonds clairs, 1 accent typo par slide, dots pagination. Remplace le « bleu pervenche `#A9C0D6` » du brief original.
 
-Le **bleu brand `#329CFF` reste couleur primaire** dans les carrousels (confirmation explicite Max 2026-06-05 « garde bien le bleu actuel comme couleur primaire ») : présent sur le logo (sur fonds clairs cream/sand/sage), sur 1 accent typo par slide (mot clé GEO en bleu), et sur les dots de pagination active. Remplace le « bleu pervenche `#A9C0D6` » pâle proposé dans linkedindesign.md original.
+**Justification** : carrousels = canal d'acquisition LinkedIn (chaleur différenciante vs Profound/Peec/Mint) ; app = outil de mesure (sobriété, crédibilité technique) ; le bleu commun fait le fil conducteur.
 
-**Options considérées** :
-- A) Étendre la persona Mamie à tout le site et l'app — rejeté, casse la cohérence SaaS premium en 24h alors que le pivot bleu logo date d'avant-hier.
-- B) Ignorer linkedindesign.md, garder le système Unified-like de la veille — rejeté, Max a explicitement demandé la refonte.
-- C) **Dual-DA** : app froide + carrousels chauds, isolés par périmètre clair — choisi.
+**Livré** : `linkedindesign.md` annoté (scope carrousels-only) ; Fraunces (600/700/900) + Hanken Grotesk (400/500/700) + Caveat (400/700) via `next/font/google` dans `src/app/(app)/app/admin/layout.tsx` uniquement ; refonte `src/components/admin/visuals/_primitives/` : `tokens.ts` (palette Mamie 8 couleurs + brandBlue + 5 thèmes cream/sand/terracotta/honey/sage), `daisy.tsx`, `highlight.tsx`, `brand-header.tsx`, `slide-shell.tsx` (1080×1350, marges 80px, header/footer auto) ; suppression `brand-pill.tsx`, `slide-number.tsx`, `waves-decoration.tsx` ; refonte des 3 slides SEO vs GEO (cover terracotta + hook Fraunces 118pt, comparaison crème 2 colonnes, CTA crème + Caveat).
 
-**Justification du dual-DA** :
-- Les carrousels sont un canal d'**acquisition LinkedIn** (cible PME marketing FR, ton humain) — la chaleur « Mamie » désamorce le jargon GEO et différencie radicalement de Profound/Peec/Mint.
-- L'app SaaS reste un **outil de mesure** — sobriété, lisibilité des charts, neutralité des données. Mélanger les deux serait perdre la crédibilité technique.
-- Le bleu brand commun (logo + accent signature) sert de **fil conducteur visuel** entre les deux DA — l'utilisateur qui passe du carrousel LinkedIn à l'app reconnaît l'identité sans choc.
+**Conséquences** : tokens `--color-cream*` du 2026-06-04 inutiles côté carrousels — restent dans globals.css, à nettoyer si toujours unused dans 1 mois. `linkedindesign.md` = source de vérité des futurs carrousels.
 
-**Livré dans ce PR** :
-- `linkedindesign.md` annoté (scope explicite carrousels-only au top, ref vers cette entrée doc 09).
-- Polices Fraunces (600/700/900) + Hanken Grotesk (400/500/700) + Caveat (400/700) chargées via `next/font/google` dans `src/app/(app)/app/admin/layout.tsx` uniquement (self-host → html-to-image embed OK).
-- Refonte complète `src/components/admin/visuals/_primitives/` :
-  - `tokens.ts` : palette Mamie (8 couleurs + brandBlue `#329CFF` préservé) + 5 thèmes de fond (cream/sand/terracotta/honey/sage)
-  - `daisy.tsx` : motif-signature marguerite 6 pétales (couleurs et opacité configurables)
-  - `highlight.tsx` : surligneur miel pour 1 mot clé du titre
-  - `brand-header.tsx` : logo Mamie GEO en haut à gauche (~36px, logo bleu brand par défaut, swap cream sur fond terracotta)
-  - `slide-shell.tsx` : canvas 1080×1350 avec marges 80px, header + footer auto (pagination numeric ou dots festonnés), pas de waves
-- Suppression : `brand-pill.tsx`, `slide-number.tsx`, `waves-decoration.tsx` (vestiges du système Unified-like).
-- Refonte des 3 slides SEO vs GEO :
-  - **Cover** : fond terracotta + hook Fraunces Black 118pt « 40 % … posent leur question à [une IA] » avec surligneur miel + sous-titre Fraunces italic + marguerite déco bottom-right opacité 13 %
-  - **Comparaison** : fond crème + headline « SEO et GEO ne se font pas la guerre » (mot GEO en bleu brand) + 2 colonnes ronded (sable pour SEO, terracotta pour GEO) avec 4 axes condensés + pastille honey ~80 % en bas
-  - **CTA** : fond crème + hook « Teste ta visibilité IA en 60 secondes » + sticker manuscrit Caveat « ↘ c'est juste là » + card terracotta avec URL outil + 3 perks (5 IA / 60s / 0 €)
-- Doc 10 : section carousel Unified-like 2026-06-04 archivée avec pointeur vers linkedindesign.md.
-
-**Conséquences attendues** :
-- Les visuels LinkedIn auront une signature instantanément reconnaissable (terracotta + marguerite + Fraunces) qui sort des templates SaaS génériques.
-- Le brand bleu reste lisible en tant que primaire (logo, accent typo, pagination).
-- Les tokens `--color-cream*` ajoutés à `globals.css` la veille (2026-06-04) deviennent **inutiles** côté carrousels (palette Mamie inlined dans `tokens.ts`). Ils restent en place dans globals.css pour ne pas casser une éventuelle utilisation future en marketing externe (OG, blog cover) — à nettoyer dans un PR séparé si toujours unused dans 1 mois.
-- Le brief `linkedindesign.md` devient la source de vérité pour tous les futurs carrousels Mamie GEO.
-
-**À revisiter** :
-- Si Cowork génère des slides automatiques (futur), aligner son prompt sur linkedindesign.md.
-- Si la persona Mamie tire les conversions LinkedIn vers le haut, envisager un module marketing externe (blog cover, OG images dynamiques) qui hérite de la palette. Pas avant 30 jours de data.
-- Si le dual-DA crée de la confusion utilisateur (« je clique sur le CTA terracotta du carrousel et j'arrive sur un site bleu froid »), repenser le pont visuel — page d'atterrissage post-carrousel avec une touche terracotta éphémère ? Pas avant d'avoir le signal.
+**À revisiter** : aligner toute génération auto sur linkedindesign.md ; module marketing externe (OG, covers) si la persona tire les conversions (pas avant 30 j de data) ; pont visuel si confusion carrousel chaud → site froid.
 
 #### 2026-06-04 — Système design carousels LinkedIn (style « Unified ») + crème chaude 3e ton marketing
 
-**Contexte** : Le visuel SEO vs GEO livré la veille (cf. entrée 2026-06-03) restait fonctionnel mais pas signature. Max envoie une référence Pinterest « Unified™ » (carousels LinkedIn pastel jaune/lavande/blanc, big bold typo, vagues organiques) et demande d'adapter ce langage à Mamie GEO pour cet asset et les futurs carousels LinkedIn.
+> Superseded dès le 2026-06-05 par la persona « Mamie » (cf. entrées ci-dessus). Conservé en historique.
 
-**Options considérées** :
-- A) Copie directe de la palette Unified (jaune saturé + lavande + rose) — rejeté, s'éloigne du brand bleu logo acté la veille.
-- B) Bleu brand strict (bleu + ink + blanc + grays) — discipliné mais perd la variation slide-à-slide qui fait le charme « Unified ».
-- C) **Bleu brand + ink + crème chaude `#fff4d6`** comme 3e ton marketing — apporte la chaleur Unified sans contredire la décision brand de la veille.
+**Contexte** : référence Pinterest « Unified™ » (pastel jaune/lavande, big bold typo, vagues organiques) à adapter à Mamie GEO.
 
-**Choix** : Option C.
+**Options** : A copie palette Unified / B bleu brand strict / C bleu + ink + crème chaude `#fff4d6` (retenu).
 
-**Justification** :
-- La crème chaude `#fff4d6` est suffisamment éloignée du jaune saturé Unified pour ne pas être perçue comme « copie » et suffisamment proche d'une teinte beige/butter pour apporter la chaleur recherchée.
-- Distinction nette **app vs carousels** : les tokens `--color-cream*` ne sont **PAS** à utiliser dans l'app `(app)/*`. L'app garde sa direction Airbnb-like minimaliste (blanc + gris + bleu brand accent). La crème est réservée aux visuels externes (carousels LinkedIn, OG images, blog covers V1+).
-- Système carousel : un visuel = `<BrandPill>` (top-left, ink rond avec logo bleu inset) + `<SlideNumber>` (top-right, `01 / N`) + headline bold massif + paper-note card pour le contenu + `<WavesDecoration>` organique en filigrane bleu pâle aux coins.
+**Choix** : C. Tokens ajoutés à `globals.css` (réservés visuels externes, jamais dans l'app) : `--color-cream: #fff4d6`, `--color-cream-soft: #fffbed`, `--color-cream-strong: #fcd34d`. Refonte `SeoVsGeoVisual` style Unified (fond crème, vagues bleu pâle, brand pill ink, slide number `01 / 01`, headline 88pt, paper-note card, pastille ink 80 %). 3 primitives co-localisées (`BrandPill`, `SlideNumber`, `WavesDecoration`) — supprimées le 2026-06-05.
 
-**Tokens ajoutés** :
-- `--color-cream: #fff4d6` (background principal carousel)
-- `--color-cream-soft: #fffbed` (variante très light, pour secondary slides)
-- `--color-cream-strong: #fcd34d` (saturé, pour accents/badges sur slides crème)
-
-**Livré dans ce PR** :
-- 3 tokens dans `globals.css` (section dédiée « 3e ton marketing »).
-- Refonte `SeoVsGeoVisual` en style Unified : fond crème, vagues décoratives bleu pâle (top-right + bottom-left), brand pill ink + cercle bleu logo, slide number `01 / 01`, headline 88pt « SEO vs GEO. », paper-note card blanche contenant les 6 lignes avec rangées alternées (gris pour SEO, bleu soft pour GEO), punchline 80 % en pastille noire ink, footer minimal mamie-geo.fr.
-- 3 primitives carousel (`BrandPill`, `SlideNumber`, `WavesDecoration`) co-localisées dans `seo-vs-geo-visual.tsx` — à splitter dans `src/components/admin/visuals/_primitives/` quand 3+ visuels les partagent.
-
-**Conséquences attendues** :
-- Le visuel LinkedIn du 2026-06-02 a maintenant une signature distinctive (vagues bleu pâle + brand pill ink + crème chaude) qui le rend reconnaissable même hors-contexte Mamie GEO.
-- Les prochains carousels LinkedIn pourront reprendre le même langage : variation slide-à-slide via combinaison des 4 fonds (crème / blanc / bleu brand / ink) avec les primitives partagées.
-- L'app reste inchangée — discipline maintenue.
-
-**À revisiter** : si les premiers carousels révèlent que la crème seule manque de pep, envisager d'ajouter `--color-lavender` `#e0e7ff` comme 4e ton marketing (jamais dans l'app).
+**À revisiter** : obsolète (système remplacé le 2026-06-05).
 
 #### 2026-05-26 — Polish "belle V0" pré-lancement + CTA prix dans le bouton + stats honnêtes
 
-**Contexte** : Avant hard launch public, audit comparatif vs getmint.ai (concurrent FR direct). Trois piliers conversion manquaient à la home : preuve produit visible (que des mockups CSS, zéro screenshot dashboard réel), garanties affichées (la garantie 14j enterrée en FAQ pricing, jamais surfacée hero), différenciation concurrentielle prouvée (aucune page comparative dédiée).
+**Contexte** : audit comparatif vs getmint.ai (concurrent FR direct) avant hard launch. 3 piliers conversion manquants : preuve produit visible (zéro screenshot réel), garanties surfacées (garantie 14j enterrée en FAQ), différenciation concurrentielle prouvée (pas de page comparative).
 
 **Décisions actées** :
+1. **CTA hero avec prix** (pattern Linear/Vercel) : « Démarrer — 9,99 €/mois » + microcopy « Garantie remboursement 14 jours · Sans engagement · Hébergé EU ». Idem `<FinalCTA>` et `/vs/profound`.
+2. **Pas de testimonials inventés** (rejet pattern Mint « 200+ marques ») : `<ProofStrip>` avec 3 stats factuelles (« 5 IA trackées · 30+ checks gratuits · 10 min pour le 1ᵉʳ rapport »). Bascule `<Testimonials>` à 3+ vrais clients nommés.
+3. **TrustStrip après PourquoiMaintenant** (le `mb-[-200px]` du `<HeroDataShowcase>` interdit la place sous le hero — coupe signature préservée).
+4. **Mobile hero data showcase** : variante `md:hidden` 2 cards (Score + Évolution) — avant : invisible sur 60 %+ du trafic.
+5. **Page `/vs/profound`** : landing comparative recyclant 80 % de l'article blog. SEO « alternative Profound » FR (zéro compétition). `/vs/mint` et `/vs/peec` en P1.
+6. **`<ProductTour>` préparé en attente** + script `pnpm seed:demo` (marque fictive « La Maison Verte », 30 j de `citation_metrics_daily` déterministes). Non monté tant que les `.webp` n'existent pas dans `public/marketing/dashboard/`.
+7. **Footer nettoyé** : retrait lien mort `/docs`, colonne « Comparatifs », bloc trust RGPD (« Hébergement EU · RGPD natif · DPA disponible · 0 tracker publicitaire »).
 
-1. **CTA hero : prix dans le bouton** (pattern Linear/Vercel). Avant : "Voir les plans →". Après : **"Démarrer — 9,99 €/mois"** + microcopy "Garantie remboursement 14 jours · Sans engagement · Hébergé EU". Idem sur le nouveau `<FinalCTA>` avant footer et sur la page `/vs/profound`. Justification : anti-friction maximum, l'utilisateur sait à quoi s'attendre, la garantie 14j fait disparaître le risque psychologique sur 9,99 €/mois.
+**Reste à faire « belle V0 »** : captures dashboard + activation ProductTour ; décision export CSV (livré 2026-06-08) ; `/vs/mint` `/vs/peec` ; section intégrations & exports (P1).
 
-2. **Pas de testimonials inventés** (rejet du pattern Mint "200+ marques nous font confiance"). À la place : composant `<ProofStrip>` avec 3 stats produit factuelles ("5 IA trackées · 30+ checks gratuits · 10 min pour le 1ᵉʳ rapport"). Justification : intégrité > preuve sociale faible. Bascule en `<Testimonials>` quand 3+ vrais clients pilote acceptent d'apparaître nommément.
-
-3. **TrustStrip placé après PourquoiMaintenant** (et non sous Hero comme initialement prévu). Le `mb-[-200px]` du `<HeroDataShowcase>` desktop fait plonger les 4 cartes tiltées dans la section noire ; mettre TrustStrip (fond tinted gris) entre Hero et PourquoiMaintenant aurait cassé cette coupe signature. Trade-off accepté : trust apparaît juste après le 1ᵉʳ chapitre noir du narratif, toujours haut dans le scroll.
-
-4. **Mobile hero data showcase ajouté** : variante `md:hidden` avec 2 cards simplifiées (Score + Évolution) dans `<HeroDataShowcase>`. Avant : `hidden md:flex` → invisible sur 60%+ du trafic. Pas de tilt ni hover-lift sur mobile.
-
-5. **Page `/vs/profound` créée** : landing comparative single-route recyclant 80% du contenu de l'article blog `mamie-geo-vs-profound.mdx`. Table 3 colonnes (Critère / Profound / Mamie GEO) + cards face-à-face + FAQ + CTA. SEO cible "alternative Profound" en FR (zéro compétition). Mêmes templates `/vs/mint` et `/vs/peec` à venir en P1.
-
-6. **Section product tour préparée mais en attente** : composant `<ProductTour>` créé + script `pnpm seed:demo` (marque fictive "La Maison Verte" + 30j de citation_metrics_daily déterministes). Captures réelles à produire par Max — composant pas inclus dans `page.tsx` tant que les `.webp` n'existent pas dans `public/marketing/dashboard/`.
-
-7. **Footer nettoyé** : retrait du lien mort `/docs`, ajout colonne "Comparatifs" (`/vs/profound`), ajout bloc trust RGPD (icône bouclier + "Hébergement EU · RGPD natif · DPA disponible · 0 tracker publicitaire") au-dessus du copyright.
-
-**Conséquences attendues** : conversion home améliorée par 2-3 leviers cumulatifs (prix transparent, garantie immédiate, démo visuelle bientôt). SEO "alternative Profound FR" capturé. Crédibilité compliance vs concurrents US renforcée.
-
-**Reste à faire pour la "belle V0" complète** : captures dashboard + activation `<ProductTour>` ; décision export CSV (implémenter endpoint `/api/export/runs.csv` ou afficher "Bientôt" dans la future section intégrations P1.3) ; pages comparatives `/vs/mint` et `/vs/peec` (P1) ; section intégrations & exports (P1).
-
-**À revisiter** : sous 3 mois après lancement public, ou dès 3 vrais clients pilote acceptent un testimonial → bascule `<ProofStrip>` en `<Testimonials>` côté hero.
+**À revisiter** : sous 3 mois post-lancement, ou dès 3 vrais clients pilote → bascule `<ProofStrip>` en `<Testimonials>`.
 
 ---
 
 #### 2026-05-22 — Phase C livrée + polish UX V0+ + retrait pattern signature (rollback 2026-05-18)
 
-**Contexte** : Période intense du 2026-05-18 au 2026-05-22 — clôture de la Phase C (multi-LLM + Stripe + emails) + démarrage V0+ (polish UX + items veille). Plusieurs décisions structurantes prises rapidement, à formaliser ensemble.
+**Contexte** : clôture Phase C (2026-05-18 → 22, multi-LLM + Stripe + emails) + démarrage V0+. Décisions groupées :
 
-**Décisions actées** :
+1. **Multi-LLM livré** (PR1-5, 2026-05-18) : Anthropic Claude Haiku 4.5 ; Mistral `mistral-large-latest` (PR2, sans web_search natif — Mistral Agents API plus tard) ; OpenAI `gpt-4o-mini` + web_search Responses API (PR3) ; Google `gemini-2.5-flash` + grounding Search (PR4) ; Perplexity `sonar` (PR5, code prêt, activation dès `PERPLEXITY_API_KEY` — crédit min $50). Source de vérité : `getConfiguredLLMs()` + flags `IMPLEMENTED_LLMS` dans `src/lib/llm/index.ts` ; le scheduler auto-détecte.
+2. **PR6 KPI dashboard** (2026-05-20) : coût USD retiré côté client (donnée technique sans valeur métier) ; 3 stats élargies Claude-only → agrégat tous-LLMs (bug d'héritage Phase A) ; 4e stat **Part de voix** = `brand / (brand + Σ concurrents) × 100`, fonction pure `computePartDeVoix()` dans `src/lib/metrics/part-de-voix.ts` (8 tests).
+3. **AppTopBar horizontale pattern Vercel** (2026-05-20) : workspace + brand pill en top bar sticky ; `<BrandFavicon>` via Google s2 favicons + fallback (carré ink + initiale) ; sidebar = logo + nav + user menu.
+4. **Pattern signature blue RETIRÉ** (rollback de la décision 2026-05-18) : 4 itérations login non concluantes → fausse bonne idée. Suppression radicale : `<PatternBlock>`, classes `.bg-pattern*`, assets `pattern.svg` (×2), 3 usages site (hero, audit-teaser, login) + 2 usages emails. Identité = logo + primary + CornerFrame + favicon top bar. Le terracotta `--color-accent` reste actif comme avant 2026-05-18.
+5. **Background app gris `#fafafa`** : `body` = `var(--color-surface)` ; cards/sidebar/topbar/tables restent `bg-white` → émergent, effet « premium SaaS » Linear/Vercel. Règle doc 10 reformulée : « cards toujours blanches sur fond gris ».
+6. **Refonte audit by severity** : `/app/audits/[id]` groupé critical/warning/info (au lieu de fail/warn/pass) via `<ChecksBySeverity>` — 3 sections dépliables fusionnées (trigger + items dans la même card), critical+warning ouverts, info fermé. Bulle notif rouge sidebar « Audits techniques » si checks `critical+fail` non résolus > 0 (dernier audit par URL owned).
+7. **Brand creation depuis BrandSwitcher** (2026-05-20) : server action `createBrand` dans `src/lib/brands/actions.ts` (auth + rôle owner/admin + quota). Champ `brands` dans `PlanQuotas` : Solo/Starter 1, Pro 3, Agency 10, Enterprise ∞. Dialog 2 modes (form ou CTA upgrade).
+8. **Newsletter blog Brevo** (2026-05-20) : form `/blog` + helpers `subscribeContactToBlogList` / `sendNewArticleNewsletter` dans `src/lib/email.ts` ; endpoint `/api/blog/notify-publish` (protégé `CRON_SECRET`) appelé par le launchd publication-mamie-geo.sh → broadcast à la liste `BREVO_BLOG_LIST_ID`.
+9. **Em dashes `—` retirés côté site** (2026-05-20) : sed `s/ —/,/g` sur src/app, src/components, src/content, src/lib/email. Placeholders `"—"` (no value) préservés.
 
-1. **Multi-LLM livré** (PR1-5 2026-05-18). Tous les 5 providers en place via `getConfiguredLLMs()` :
-   - Anthropic Claude Haiku 4.5 (Phase A, déjà en place)
-   - Mistral `mistral-large-latest` (PR2, sans web_search natif — à upgrader vers Mistral Agents API plus tard)
-   - OpenAI `gpt-4o-mini` + web_search Responses API (PR3)
-   - Google `gemini-2.5-flash` + grounding Search (PR4)
-   - Perplexity `sonar` (PR5, code prêt, activation à chaud dès `PERPLEXITY_API_KEY` settée — crédit min $50 en attente)
-   - Source de vérité : `src/lib/llm/index.ts` `getConfiguredLLMs()` + `IMPLEMENTED_LLMS` flags.
-   - Scheduler `/api/cron/schedule-runs` auto-détecte → enqueue runs pour les LLMs configurés uniquement.
+**Conséquences** : doc 10 (§ pattern + règle fond) et doc 03 (quotas `brands`) mis à jour ; Phase C marquée livrée dans CLAUDE.md § 9.
 
-2. **PR6 KPI dashboard repensé** (2026-05-20). Le coût USD affiché aux 4 endroits client était de la donnée technique sans valeur métier (l'user paie un abonnement Stripe en €). Retiré partout côté client. Les 3 stats principales (Score, Marque citée, Top concurrent) étaient toujours Claude-only (héritage Phase A) → élargies à l'agrégat tous-LLMs. 4e stat = nouveau KPI **Part de voix** (terme glossaire officiel, jamais calculé jusque-là). Formule `brand / (brand + Σ concurrents) × 100`, fonction pure `computePartDeVoix()` dans `src/lib/metrics/part-de-voix.ts` (8 tests).
-
-3. **AppTopBar horizontale pattern Vercel** (2026-05-20). Sortie du workspace + brand pill de la sidebar verticale vers une top bar sticky horizontale. Composant `<BrandFavicon>` charge l'icône du domaine via Google s2 favicons API avec fallback (carré ink + initiale). Sidebar simplifiée : logo + nav + user menu uniquement.
-
-4. **Pattern signature blue RETIRÉ** (rollback de la décision 2026-05-18). Après 4 itérations sur `/login` (xl primary 100%, gradient bleu radial, ink coin opacity 8%, primary full-width 5%), aucune n'a convaincu sur l'équilibre lisibilité × signature. Conclusion : faux bonne idée. Suppression radicale : composant `<PatternBlock>`, classes CSS `.bg-pattern*`, assets `/public/pattern.svg` + `/src/assets/pattern.svg`, 3 usages site (hero, audit-teaser, login) + 2 usages emails (welcome-paid bande top, weekly-recap pattern-band). L'identité visuelle s'appuie désormais sur logo + couleur primary + CornerFrame + favicon brand dans la top bar. Le terracotta `--color-accent` reste actif sur badges/CTAs comme avant 2026-05-18.
-
-5. **Background app gris `#fafafa`** (2026-05-22). `body` utilise `var(--color-surface)` (#fafafa) au lieu de `--color-bg` (#fff). Cards / sidebar / topbar / tables restent en `bg-white` → émergent visuellement, sensation "premium SaaS" type Linear/Vercel. Aligné avec doc 10 mais corrige la règle « fond toujours blanc » qui devient « cards toujours blanches sur fond gris ».
-
-6. **Refonte audit by severity** (2026-05-22). `/app/audits/[id]` groupe les checks par **sévérité** (critical/warning/info) au lieu de status (fail/warn/pass). Composant `<ChecksBySeverity>` : 3 sections dépliables FUSIONNÉES (le trigger header et les items checks vivent dans la même card, pas de cassure visuelle entre "Critique 3" et les 3 cards critiques). Critical + warning ouverts par défaut, info fermé. Bulle de notification rouge sur l'item sidebar "Audits techniques" si checks `critical+fail` non résolus > 0 (somme sur dernier audit par URL owned).
-
-7. **Brand creation depuis BrandSwitcher** (2026-05-20). Server action `createBrand` dans `src/lib/brands/actions.ts` avec auth + rôle owner/admin + quota check. Nouveau champ `brands` dans `PlanQuotas` : Solo/Starter 1, Pro 3, Agency 10, Enterprise illimité. Dialog UI à 2 modes (form ou CTA upgrade).
-
-8. **Newsletter blog Brevo** (2026-05-20). Form inscription sur `/blog` + helpers `subscribeContactToBlogList` / `sendNewArticleNewsletter` dans `src/lib/email.ts`. Endpoint `/api/blog/notify-publish` (protégé `CRON_SECRET`) appelé par le launchd publication-mamie-geo.sh après chaque push d'article → broadcast Brevo à la liste `BREVO_BLOG_LIST_ID`.
-
-9. **Em dashes `—` retirés côté site** (2026-05-20). Sed `s/ —/,/g` global sur src/app, src/components, src/content, src/lib/email. Placeholders `"—"` (no value) préservés.
-
-**Conséquences** :
-- doc 10 § Pattern signature à retirer (devenu obsolète).
-- doc 10 règle « fond toujours blanc » à reformuler : « cards toujours blanches sur fond gris #fafafa ».
-- doc 03 § Quotas par plan à updater avec le champ `brands`.
-- Phase C marquée livrée dans CLAUDE.md § 9, V0+ entamé.
-
-**À revisiter** : si traction user / feedback signale un manque de signature visuelle distinctive après le retrait pattern, ouvrir un nouveau ticket design (mais pas de damier — autre piste type ligne diagonale, gradient subtil, ou pictogramme).
+**À revisiter** : si manque de signature visuelle remonté après le retrait pattern, nouveau ticket design (pas de damier — ligne diagonale, gradient subtil, ou pictogramme).
 
 #### 2026-05-18 — Pattern signature blue (damier diagonal) remplace progressivement le terracotta
 
-> ⚠️ **ROLLBACK 2026-05-22** : cette décision a été annulée 4 jours après. Voir entrée 2026-05-22 ci-dessus pour la décision finale (suppression complète du pattern). Conservé en historique.
+> ⚠️ **ROLLBACK 2026-05-22** : décision annulée 4 jours après — voir § 2026-05-22 (suppression complète du pattern). Conservé en historique.
 
-**Contexte** : Max a livré une banner LinkedIn qui utilise un motif damier diagonal 80×80 en bleu primary sur fond blanc, occupant ~20 % du côté gauche. Le rendu est mémorable et distinctif. Il a déposé le pattern dans `src/assets/pattern.svg` et demande qu'il devienne un élément du design system : remplacer le dégradé orange du login, le poser sur 1-2 sections de la home, l'ajouter aux templates email.
-
-**Tension à résoudre** : doc 10 spécifiait *« fond toujours blanc, jamais teinté »* + *« accent terracotta #C5532E seule signature chaleur »*. Ajouter un second élément signature (bleu géométrique) doit être cadré pour ne pas créer un design system schizophrène.
-
-**Options considérées** :
-
-- A : Pattern = **signature graphique additionnelle**. Terracotta reste l'accent ponctuel (badges, asterisque login). Bleu data viz inchangé. Le pattern s'utilise sur 1-2 placements par page max.
-- B : Pattern **remplace progressivement le terracotta**. Le terracotta n'est pas retiré du code en V0 mais ses usages migrent PR par PR vers du pattern bleu ou du neutre. À terme, la marque est portée par le pattern bleu, pas par l'accent orange. ← **retenu**
-- C : Pattern décoratif sans statut signature (touche sur 1-2 endroits sans devenir un élément récurrent).
-
-**Choix (livré 2026-05-18)** :
-
-1. **Pattern asset** : `/public/pattern.svg` (servi statiquement Next), fill baké en `#329cff` pour les usages `<img>` et emails. Pour les usages CSS où on veut tinter, classe utilitaire `.bg-pattern` qui projette la couleur via `mask-image` (seul l'alpha du SVG compte).
-2. **Composants** : `<PatternBlock corner tone size />` dans `src/components/ui/pattern-block.tsx` pour les blocs carrés qui débordent en signature aux coins ; `<PatternBand position tone height tile />` pour les bandes horizontales (headers email, séparateurs section).
-3. **Règles d'usage** (cf. doc 10) : 1-2 placements par page max, toujours coin ou bande délimitée jamais fond plein, tone soft 30 % quand cohabite avec du texte/mockup et tone full en signature isolée, tile 56-104 px côté UI et 24-56 px côté emails.
-4. **Migration progressive** : `--color-accent` (`#C5532E`) reste actif dans `globals.css`. Les usages migrés en V0 : panel login (gradient warm → pattern), asterisque login (terracotta → primary), home Hero (ajout pattern soft top-right), home AuditTeaser (blob terracotta → pattern soft bottom-left), email weekly-recap (header pattern band), email welcome-paid (header pattern band). Les autres usages (badges `tone="accent"`, glow ai, terracotta dans dropdowns) restent en place et seront migrés au fil des PR de refonte.
-5. **Doc** : `geo-project/10-design-direction.md` enrichi d'une section « Pattern signature » qui codifie les règles. CLAUDE.md snapshot mis à jour.
-
-**Justification** :
-
-- Un logo + un wordmark ne suffisent pas à créer une signature mémorable de marque SaaS. Le damier bleu, vu une fois en grand (login, email), devient associatif et reconnaissable hors contexte — c'est ce que la banner LinkedIn de Max démontre déjà.
-- Le terracotta `#C5532E` jouait ce rôle dans doc 10 mais sans forme — il était facile à confondre avec n'importe quel SaaS « accent orange ». Un motif géométrique est intrinsèquement plus distinctif qu'une couleur d'accent.
-- Le bleu primary `#329cff` était déjà la couleur du logo et de la data viz. Le pattern le démultiplie en signature graphique cohérente.
-- Garder le terracotta en transition évite une refonte big-bang et permet de calibrer le dosage du pattern au fur et à mesure.
-
-**Conséquences attendues** :
-
-- Identité visuelle plus distinctive en post-checkout (premier email reçu = premier contact avec la marque hors site).
-- Le login devient un point de signature fort plutôt qu'un panneau marketing tiède (le gradient orange n'apportait pas grand-chose narratif).
-- Risque : si on charge le pattern partout au lieu de respecter la règle « 1-2 par page », le motif devient bruit. À surveiller en revue UI.
-
-**À revisiter** : 2026-06-15 — après 2-3 PR de refonte, décider si le terracotta est entièrement retiré du design system (et passer `--color-accent` en alias de neutre) ou si on garde un dual signature pattern bleu + accent terracotta sur les badges marginaux.
+**Résumé** : banner LinkedIn de Max avec damier diagonal 80×80 bleu primary → promu signature graphique destinée à remplacer progressivement le terracotta (option B retenue parmi : A signature additionnelle / B remplacement progressif / C décoratif sans statut). Livré : `/public/pattern.svg` (fill `#329cff`), classe `.bg-pattern` (tint via `mask-image`), composants `<PatternBlock corner tone size />` + `<PatternBand>`, règles d'usage doc 10 (1-2 placements/page max, jamais fond plein), migration login + hero + audit-teaser + 2 emails. Justification d'époque : un motif géométrique est plus distinctif qu'une couleur d'accent. Tout supprimé le 2026-05-22.
 
 #### 2026-05-17 — Sprint 6 PR B — app /app/audits Premium + charts dashboard vivants
 
-**Contexte** : PR A (2026-05-16) a promu l'audit technique en home + blog. PR B livre la version premium dans l'app : audit on-demand depuis `/app/audits/new`, historique en DB, audit hebdo automatique sur la brand, alerte email si chute ≥ 10 pts, et matrice comparative avec les concurrents (différenciateur Pro/Agency). En parallèle, suppression des EmptyState dashboard pour rendre les charts visibles dès J0 (la première impression du dashboard était mortifère pour un nouveau user qui n'avait pas encore de data).
+**Contexte** : suite PR A — version premium de l'audit dans l'app (on-demand, historique DB, cron hebdo, alerte email, matrice concurrents) + suppression des EmptyState dashboard (première impression mortifère à J0).
 
-**Options considérées (audit-app)** :
+**Options (audit-app)** : A one-shot full premium (retenu) / B lean MVP puis itérations / C on-demand sans historique DB.
 
-- A : One-shot full premium (table DB + 4 pages + worker + cron + email + comparaison concurrents) en un seul push ← **retenu**
-- B : Lean MVP d'abord (juste on-demand + list + detail), puis cron/email/compare dans une PR ultérieure
-- C : Audit on-demand côté server action + cron, mais pas d'historique DB (juste cache mémoire éphémère)
+**Choix (audit-app, livré)** :
+1. Table `technical_audits` (workspaceId, brandId nullable, url, isCompetitor, scoreGlobal, subScores jsonb, checks jsonb, htmlSizeKb, httpStatus, psiUnavailable, fetchedAt, createdAt) ; index `(workspaceId, createdAt)` + `(workspaceId, url)`.
+2. Table `audit_counters` (workspaceId, periodStart YYYY-MM-01, auditsCount, competitorAuditsCount), PK composite, mois calendaire UTC ; compteurs séparés owned/concurrents ; `incrementAuditCounter()` UPSERT atomique avec pré-check quota.
+3. Quotas `PlanQuotas` étendus : `audits`/mois + `comparisonCompetitors` (batch max) : Solo 5/0, Starter 30/3, Pro 100/10, Agency ∞/∞ ; trialing/past_due/expired/canceled 0/0.
+4. Server action `runWorkspaceAudit` synchrone (~10 s, marge Vercel 60 s) — quota incrémenté AVANT `runAudit()` (anti-spam URLs invalides).
+5. `runCompetitorsBatch` async → enqueue N jobs `audit_workspace_url` (10 × 10 s dépasserait Vercel). Solo bloqué (0).
+6. Worker `audit_workspace_url` (nouveau `QUEUE_KIND`), idempotence `audit_workspace_url:{workspaceId}:{url}:{date}` ; email score-drop seulement si `notifyOnDrop=true` ET delta ≥ -10 pts (réservé au cron — un audit ad hoc n'envoie pas d'email redondant).
+7. 4 pages : `/app/audits` (list groupée par URL + delta), `/app/audits/new` (pré-rempli `brand.domain` + checkbox batch Starter+), `/app/audits/[id]` (recos `getRecommendation()`), `/app/audits/compare` (matrice URL × catégorie SEO/GEO/A11y/Perf ; Solo verrouillé → upsell).
+8. Cron `/api/cron/schedule-audits` lundi 05:00 UTC : 1 audit `brand.domain` par workspace actif non hard-capé, `notifyOnDrop=true`, quota check.
+9. Email `audit-score-drop` (pattern weekly-recap, owned only).
+10. Sidebar « Audits techniques » (icône `Wrench`), entre Concurrents et Runs.
 
-**Choix (audit-app, livré 2026-05-17)** :
+**Choix (charts vivants)** : TrendSection toujours rendu avec scaffold N jours à `value: 0` + overlay backdrop blur si `fullTrend.length < SPARSE_THRESHOLD (3)` (« Données en cours de collecte ») ; BreakdownBars : 5 LLMs visibles en permanence (0 = opacity 0.18) ; RecentRunsTable **garde** son EmptyState (une table vide ne communique rien). **Pas de mock data démo** : honnêteté > effet wow.
 
-1. **Table `technical_audits`** (workspaceId, brandId nullable, url, isCompetitor, scoreGlobal, subScores jsonb, checks jsonb, htmlSizeKb, httpStatus, psiUnavailable, fetchedAt, createdAt). Index `(workspaceId, createdAt)` + `(workspaceId, url)`. `brandId` nullable pour les audits concurrents qui ne pointent pas vers `brands.id`.
-2. **Table `audit_counters`** (workspaceId, periodStart YYYY-MM-01, auditsCount, competitorAuditsCount) avec PK composite — fenêtre mois calendaire UTC. Compteurs séparés pour ne pas qu'un batch concurrents consomme tout le quota mensuel. Helper `incrementAuditCounter()` UPSERT atomique avec pré-check du quota fini.
-3. **Quotas par plan** étendus dans `PlanQuotas` : `audits` (mensuel) + `comparisonCompetitors` (batch max). Solo 5/0, Starter 30/3, Pro 100/10, Agency ∞/∞. Trial/past_due/expired/canceled : 0/0.
-4. **Server action `runWorkspaceAudit`** synchrone — quota check + increment AVANT `runAudit()` (5-15s) + insert DB. Tient dans Vercel functions 60s. L'incrément consomme une "tentative" même si l'audit échoue (anti-spam URLs invalides).
-5. **Server action `runCompetitorsBatch`** async — enqueue N jobs `audit_workspace_url` (1 par concurrent avec domaine). Limité à `quotas.comparisonCompetitors`. Solo bloqué (0).
-6. **Worker `audit_workspace_url`** (nouveau queue kind ajouté à `QUEUE_KIND`). Idempotence `audit_workspace_url:{workspaceId}:{url}:{date}` — lance la même URL le même jour est dédupliqué. Si `notifyOnDrop=true` ET delta ≥ -10 pts vs précédent → envoie l'email score-drop aux membres.
-7. **4 pages app** : `/app/audits` (list groupée par URL + delta vs précédent + badge nb d'audits), `/app/audits/new` (form URL pré-rempli sur `brand.domain` + checkbox batch concurrents pour Starter+), `/app/audits/[id]` (détail full avec recos `getRecommendation()`, organisé par failures / warnings / passed), `/app/audits/compare` (matrice URL × catégorie SEO/GEO/A11y/Perf — owned highlighted + concurrents en dessous). Solo voit `/compare` en mode verrouillé (upsell vers Starter).
-8. **Cron `/api/cron/schedule-audits`** lundi 05:00 UTC. Pour chaque workspace actif non hard-capé, enqueue 1 audit sur `brand.domain` avec `notifyOnDrop=true`. Quota check inclus (skippe si workspace a déjà épuisé son quota mensuel via on-demand).
-9. **Email `audit-score-drop`** : template HTML inline branded, table avec score précédent/actuel + URL, CTA vers `/app/audits`. Reprend le pattern `weekly-recap.ts`. Seulement sur owned, jamais sur concurrents.
-10. **Sidebar entry** « Audits techniques » + icon `Wrench` (lucide). Position : après Concurrents, avant Runs.
+**Justifications clés** : `brandId` nullable évite une table polymorphique pour les audits concurrents ; quotas séparés pour qu'un batch concurrents ne cannibalise pas le mensuel owned ; coût LLM nul (l'audit n'utilise pas de LLM), PSI gratuit < 25K/jour.
 
-**Choix (charts vivants, livré 2026-05-17)** :
+**Conséquences** : différenciation vs Profound/Otterly (plus qu'un tracker LLM). KPI à suivre : ratio audits/runs par workspace (objectif > 0.5), click-through dashboard → audits.
 
-1. **TrendSection** : suppression de l'EmptyState « pas assez d'historique ». Toujours rendu via `<LineChart>` avec un scaffold de N jours (7/30/90 selon range) où les jours sans data ont `value: 0` pour chaque LLM. Visuellement la ligne « monte du sol » à mesure que les runs arrivent. Overlay flottant central avec backdrop blur quand `fullTrend.length < SPARSE_THRESHOLD (3)` : « Données en cours de collecte — N jours sur 3 requis ». Fallback série `["claude"]` (Phase A) si server renvoie `series=[]`.
-2. **BreakdownBars** dashboard : suppression de l'EmptyState « aucun score aujourd'hui ». Les 5 LLMs trackés restent visibles en permanence avec couleur + label + valeur (0 si pas de run). Le composant `<BreakdownBars>` gère déjà gracefully `value === 0` (opacity 0.18 + hauteur min 8 %). Sous-titre change quand tout est à 0 (« Snapshot du jour — en attente du premier run »).
-3. **RecentRunsTable** : EmptyState **conservé** (une table de 0 lignes est triste, le texte est plus utile que des cases vides).
+**Hors scope (à revisiter)** : audit d'URLs internes multiples ; diff structurel entre 2 audits (`checks` jsonb) ; export PDF.
 
-**Justifications** :
+**À revisiter** : 2026-06-15 — retirer ou non le test visibilité IA humain (`/outils/test-visibilite-ia`).
 
-- **Audits synchrones côté on-demand** : `runAudit()` prend ~10s en moyenne (fetch + parse + PSI parallèle). Vercel functions 60s laisse une marge confortable. Pas d'async pour une expérience instantanée — l'utilisateur clique « Lancer », voit un spinner, et arrive sur le rapport. Le batch concurrents (10 URLs × 10s = 100s) DOIT être async via queue, sinon dépassement Vercel.
-- **`brandId` nullable pour les concurrents** : un concurrent n'est pas dans `brands` (table dédiée à la marque trackée). On garde `brandId` pour les audits owned, et `null` pour les concurrents qui ont `competitors.domain` comme source. Avantage : pas besoin d'une table polymorphique ou de discriminator.
-- **Quotas séparés owned vs concurrents** : sinon un batch de 10 concurrents consommerait 10/30 du quota mensuel d'un Starter, ne laissant que 20 audits owned pour le mois. Avec compteur séparé, Starter a 30 audits owned + 3 concurrents par batch — quota concurrent moins strict car valeur business plus faible (snapshot ponctuel vs suivi continu).
-- **Variant `notifyOnDrop`** : on ne veut PAS d'email d'alerte si l'utilisateur lance lui-même un audit ad hoc et constate une chute (il est déjà sur la page, l'email serait redondant). L'email est réservé aux audits programmés (cron hebdo) où la chute serait passée inaperçue. Implementé via flag dans le payload `audit_workspace_url`.
-- **Charts vivants — pas de mock data** : malgré la tentation de pré-remplir avec un dataset « démo » pour l'effet wow, on a refusé. Mensonge → confusion. Baseline 0 + overlay « collecte » est honnête : l'utilisateur sait que ses propres données vont remplir la courbe, et la grille temporelle communique la promesse (tracking continu) sans tromper.
-- **RecentRunsTable garde son EmptyState** : à l'inverse des charts, une table avec 0 ligne et juste les en-têtes ne communique rien d'utile — le texte explicatif (« le cron tourne à 06:00 UTC ») est plus actionable.
-
-**Conséquences attendues** :
-
-- L'app gagne un onglet « Audits techniques » qui rend tangible la promesse « plus qu'un tracker LLM » de Mamie GEO — différencie de Profound/Otterly qui ne font que du tracking IA.
-- KPI à suivre : ratio `audits / runs` par workspace actif (objectif > 0.5 = chaque workspace audite au moins une fois par mois). Click-through `/app/dashboard` → `/app/audits` (mesure adoption de la nouvelle feature).
-- Risque de coût LLM : zéro (audit n'utilise pas de LLM). Risque de coût Google PSI : un appel par audit, gratuit jusqu'à 25K/jour. Risque de coût Vercel functions : un audit ~10s = 10× plus cher qu'un run LLM en compute time, mais on-demand donc rare en pratique.
-- Le cron hebdo lundi 5h UTC tournera demain (2026-05-18) sur les workspaces actifs avec brand.domain — premier batch d'audits programmés.
-
-**Hors scope PR B (à revisiter)** :
-
-- ❌ Audit d'URLs internes multiples (page produit, blog post) — V0 audite uniquement la home. Évolution simple : on garde `audit_counters` séparé par URL si on veut tracker tout un site.
-- ❌ Diff visuel entre 2 audits (« qu'est-ce qui a changé ? ») — pour l'instant on voit juste le delta de score global ; la liste des checks qui ont changé exigerait un diff structurel des `checks` jsonb, à coder plus tard.
-- ❌ Export PDF du rapport — la page `/app/audits/[id]` est déjà print-friendly mais pas d'export bouton.
-
-**À revisiter** : 2026-06-15 — décider si on retire le test visibilité IA humain (`/outils/test-visibilite-ia`) maintenant que l'audit-app Premium tient la promesse principale.
-
-**Fichiers touchés PR B** :
-
-- DB : `src/db/schema.ts` (+ `technicalAudits` + `auditCounters` + queue kind), `src/db/migrations/0002_classy_joshua_kane.sql`
-- Lib : `src/lib/plans/quotas.ts` (+ champs `audits` + `comparisonCompetitors`), `src/lib/audits/counters.ts` (NOUVEAU), `src/lib/queue/types.ts` (+ `AuditWorkspaceUrlPayload`), `src/lib/email/templates/audit-score-drop.ts` (NOUVEAU)
-- Worker : `src/workers/audit-workspace-url.ts` + `src/workers/audit-workspace-url-payload.ts` (NOUVEAUX), `src/app/api/cron/dispatch/route.ts` (+ case `audit_workspace_url`), `src/app/api/cron/schedule-audits/route.ts` (NOUVEAU)
-- Pages : `src/app/(app)/app/(with-nav)/audits/{page,actions}.ts`, `audits/new/{page,new-audit-form}.tsx`, `audits/[id]/page.tsx`, `audits/compare/{page,competitors-batch-button}.tsx` (TOUS NOUVEAUX)
-- UI : `src/app/(app)/app-sidebar.tsx` (+ entry « Audits techniques » + icon `Wrench`)
-- Cron config : `vercel.json` (+ schedule `0 5 * * 1`)
-
-**Fichiers touchés charts vivants** :
-
-- `src/app/(app)/app/(with-nav)/dashboard/page.tsx` (suppr empty state BreakdownBars)
-- `src/app/(app)/app/(with-nav)/dashboard/trend-section.tsx` (scaffold baseline + overlay « collecte »)
+**Fichiers** : `src/db/schema.ts` (+`technicalAudits` +`auditCounters` + queue kind) + migration `0002_classy_joshua_kane.sql` ; `src/lib/plans/quotas.ts`, `src/lib/audits/counters.ts` (NOUVEAU), `src/lib/queue/types.ts` (+`AuditWorkspaceUrlPayload`), `src/lib/email/templates/audit-score-drop.ts` (NOUVEAU) ; `src/workers/audit-workspace-url{,-payload}.ts` (NOUVEAUX), `/api/cron/dispatch` (+case), `/api/cron/schedule-audits` (NOUVEAU) ; pages `audits/{page,actions}`, `audits/new/`, `audits/[id]/`, `audits/compare/` ; `app-sidebar.tsx` ; `vercel.json` (`0 5 * * 1`) ; dashboard `page.tsx` + `trend-section.tsx`.
 
 ---
 
 #### 2026-05-16 — Sprint 6 PR A — promotion audit technique sur la home + blog
 
-**Contexte** : audit ROI marketing fait après Sprint 5. Deux lead magnets en prod : `/outils/test-visibilite-ia` (humain, ~24 h ouvrées, ~$0,20 LLM/audit, capacité limitée par mon temps) et `/outils/audit-technique` (instantané, pas d'appel LLM, coût marginal 0 €, scalable à l'infini). Le second est massivement sous-promu : pas de mention en hero, pas de section home dédiée, listé après le test IA dans le footer. Le test visibilité IA est mis en avant partout alors qu'il scale mal.
+**Contexte** : 2 lead magnets en prod — `/outils/test-visibilite-ia` (humain, ~24 h ouvrées, ~$0,20 LLM/audit, capacité limitée) vs `/outils/audit-technique` (instantané, 0 € LLM, scalable à l'infini) massivement sous-promu. Objectif : audit technique = lead magnet #1, test IA exposé en second.
 
-**Objectif** : faire de l'audit technique le lead magnet #1 — il est ownable (peu de concurrents font de l'audit GEO-spécifique), gratuit-forever sans contrainte coût, et c'est la première action concrète à recommander à quelqu'un qui découvre le GEO. Le test visibilité IA reste exposé mais en second.
+**Options** : A gros PR home + app audits (~2000 lignes) / B 2 PRs séquentielles (retenu — PR A ~400 lignes, PR B sur base déployée) / C mention discrète footer.
 
-**Options considérées** :
+**Choix PR A (livrée)** :
+1. Hero : secondary → `<LinkButton variant="ai">` « Audit technique gratuit », lien texte discret vers le test IA dessous, sous-titre « 30+ checks SEO + GEO en 10 secondes, sans inscription ».
+2. Section `<AuditTeaser />` après `<TesConcurrentsPasToi />` (le problème → la première solution actionnable) : copy + `<MockupAudit />` client animé (un mockup React reflète le design system courant, un screenshot vieillit).
+3. Footer outils réordonné (audit technique premier).
+4. Variant CTA blog `audit-technique` ajouté à `BLOG_CTAS` (`src/lib/blog/schemas.ts`) + `CTA_CONFIG` (`article-cta.tsx`) — pour futurs articles « optimiser pour les LLM » ; `audit-gratuit` (humain) reste pour les généralistes, les deux coexistent.
 
-- A : Refonte home large + promo audit + app /app/audits Premium dans un seul gros PR (~2000 lignes, risque merge)
-- B : 2 PRs séquentielles — (PR A) promotion audit dans home + blog seule ; (PR B) app /app/audits Premium séparée ← **retenu**
-- C : Juste ajouter une mention discrète dans le footer + un bouton ghost en hero (suffisant à court terme mais ne capitalise pas)
+**Hors scope** : refonte hero large, réorganisation home profonde, refonte blog, app audits (PR B, cf. § 2026-05-17). Pas d'A/B test V0 (trafic insuffisant — bascule franche + mesure 14 j).
 
-**Choix PR A (livrée 2026-05-16)** :
+**Conséquences attendues** : conversion vers audit-technique ×3-5 ; baisse mécanique ~30-50 % vers test-visibilite-ia (acceptable, goulot). KPI : page views audit-technique ÷ home, CTR CTA hero `ai`, complétion form.
 
-1. **Hero refait** : primary inchangé (« Voir les plans »), secondary remplacé par `<LinkButton variant="ai">` « Audit technique gratuit » → `/outils/audit-technique`. Lien texte discret vers `/outils/test-visibilite-ia` en dessous. Sous-titre mis à jour avec « 30+ checks SEO + GEO en 10 secondes, sans inscription ».
-2. **Nouvelle section `<AuditTeaser />`** insérée dans la home **après `<TesConcurrentsPasToi />` et avant `<LLMBadges />`** — logique narrative : (a) « les IA citent les concurrents pas toi » pose le problème, (b) AuditTeaser pose la première solution actionnable et gratuite. Layout 2 colonnes : copy à gauche (eyebrow « Première action concrète » + titre + mini-stats « 30+ checks · 10 sec · 0 € forever · sans inscription » + CTA `variant="ai"`) + mockup à droite (`<MockupAudit />` client component qui simule un rapport : score global 67/100, 4 sub-scores SEO/GEO/A11y/Perf avec progress bars animées au mount, issue critique FAQPage JSON-LD avec recommandation).
-3. **Footer outils réordonné** : « Audit technique site » remonte en première position, « Test visibilité IA » en seconde — l'outil le plus scalable doit être premier.
-4. **Nouveau variant CTA blog `audit-technique`** ajouté à `BLOG_CTAS` (`src/lib/blog/schemas.ts`) + entry correspondante dans `CTA_CONFIG` (`src/components/blog/article-cta.tsx`). Pas appliqué aux 3 articles existants — sera utilisé sur les **futurs articles** orientés « comment optimiser pour les LLM » (où l'audit technique est la première action recommandée). On garde `audit-gratuit` (humain) pour les articles généralistes GEO ; les deux variants coexistent.
+**À revisiter** : 2026-06-15 — garder les 2 lead magnets ou retirer le test IA humain.
 
-**Hors scope PR A (refusé)** :
-
-- ❌ Refonte hero copy/animations large — reporté, on attend feedback users
-- ❌ Réorganisation profonde des sections home (juste 1 ajout après TesConcurrentsPasToi)
-- ❌ Refonte du blog au-delà du nouveau variant CTA
-- ❌ App version audit (sera PR B)
-
-**Justification** :
-
-- **PR séquentielles plutôt que big bang** : PR A est ~400 lignes, mergeable en 24 h. PR B (app /app/audits Premium, ~1500 lignes estimées) part sur une base déjà déployée et bénéficie du feedback users sur la nouvelle home avant qu'on investisse dans la version premium.
-- **Variant `ai` pour les CTAs audit-technique** : cohérent avec le langage déjà posé (le variant `ai` injecte Sparkles + gradient terracotta→purple→blue). Visuellement, le CTA hero a la même signature que le CTA fin d'article + le CTA AuditTeaser → l'utilisateur identifie « outil » sans avoir besoin de lire.
-- **Mockup animé plutôt que screenshot statique** : un screenshot vieillit (UI bouge), un mockup en composant React reflète le design system courant. Les progress bars qui s'animent au mount cassent la froideur d'une capture figée et donnent envie de cliquer pour voir « son » rapport.
-- **Pas d'A/B test V0** : trafic insuffisant pour conclure. On bascule franchement, on mesure conversion sur 14 jours, on ajuste si besoin.
-
-**Conséquences attendues** :
-
-- Conversion `landing → /outils/audit-technique` montera (estimation : ×3-5 vs niveau actuel quasi nul) car le CTA passe d'un lien footer obscur à un emplacement hero + une section home dédiée.
-- Inversement, conversion vers `/outils/test-visibilite-ia` baissera mécaniquement de ~30-50 %. Acceptable : c'était un goulot d'étranglement de toute façon (capacité limitée par mon temps).
-- L'audit technique reste sans inscription en V0 (pas de gate email pour l'instant — cf. décision Sprint 3) ; ce sera revu dans la PR B Premium si la conversion organique nous fournit déjà assez de leads.
-- KPI à suivre dans `09 § Suivi KPI mensuel` : ratio `/outils/audit-technique` page views ÷ home views, taux click-through CTA hero variant `ai`, taux complétion form audit-technique.
-
-**À revisiter** : 2026-06-15 — décider si on garde les 2 lead magnets ou si on retire le test IA humain (devenu redondant avec l'app version audit Premium PR B).
-
-**Fichiers touchés PR A** :
-
-- `src/app/(marketing)/_sections/hero.tsx` (modif CTA secondaire + sous-titre)
-- `src/app/(marketing)/_sections/audit-teaser.tsx` (NOUVEAU — server component)
-- `src/app/(marketing)/_sections/mockups/mockup-audit.tsx` (NOUVEAU — client, progress bars animées)
-- `src/app/(marketing)/page.tsx` (wire `<AuditTeaser />` après `<TesConcurrentsPasToi />`)
-- `src/app/(marketing)/_sections/marketing-footer.tsx` (réordonner outils)
-- `src/lib/blog/schemas.ts` (ajouter `"audit-technique"` à `BLOG_CTAS`)
-- `src/components/blog/article-cta.tsx` (ajouter entry au `CTA_CONFIG`)
-- `CLAUDE.md` § 9 + ce doc
-
-**Plan PR B (résumé — détail à écrire au moment de la PR)** :
-
-- Table `technical_audits` + migration Drizzle
-- Pages `/app/audits` (list grouped by URL + sparkline 30j), `/app/audits/new` (form + checkbox concurrent), `/app/audits/[id]` (rapport full réutilisant `<AuditResults>`), `/app/audits/compare` (matrice URL × catégorie)
-- Server actions `runWorkspaceAudit` / `runCompetitorsBatch` / `listAudits` / `getAuditDetail` / `deleteAudit` + quota check
-- Worker `audit_workspace_url` async + cron `/api/cron/schedule-audits` (lundi 5h UTC)
-- Email alerte `audit-score-drop` (delta < -10 pts vs audit précédent)
-- Sidebar entry « Audits techniques »
-- Quotas : Solo 5/mois, Starter 30, Pro 100, Agency illimité ; comparaison concurrents Starter ✅ 3 / Pro ✅ 10 / Agency ✅ illimité ; Solo ❌
+**Fichiers** : `_sections/hero.tsx`, `_sections/audit-teaser.tsx` (NOUVEAU), `_sections/mockups/mockup-audit.tsx` (NOUVEAU), `(marketing)/page.tsx`, `marketing-footer.tsx`, `src/lib/blog/schemas.ts`, `src/components/blog/article-cta.tsx`.
 
 ---
 
 #### 2026-05-16 — Sprint 2 blog : pipeline content-driven + SEO/GEO complet
 
-**Contexte** : le blog avait 3 articles MDX bloqués sur une architecture manuelle — registry TS hardcodé dans `src/app/(blog)/blog/articles-registry.ts`, pas de frontmatter YAML, pas d'OG image dynamique, pas de JSON-LD, pas de sitemap. Impossible de "copier-coller un markdown" pour ajouter un article, et les LLM/Google ne pouvaient pas tirer parti des FAQ structured data qui boostent le ranking GEO.
+**Contexte** : blog sur registry TS hardcodé (`articles-registry.ts`), pas de frontmatter/OG/JSON-LD/sitemap. Objectif : Max colle un `.mdx`, le système fait le reste.
 
-**Objectif** : transformer le blog en machine SEO/GEO autonome — Max colle un fichier `src/content/blog/{slug}.mdx` avec frontmatter YAML, le système fait le reste (meta, OG, JSON-LD, CTA contextuel, articles liés, sitemap).
-
-**Options considérées** :
-
-- A : Garder l'architecture manuelle + ajouter juste sitemap/OG (~400 lignes mais ne scale pas)
-- B : Refacto complet content-driven + SEO/GEO complet (~1400 lignes, scale à 100+ articles) ← **retenu**
-- C : Migrer vers contentlayer/velite (libraries content-as-data) — overkill V0, nouvelle dépendance externe
+**Options** : A garder manuel + sitemap/OG (~400 lignes, ne scale pas) / B refacto content-driven complet (~1400 lignes, retenu) / C contentlayer/velite (overkill V0).
 
 **Choix** :
+1. `src/content/blog/{slug}.mdx` + frontmatter YAML validé Zod au scan filesystem (build fail si mal formé).
+2. Plugins `next.config.ts` : `remark-frontmatter`, `remark-gfm`, `rehype-slug`, `rehype-autolink-headings` (`behavior: "wrap"`, classe `.heading-anchor`).
+3. Registry filesystem `src/lib/blog/registry.ts` (`listArticles` / `getArticleBySlug` / `getRelatedArticles`, `gray-matter`, mémoïsé `cache()` per-request).
+4. JSON-LD complet : `Article` + `BreadcrumbList` + `FAQPage` auto via `<BlogFAQ>` — **le boost GEO majeur** (les LLM citent en priorité les contenus structurés).
+5. OG image dynamique `next/og` 1200×630 (`opengraph-image.tsx`, template paramétré).
+6. `<ArticleCTA>` auto, 4 variantes (solo/starter/pro/audit-gratuit) selon `frontmatter.cta`.
+7. `<RelatedArticles>` (3 articles, scoring catégorie + keywords overlap) — pas de rehype auto-liens (complexité disproportionnée V0).
+8. `<TOC>` sticky desktop (articles ≥ 6 min) + `<ReadingProgress>` bar.
+9. `sitemap.ts` + `robots.ts` auto-générés.
+10. Newsletter reportée (attendre du trafic).
 
-1. **Format MDX + frontmatter YAML** : `src/content/blog/{slug}.mdx` autonomes, frontmatter validé par Zod au scan filesystem (rejette les articles mal formés au build).
-2. **Plugins MDX** ajoutés à `next.config.ts` : `remark-frontmatter` (retire YAML du rendu), `remark-gfm` (tables, strikethrough), `rehype-slug` (id auto sur h2/h3), `rehype-autolink-headings` (`behavior: "wrap"` + classe `.heading-anchor` pour styler une icône # au hover).
-3. **Registry filesystem** (`src/lib/blog/registry.ts`) : `listArticles()` + `getArticleBySlug()` + `getRelatedArticles()` scannent `src/content/blog/` avec `gray-matter`, mémoïsés via `cache()` per-request.
-4. **JSON-LD complet** sur chaque article : `Article` + `BreadcrumbList` + `FAQPage` (auto-injecté par `<BlogFAQ>`). FAQPage est le boost GEO majeur — Google et les LLM citent en priorité ces contenus.
-5. **OG image dynamique** via `next/og` ImageResponse, 1200×630, halo gradient catégorie + branding Mamie GEO. Template unique paramétré (cf. `src/app/(blog)/blog/[slug]/opengraph-image.tsx`).
-6. **`<ArticleCTA>` auto** : 4 variantes (solo / starter / pro / audit-gratuit) selon `frontmatter.cta`, injectée en fin d'article. `audit-gratuit` utilise le variant `Button ai` (gradient terracotta→purple→blue).
-7. **Maillage interne via `<RelatedArticles>`** (3 articles via scoring catégorie + keywords overlap). Pas de rehype plugin auto-liens : complexité disproportionnée pour V0, le maillage interne est suffisamment couvert par les RelatedArticles + liens manuels que l'auteur peut écrire.
-8. **`<TOC>` sticky desktop** (articles ≥ 6 min) + `<ReadingProgress>` bar fixed top. Parsé du DOM via les ids posés par rehype-slug.
-9. **`sitemap.ts` + `robots.ts`** auto-générés. Mise à jour automatique quand un .mdx est ajouté.
-10. **Newsletter** : reportée à une PR future (décision validée 2026-05-16 — on attend que le blog drive du trafic).
+**Conséquences** : 1 fichier .mdx = 1 article complet ; tous SSG (`generateStaticParams`) ; 145 tests verts (+15) ; PageSpeed cible ≥ 98 (validation manuelle, pas de Lighthouse CI V0).
 
-**Justification** :
-
-- Le pipeline content-driven résout le bottleneck Max (« copier-coller du markdown »). Plus de double maintenance registry TS + .mdx — un seul fichier = un article complet.
-- Les structured data (Article + FAQPage + BreadcrumbList) sont **le levier GEO** : les LLM citent en priorité les contenus structurés. ROI direct sur la mission de Mamie GEO.
-- L'architecture est scalable à 100+ articles sans modification (filesystem scan + cache per-request).
-- 145 tests verts (+ 15 nouveaux : schemas frontmatter, registry, blog-faq).
-- Pas de Lighthouse CI — validation PageSpeed manuelle post-deploy suffit pour V0.
-
-**Conséquences attendues** :
-
-- Workflow Max : 1 fichier .mdx = 1 article complet (meta, OG, JSON-LD, CTA, articles liés auto).
-- Tous les articles sont SSG (`generateStaticParams`) — pages HTML pures, TTFB minimal.
-- Page `/sitemap.xml` listée dans `robots.txt`, prête pour Google Search Console.
-- Score Google PageSpeed cible ≥ 98 (Perf + SEO) sur les articles — à valider manuellement après deploy sur https://pagespeed.web.dev/.
-
-**À revisiter** :
-
-- **Newsletter form + endpoint Brevo addToList** : quand le blog drive du trafic significatif (~500 visiteurs uniques/semaine sur le blog), brancher pour capturer les leads. Brevo liste à créer à ce moment-là.
-- **rehype plugin auto-liens internes** : si on dépasse 30+ articles et que le maillage interne devient un facteur SEO critique, ré-évaluer. Pour l'instant `<RelatedArticles>` + liens manuels suffisent.
-- **Lighthouse CI dans GitHub Actions** : à ajouter quand on aura > 10 articles pour catch les régressions perf au build.
-- **Pages-templates spécialisées** : si on lance des "guides longs" (10k+ mots), créer un template `<LongFormGuide>` avec TOC enrichie + ancres sticky mobile.
+**À revisiter** : newsletter Brevo à ~500 visiteurs uniques/semaine blog (livrée 2026-05-20) ; rehype auto-liens si 30+ articles ; Lighthouse CI à > 10 articles ; template `<LongFormGuide>` si guides 10k+ mots.
 
 ---
 
 #### 2026-05-14 — Stripe billing + plan Solo 9,99 € + pivot trial → garantie 14 j refund
 
-**Contexte** : la PR « App CRUD » (2026-05-13) a achevé le self-service. Reste à monétiser. Audit du schéma DB confirme que les colonnes Stripe (`stripeCustomerId`, `stripeSubscriptionId`, `trialEndsAt`, `currentPeriodStart/End`, `hardCapHitAt`) et les tables `subscription_events` (avec `stripeEventId UNIQUE` → idempotence webhook gratuite) + `usage_counters` sont déjà en place — le code Stripe peut être greffé sans refonte schéma.
+**Contexte** : self-service achevé (PR CRUD 2026-05-13), reste à monétiser. Colonnes Stripe (`stripeCustomerId`, `stripeSubscriptionId`, `trialEndsAt`, `currentPeriodStart/End`, `hardCapHitAt`) + tables `subscription_events` (`stripeEventId UNIQUE` = idempotence gratuite) et `usage_counters` déjà en place. 3 questions tranchées :
+1. **Trial 7 j sans carte encore valide ?** ~$0,043/run → ~$3 LLM gaspillés/trial (1 LLM), ~$285/100 signups à 5 % conv ; ~$15/trial en Phase C 5 LLMs → ~$1 425/100 signups. **Non viable en early access.**
+2. **Tarifs 49/149/399 trop chers ?** Profound $499, Athena ~$300, Otterly €69 → déjà 7-10× moins cher que Profound. **Conservés** (baisser détruirait la marge sans changer la décision d'achat).
+3. **Agency 399 € en V0 ?** Peu de demande → retiré de l'UI publique (reste dans l'enum DB), remplacé par CTA « Plus de volume ? Contact ».
 
-Trois questions stratégiques se sont posées avant l'implémentation :
-
-1. **Trial automatique 7 jours sans carte (décision 2026-05-05) — encore valide ?** Recalcul coûts unitaires : ~$0,043 / run (Haiku + scoring). Trial 7j × utilisateur moyen (10 prompts × 1 LLM) = ~$3 LLM gaspillés par trial. Sur 100 signups à 5 % conv = $285 de perte sèche. En Phase C complète (5 LLMs), le coût grimpe à ~$15 / trial user → ~$1 425 / 100 signups. **Non viable** en early access.
-2. **Tarifs 49/149/399 — trop chers ?** Comparaison marché : Profound $499, Athena ~$300, Otterly €69. Mamie GEO est **déjà 7-10× moins cher que Profound** et aligné avec Otterly. Baisser à 39/119/299 détruirait la marge sans changer la décision d'achat. **Tarifs conservés**.
-3. **Plan Agency 399 € — nécessaire en V0 ?** Peu de demande agences early. Risque d'effort marketing dilué. Garder Agency dans l'enum DB mais retirer de l'UI publique. Remplacer par CTA « Plus de volume ? Contact ».
-
-**Options considérées** :
-
-- A : Stripe minimal (checkout + portal + webhook seulement, ~600 lignes, trial conservé, hard-cap PR suivante)
-- B : Stripe standard (A + bascule trialing → 0/0/weekly, cadence per-plan, cron expire-past-due, ~750 lignes, hard-cap PR suivante) ← **retenu**
-- C : Stripe complet (B + hard-cap enforcement worker, ~1 000 lignes — au-delà du target CLAUDE.md § 4)
+**Options** : A Stripe minimal (~600 lignes) / B Stripe standard (+ trialing 0/0/weekly, cadence per-plan, cron expire-past-due, ~750 lignes — retenu) / C complet avec hard-cap worker (~1000 lignes).
 
 **Choix** :
+1. **Pas de trial automatique + garantie remboursement 14 j** (refund manuel via portal Stripe). Free taster = `/outils/test-visibilite-ia`. Stripe Tax conservé. Documenté CGU + FAQ pricing.
+2. **Plan Solo 9,99 €/mois** : 5 prompts × 3 concurrents × 1 run/semaine (lundi 6h UTC) sur 5 LLMs. Marge brute LLM ~75 % Phase A, ~59 % Phase C. Hook : « ton bilan visibilité IA chaque lundi pour le prix d'un café ».
+3. Tarifs 49/149/399 conservés ; Agency → mailto.
+4. Cadence per-plan : champ `cadence: "daily" | "weekly"` dans `quotasFor(plan)` ; le scheduler skip les weekly hors lundi UTC.
+5. Billing dans `/app/settings` (section dédiée, pas de page `/app/billing`).
+6. Webhooks idempotents via `subscription_events.stripeEventId UNIQUE` ; 5 events : `checkout.session.completed`, `customer.subscription.{updated,deleted}`, `invoice.{paid,payment_failed}`.
 
-1. **Modèle d'acquisition** : pas de trial automatique + garantie remboursement 14 jours (refund manuel via portal Stripe). Le free taster reste `/outils/test-visibilite-ia` (one-shot, ~$0,20 LLM coût, déjà déployé). Conservation Stripe Tax.
-2. **Plan d'entrée Solo 9,99 €/mois** : 5 prompts × 3 concurrents × **1 run par semaine (lundi 6h UTC)** sur les 5 LLMs. Marge brute LLM ~75 % en Phase A, ~59 % en Phase C complète. Hook commercial : « ton bilan visibilité IA chaque lundi pour le prix d'un café ».
-3. **Tarifs 49/149/399 conservés**. Agency retiré de `/pricing` public, remplacé par mailto. Reste dans enum DB pour les workspaces existants ou les contrats négociés.
-4. **Cadence per-plan** : champ `cadence: "daily" | "weekly"` dans `quotasFor(plan)`. Le scheduler skip les workspaces en cadence weekly hors lundi UTC.
-5. **UI billing dans `/app/settings`** (section dédiée) plutôt que page `/app/billing` séparée — cohérent avec le reste settings.
-6. **Webhook handlers idempotents** via `subscription_events.stripeEventId UNIQUE` plutôt que table dédiée `stripe_webhooks` brute. 5 events traités : `checkout.session.completed`, `customer.subscription.{updated,deleted}`, `invoice.{paid,payment_failed}`.
+**Conséquences** : migration `0001_thick_husk` (ajout `"solo"` à `workspaces.plan`) ; `/pricing` refondue 3 cards + ligne contact ; onboarding inchangé (`trialing` = quotas 0/0/weekly → aucun run sans subscription) ; `<UpgradeBanner>` dans `(with-nav)/layout.tsx` ; cron `/api/cron/expire-past-due` 03:00 UTC (past_due → expired après 7 j) ; 128 tests verts (+23) ; coût trial gaspillé ~$0, réinvestissable en acquisition.
 
-**Justification** :
-
-- Trial 7j sans carte n'est pas finançable sans capital. La garantie 14j refund a le même effet rassurant côté commercial mais sans coût LLM upfront (rare en early access que des refunds soient demandés massivement).
-- Solo à 9,99 € comble le segment freelance ultra-budget (sub-Otterly) tout en gardant une marge brute saine grâce à la cadence hebdo. C'est aussi la première brique d'acquisition : « tester 1 mois pour 10 € puis upgrade Starter ».
-- Le pivot trial est documenté dans CGU et FAQ pricing — pas de friction inattendue côté user.
-- La règle d'idempotence via `stripeEventId UNIQUE` réutilise l'infrastructure existante (table `subscription_events` déjà en place), évite une nouvelle migration.
-
-**Conséquences attendues** :
-
-- Migration `0001_thick_husk` ajoute `"solo"` à `workspaces.plan` (constraint check). Aucune autre modif schéma.
-- Page `/pricing` refondue : 3 cards Solo (9,99 €) / Starter (49 €) / Pro (149 €) + ligne « Plus de volume ? Contact ».
-- Onboarding inchangé (workspace toujours créé en `trialing`, mais `quotasFor("trialing") = 0/0/weekly` → aucun run lancé tant que pas de subscription).
-- `<UpgradeBanner>` server component dans `(with-nav)/layout.tsx` : message contextuel quand plan ∈ trialing/past_due/expired/canceled.
-- Cron quotidien `/api/cron/expire-past-due` (03:00 UTC) bascule past_due → expired après 7 jours.
-- 128 tests verts (+ 23 nouveaux : quotas avec cadence, products mapping, email templates welcome/payment-failed).
-- Bouton « Plus de volume ? » dans pricing → leads agences/enterprise dirigés vers `hello@mamie-geo.fr`.
-- Coût trial gaspillé : ~$0 (vs ~$3-30 par user trial 7j sans carte) — réinvestissable en acquisition.
-
-**À revisiter** :
-
-- **Trial 7j avec carte requise** (mode `trial_period_days` natif Stripe) à reconsidérer quand capital disponible et conversion rate de la garantie 14j stabilisé. Avec carte requise, conv ~50-70 % vs ~5-15 % sans carte.
-- **Hard-cap enforcement worker** : PR suivante (~300 lignes). Sans hard-cap, le risque d'abus reste théorique avec 5 LLMs Phase C — à brancher avant marketing élargi.
-- **Pricing Pro 149 €** : à reconsidérer quand bascule Sonnet 4.6 prête en prod. Marge LLM à 18 % aujourd'hui avec Haiku 5 LLMs → recalculer avec Sonnet (plus cher) et ajuster si nécessaire.
-- **Lifetime discount early-access** (Stripe coupon code -30 % à vie pour les 50 premiers) : peut être ajouté à tout moment via dashboard Stripe + champ `discounts` dans la session checkout.
+**À revisiter** : trial avec carte requise (`trial_period_days` natif, conv ~50-70 % vs ~5-15 %) quand capital dispo + conv garantie stabilisée — **levé le 2026-06-08, cf. §** ; hard-cap worker PR suivante (**livré 2026-05-16**) ; pricing Pro 149 € à recalculer à la bascule Sonnet 4.6 (marge LLM 18 % avec Haiku 5 LLMs) ; lifetime discount early-access (-30 % à vie, 50 premiers) activable via Stripe dashboard + `discounts` checkout.
 
 ---
 
 #### 2026-05-05 — Lancement du projet GEO France
 
-**Contexte** : recherche de SaaS récurrent après fatigue du freelance pur. Analyse du marché GEO, identification du trou francophone.
+**Contexte** : recherche de SaaS récurrent après fatigue du freelance pur ; analyse marché GEO, trou francophone identifié.
 
-**Options considérées** :
+**Options** : A SaaS audit SEO + UI / B boîtage tool mapping / C SaaS Digital Product Passport SMB / D SaaS GEO francophone.
 
-- A : SaaS audit SEO + UI (en cours, à compléter)
-- B : Boîtage tool mapping
-- C : SaaS Digital Product Passport SMB
-- D : SaaS GEO francophone
+**Choix** : D — Mamie GEO. Marché en hypercroissance (45,5 % CAGR), trou FR évident, leverage mamie-seo.fr existant, fenêtre 12-18 mois, pas de concurrent direct FR.
 
-**Choix** : D — SaaS GEO francophone (Mamie GEO)
+**Conséquences** : 6-12 mois de focus, pivot du site mamie-seo, solo founder, cash freelance préservé.
 
-**Justification** : marché en hypercroissance (45,5% CAGR), trou français évident, leverage mamie-seo.fr existant, fenêtre 12-18 mois, pas de concurrent direct FR.
-
-**Conséquences attendues** : 6-12 mois de focus, pivot du site mamie-seo, solo founder mode, cash freelance préservé.
-
-**À revisiter** : Gate 1 à 6 mois (juin 2026 → critères dans doc 08).
+**À revisiter** : Gate 1 à 6 mois (juin 2026 — critères dans doc 08).
 
 ---
 
 #### 2026-05-05 — Architecture mono-repo Next.js + redirect mamie-seo
 
-**Contexte** : Mamie-seo.fr n'a aucun trafic ni autorité SEO valorisable. La question s'est posée de garder un repo séparé pour le blog ou de tout rassembler.
+**Contexte** : mamie-seo.fr n'a aucun trafic ni autorité SEO valorisable.
 
-**Options considérées** :
+**Options** : A 3 repos séparés (Framer + app + blog) / B monorepo Turborepo / C mono-repo unique Next.js.
 
-- A : 3 repos séparés (marketing Framer + app Next.js + blog standalone)
-- B : Monorepo Turborepo avec apps/marketing, apps/app, apps/blog
-- C : Mono-repo unique : une seule app Next.js qui contient marketing + blog + app SaaS
+**Choix** : C. Solo founder (un seul projet), aucun SEO à préserver, cohérence visuelle native, déploiement/SSL/cookie uniques, splittable plus tard.
 
-**Choix** : C — Mono-repo unique Next.js
+**Conséquences** : 301 mamie-seo.fr → mamie-geo.fr dès J1 ; pas de subdomain `app.` (path-based `/app/*`) ; pas de Framer ; route groups `(marketing)` / `(blog)` / `(app)` ; mamie-seo.fr loué 1-2 ans en sécurité puis abandonné.
 
-**Justification** :
-
-- Solo founder, pas d'équipe à coordonner → un seul projet à maintenir
-- Aucun SEO existant à préserver sur mamie-seo.fr → pas d'argument pour le conserver
-- Cohérence visuelle native (marketing utilise les mêmes composants UI que l'app)
-- Déploiement et configuration uniques (un seul Vercel, un seul SSL, un seul cookie)
-- Splittable plus tard si besoin (mois 12+ ou si recrutement)
-
-**Conséquences attendues** :
-
-- `mamie-seo.fr` est redirigé en 301 vers `mamie-geo.fr` dès J1
-- Pas de subdomain `app.mamie-geo.fr` en V0 — l'app vit sur `mamie-geo.fr/app/*`
-- Pas de Framer pour le marketing (pages codées en TSX comme tout le reste)
-- Structure `(marketing)`, `(blog)`, `(app)` route groups pour séparer les layouts
-- Domaine `mamie-seo.fr` gardé loué 1-2 ans en sécurité, puis abandonné
-
-**À revisiter** : mois 12+ si recrutement ou si besoin de stack séparée pour le marketing.
+**À revisiter** : mois 12+ si recrutement ou besoin de stack marketing séparée.
 
 ---
 
 #### 2026-05-05 — Réponses aux 10 questions de bootstrap (session 2)
 
-**Contexte** : fin de session 1, 10 décisions en suspens identifiées (direction
-artistique, polices, naming, mécanique trial, magic-link, etc.). Max a tranché
-en début de session 2.
-
-**Choix actés** :
-
-1. Direction artistique : A — éditorial chaud
-2. Polices : gratuites V0 — Newsreader + Geist + Geist Mono (pas Inter ni Source Serif Pro)
+**Choix actés** (déblocage Sprint 0) :
+1. Direction artistique : A — éditorial chaud (superseded 2026-05-07)
+2. Polices gratuites V0 : Newsreader + Geist + Geist Mono (superseded 2026-05-07/11 → Inter)
 3. Template marketing : from scratch
-4. Naming et domaine : Mamie GEO sur `mamie-geo.fr`
-5. Magic-link Better Auth : SMTP Brevo (transport nodemailer)
+4. Naming/domaine : Mamie GEO sur `mamie-geo.fr`
+5. Magic-link Better Auth : SMTP Brevo (superseded 2026-05-12 → REST API)
 6. Le Chat dès Starter : oui sans condition
-7. Trial 14j sans carte + Stripe Tax dès J0 : oui aux deux
-8. Statut juridique : EI continue en V0, bascule SAS/EURL mois 6-9 avant plafond ~77 700 €/an BIC services
-9. Hard-cap LLM 200% du quota théorique → block + email + alerte interne
-10. Redirect `mamie-seo.fr` : DNS-level via Vercel Domains + ligne défensive dans `next.config.ts`
+7. Trial 14 j sans carte + Stripe Tax dès J0 (trial superseded 2026-05-13 puis 2026-05-14)
+8. Statut juridique : EI en V0, bascule SAS/EURL mois 6-9 avant plafond ~77 700 €/an BIC services
+9. Hard-cap LLM 200 % du quota → block + email + alerte interne
+10. Redirect mamie-seo.fr : DNS-level Vercel Domains + ligne défensive `next.config.ts`
 
-**Conséquences attendues** : déblocage du Sprint 0. Toutes les briques de la
-stack peuvent être configurées sans nouvelle question. Les sections "Décisions
-Sprint 0 — verrouillées" et "Décisions tranchées en Sprint 0" sont à jour.
-
-**À revisiter** :
-
-- Polices premium quand MRR > 5K€
-- Statut juridique au mois 6 (audit CA cumulé vs plafond 77 700 €)
-- Mascotte mamie au mois 3+ (non bloquant)
+**À revisiter** : polices premium à MRR > 5K€ ; statut juridique au mois 6 (audit CA vs plafond) ; mascotte mamie mois 3+ (non bloquant).
 
 ---
 
 #### 2026-05-05 — Cohérences purgées (Phase 1 session 2)
 
-**Contexte** : audit des 12 docs en fin de session 1 a remonté 11 incohérences
-entre les décisions actées dans `03`/`09` et le contenu résiduel des autres
-docs (Clerk, Prisma, Inngest, subdomain `app.`, etc.).
+11 incohérences corrigées entre les décisions `03`/`09` et le contenu résiduel des autres docs : Clerk/Supabase Auth → Better Auth (02) ; Inngest/BullMQ → Postgres-queue + Vercel Cron (02, 04, 08) ; `browse_with_bing` → `web_search` tool (03) ; hébergements multiples → choix figés (03) ; `app.mamie-geo.fr` → path-based (03) ; Docker Compose → branche Neon `dev-{username}` (03) ; devise harmonisée `~$0.015` (04) ; lead magnet → `mamie-geo.fr/outils/test-visibilite-ia` (06) ; Clerk/Prisma/Inngest → Better Auth/Drizzle/Postgres-queue (08) ; checkboxes 09 verrouillées ; README renommé « Mamie GEO ».
 
-**Corrections appliquées** :
-
-- `02` § "Fonctionnalités V0" : auth `Clerk ou Supabase Auth` → `Better Auth`
-- `02` § "Fonctionnalités V0" : worker `Inngest ou BullMQ` → `Postgres-based queue + Vercel Cron`
-- `03` § "APIs ciblées" : `gpt-4o-mini avec browse_with_bing` → `gpt-4o-mini + web_search tool`
-- `03` § "Hébergement" : options multiples (Neon ou Supabase, Vercel ou Render, Inngest ou self-hosted) → choix figés
-- `03` § "Environnements" : prod sur `app.mamie-geo.fr` → `mamie-geo.fr` (path-based)
-- `03` § "Environnements" : dev local Docker Compose → branche Neon `dev-{username}`
-- `04` § "Coûts fixes mensuels" : Inngest $20-100 listé en V0 → 0 (Postgres-queue), Inngest planifié à scale
-- `04` § "Lead magnet" : `~0,015 €` → `~$0.015` (devise harmonisée)
-- `06` § "Lead magnet n°1" : `mamie-seo.fr/test-ia` → `mamie-geo.fr/outils/test-visibilite-ia`
-- `08` § "Sprint 1.1" et § "Sprint 0 checklist" : Clerk / Prisma / Inngest → Better Auth / Drizzle / Postgres-queue
-- `09` § "Décisions à figer en Sprint 0" : checkboxes obsolètes → décisions verrouillées
-- `README.md` : "Projet GEO France" → "Mamie GEO"
-
-**Justification** : éviter qu'un futur lecteur (humain ou Claude) suive une
-décision obsolète parce que le doc n'a pas été synchronisé. Règle dorénavant
-appliquée : toute modif qui invalide une info dans un doc met à jour le doc
-dans le **même PR**.
-
-**Conséquences attendues** : tous les docs cohérents avec `03` et `09`. Sprint 0
-peut démarrer sans ambiguïté résiduelle.
-
-**À revisiter** : N/A (tâche de remise à plat ponctuelle).
+**Règle actée** : toute modif qui invalide une info dans un doc met à jour le doc dans le **même PR**.
 
 ---
 
 #### 2026-05-05 — Schéma BDD complet (Phase 2 session 2)
 
-**Contexte** : 9 manques techniques avaient été identifiés en session 1 dans
-le schéma BDD du doc 03 (Better Auth, queue_jobs, events, états plan,
-prompt_cache, usage_counters, hard-cap, idempotence). Le schéma a été
-complété avant toute écriture de code.
+9 manques techniques de session 1 comblés avant tout code :
 
-**Décisions techniques actées** :
+- **Better Auth** : tables générées via `npx @better-auth/cli generate` (`user`, `session`, `account`, `verification`). **Pas de table `users` parallèle** — FK applicatives sur Better Auth `user.id` (TEXT, pas UUID).
+- **`workspaces.plan`** : CHECK étendu à `trialing/starter/pro/agency/enterprise/past_due/expired/canceled`. Pas de valeur `'free'`.
+- **`workspaces.current_period_start/end`** : aligné cycle Stripe ; webhook `invoice.created` = reset `usage_counters`.
+- **`workspaces.hard_cap_hit_at`** : timestamp dénormalisé (fast-path du guard quota, évite un join à chaque appel LLM).
+- **`queue_jobs.idempotency_key TEXT UNIQUE NOT NULL`** : format imposé par `kind` (cf. doc 03) ; `INSERT ... ON CONFLICT DO NOTHING`.
+- **`queue_jobs.status`** : `pending → claimed → done | failed | dead` ; retry transient = `scheduled_at += 1h` puis `+ 6h`.
+- **`runs.cache_hit BOOLEAN`** : distingue runs facturés / réutilisés depuis `prompt_cache`.
+- **`prompt_cache`** : cache cross-clients sha256 texte normalisé + `(llm, language)`, fraîcheur 24 h, gain estimé 20-40 % Starter. Documenté V0, à activer dès que mesurable.
+- **`events`** : audit log applicatif générique `kind` libre + `payload JSONB`, purge 90 jours.
+- **`subscription_events.stripe_event_id UNIQUE`** : idempotence webhooks Stripe.
+- **Hard-cap LLM** : 60 % alerte interne, 100 % email client, 200 % block + email + alerte interne, levée manuelle uniquement, reset au cycle Stripe.
 
-- **Better Auth** : tables générées via `npx @better-auth/cli generate`,
-  documentées en V0 pour magic-link uniquement (`user`, `session`, `account`,
-  `verification`). **Pas de table `users` parallèle** — toutes les FK
-  applicatives pointent sur Better Auth `user.id` (TEXT, pas UUID).
-- **`workspaces.plan`** : énumération `CHECK` étendue à `trialing`, `starter`,
-  `pro`, `agency`, `enterprise`, `past_due`, `expired`, `canceled`. Plus de
-  valeur `'free'` (on n'a pas de freemium permanent).
-- **`workspaces.current_period_start/end`** : aligné sur le cycle de
-  facturation Stripe. Webhook `invoice.created` = reset du `usage_counters`.
-- **`workspaces.hard_cap_hit_at`** : timestamp dénormalisé pour fast-path du
-  guard quota (évite un join sur `usage_counters` à chaque appel LLM).
-- **`queue_jobs.idempotency_key TEXT UNIQUE NOT NULL`** : format imposé par
-  `kind` (cf. table dans doc 03). `INSERT ... ON CONFLICT DO NOTHING`.
-- **`queue_jobs.status`** : `pending → claimed → done | failed | dead`. Retry
-  transient = remise en `pending` avec `scheduled_at += 1h` puis `+ 6h`
-  (formalisation de la "fallback strategy" du doc 03).
-- **`runs.cache_hit BOOLEAN`** : flag de réutilisation depuis `prompt_cache`
-  pour distinguer les runs facturés des runs gratuits.
-- **`prompt_cache`** : caching cross-clients sur hash sha256 du texte
-  normalisé + `(llm, language)`, fenêtre de fraîcheur 24 h. Gain estimé
-  20-40% sur Starter. Documenté V0, à activer dès que mesurable.
-- **`events`** : audit log applicatif générique avec `kind` libre + `payload
-JSONB`, purge à 90 jours. Centralise les événements forensic (quota
-  warnings, plan changes, run completed, etc.).
-- **`subscription_events.stripe_event_id UNIQUE`** : idempotence des
-  webhooks Stripe (un même `evt_xxx` ne crée qu'une ligne).
-- **Algorithme hard-cap LLM** : 60% → alerte interne, 100% → email client,
-  200% → block + email + alerte interne, levée manuelle uniquement, reset
-  au prochain cycle Stripe.
-
-**Conséquences attendues** : `src/db/schema.ts` peut être écrit sans
-ambiguïté, première migration `0001_init.sql` peut être versionnée et
-appliquée.
-
-**À revisiter** :
-
-- `prompt_cache` : mesurer le hit-rate réel après 1 mois de prod et décider
-  si la fenêtre 24h est la bonne (peut-être 12h pour Pro/Agency, 7j pour
-  Starter ?)
-- `queue_jobs` : si > 100K runs/mois, migrer vers Inngest (la table reste
-  utile en mode "outbox pattern" même avec Inngest)
+**À revisiter** : hit-rate `prompt_cache` après 1 mois (fenêtre 24 h vs 12 h Pro / 7 j Starter ?) ; migration Inngest si > 100K runs/mois (la table reste en outbox pattern).
 
 ---
 
 #### 2026-05-06 — Première migration Drizzle appliquée sur Neon EU Frankfurt
 
-**Contexte** : Sprint 0 close, DATABASE_URL Neon en main, étape avant
-Sprint 1. Au premier `pnpm db:migrate`, deux blocages successifs :
+**Contexte** : 3 blocages au premier `pnpm db:migrate` : drizzle-kit ne charge pas `.env.local` ; `drizzle.config.ts` importait `@/lib/env` (validation runtime complète, bloquante) ; le pool WebSocket `@neondatabase/serverless` échouait silencieusement sur mauvais endpoint Neon (username placeholder au lieu de `*_owner`).
 
-1. `drizzle-kit` ne charge pas `.env.local` (Next.js le fait, lui non).
-2. `drizzle.config.ts` importait `@/lib/env` qui valide tout le contrat
-   runtime (Better Auth, Brevo, CRON…) — bloque la migration alors
-   qu'aucun de ces secrets n'est nécessaire pour `drizzle-kit`.
-3. Drizzle-kit utilise en interne le pool WebSocket `@neondatabase/serverless`
-   pour ses transactions multi-statements. Sur le mauvais endpoint Neon
-   (URL avec username placeholder `user` au lieu du vrai `*_owner`), ça
-   produisait un échec d'auth silencieux avalé par le spinner.
+**Options** : A `ws` devDep + `neonConfig.webSocketConstructor` (recommandé Neon, retenu) / B `pg` devDep pour drizzle-kit / C script de migration maison.
 
-**Options considérées** :
+**Choix** : A. `ws` strictement devDep, jamais dans le bundle runtime Edge ; B dupliquerait la logique de connexion ; C dériverait du format officiel `drizzle.__drizzle_migrations`.
 
-- A : Installer `ws` comme devDep et fournir `neonConfig.webSocketConstructor`
-  depuis `drizzle.config.ts` (recommandé par Neon en CLI Node).
-- B : Installer `pg` comme devDep et configurer drizzle-kit sur ce driver,
-  en gardant `@neondatabase/serverless` au runtime Edge.
-- C : Script de migration custom maison qui applique les `.sql` via le
-  driver Neon HTTP fetch et tient à jour `__drizzle_migrations`.
+**Conséquences** : devDeps `ws@^8.20.0` + `@types/ws@^8.18.1` ; scripts `db:generate`, `db:migrate`, `db:studio` préfixés `node --env-file-if-exists=.env.local ./node_modules/drizzle-kit/bin.cjs <cmd>` (charge `.env.local` en local, no-op CI/Vercel) ; `drizzle.config.ts` lit `process.env.DATABASE_URL` directement (check minimal, plus de dépendance `@/lib/env`) + `neonConfig.webSocketConstructor = ws`. Migration `0000_many_human_torch.sql` appliquée : 16 tables, 13 FK, 34 indexes, 98 CHECK constraints.
 
-**Choix** : A.
-
-**Justification** :
-
-- `ws` est strictement devDep — jamais embarqué dans le bundle runtime
-  Edge/Vercel ; pas d'impact sur la cohérence "HTTP fetch en runtime".
-- Drizzle-kit bundle en réalité `ws@8.18.2` en interne, donc la dépendance
-  publique sert uniquement à fournir `webSocketConstructor` à `neonConfig`
-  côté `drizzle.config.ts` (B et C demandent plus de code à maintenir
-  pour le même résultat).
-- B aurait dupliqué la logique de connexion DB (un client pour CLI, un
-  pour runtime) sans bénéfice tant qu'on reste sur Neon.
-- C aurait recréé maison ce que drizzle-kit fait correctement, et dérivé
-  par rapport au format officiel `drizzle.__drizzle_migrations`.
-
-**Conséquences appliquées** :
-
-- `package.json` : devDep `ws@^8.20.0` + `@types/ws@^8.18.1`.
-- `package.json` : scripts `db:generate`, `db:migrate`, `db:studio`
-  préfixés par `node --env-file-if-exists=.env.local ./node_modules/drizzle-kit/bin.cjs <cmd>`.
-  Charge `.env.local` en local, no-op sur Vercel/CI où les vars sont
-  déjà dans `process.env`.
-- `drizzle.config.ts` : ne dépend plus de `@/lib/env` (lecture directe
-  `process.env.DATABASE_URL` avec check minimal). Le validateur strict
-  reste actif au runtime app — drizzle-kit n'est juste plus son client.
-- `drizzle.config.ts` : `neonConfig.webSocketConstructor = ws` avant
-  l'export du config.
-- Migration `0000_many_human_torch.sql` appliquée : 16 tables, 13 FK,
-  34 indexes, 98 CHECK constraints, 1 entrée dans `drizzle.__drizzle_migrations`.
-
-**À revisiter** :
-
-- Si on ajoute un autre provider Postgres (improbable V0), réévaluer le
-  choix `ws` vs `pg`.
-- Quand on industrialise les branches Neon dev par PR (Sprint 1+),
-  vérifier que le même flow `pnpm db:migrate` tient avec une `DATABASE_URL`
-  pointant sur une branche éphémère.
+**À revisiter** : `ws` vs `pg` si autre provider Postgres ; vérifier le flow sur branches Neon éphémères par PR (Sprint 1+).
 
 ---
 
 #### 2026-05-07 — Phasage moteur Haiku → design system → multi-LLM, suite mesure coût Sonnet 4.6
 
-**Contexte** : PR 1 du Sprint 1 (LLMClient + provider Anthropic avec
-`web_search_20250305`) a permis de mesurer un coût réel par run de
-tracking. Cassette enregistrée contre l'API live :
+**Contexte** : mesure réelle du coût par run (cassette live, PR 1, Sonnet 4.6) :
 
 | Métrique         | Mesuré (Sonnet 4.6)           | Estimé doc 03 (initial) |
 | ---------------- | ----------------------------- | ----------------------- |
@@ -1220,653 +673,166 @@ tracking. Cassette enregistrée contre l'API live :
 | Web search calls | 1                             | 1-5                     |
 | **Coût total**   | **~$0,107 / run**             | $0,005-0,02 / run       |
 
-Cause : le tool serveur `web_search_20250305` injecte les résultats de
-recherche (~5 ko / search, parfois plus) comme input tokens du modèle.
-Anthropic facture donc l'input gonflé + l'appel search ($0,01) + l'output
-final. Le ratio est largement défavorable sur Sonnet 4.6 ($3 / $15 par
-Mtok) à un point qui plombe la marge Starter (49 €) si on tracke 5 LLMs
-× 30 prompts × 30 jours.
+Cause : `web_search_20250305` injecte les résultats (~5 ko/search) en input tokens → input gonflé + $0,01/search + output. Plombe la marge Starter (49 €) sur Sonnet 4.6 ($3/$15 par Mtok) à 5 LLMs × 30 prompts × 30 jours.
 
-Le doc 03 § 232 mentionne déjà `claude-haiku-4-5` pour le tracking
-Anthropic ; c'est la cohérence qu'on doit conserver et respecter dans
-le code (PR 1 avait pris Sonnet 4.6 par défaut, à corriger).
+**Options** : A Sonnet partout (marge négative, jusqu'à -300 €/compte Starter — tué) / B phasage A Haiku cheap → B UI → C Sonnet + 4 providers (retenu) / C couper `web_search` (citations hallucinées, produit non représentatif — tué).
 
-**Options considérées** :
+**Choix** : B. Coût dev ÷ ~5 (Haiku $1/$5 par Mtok) ; bascule triviale via interface `LLMClient` (un seul fichier `anthropic.ts` en Phase C, ou feature-flag par plan).
 
-- A : Garder Sonnet 4.6 partout, accepter une marge négative en V0
-  pour avoir le LLM le plus représentatif de claude.ai
-- B : Phaser l'exécution. Phase A développement et tests sur Haiku 4.5
-  (cheap), Phase B UI / design system / SEO sur le même backend cheap,
-  Phase C bascule vers Sonnet 4.6 et ajout des 4 autres providers
-  quand l'expérience produit est figée
-- C : Couper le `web_search` en V0 (réponses sans grounding) → coût
-  quasi nul, mais "citations" hallucinées par le modèle, donc
-  produit non représentatif et invalide pour mesurer ce que voit
-  un utilisateur final
+**Conséquences** : `src/lib/llm/anthropic.ts` : `DEFAULT_MODEL = "claude-haiku-4-5-20251001"`, `DEFAULT_MAX_TOKENS = 4096`, `DEFAULT_MAX_WEB_SEARCHES = 2` (configurables via factory) ; cassette `real-fr-visibility.json` réenregistrée sur Haiku ; docs 03 § 656 / 08 / CLAUDE.md § 2+9 alignés.
 
-**Choix** : B — Phasage A → B → C.
-
-**Justification** :
-
-- **Coût dev divisé par ~5** sur Phase A (Haiku 4.5 = $1 / $5 par Mtok
-  vs Sonnet $3 / $15). On va générer beaucoup de runs en debug et
-  itération pendant Phase A et B, autant qu'ils coûtent 2-4¢ pièce.
-- **L'interface `LLMClient` rend la bascule triviale** : un seul
-  fichier `anthropic.ts` à toucher en Phase C pour passer Sonnet 4.6
-  (ou feature-flag par plan : Starter sur Haiku, Pro/Agency sur Sonnet).
-- **A est tué** par les marges (-300 €/compte Starter dans le pire cas).
-- **C est tué** par la fidélité : sans `web_search`, le produit ne
-  reflète plus ce que voit un utilisateur de claude.ai, donc invalide
-  la promesse de valeur.
-- Cohérent avec la séquence "1 LLM cheap pour valider, design avant
-  de scaler" demandée par le founder (cf. CLAUDE.md § 9).
-
-**Conséquences appliquées** :
-
-- `src/lib/llm/anthropic.ts` : `DEFAULT_MODEL = "claude-haiku-4-5-20251001"`,
-  `DEFAULT_MAX_TOKENS = 4096`, `DEFAULT_MAX_WEB_SEARCHES = 2`. Configurables
-  via options du factory si on veut bumper ponctuellement.
-- Cassette de test `real-fr-visibility.json` réenregistrée sur Haiku 4.5
-  pour rester représentative de l'usage Phase A.
-- `geo-project/03-architecture-technique.md` § 656 : note de bas de
-  tableau ajoutant la mesure réelle Sonnet 4.6 + le cap pour la
-  bascule Phase C.
-- `geo-project/08-roadmap-execution.md` : note d'introduction sur le
-  phasage A/B/C qui s'intercale dans Sprint 1.x sans changer la
-  timeline mensuelle.
-- `CLAUDE.md` § 2 + § 9 : modèle tracking V0 = Haiku 4.5 explicité,
-  bascule Sonnet 4.6 pointée vers Phase C.
-
-**À revisiter** :
-
-- Fin Phase B (avant les premiers paying users) : refaire un smoke
-  test sur 5-10 prompts variés en Haiku 4.5 pour calibrer un coût
-  moyen réaliste, puis trancher la grille de bascule Phase C
-  (Starter/Pro/Agency par plan, ou par feature flag par workspace).
-- Si Anthropic introduit un mode `web_search` qui n'inclut pas tout
-  le contenu en input (style "résumé seul"), basculer dessus.
-- Si la marge Starter reste trop tendue malgré le bascule par plan,
-  considérer le cache cross-clients (`prompt_cache` table déjà prête)
-  pour les prompts génériques partagés entre workspaces.
+**À revisiter** : fin Phase B, smoke test 5-10 prompts Haiku pour calibrer le coût moyen puis trancher la grille de bascule Phase C (par plan ou par workspace) ; basculer si Anthropic sort un mode web_search « résumé seul » ; activer `prompt_cache` cross-clients si marge Starter trop tendue.
 
 ---
 
 #### 2026-05-07 — Pivot UI vers Airbnb-like minimaliste (supersede Direction A doc 10)
 
-**Contexte** : PR 7 (design system éditorial chaud — crème + Newsreader serif + italique) déployée sur Vercel. Retour Max après visite preview : « ça va pas du tout, faut vraiment qu'on revoit le design ». Réorientation explicite vers un look Airbnb (`airbnb.com`) + DesignMe Agency (`https://www.designme.agency/`) avec contraintes :
+**Contexte** : retour Max sur la PR 7 (éditorial chaud : crème + Newsreader serif + italique) : « ça va pas du tout ». Réorientation vers airbnb.com + designme.agency : pas de fond coloré, une seule police, pas d'italique, nuances de gris + accent ponctuel CTA.
 
-- pas de fond coloré (donc adieu le crème `#FAF7F2`)
-- une seule police, pas plusieurs (donc adieu Newsreader + Geist Mono, on garde Geist Sans seul)
-- pas d'italique
-- nuances de gris + accent ponctuel pour les CTA
+**Options** : A patcher Direction A / B blanc-gris + 1 police + accent terracotta conservé (retenu) / C full noir & blanc (trop austère, perd le fil « Mamie »).
 
-**Options considérées** :
+**Choix** : B. Le look magazine alourdit un produit dont l'écran principal est un dashboard ; Airbnb-like = lisible, focus data ; terracotta `#C5532E` conservé en accent ponctuel (jamais en fond ni surface large).
 
-- A : garder Direction A doc 10 et patcher cosmétiquement → ne répond pas à la demande
-- B : pivoter en blanc/gris + 1 police, accent terracotta gardé pour cohérence naming (Mamie = chaleur), zéro italique
-- C : full noir & blanc, accent neutre → trop austère, perd le fil narratif "Mamie"
+**Conséquences** : reset complet des tokens `globals.css` (palette gray-50→950, alias `--color-ink` / `--color-muted` / `--color-border`, suppression cream/warm-gray, `em, i, cite, address { font-style: normal }`, classes `.type-*` sans-serif) ; Newsreader + Geist Mono retirés du layout ; composants ui restylés (Button variant `accent`, Card bordure gray-200 sans ombre, Badge fond gray-100, Input focus ring gris) ; login / dashboard / home / layout app alignés ; doc 10 nouveau § « Direction actée 2026-05-07 » supersede A/B/C ; CLAUDE.md § 9 mis à jour.
 
-**Choix** : B.
-
-**Justification** :
-
-- Direction A "éditorial chaud" donnait un look magazine déjà-vu et chargé, peu adapté à un produit data-driven dont l'écran principal est un dashboard. Le serif Newsreader sur les chiffres impressionne 3 secondes mais alourdit la lecture quotidienne.
-- Airbnb-like = standard moderne, lisible, focus sur la donnée. Plus facile à itérer (less is more).
-- L'accent terracotta `#C5532E` est conservé pour les CTAs et liens. Ce fil rouge avec le naming "Mamie" reste sans envahir l'interface (jamais en fond, jamais en surface large).
-- Geist Sans (déjà installée via le package `geist`) couvre tous les usages : titres en weight 600, body en 400, chiffres tabulaires via `font-variant-numeric: tabular-nums`. Pas besoin d'ajouter une mono.
-
-**Conséquences appliquées** :
-
-- `src/app/globals.css` : reset complet des tokens. Palette `gray-50 → gray-950` alignée Tailwind v4, alias sémantiques `--color-ink`, `--color-muted`, `--color-border`, etc. Suppression des couleurs cream/cream-dim/warm-gray/warm-gray-soft. `em, i, cite, address { font-style: normal }` neutralise les italiques au niveau global. Classes `.type-*` repensées en sans-serif uniquement.
-- `src/app/layout.tsx` : retire `next/font/google` Newsreader et `geist/font/mono`. Seul `GeistSans` reste branché.
-- `src/components/ui/` : Button gagne un variant `accent` (terracotta plein) en plus de `primary` (ink plein) ; Card en bordure gris-200 / radius `lg` / pas d'ombre ; Stat full sans-serif weight 600 ; Badge en fond `gray-100` neutre + variants light bg pour success/warning/error ; Input en focus ring gris (sobre).
-- `src/app/login/page.tsx` : refait en typo unique, CTA `accent`, banners success/error avec fond très light.
-- `src/app/(app)/app/dashboard/page.tsx` : header sans serif, stat values en sans-serif épais, tableau avec eyebrow petites caps en thead, hover row gris-50.
-- `src/app/(marketing)/page.tsx` : home placeholder sans italique sur "ChatGPT", CTA `accent`.
-- `src/app/(app)/layout.tsx` : fond passe de `bg-[color:var(--color-cream)]` à `bg-white`.
-- `geo-project/10-design-direction.md` : nouveau § « Direction actée 2026-05-07 » en tête, qui supersede les Directions A/B/C explorées en archive plus bas.
-- `CLAUDE.md` § 9 : décision "Direction artistique : A — éditorial chaud" remplacée par pointeur vers cette entrée + précision sur la police unique.
-
-**À revisiter** :
-
-- Avant la livraison Phase B PR 8 (vraie home + pricing) : refaire un retour visuel sur Vercel preview pour valider que le ton Airbnb tient sur des sections marketing plus longues (hero + sans/avec + how-it-works).
-- Si on ressent un manque de chaleur dans le dashboard une fois 5 LLMs trackés : envisager un accent moutarde ponctuel sur les badges de meilleurs scores (sans inverser la règle "pas de fond coloré").
-- Direction artistique = chose qui vit. Cette entrée n'est pas finale, juste la base pour Phase B. Tout retour user remontant que le rendu final n'est pas Airbnb-like déclenchera une nouvelle entrée 09 sans culpabilité.
+**À revisiter** : valider le ton sur les vraies sections marketing (PR 8) ; accent chaleureux ponctuel si dashboard trop froid. La DA vit — tout retour déclenche une nouvelle entrée 09 sans culpabilité.
 
 ---
 
 #### 2026-05-11 — Refs visuelles ancrées sur designme.agency + taap.it (raffinement direction Airbnb-like)
 
-**Contexte** : après le pivot du 2026-05-07 vers une direction Airbnb-like minimaliste, Max apporte deux screenshots PDF de sites qu'il aime visuellement : `https://www.designme.agency/` et `https://taap.it/fr/radar`. Demande : « inspire toi de la charte graphique des deux screens pour l'implementer au projet et mettre à jour les fichiers de charte graphique ».
+**Contexte** : 2 refs visuelles fournies par Max (designme.agency + taap.it/fr/radar). DNA commun : fond blanc + sections gris-50 alternées, **CTA = bouton noir plein pill** (pas terracotta), cards bordure 1px gray-200 radius 16-20px sans ombre, titres weight 600-700 tracking `-0.025em`, body gray-700, eyebrows uppercase 12-13px, badges pastel ponctuels (jamais en CTA), touches humanisantes, 1 police, pas d'italique.
 
-**Analyse des refs** (extraite des 12 premières pages de chaque PDF) :
+**Décision** : raffiner le design system 2026-05-07 sur ce DNA (le pivot global reste valable).
 
-DNA commun aux deux sites :
+**Appliqué** : token `--radius-pill: 9999px`, `--radius-lg` → 16px ; tous les boutons en pill, `primary` (noir) = CTA par défaut, `accent` (terracotta) marqué rare ; Card radius `xl` (20px), padding `px-6 py-6` ; nouveau `<Section variant="default|tinted" pad="md|lg|xl">` (trame sections alternées) ; login + dashboard CTAs passés en `primary` ; home placeholder enrichie (header, hero, section gris-50, footer).
 
-- Fond blanc + sections alternées gris-50 pour rythme visuel (jamais de fond coloré)
-- CTA principal = **bouton noir plein arrondi pill (`rounded-full`)** — pas terracotta. CTA secondaire = outline gris (`secondary` chez nous).
-- Cards : fond blanc, bordure 1px gris-200, radius généreux (16-20px), pas d'ombre par défaut
-- Titres sans-serif épais (weight 600-700), tracking serré (`-0.025em`)
-- Body en gris muted (`gray-700`)
-- Eyebrows uppercase 12-13px gris (`type-eyebrow`)
-- Badges accent ponctuels colorés (vert pastel "Fonctionnalités" sur taap, rose pour les icônes services designme) — mais jamais en bouton CTA
-- Touches humanisantes : icônes brand circulaires, illustrations subtiles
-- Pas d'italique, une seule police
+**Update même jour — fix polices + cascade CSS** : (1) bug police — `globals.css` référençait `var(--font-geist)` inexistante (le package expose `--font-geist-sans`) → titres rendus en serif fallback ; (2) bug cascade — règles globales `a { color: accent; underline }` au top-level écrasaient les utilities dans les boutons. Fixes : passage à **Inter** via `next/font/google` (weights 400/500/600/700, variable `--font-inter`, package `geist` retiré) ; règles globales wrappées dans `@layer base` ; default `<a>` = `color: inherit; text-decoration: none`, liens inline visibles via classe `.link`. Doc 10 : Geist → Inter.
 
-Différences entre les deux :
+**Update 3e itération — enrichissement DA (4 screens Mobbin/Dribbble, « trop plat »)** : ajout 12 tokens pastel (`--color-blue`, `--color-blue-bg`, … × 6 teintes) + 4 tokens glow ; `Badge` 6 nouveaux tones (blue/green/orange/purple/pink/yellow) + prop `icon` Lucide ; `<StatusDot tone pulse />` (NOUVEAU — cercle 8px + halo) ; `<CornerFrame>` (NOUVEAU — cross-hairs gris aux coins, signature print) ; dep `lucide-react`. Appliqué : hero en CornerFrame, badge Beta avec StatusDot pulse, mix-weight headline, section 5 badges LLM pastel, steps colorées. **Règle de discipline : 1 CornerFrame, 1-2 StatusDot, 5-7 badges colorés max par page** — au-delà = bruit.
 
-- designme.agency intègre des éléments « fancy » : frame monitor avec cross hairs, timecodes, badge vertical "Certified Partner" — accents décoratifs qui donnent du caractère sans bruiter.
-- taap.it/fr/radar plus sage, plus produit. Cards features 2 colonnes avec screenshots dedans, speech bubbles dessinées au stylo pour humaniser.
-
-**Décision** : raffiner le design system 2026-05-07 pour matcher ce DNA précis. Le pivot global reste valable (blanc, grays, 1 police, no italique) — c'est juste le styling fin qui s'aligne sur les refs.
-
-**Conséquences appliquées** :
-
-- `src/app/globals.css` : ajout d'un token `--radius-pill: 9999px` pour les boutons en full pill. `--radius-lg` passe à 16px (au lieu de 14px) pour matcher les cards taap.it.
-- `src/components/ui/button.tsx` : tous les variants passent en `rounded-[var(--radius-pill)]`. Le variant `primary` (noir plein) devient celui par défaut des CTAs. Le variant `accent` (terracotta) est **conservé mais marqué comme rare** dans le commentaire de tête — gardé pour cas marginaux décoratifs, plus pour CTA principal.
-- `src/components/ui/card.tsx` : radius passe de `lg` à `xl` (20px). Padding interne bumpé de `px-5 py-5` à `px-6 py-6`.
-- `src/components/ui/section.tsx` (nouveau) : composant `<Section variant="default" | "tinted" pad="md|lg|xl">` qui pose la trame de sections alternées blanc/gris-50 avec padding standard. Évite de réécrire la même classe à chaque page.
-- `src/app/login/page.tsx` : CTA `Recevoir le lien` passe de `accent` (terracotta) à `primary` (noir). Banners arrondies en `rounded-[var(--radius-lg)]`.
-- `src/app/(app)/app/dashboard/trigger-form.tsx` : bouton "Lancer un run" passe de `accent` à `primary` (noir). Le terracotta reste juste dans le `Badge tone="accent"` du plan trialing — accent ponctuel, comme dans les refs.
-- `src/app/(marketing)/page.tsx` : home placeholder enrichi avec un vrai header (logo + nav + 2 CTAs), hero centré avec Badge "Beta · GEO" + display title + 2 CTAs (noir pill + outline pill), première vraie section "Comment ça marche" sur fond gris-50 avec 3 cards eyebrow + h3 + body, footer minimaliste. Préfigure le travail de PR 8 (vraie home).
-
-**À revisiter** :
-
-- PR 8 (vraie home) : compléter avec « Sans Mamie GEO / Avec Mamie GEO », témoignages, founder visible, FAQ. Reproduire le pattern designme.agency : showcase de screenshots dashboard dans des « monitor frames » avec cross hairs en coin.
-- Si on veut ajouter un peu plus de personnalité comme designme/taap : envisager des touches décoratives (speech bubbles dessinées sur la home, badge vertical "Certified Partner" → "Bootstrap français"), à valider avec Max avant.
-
-**Update 2026-05-11 (même jour) — fix polices + cascade CSS** :
-
-Retour Max sur le rendu preview après PR 7ter : le titre de la home s'affichait en **serif Times-like** et les CTAs noirs avaient un texte « Se connecter → » en **orange souligné** à l'intérieur. Bugs identifiés :
-
-1. **Bug police** : le package `geist` v1.7 expose la variable CSS `--font-geist-sans`, mais `src/app/globals.css` référençait `var(--font-geist)` (variable inexistante). Résultat : chaîne de fallback `ui-sans-serif, system-ui, ...` qui résolvait en serif par défaut du browser sur Vercel preview.
-2. **Bug cascade** : les règles globales `a { color: var(--color-accent); text-decoration: underline }` étaient écrites au top-level du CSS — donc plus prioritaires que les utilities Tailwind `text-white` / `no-underline` appliquées sur les `LinkButton`. Tous les `<a>` héritaient du orange souligné, même à l'intérieur des boutons noirs.
-
-Fixes appliqués :
-
-- **Police** : passage de Geist Sans à **Inter** via `next/font/google` (Max demandait « un Google Font classique sans serif » — Inter est la plus utilisée sur les SaaS modernes). Variable CSS `--font-inter` correctement référencée dans `--font-sans`. Weights 400/500/600/700 chargés. Le package `geist` est retiré des dépendances.
-- **Cascade** : toutes les règles globales (`html`, `body`, `em/i/cite`, `h1-h4`, `a`) sont maintenant wrappées dans `@layer base { ... }`. Tailwind v4 cascade priorise les utilities sur la base layer → un `LinkButton` avec `text-white no-underline` gagne contre tout default `<a>` style.
-- **Liens** : la règle globale `a { color: accent; underline }` est supprimée. Le default `<a>` est désormais `color: inherit; text-decoration: none`. Pour les liens INLINE dans du corps de texte qu'on veut visibles (ex : « GitHub » en footer), on applique explicitement la classe utilitaire `.link` (souligné gris foncé, hover terracotta) — pas de comportement global qui fuite dans les boutons.
-
-**Conséquences sur la doc 10** : remplacer toute mention de Geist Sans par Inter. Mention "police installée via package `geist`" supprimée — Inter passe par `next/font/google` natif.
-
-**Update 2026-05-11 (3e itération du jour) — enrichissement DA suite à 4 screens Mobbin/Dribbble** :
-
-Max remonte que le rendu actuel est « trop plat » et envoie 4 screens d'inspiration : card Active Node avec status dot glow + cross-hairs marks, gallery de pills colorés pastel avec icônes, cards dashboard avec dataviz, tooltip dark mode. Demande de « décrire précisément et intégrer à la charte pour uniformiser et donner plus de personnalité, toujours clean sans extravagance ».
-
-Lecture des screens :
-
-- **Cross-hairs marks** (+ stylisés en gris ultra-light aux coins) : signature « print éditorial » que designme.agency utilise aussi. Cassent la planéité sans bruiter.
-- **Pills colorés pastel** (bleu/orange/vert/violet/rose) avec icône matching à gauche : permettent de catégoriser visuellement (LLMs, types) sans casser le minimalisme blanc.
-- **Status dots avec glow doux** : signal "live/offline" qui donne de la profondeur sans ombres lourdes.
-- **Mix-weight typo** (Active = 700, Node = 400) : joue la hiérarchie sans changer de couleur.
-
-Ajouts au design system :
-
-- `src/app/globals.css` : 12 tokens couleur pastel (`--color-blue`, `--color-blue-bg`, etc. × 6 teintes). 4 tokens glow (`--glow-red/green/orange/blue`).
-- `src/components/ui/badge.tsx` : 6 nouveaux tones (`blue/green/orange/purple/pink/yellow`) avec fond pastel + texte saturé. Prop `icon` slot pour Lucide à gauche du label.
-- `src/components/ui/status-dot.tsx` (NOUVEAU) : `<StatusDot tone="success" pulse />` — cercle 8px coloré avec halo léger, optionnellement pulsé.
-- `src/components/ui/corner-frame.tsx` (NOUVEAU) : `<CornerFrame>` — wrapper qui pose 4 cross-hairs gris-300 aux coins de son enfant. Signature à utiliser sobrement (1-2 occurrences par page).
-- `package.json` : ajout `lucide-react` (icônes sans-serif légères, tree-shake natif).
-
-Application sur la home (placeholder enrichi, pas la vraie home — celle-ci arrive en PR 8) :
-
-- Hero wrappé dans `<CornerFrame>` (signature print subtile)
-- Badge "Beta · Generative Engine Optimization" avec `StatusDot tone="accent" pulse` (signal "live")
-- Mix-weight sur le headline : « Sache enfin si **ChatGPT** parle de toi. »
-- Nouvelle section gris-50 « Les 5 IA qui répondent aux questions de tes futurs clients » avec 5 badges colorés pastel + icônes Lucide (ChatGPT green/MessageCircle, Claude purple/Bot, Perplexity blue/Search, Gemini orange/Sparkles, Le Chat pink/Cat) — c'est le « money shot » qui montre la signature visuelle pastel.
-- Section "Comment ça marche" : "Étape 01/02/03" remplacés par 3 Badge colorés (blue/orange/green) — pose la rythmique multi-couleurs sans casser le minimalisme.
-
-Règle de discipline : utiliser ces patterns **sobrement**. Une page peut avoir 1 `CornerFrame`, 1-2 `StatusDot`, et 5-7 badges colorés max. Au-delà = bruit, on retombe dans l'extravagance.
-
-**À revisiter** :
-
-- PR 8 (vraie home) : décliner ces patterns sur les sections « Sans / Avec » (badges status), « Comment ça marche » (steps colorées déjà posées), « Témoignages » (avatars + pills clients), FAQ, footer enrichi.
-- PR 9+ (dashboard polish) : appliquer `CornerFrame` sur la card hero du dashboard, `StatusDot` sur les runs en cours, badges colorés sur les LLMs dans la table des runs.
+**À revisiter** : décliner sur PR 8 (vraie home) et le dashboard (CornerFrame hero card, StatusDot runs, badges LLM) ; touches décoratives (speech bubbles, badge vertical) à valider avec Max avant.
 
 ---
 
 #### 2026-05-12 — Bilan Phase A + B livrées + bascule Brevo SMTP → REST API (PR 18bis)
 
-**Contexte** : 8 jours après le démarrage Sprint 1, Max a accès au dashboard en prod sur Vercel après résolution finale du blocage login (magic-link via Brevo). Le pipeline produit (Phase A) et la couche UI (Phase B) sont livrés et fonctionnels. Une seule issue ouverte côté Phase A : les runs restent en `pending` après trigger en prod — probable problème de cron Vercel à investiguer (CRON_SECRET pas posé ? `vercel.json` mal lu ?).
+**Contexte** : J+8 du Sprint 1, dashboard accessible en prod. Issue ouverte : runs `pending` en prod (cron Vercel — résolu 2026-05-13).
 
-**Bascule Brevo SMTP → REST API** :
+**Bascule Brevo SMTP → REST** : 2 causes d'échec magic-link sur 3 sessions de debug : (1) `535 Authentication failed` — `BREVO_SMTP_USER` doit être l'identifiant SMTP `xxxxxxx@smtp-brevo.com`, pas l'email de compte (doc + `.env.example` mis à jour) ; (2) `525 Unauthorized IP address` — le plan Brevo Free impose une IP whitelist SMTP, incompatible avec les IPs serverless dynamiques Vercel.
 
-L'envoi du magic-link de login a planté pendant 3 sessions de debug consécutives avec une cascade d'erreurs Brevo :
+**Décision** : backend **REST API** (`https://api.brevo.com/v3/smtp/email`, clé `xkeysib-...`) non soumis à la whitelist. `src/lib/email.ts` supporte les 2 backends via `pickBackend()` : `BREVO_API_KEY` défini → REST (prioritaire), sinon SMTP nodemailer (fallback legacy, utile en local + `pnpm test:smtp`). 3 env vars : `BREVO_API_KEY`, `BREVO_FROM_EMAIL`, `BREVO_FROM_NAME` ; les `BREVO_SMTP_*` deviennent optionnelles.
 
-1. `535 5.7.8 Authentication failed` → cause 1 : `BREVO_SMTP_USER` était l'email de compte Brevo (`maxencecailleau.pro@gmail.com`) alors que Brevo attend l'identifiant SMTP généré sous la forme `xxxxxxx@smtp-brevo.com` (visible dans le dashboard Brevo sous le label « Connexion » à côté du serveur SMTP). Doc et `.env.example` mis à jour pour prévenir ce piège.
-2. `525 5.7.1 Unauthorized IP address` → cause 2 : le plan Brevo Free impose une IP whitelist SMTP qu'on ne peut pas désactiver. En local on peut whitelister l'IP de la machine, mais Vercel utilise des IPs serverless dynamiques non-whitelistables stablement.
+**Bilan Phase A** : pipeline complet `schedule-runs → execute_prompt → score_response → recompute_metrics → dashboard` ; coûts mesurés ~$0,04/run tracking + ~$0,003/scoring Haiku.
+**Bilan Phase B** : design system custom, 9 routes publiques + 5 routes app, blog MDX 3 articles, lead magnet, onboarding wizard 3 étapes (suggestion Haiku, PR 13), settings (PR 16), légales placeholder (PR 17).
 
-**Décision** : bascule du backend Brevo de SMTP vers **REST API** (`https://api.brevo.com/v3/smtp/email`). L'API REST n'est pas soumise à l'IP whitelist du plan Free — elle s'authentifie via une clé API HTTP `xkeysib-...` (différente de la clé SMTP `xsmtpsib-...`).
-
-Implémentation : `src/lib/email.ts` supporte désormais les **2 backends en parallèle**, sélection automatique via `pickBackend()` :
-
-- Si `BREVO_API_KEY` défini → REST API (prioritaire)
-- Sinon → SMTP nodemailer (fallback legacy)
-
-Avantages :
-
-- En prod Vercel : REST API marche sans whitelist IP
-- En local : SMTP peut continuer à marcher si l'IP locale est whitelistée (utile pour debug avec `pnpm test:smtp` en mode verbose)
-- Compat retro : aucune migration imposée aux dev qui ont déjà leur config SMTP
-
-3 nouvelles vars d'env optionnelles : `BREVO_API_KEY`, `BREVO_FROM_EMAIL`, `BREVO_FROM_NAME`. Les anciennes `BREVO_SMTP_*` deviennent optional (fallback). `.env.example` documenté avec les 2 modes.
-
-**Bilan Phase A** : moteur complet sur Haiku 4.5 livré (PR 1 à 5). Le pipeline `schedule-runs → execute_prompt → score_response → recompute_metrics → dashboard` tourne en local et sur Vercel. Coûts mesurés sur seed dev : ~$0,04 par run de tracking + ~$0,003 par scoring Haiku.
-
-**Bilan Phase B** : design system custom (Tailwind v4 + composants ui/), 9 routes publiques + 5 routes app, blog MDX (3 articles), lead magnet capture, onboarding wizard 3 étapes avec suggestion de prompts via Haiku (PR 13), page settings (PR 16), pages légales V0 placeholder (PR 17). Direction artistique Airbnb-like minimaliste actée le 2026-05-07 et raffinée par dégradés warm + bento cards + hover gradients le 2026-05-11.
-
-**À revisiter** :
-
-- Issue connue Phase A : cron en prod ne traite pas les jobs (runs `pending`). À investiguer en priorité — sans cron qui tourne, le bouton « Lancer un run » crée des jobs mais aucun n'est exécuté.
-- DNS Brevo : finaliser DKIM/SPF/DMARC sur `mamie-geo.fr` pour avoir un sender `hello@mamie-geo.fr` validé. En attendant, un sender perso validé suffit.
-- Pages légales : valider avec juriste avant lancement public payant (1500 € budgété dans doc 08).
-- Le `nodemailer` reste dans les deps tant que `pnpm test:smtp` est utile pour debugger SMTP (le script construit son propre transporter local en mode verbose). À retirer quand on aura assez de recul sur la REST API.
+**À revisiter** : cron prod (résolu 2026-05-13) ; DNS Brevo DKIM/SPF/DMARC pour `hello@mamie-geo.fr` ; pages légales à valider juriste avant lancement payant (1 500 € budgété doc 08) ; retirer `nodemailer` quand recul suffisant sur la REST API.
 
 ---
 
 #### 2026-05-12 — Foundation design post-connexion : sidebar app + 11 primitifs Radix + 2 wrappers Recharts
 
-**Contexte** :
-
-L'app authentifiée n'avait que 2 liens de nav (Dashboard / Réglages) dans un `<AppHeader>` minimaliste — insuffisant pour scale aux 5+ sections nécessaires (Dashboard, Prompts, Concurrents, Runs, Réglages, Billing). Côté primitifs UI, les composants critiques pour les pages CRUD à venir (Prompts, Concurrents, Settings étendu) manquaient : Dialog, DropdownMenu, Tabs, Switch, Tooltip, Toast, Skeleton, Banner, EmptyState, Pagination, Sheet (drawer mobile). Côté charts, l'évolution 30j et le score par LLM mentionnés dans doc 02 n'étaient pas implémentés. Cette PR pose la **foundation** avant les pages CRUD elles-mêmes.
-
-**Options considérées** :
-
-| Sujet             | Option A (retenue)                              | Option B                               | Option C                                   |
-| ----------------- | ----------------------------------------------- | -------------------------------------- | ------------------------------------------ |
-| Nav app           | Sidebar verticale gauche fixed (w-60)           | Top nav étendu + brand switcher        | Hybride top global + sub-nav contextuel    |
-| Charts            | Tremor → bascule Recharts pur                   | Tremor Raw (TW v4 ready)               | Custom SVG + Recharts au besoin            |
-| Primitifs UI      | shadcn/ui sur Radix (copy-paste manuel restylé) | Radix nu + wrappers maison             | Custom from-scratch comme `Button`, `Card` |
-| Exclusion sidebar | Route group `(with-nav)` Next 15                | `useSelectedLayoutSegment` côté client | Wrapper `<WithSidebar>` opt-in par page    |
-| Toasts            | `sonner`                                        | Notistack / custom                     | —                                          |
+**Contexte** : nav app limitée à 2 liens ; primitifs CRUD manquants ; pas de charts. Foundation posée avant les pages CRUD.
 
 **Choix** :
+1. **Sidebar verticale gauche w-60** (drawer `<Sheet>` mobile) — vs top nav étendu ou hybride. Scale propre à 6+ sections, brand switcher en place.
+2. **Recharts pur** (pas Tremor) : Tremor v3 lié à TW v3, Tremor Raw non testé TW v4 ; wrappers minces suffisent, Recharts est de toute façon une transitive dep de Tremor.
+3. **shadcn/ui sur Radix** copié-collé manuellement (pas de `shadcn init`, design system custom existant), restylé avec nos tokens — a11y Radix gratuite (focus trap, ARIA, keyboard).
+4. **Route group `(with-nav)`** : dashboard/runs/settings dessous, onboarding dehors (full-screen) ; URLs inchangées.
+5. **sonner** pour les toasts.
 
-1. **Sidebar verticale gauche** (w-60, collapsible mobile via `<Sheet>` drawer). Pattern SaaS data-driven standard, scale propre à 6+ sections.
-2. **Recharts pur** (pas Tremor). Tremor v3 est lié à Tailwind v3, et Tremor Raw n'a pas été testé en TW v4 avec nos tokens custom — des wrappers Recharts minces suffisent et donnent un contrôle total.
-3. **shadcn/ui sur Radix** : copie manuelle des fichiers (pas de `shadcn init` car notre design system custom existe déjà), restylé avec nos tokens (`--color-ink`, `--radius-xl`, etc.). Accessibilité Radix gratuite (focus trap, ARIA, keyboard nav, ESC, click-outside).
-4. **Route group `(with-nav)`** : `/app/dashboard`, `/app/runs/[id]`, `/app/settings` déplacés sous `src/app/(app)/app/(with-nav)/`. `/app/onboarding` reste en dehors → full-screen wizard sans sidebar. Les URLs restent identiques (les groupes `()` n'affectent pas le routing).
-5. **sonner** pour les toasts (recommandé shadcn, API simple, déjà customisable via classNames).
+**Deps ajoutées** : `@radix-ui/react-dialog ^1.1.15`, `react-dropdown-menu ^2.1.16`, `react-tabs ^1.1.13`, `react-switch ^1.2.6`, `react-tooltip ^1.2.8`, `react-slot ^1.2.4`, `sonner ^2.0.7`, `recharts ^3.8.1`, `class-variance-authority ^0.7.1`, `clsx ^2.1.1`, `tailwind-merge ^3.6.0`.
 
-**Justification** :
+**Conséquences** : 11 primitifs dans `@/components/ui` (Dialog, Sheet, DropdownMenu, Tabs, Switch, Tooltip, Skeleton, Banner, EmptyState, Pagination, Toaster) + 2 wrappers `@/components/charts` (LineChart, BarChartHorizontal) + helper `cn()` ; 4 pages rafraîchies (dashboard charts 30j, onboarding progress, run detail tabs, settings cards) ; `triggerRunNow` avec Dialog + toast ; animations CSS `--animate-*` dans globals ; `loadSidebarData()` mémoïsé `React.cache()` ; `getVisibilityTrend(brandId, days=30)` dans `src/lib/dashboard/queries.ts`.
 
-- Sidebar : permet de poser une nav stable avant que les pages CRUD à venir ne forcent une refonte de la nav en plein milieu. Le brand switcher (DropdownMenu) est en place dès maintenant — utile dès que les comptes Pro/Agence ajouteront 3-10 brands.
-- Recharts vs Tremor : décision tactique pendant l'exécution. Tremor v3 incompatible TW v4. Tremor Raw nécessitait du copy-paste lourd avec risque d'incompat sur les styles. Recharts est solide, sa surface API petite suffit ici (LineChart + BarChart horizontal), et il est de toute façon une transitive dep de Tremor — autant l'utiliser directement.
-- shadcn/Radix vs custom : les primitifs `Dialog`, `DropdownMenu` etc. ont une surface d'a11y non triviale (focus trap, ARIA, keyboard nav). Réécrire ça maison aurait été 2-3× plus de code pour un résultat moins solide. shadcn fournit la base, on customise les classes via nos tokens.
-- Route group : pattern Next 15 officiel pour faire varier le layout sans changer les URLs. Plus propre que `useSelectedLayoutSegment` (qui forcerait un client wrapper) ou un wrapper opt-in par page (boilerplate).
+**Exclu (PRs suivantes)** : pages CRUD prompts/competitors ; settings étendu (équipe, billing, audit logs) ; états trial/quota/hard-cap ; `/app/admin` ; E2E des 7 flows ; tests unit React des wrappers (déléguée au E2E manuel).
 
-**Dépendances ajoutées** :
-
-`@radix-ui/react-dialog ^1.1.15`, `@radix-ui/react-dropdown-menu ^2.1.16`, `@radix-ui/react-tabs ^1.1.13`, `@radix-ui/react-switch ^1.2.6`, `@radix-ui/react-tooltip ^1.2.8`, `@radix-ui/react-slot ^1.2.4`, `sonner ^2.0.7`, `recharts ^3.8.1`, `class-variance-authority ^0.7.1`, `clsx ^2.1.1`, `tailwind-merge ^3.6.0`.
-
-**Conséquences attendues** :
-
-- 11 primitifs UI disponibles dans `@/components/ui` (Dialog, Sheet, DropdownMenu, Tabs, Switch, Tooltip, Skeleton, Banner, EmptyState, Pagination, Toaster). 2 wrappers chart dans `@/components/charts` (LineChart, BarChartHorizontal). 1 helper `cn()` dans `@/lib/utils`.
-- 4 pages existantes rafraîchies : dashboard (charts évolution 30j + score par LLM en barres + empty states), onboarding wizard (progress bar 3 segments), run detail (tabs Réponse / Citations / Scoring), settings (sections cards).
-- `triggerRunNow` server action côté dashboard : confirmation via `<Dialog>` + feedback via `<toast>` (au lieu d'un texte inline).
-- Animations CSS ajoutées à `globals.css` (`@keyframes fade-in`, `fade-out`, `zoom-in`, `zoom-out`, `slide-in-left`, `slide-out-left`, `skeleton-pulse`) + tokens `--animate-*` consommables via classes `animate-fade-in` etc.
-- Helper data `loadSidebarData()` mémoïsé via `React.cache()` — pas de duplication query workspace/brands entre layout et page.
-- Nouvelle query `getVisibilityTrend(brandId, days=30)` dans `src/lib/dashboard/queries.ts` (agrégation `citation_metrics_daily` pivotée par LLM).
-
-**Périmètre exclu** (PRs suivantes — explicitement pas dans cette PR) :
-
-- `/app/prompts` (liste + CRUD) et `/app/prompts/[id]` (détail breakdown par LLM)
-- `/app/competitors` (gestion post-onboarding)
-- Settings étendu : sections Équipe (invitations Pro+), Billing (Customer Portal Stripe), Audit logs
-- États spéciaux : trial countdown banner, quota warnings 60 %/100 %, hard-cap 200 % block screen
-- Page `/app/admin` (MRR, runs/jour, coûts LLM)
-- E2E Playwright des 7 flows critiques (s'écriront quand les pages CRUD existent)
-- Tests unit React des primitifs Radix-wrappers (nécessiterait `@testing-library/react` + jsdom — coverage déléguée au E2E manuel en attendant)
-
-**À revisiter** :
-
-- Si le scaling de la nav atteint 8+ sections, envisager des "groups" ou une sidebar collapsible en mode rail. Pas avant.
-- Si Tailwind v4 ou un futur add-on sort une animation lib first-class, retirer les `@keyframes` custom de `globals.css`.
-- BrandSwitcher V0 montre les brands mais ne permet pas encore de switcher la brand active (URL/cookie). À traiter quand le multi-brand est livré (Pro plan).
-- Le wrapper `Pagination` est en mode prev/next simple. Si on ajoute > 100 prompts par workspace il faudra des numbers + ellipsis.
+**À revisiter** : sidebar rail si 8+ sections ; BrandSwitcher sans switch actif (à traiter au multi-brand Pro) ; Pagination numbers + ellipsis si > 100 prompts.
 
 ---
 
 #### 2026-05-12 — Polish dashboard : Stats enrichies, SegmentedControl, AreaChart à gradient, BreakdownBars
 
-**Contexte** :
-
-Après la PR « foundation design post-connexion » (sidebar + primitifs Radix + charts de base), Max a partagé 3 screens de dashboards SaaS contemporains comme références visuelles pour aller plus loin. Le dashboard Mamie GEO restait fonctionnellement correct mais visuellement basique — il manquait les codes contemporains : delta arrow visible sur chaque stat, time-range picker au-dessus des charts, pattern « breakdown » (bars + légende + liste) pour les répartitions catégorielles, area chart à gradient. En parallèle, Max a relevé une redite : le nom « Mamie GEO » apparaissait deux fois côté sidebar (top desktop + centre du header mobile) alors que l'utilisateur connecté sait déjà où il est.
+**Contexte** : 3 screens de référence SaaS fournis par Max ; dashboard fonctionnel mais visuellement basique ; redite « Mamie GEO » ×2 dans le chrome.
 
 **Patterns ajoutés** (cf. doc 10 § « Patterns dashboard ») :
+1. **`Stat` enrichie** : 8 `iconTone` pastel, cercle 32 px icône Lucide, prop `delta?: { value, period }` (TrendingUp/Down + % signé coloré + libellé small caps). Rétro-compatible (props optionnelles).
+2. **`SegmentedControl`** : pill group, container gray-100, actif fond blanc + shadow-sm, API contrôlée générique.
+3. **`AreaChart`** : mono-série `linearGradient` (0.25 → 0), axe Y droite, `ReferenceLine` optionnelle — livré dans la lib, pas encore utilisé (futur : coût cumulé, volumétrie).
+4. **`BreakdownBars`** : bars verticales colorées + légende dots + liste valeurs tabulées, modes `absolute`/`share` — plus lisible que `BarChartHorizontal` pour 5 segments (qui reste exporté).
 
-1. **`Stat` enrichie** : 8 `iconTone` pastel (blue/green/orange/purple/pink/yellow/accent/neutral), cercle 32 px à droite avec icône Lucide centrée. Prop `delta?: { value, period }` qui affiche `TrendingUp`/`Down` Lucide + pourcentage signé coloré + libellé SMALL CAPS muted.
-2. **`SegmentedControl`** : pill group horizontal, container `gray-100` + items radius `pill`, actif = fond blanc + shadow-sm. API contrôlée générique (`value`/`onValueChange`/`options`).
-3. **`AreaChart`** : Recharts `AreaChart` mono-série avec `linearGradient` (top 0.25 → bottom 0), axe Y droite, `ReferenceLine` dashée optionnelle (couleur accent terracotta).
-4. **`BreakdownBars`** : rangée de bars verticales colorées + légende dots inline + liste « dot + label · valeur tabulée à droite ». Modes `absolute` ou `share`.
+**Appliqué** : 4 stats avec iconTone sémantique + delta vs J-7 via `computeDelta()` (exposé depuis `@/lib/dashboard/queries`, réutilisable) ; `<TrendSection>` client avec SegmentedControl 7/30/90 j (90 j chargés serveur, slice client → switch instantané) ; « Score par LLM » → BreakdownBars 5 segments `LLM_COLORS` ; section « Top concurrents cités » retirée (info portée par la stat du haut). Mentions de marque réduites : titre sidebar = nom du workspace, header mobile sans « Mamie GEO » centré (brand fatigue).
 
-**Appliqués sur le dashboard** :
-
-- 4 stats du haut → `iconTone` choisi sémantiquement (Flame orange pour score visibilité, Activity green pour citations, Users purple pour concurrents, DollarSign blue pour coût). Delta `vs J-7` calculé côté serveur via le nouveau helper `computeDelta()` à partir du `getVisibilityTrend(90)`.
-- Section « Évolution de visibilité » → nouveau composant client `<TrendSection>` qui wrap le `LineChart` existant avec un `SegmentedControl` (7 j / 30 j / 90 j). Le filtrage range est client-side : on charge 90 jours côté serveur, le composant slice côté client → switch instantané sans re-fetch.
-- Section « Score par LLM aujourd'hui » → remplacée par `<BreakdownBars>` avec 5 segments (un par LLM, couleur LLM_COLORS, valeur = visibilityScore du jour, suffix `" / 100"`).
-- Section « Top concurrents cités » → retirée du dashboard (info déjà portée par la stat « Top concurrent » du haut). Réduit la verticalité, allège la page.
-
-**Mentions de marque réduites** :
-
-- Sidebar desktop top : le titre n'est plus « Mamie GEO » + workspace name en sous-titre, mais directement **le nom du workspace** comme titre primaire. Le brand switcher juste dessous précise la marque trackée.
-- Header mobile : retrait du « Mamie GEO » centré. On garde juste le hamburger à gauche et le nom du workspace à côté.
-- Pages marketing/blog/login : aucun changement (utilisateur non identifié, contexte différent).
-- Placeholder onboarding `placeholder="Mamie GEO"` dans le formulaire de création de brand : conservé (c'est une démo d'exemple, pas une affirmation de marque).
-
-**Justification** :
-
-- Les screens partagés (Lead Source Breakdown + quad stats avec icons + area chart à gradient) sont des standards SaaS modernes. Les copier exactement aurait été coûteux et hors charte ; les **adapter au design system Airbnb-like** existant (tokens custom, palette pastel déjà en place) est cohérent et rapide.
-- Le pattern « breakdown bars + légende + liste » est plus lisible que le `BarChartHorizontal` Recharts initial pour une répartition à 5 segments — il combine visualisation et lecture exacte des valeurs dans le même bloc. Le `BarChartHorizontal` reste exporté pour des cas futurs (>5 segments, comparatif large).
-- Réduire les répétitions « Mamie GEO » dans le chrome de l'app est de l'hygiène UX. L'utilisateur connecté est dans le produit — affirmer le nom à chaque écran tient du brand fatigue.
-
-**Conséquences attendues** :
-
-- API `Stat` enrichie est rétro-compatible (`icon`, `iconTone`, `delta` sont tous optionnels — l'appel `<Stat label value />` continue de marcher).
-- `computeDelta(current, previous)` exposé depuis `@/lib/dashboard/queries` — utilisable par d'autres pages (`/app/competitors` à venir notamment).
-- Nouveau wrapper client `TrendSection` à côté de `page.tsx` — pattern à reproduire pour les autres charts qui auront besoin d'un time-range picker.
-- Le dashboard reste pleinement fonctionnel quand l'historique est vide (EmptyState par section, deltas qui retombent sur `hint`).
-
-**Périmètre exclu** (PRs suivantes) :
-
-- Le `BarChartHorizontal` reste dans le repo (utilisable ailleurs) mais n'est plus dans le dashboard.
-- Le pattern toolbar « Import/Export + Create New » du screen 1 n'est pas ajouté : pas de feature CRUD encore (Prompts et Competitors arrivent en PR suivante avec leur propre toolbar).
-- L'`AreaChart` est livré dans la lib mais n'est pas encore utilisé dans le dashboard — il servira pour les métriques single-series (coût cumulé, volumétrie de runs) en PRs futures.
-
-**À revisiter** :
-
-- Le delta « vs J-7 » est codé en dur. Quand on aura plusieurs périodes pertinentes (J-7, J-30, mois calendaire), le rendre paramétrable via le futur `SegmentedControl` global du dashboard.
-- Couleurs LLM dans `BreakdownBars` : aujourd'hui le mapping vient de `LLM_COLORS` côté charts. Quand on aura un Brand multi-LLM, vérifier que l'ordre stable (chatgpt/claude/perplexity/gemini/lechat) est cohérent partout (sidebar, charts, listes, badges).
+**À revisiter** : delta « vs J-7 » paramétrable quand plusieurs périodes pertinentes ; cohérence de l'ordre LLM (chatgpt/claude/perplexity/gemini/lechat) partout.
 
 ---
 
 #### 2026-05-13 — Cron prod stuck résolu (cause racine Vercel Cron GET vs POST) + worker `send_weekly_email` (weekly recap)
 
-**Contexte** :
+**Cause racine cron stuck** : les routes cron n'exposaient que `POST`, or **Vercel Cron envoie uniquement des `GET`** (avec `Authorization: Bearer ${CRON_SECRET}` auto-injecté) → le handler GET répondait `{ ok: true }` sans rien exécuter, le dispatcher ne tournait jamais.
 
-Deux chantiers liés. (1) Les runs restaient en `pending` côté prod alors que tout marchait en local — blocker critique sans lequel rien ne tournait pour la beta. (2) Le worker `send_weekly_email` était un stub qui throwait `not yet implemented (Phase A)` — bloquait la boucle d'engagement utilisateur.
+**Options** : A GET et POST sur le même handler (retenu — rétro-compatible avec les tests `curl -X POST`) / B GET only / C middleware GET→POST (sur-abstraction). Appliqué aux 3 endpoints (`dispatch`, `schedule-runs`, `schedule-weekly-emails`).
 
-**Cause racine du cron prod stuck** :
+**Instrumentation** : `logCronEvent()` dans `src/lib/cron-logger.ts` (JSON logs ligne-par-ligne, parsés nativement par Vercel) ; endpoint debug `GET /api/cron/dispatch?inspect=1` (auth requise) : countsByStatus, 10 derniers jobs, présence **booléenne** des env vars critiques (`CRON_SECRET`, `DATABASE_URL`, `ANTHROPIC_API_KEY`, `BREVO_API_KEY`, `NEXT_PUBLIC_APP_URL`), server time UTC. Pattern standard pour les futurs crons.
 
-À la lecture du code des endpoints `/api/cron/dispatch` et `/api/cron/schedule-runs`, l'erreur saute aux yeux : **les routes n'exposent que `POST`**, mais **Vercel Cron envoie uniquement des `GET`** (avec header `Authorization: Bearer ${CRON_SECRET}` automatiquement injecté). Conséquence : Vercel pingait les endpoints, qui répondaient `{ ok: true }` via le handler `GET` (sans rien exécuter), et le dispatcher ne tournait jamais.
+**Worker `send_weekly_email`** — scope V0 weekly recap uniquement (nurture trial J+3/J+10 reportée : dépend du state Stripe fiabilisé en PR Stripe). Flow : workspace + brand → skip si 0 run.success sur 7 j (log `email_skipped_no_data`) → agrégats `citation_metrics_daily` 7 j vs 7 j précédents → top 3 concurrents (`competitorsData` JSONB) → membres → `renderWeeklyRecap()` (HTML inline table-based + text fallback, échappement XSS testé) → `sendWeeklyRecapEmail()` via nouveau `sendTransactional()` générique (REST prioritaire, SMTP fallback) → log `events.kind = "email_sent"` par destinataire. Idempotence : `send_weekly_email:{workspaceId}:{isoWeek}` (helper `isoWeekFromDate()`, format `YYYY-Www`).
 
-Diagnostic confirmé sans avoir besoin des logs Vercel (la cause est évidente à lecture du code une fois la convention Vercel Cron rappelée).
+**Fichiers ajoutés** : `src/lib/cron-logger.ts`, `src/lib/email/templates/weekly-recap.ts` (+test), `src/workers/send-weekly-email{,-payload}.ts` (+tests), `/api/cron/schedule-weekly-emails/route.ts`. Modifiés : routes `dispatch` + `schedule-runs` (GET handler + logs + inspect), `src/lib/email.ts` (+`sendTransactional` +`sendWeeklyRecapEmail`), `vercel.json` (`0 9 * * 1`). 19 nouveaux tests unit.
 
-**Options considérées** :
-
-- **A : Faire pointer GET et POST sur le même handler** (retenue). Simple, rétro-compatible avec les tests manuels `curl -X POST`, et match la convention Vercel.
-- B : Refactor pour n'exposer que GET (cassait les tests manuels existants côté `/api/runs/trigger`-style).
-- C : Wrapper l'endpoint avec un middleware qui transforme GET → POST. Trop d'abstraction pour un problème de 2 lignes.
-
-**Choix** : option A. `export const GET = handler; export const POST = handler;` (en pratique : `export async function GET(req) { return handle(req); }` + idem POST). Tous les 3 endpoints cron (`dispatch`, `schedule-runs`, `schedule-weekly-emails`) suivent ce pattern.
-
-**Instrumentation ajoutée** :
-
-- Helper `logCronEvent()` dans `src/lib/cron-logger.ts` : émet `console.log(JSON.stringify({...}))` ligne-par-ligne. Vercel parse les JSON logs nativement → events filtrables dans le dashboard sans regex (`event:"job_succeeded"`, etc.).
-- Endpoint debug `GET /api/cron/dispatch?inspect=1` (auth requise) : retourne JSON avec `countsByStatus` (pending/claimed/done/failed/dead), 10 derniers jobs, présence (booléen seul, jamais la valeur) des env vars critiques (`CRON_SECRET`, `DATABASE_URL`, `ANTHROPIC_API_KEY`, `BREVO_API_KEY`, `NEXT_PUBLIC_APP_URL`), server time UTC. Permet de diagnostiquer un futur blocker sans déployer du code.
-
-**Worker `send_weekly_email` — scope V0 « weekly recap uniquement »** :
-
-Cf. arbitrage 2026-05-12 (avant la session) : on couvre uniquement le récap hebdo, pas la nurture trial (J+3 / J+10). Justification : la nurture trial nécessite de connaître le state Stripe (`trialEndsAt`, `currentPeriodStart`) qui sera fiabilisé dans la PR « Stripe checkout + webhooks ». Lier les deux maintenant aurait introduit du code à re-aligner.
-
-**Flow du worker** :
-
-1. Charge workspace + brand principale (V0 = 1 brand par workspace).
-2. Compte `runs.success` des 7 derniers jours. Si 0 → log `email_skipped_no_data` et return early (pas d'email vide envoyé).
-3. Agrège `citation_metrics_daily` sur 7 j (cette semaine) et 7 j antérieurs (semaine précédente) pour calculer les deltas par moyenne.
-4. Charge top 3 concurrents cités cette semaine via `competitorsData` JSONB.
-5. Charge les membres du workspace (V0 = owner uniquement, prêt pour invitations Pro+).
-6. Render le template via `renderWeeklyRecap()` (HTML inline + text fallback).
-7. Envoie via `sendWeeklyRecapEmail()` qui passe par le `sendTransactional()` générique (Brevo REST API prioritaire, SMTP fallback).
-8. Log `events.kind = "email_sent"` par destinataire avec `messageId`.
-
-**Template** :
-
-Structure HTML inline (table-based pour compat Gmail/Outlook), CSS dans `<style>` + `style="..."` attributes pour les éléments dynamiques. 4 stats en grille 2×2 (label, valeur, delta avec flèche colorée), bloc top 3 concurrents, CTA pill noir « Voir le dashboard complet », footer avec rappel d'inscription + lien vers `/app/settings`. Échappement HTML sur tous les champs dynamiques (test inclus pour XSS sur `workspaceName`).
-
-**Idempotence** :
-
-`idempotency_key = send_weekly_email:{workspaceId}:{isoWeek}` (déjà défini dans `src/lib/queue/types.ts`). Format ISO 8601 semaine `YYYY-Www` via le helper `isoWeekFromDate()` (algo standard jeudi de la semaine ISO). Si le cron `schedule-weekly-emails` est rejoué dans la même semaine ISO → re-enqueue no-op.
-
-**Conséquences attendues** :
-
-- Tous les workers en pending côté prod vont commencer à être traités au prochain tick de cron (toutes les 5 min). Premier email weekly recap envoyé le lundi suivant le merge pour le workspace de test (Max).
-- Le pattern logs JSON + endpoint inspect est désormais le standard pour les futurs crons (`schedule-weekly-emails` l'applique d'emblée).
-- Nouveau helper `sendTransactional()` dans `src/lib/email.ts` factorise le switch REST/SMTP — utilisé par `sendWeeklyRecapEmail()`, utilisable par les futurs templates (nurture, audit-ready alert, etc.) sans re-dupliquer le boilerplate.
-- 19 nouveaux tests unit (10 payload parser + 9 template render) — couvre les briques pures. Les tests d'intégration full DB du worker viendront avec le setup branche-Neon-par-PR mentionné dans CLAUDE.md.
-
-**Fichiers ajoutés** :
-
-- `src/lib/cron-logger.ts`
-- `src/lib/email/templates/weekly-recap.ts` (+ `.test.ts`)
-- `src/workers/send-weekly-email.ts` + `send-weekly-email-payload.ts` (+ `.test.ts`)
-- `src/app/api/cron/schedule-weekly-emails/route.ts`
-
-**Fichiers modifiés** :
-
-- `src/app/api/cron/dispatch/route.ts` (GET handler + JSON logs + inspect mode + case `send_weekly_email`)
-- `src/app/api/cron/schedule-runs/route.ts` (GET handler + JSON logs)
-- `src/lib/email.ts` (ajout `sendTransactional()` + `sendWeeklyRecapEmail()`)
-- `vercel.json` (ajout du cron `0 9 * * 1` pour `schedule-weekly-emails`)
-
-**À revisiter** :
-
-- Si le pattern `events` table de logs (kind `email_sent`, `email_skipped_no_data`, etc.) devient riche, considérer un index supplémentaire sur `(kind, createdAt)` ou une vue matérialisée pour les requêtes BI internes.
-- Le worker envoie 1 email par membre du workspace. En V1 multi-membre (Pro = 10 users), considérer un bouton de désinscription par membre (UNSUBSCRIBE_TOKEN) plutôt qu'un opt-out workspace global.
-- Aujourd'hui le worker fait 4 queries SQL (workspace, brand, métriques this+last, top concurrents). Si on a beaucoup de workspaces actifs, profiler et envisager un CTE unique.
-- Le helper `isoWeekFromDate()` est dupliqué côté worker (peut-être déplaçable dans `src/lib/dates.ts` si on en a besoin ailleurs).
+**À revisiter** : index `(kind, createdAt)` sur `events` si la table grossit ; unsubscribe par membre (UNSUBSCRIBE_TOKEN) en V1 multi-membre ; CTE unique si beaucoup de workspaces actifs ; déplacer `isoWeekFromDate()` dans `src/lib/dates.ts` si réutilisé.
 
 ---
 
 #### 2026-05-13 — Refresh home inspiré Semrush AI SEO (data + features nommées + glossaire vocabulaire)
 
-**Contexte** :
+**Contexte** : comparatif vs semrush.com/ai-seo/overview. 4 gaps : zéro chiffre marketing, features non nommées, vocabulaire métrique flou, pas de narrative « why now ». 8 forces à protéger (que Semrush ne peut pas copier) : tu/direct, honnêteté « n'est pas… », Le Chat inclus, EU/RGPD, pricing transparent, personas humains, lead magnet.
 
-Analyse comparative de `https://www.semrush.com/ai-seo/overview/` (référence du marché) vs notre home Mamie GEO. 4 gaps identifiés : (1) aucun chiffre marketing chez nous vs 10+ stats chez Semrush, (2) features non nommées (« tracking » générique) vs 12 produits Semrush distincts, (3) vocabulaire métrique flou vs 3 termes Semrush ownés (« AI Visibility Score », « Share of Voice », « Sentiment »), (4) pas de narrative « why now » vs Semrush qui ouvre sur l'urgence. À l'opposé, on identifie 8 forces à PROTÉGER que Semrush ne peut pas copier : tonalité tu/direct, honnêteté « n'est pas… », Le Chat inclus, EU/RGPD, pricing transparent + trial sans CB, personas humains, lead magnet.
+**Options** : A refresh ciblé ~415 lignes (retenu) / B minimal ~150 (ne ferme aucun gap) / C refonte complète ~1200+ (« copié » plus qu'« inspiré »).
 
-Cette PR refresh la home avec **2 sections nouvelles** (« Pourquoi maintenant ? » avec 4 stats, « Tes outils » avec 5 features nommées) + retouche le hero (chiffre-marteau en ouverture du sous-titre) + cale le vocabulaire métrique dans la doc 02 (glossaire officiel) + snapshot Semrush daté dans la doc 01.
+**Choix** : 2 sections nouvelles (« Pourquoi maintenant ? » 4 stats + « Tes outils » 5 features nommées) + hero retouché (chiffre-marteau) + glossaire officiel doc 02 + snapshot Semrush daté doc 01.
+- Stats sourcées : ×6 trafic AI 2025, ×4,4 conversion, 60 % zero-click (Semrush blog / SparkToro) + « 5 plateformes IA majeures dont Le Chat ». **Règle de vérité : aucun chiffre inventé, source cliquable, chiffre remplacé si la source meurt.**
+- 5 features nommées (pas 12 — V0 honnête) : Score de visibilité IA / Part de voix / Sentiment / Comparatif concurrents / Rapport hebdo.
+- Vocabulaire FR : « Part de voix » (pas « Share of Voice »), Sentiment conservé. Glossaire dans doc 02.
+- **Pas de demo path** (le funnel transparent est un différenciateur) ; **pas de social proof artificielle** (on attend les vrais beta testers).
 
-**Options considérées** :
+**Fichiers** : + `_sections/pourquoi-maintenant.tsx`, `_sections/tes-outils.tsx` ; modifiés : `hero.tsx`, `(marketing)/page.tsx`, docs 01/02. Pas d'impact backend/DB.
 
-- **A : Refresh ciblé** (retenue). 2 sections nouvelles + hero retouché + glossaire + snapshot. Scope ~415 lignes, faisable en une PR.
-- B : Refresh minimal. Juste un chiffre dans le hero + glossaire. ~150 lignes mais ne ferme aucun gap structurel.
-- C : Refonte complète. Tout A + page `/comparatif` dédiée + roadmap V1 enrichie (Prompt Research DB, AI-Readiness audit…). ~1200+ lignes, plusieurs PR, sortie de scope « inspiré » → « copié ».
-
-**Choix** : A (refresh ciblé). Justification : pose les fondations (vocabulaire, data, features nommées) sans surcharger le scope. Le reste suit en PRs futures si la traction confirme l'intérêt.
-
-**Sourcing des chiffres** :
-
-Choix : **mix externe + 1 stat FR**. Les 3 stats externes (×6 trafic AI 2025, ×4,4 conversion, 60 % zero-click) viennent de Semrush blog / SparkToro — publics et réutilisables. La 4ᵉ « stat » FR est un fait verifiable (« 5 plateformes IA majeures dont Le Chat de Mistral ») qui sert aussi de pont vers la section LLMBadges qui suit immédiatement.
-
-**Règle de vérité** posée : **aucun chiffre inventé**. Pour chaque stat, la source est cliquable (lien externe ou ancre interne vers `/blog/etat-visibilite-ia-france-2026`). Si une source est retirée du web, on remplace le chiffre, on ne maintient pas un sourcing mort.
-
-**Décisions copy/UX en regard** :
-
-- **Tutoiement tu/te/ta** : strictement conservé dans les nouvelles sections (« Pourquoi tu dois t'y mettre maintenant »). Différenciateur fort vs Semrush impersonnel.
-- **5 features, pas 12** : V0 honnête. On ne crée pas de feature fictive. Les 5 sont : Score de visibilité IA / Part de voix / Sentiment / Comparatif concurrents / Rapport hebdo — toutes déjà ou bientôt implémentées (Rapport hebdo livré 2026-05-13).
-- **Vocabulaire français** : « Part de voix » au lieu de « Share of Voice ». Sentiment garde son nom (le mot est suffisamment courant en FR). Glossaire officiel dans doc 02 § « Glossaire vocabulaire ».
-- **Pas de demo path** : on n'ajoute PAS « Demander une démo » côté CTA. Notre funnel transparent (trial 14j sans CB + pricing public) reste un différenciateur — un demo gate serait régression UX.
-- **Pas de social proof artificielle** : on n'invente pas de « Mamie GEO Awards » ou de logos clients pour faire genre. On attend les vrais beta testers signés.
-
-**Conséquences attendues** :
-
-- Crédibilité home augmentée (4 chiffres massue + 5 features nommées vs précédent « tracking » générique).
-- Vocabulaire métrique aligné entre produit, marketing et doc commerciale — facilite onboarding nouveaux relecteurs / contractuels.
-- Snapshot Semrush daté dans doc 01 → veille structurée, repère pour les prochaines comparaisons.
-- Pas d'impact backend / API / DB — purement marketing + doc.
-
-**Hors scope explicite** :
-
-- ❌ Page `/comparatif` dédiée (différée — pourrait être une PR follow-up si la traction le justifie)
-- ❌ Live demo path (anti-décision documentée)
-- ❌ Implémentation des features Semrush absentes chez nous (Prompt Research DB 261M, AI-Readiness audit, AI traffic dashboard) — restent en V1/V2 dans roadmap doc 02 § V3 et au-delà éventuellement
-- ❌ Refactor des sections home existantes (`<SansAvec>`, `<HowItWorks>`, `<PourQui>`, `<NEstPas>`, `<FAQ>`) — elles fonctionnent
-
-**Fichiers ajoutés** :
-
-- `src/app/(marketing)/_sections/pourquoi-maintenant.tsx`
-- `src/app/(marketing)/_sections/tes-outils.tsx`
-
-**Fichiers modifiés** :
-
-- `src/app/(marketing)/_sections/hero.tsx` (sous-titre avec chiffre + footnote source)
-- `src/app/(marketing)/page.tsx` (montage des 2 nouvelles sections)
-- `geo-project/02-produit-roadmap.md` (section « Glossaire vocabulaire » officiel)
-- `geo-project/01-marche-concurrence.md` (snapshot Semrush AI SEO Overview daté 2026-05-13)
-
-**À revisiter** :
-
-- Si la traction confirme l'intérêt narrative pour le canal Agence (Aline), envisager une **page `/comparatif`** publique avec tableau Mamie GEO vs Semrush vs Profound vs Peec — utile pour le SEO + closing agence (~1 PR dédiée).
-- Le chiffre « 5 plateformes IA » dans la 4ᵉ stat est passable mais un peu light vs les 3 autres bien sourcées. Si on trouve un chiffre Médiamétrie ou Frenchweb sur l'usage IA en France, le remplacer.
-- La règle « 5 features nommées » peut évoluer quand on livre vraiment les pages CRUD Prompts / Competitors — à ce moment on pourra peut-être faire passer la liste à 6-7 sans inventer.
-- Mesurer l'impact des nouvelles sections sur le funnel (rebond, scroll depth, click-through CTAs) après le merge — décider en M2 si on garde le format ou si on simplifie.
+**À revisiter** : page `/comparatif` publique (Mamie GEO vs Semrush vs Profound vs Peec) si traction agence ; remplacer la 4ᵉ stat par un chiffre FR sourcé (Médiamétrie/Frenchweb) si trouvé ; mesurer l'impact funnel en M2 ; étendre la liste features quand les CRUD seront livrées.
 
 ---
 
 #### 2026-05-13 — Polish UX home (hero interactif + scroll-fill dark section + pastilles LLM partagées) + pivot trial 14j → 7j
 
-**Contexte** :
+**Contexte** : 2ᵉ vague de demandes Max : hero interactif, data « En 2025… » en section sombre scroll-fill, pastilles LLM harmonisées, touche subtile de couleur, trial 14 j → 7 j.
 
-Suite à la PR refresh marketing « inspiré Semrush » (entrée précédente du même jour), Max a poussé une 2ᵉ vague de demandes UX/UI :
+**Choix techniques** : `<HeroLLMRotator>` client (cycle 5 LLMs / 2,4 s, couleur saturée) ; composant unique `LLMPill` (`src/components/marketing/llm-pill.tsx` + map `LLM_KEYS_ORDER` + `getLLMConfig`), rotation déterministe par LLM (-2°/+3°/-1°/+2°/-3°, effet sticker sans random) ; scroll-fill CSS pur (`animation-timeline: view()` + `background-clip: text`, Chrome 115+/Safari 17+, fallback `gray-300` lisible) ; section `<PourquoiMaintenant>` sur fond `--color-ink` + radial warm subtil (rgba terracotta < 0.22).
 
-1. Hero interactif (le mot en gras dans le headline cycle entre les 5 LLMs trackés)
-2. La data « En 2025… » sortie du hero pour devenir une **section dédiée fond sombre avec effet scroll-fill** (texte qui se révèle au scroll, section sticky)
-3. Pastilles LLM **harmonisées partout** dans le site (style commun, angles légèrement décalés, gaps resserrés)
-4. **Touche subtile de couleur** (gradient ou contraste inversé, pas flashy) pour éviter que le site ne soit trop plat
-5. **Passage du trial 14 jours à 7 jours**
+**Pivot trial 14 j → 7 j** (cf. doc 04 § Couche 3) : force la décision payante (anti « zombie trial »), standards SaaS modernes, la citation drift se voit sur 30+ j de toute façon, l'audit gratuit joue déjà la démo. Remplacement global dans 14 fichiers (hero, FAQ, pricing ×3, metadata, lead magnet, CGU, blog vs-profound, email audit, docs 01-04/10). Exclusions : cookie Better Auth 14 jours (privacy, non lié) ; entrées historiques doc 09 inchangées. **Note : superseded par le pivot 2026-05-14 (plus de trial auto) puis le trial 14 j carte requise du 2026-06-08.**
 
-Les 4 premières demandes se consolident bien dans la même PR — la section sombre scroll-fill cumule l'inversion contraste (point 4), le narratif data (réutilisé du hero, point 2) et les pastilles LLM inline (point 3). Le hero rotator (point 1) utilise la même map de couleurs LLM que les pastilles → cohérence visuelle systémique.
+**Fichiers** : + `llm-pill.tsx`, `hero-llm-rotator.tsx` ; modifiés : `globals.css` (keyframes `scroll-reveal*`), `hero.tsx`, `pourquoi-maintenant.tsx`, `llm-badges.tsx`, 14 fichiers du pivot.
 
-**Choix techniques** :
-
-| Sujet                   | Choix                                                                                                      |
-| ----------------------- | ---------------------------------------------------------------------------------------------------------- |
-| Hero rotator            | Client component `<HeroLLMRotator>` qui cycle les 5 LLMs toutes les 2,4 s avec leur couleur saturée        |
-| Source unique pastilles | Nouveau composant `LLMPill` dans `src/components/marketing/llm-pill.tsx` + map `LLM_KEYS_ORDER`            |
-| Rotation pastilles      | Déterministe par LLM (-2°/+3°/-1°/+2°/-3°) — effet « sticker » sans random qui changerait par rendu        |
-| Scroll-fill             | CSS pur via `animation-timeline: view()` + `background-clip: text` (Chrome 115+ / Safari 17+) — JS inutile |
-| Fallback scroll         | `color: gray-300` en `:not(@supports)` → toujours lisible sans animation                                   |
-| Contraste inversé       | Section `<PourquoiMaintenant>` sur fond `--color-ink` + radial warm subtile (rgba terracotta < 0.22)       |
-| Trial 14j → 7j          | Override commercial du rationale antérieur (citation drift) — cf. doc 04 § Couche 3                        |
-
-**Pivot trial 14j → 7j — justifications** (cf. doc 04 § « Pivot 2026-05-13 vers 7 jours ») :
-
-- Force la décision payante plus rapidement → réduction du « zombie trial »
-- Matche les standards SaaS modernes (Notion, Linear, Vercel Pro) — moins de friction perçue
-- La citation drift se voit sur 30+ jours de toute façon ; 7 vs 14 ne change pas la perception initiale
-- L'audit gratuit `/outils/test-visibilite-ia` joue déjà le rôle de « démo sans engagement »
-- **À revisiter** après 30 jours de feedback prospects : si la conversion trial → payant chute, repasser à 10j ou 14j
-
-**Mentions de marque** : tous les `14 jours` / `14 j` ont été remplacés par `7 jours` / `7 j` dans :
-
-- Hero trust signal, FAQ home, pricing-faq, pricing-data CTAs ×3, pricing page metadata, lead magnet `/outils/test-visibilite-ia`, CGU, blog `mamie-geo-vs-profound`, audit reply email (`src/lib/email.ts`), docs 02/03/04/10, snapshot Semrush doc 01.
-- **Exclusion** : `privacy/page.mdx` qui mentionne « Cookies de session Better Auth (durée 14 jours) » — non lié au trial, on garde.
-- **Historique doc 09** : les entrées datées du Sprint 0 (lignes 65, 104, 231) qui mentionnent « trial 14j » **restent inchangées** — elles documentent ce qui était décidé à l'époque ; cette nouvelle entrée acte le pivot 2026-05-13.
-
-**Conséquences attendues** :
-
-- Home post-refresh : hero plus light (le paragraphe data est sorti) + section dark percutante au scroll qui sert d'inversion contraste + pastilles LLM cohérentes partout.
-- Engagement attendu : la section dark scroll-fill devient un « moment de pause » dans le scroll qui force l'attention.
-- Funnel : trial 7j réduit la queue d'utilisateurs hésitants ; à mesurer.
-
-**Fichiers ajoutés** :
-
-- `src/components/marketing/llm-pill.tsx` (composant + LLM_KEYS_ORDER + getLLMConfig)
-- `src/app/(marketing)/_sections/hero-llm-rotator.tsx`
-
-**Fichiers modifiés** :
-
-- `src/app/globals.css` (animations `scroll-reveal-text` + `scroll-reveal-skip` + keyframes `scroll-reveal`)
-- `src/app/(marketing)/_sections/hero.tsx` (rotator + paragraphe simplifié + 7 jours)
-- `src/app/(marketing)/_sections/pourquoi-maintenant.tsx` (réécrit en dark scroll-fill)
-- `src/app/(marketing)/_sections/llm-badges.tsx` (utilise `LLMPill` + gap resserré)
-- 14 fichiers touchés pour le pivot 14j → 7j (cf. liste ci-dessus)
-
-**À revisiter** :
-
-- Mesurer impact UX (rebond, scroll depth, taux de clic CTA) après le merge — décider en M2 si la section dark reste ou évolue.
-- Si le scroll-fill ne fonctionne pas bien sur Safari < 17 (~ 8% du trafic FR estimé), envisager un fallback IntersectionObserver-based.
-- Le rotator hero peut être étendu : ajouter un mode « pause au focus clavier » plus visible si retour user.
-- La rotation des pastilles (-2°/+3°…) est déterministe par LLM ; si on ajoute Grok ou autre LLM, lui assigner sa rotation dans `LLM_CONFIG`.
-- Le pivot trial 7j sera revisité à 30 jours de feedback prospects (cf. doc 04 § Couche 3).
+**À revisiter** : impact UX en M2 (rebond, scroll depth, CTR) ; fallback IntersectionObserver si Safari < 17 (~8 % trafic FR) problématique ; assigner une rotation dans `LLM_CONFIG` à tout nouveau LLM.
 
 ---
 
 #### 2026-05-13 — Pages CRUD app (Prompts + Competitors) + Settings édition + helper `getUserContext`
 
-**Contexte** :
+**Contexte** : rien n'était gérable après l'onboarding (pas de CRUD prompts/concurrents, settings read-only). Cette PR complète « onboarding → tracking → gestion » : self-service complet pour les beta-testeurs.
 
-L'application post-login avait une chaîne UX incomplète : un user pouvait créer son workspace, sa brand, ses concurrents et ses 5+ prompts à l'onboarding, mais ne pouvait rien gérer après coup. Pas de page pour ajouter / éditer / supprimer / pauser un prompt. Pas de page pour gérer les concurrents. `/app/settings` était en read-only. Cette PR complète la chaîne « onboarding → tracking → gestion » et permet le **self-service complet** pour les beta-testeurs.
-
-**Choix retenus** :
-
-| Sujet                 | Choix                                                                 |
-| --------------------- | --------------------------------------------------------------------- |
-| Détail prompt         | Page dédiée `/app/prompts/[id]` (URL partageable + breakdown par LLM) |
-| Settings édition      | Inclure (workspace name + brand aliases) — ~200 lignes en plus        |
-| Brand switcher action | ❌ Reporté (V0 = 1 brand par workspace)                               |
-| Invitations équipe    | ❌ Reporté (Better Auth invitations système séparé)                   |
-| Bulk upload CSV       | ❌ Reporté (UX dédié)                                                 |
-| Pagination prompts    | Activée (Pro = 100, Agency = 300)                                     |
+**Choix** : page dédiée `/app/prompts/[id]` (URL partageable + breakdown par LLM) ; settings édition (workspace name + brand aliases, ~200 lignes) ; pagination prompts activée ; reportés : brand switcher actif, invitations équipe (système Better Auth séparé), bulk upload CSV.
 
 **Architecture** :
+- Schémas Zod dans `src/lib/{prompts,competitors,settings}/schemas.ts` — trim + dedupe case-insensitive des aliases côté server ; strings vides acceptées côté Zod et filtrées par le transform (sinon `"alias, , alias2"` rejetterait tout).
+- Quotas centralisés `src/lib/plans/quotas.ts` (single source of truth) : trialing 100/10, starter 25/5, pro 100/10, agency 300/illimité, enterprise illimité (prompts/concurrents). Enforcement en server actions ; erreur structurée `{ ok: false, error: "quota_reached", current, max, plan }` → `toast.error()`.
+- Helper `getUserContext(userId)` (`src/lib/auth/user-context.ts`) : workspace + brand + role en 1 query, utilisé partout.
+- Server actions CRUD + `togglePromptActive`, `revalidatePath` ; pages server + client wrappers ; form dialogs Radix (state initial via `useState`, remount via `key={item.id}`) ; tag input aliases (Enter/virgule, Backspace, max 10).
+- Suggestion IA dans `/app/prompts` : réutilise `suggestPrompts()` de l'onboarding (Haiku, ~$0,003), validation manuelle avant insert (pas d'auto-insert).
 
-- **Schémas Zod** dans `src/lib/prompts/schemas.ts`, `src/lib/competitors/schemas.ts`, `src/lib/settings/schemas.ts`. Trim + dédoublon case-insensitive sur les aliases (côté server pour éviter dups). Strings vides dans les arrays d'aliases **acceptées côté Zod** et filtrées par le transform — sinon `"alias, , alias2"` rejette tout le payload au lieu de garder `alias` + `alias2`.
-- **Quotas par plan** centralisés dans `src/lib/plans/quotas.ts` (single source of truth) : Starter 25 prompts / 5 concurrents, Pro 100 / 10, Agency 300 / illimité. Enforcement côté server actions avant insert. `quota_reached` error structurée renvoyée au client.
-- **Helper auth `getUserContext(userId)`** dans `src/lib/auth/user-context.ts` : charge workspace + brand + role en une query. Utilisé par toutes les server actions + queries pour éviter le code dupliqué.
-- **Server actions** : `create`, `update`, `delete`, `togglePromptActive` côté prompts ; `create`, `update`, `delete` côté competitors. Toutes avec `revalidatePath` sur les paths concernés.
-- **Pages serveur** : `prompts/page.tsx`, `prompts/[id]/page.tsx`, `competitors/page.tsx` chargent les données puis délèguent à un client wrapper pour la partie interactive (filtre, dialogs, toast). Settings page wire les 2 forms d'édition inline.
-- **Form Dialogs** : `prompt-form-dialog.tsx` et `competitor-form-dialog.tsx` réutilisent `<Dialog>` Radix. State initial via `useState` (pas `useEffect`) pour respecter le lint React `no-set-state-in-effect`. Parent passe `key={item.id}` pour forcer remount entre éditions.
-- **Tag input aliases** : Enter/virgule pour ajouter, Backspace sur input vide pour retirer le dernier, max 10 aliases. Validation server (trim + dedupe case-insensitive).
+**Conséquences** : self-service complet (réduction support) ; conversions visibles au hit de quota ; breakdown par prompt = argument marketing (pas dispo chez Profound entry) ; 105 tests verts (avant 76).
 
-**Quotas enforced en server actions** :
+**Fichiers (16 ajoutés)** : `src/lib/plans/quotas.ts`, `src/lib/auth/user-context.ts`, `src/lib/{prompts,competitors,settings}/{schemas,schemas.test,queries}.ts`, pages `prompts/{page,actions,prompts-list,prompt-form-dialog}`, `prompts/[id]/page.tsx`, `competitors/{page,actions,competitors-list,competitor-form-dialog}`, `settings/{actions,workspace-form,brand-aliases-form}`. Modifiés : `settings/page.tsx`, CLAUDE.md § 9.
 
-| Plan         | Prompts  | Concurrents |
-| ------------ | -------- | ----------- |
-| `trialing`   | 100      | 10          |
-| `starter`    | 25       | 5           |
-| `pro`        | 100      | 10          |
-| `agency`     | 300      | illimité    |
-| `enterprise` | illimité | illimité    |
-
-Quand un user trial atteint 100 prompts et tente d'en créer un 101ᵉ, l'action renvoie `{ ok: false, error: "quota_reached", current: 100, max: 100, plan: "trialing" }` et le client affiche une erreur via `toast.error()`.
-
-**Suggestion IA dans `/app/prompts`** :
-
-Réutilise le helper `suggestPrompts()` de `src/app/(app)/app/onboarding/actions.ts` (Haiku 4.5, coût ~$0,003). Le user clique « Suggérer via IA » → 5 prompts apparaissent dans une zone éphémère sous le header → click « Ajouter » pour insérer un par un (avec quota check). Pas d'auto-insert (l'utilisateur valide).
-
-**Conséquences attendues** :
-
-- Tout utilisateur trial peut gérer ses prompts / concurrents / aliases sans email à Max → réduction du support load
-- Quotas enforced → les conversions Starter → Pro deviennent visibles (un user qui hit le quota 25 voit un message → upgrade)
-- Page détail prompt avec breakdown par LLM = nouvel argument marketing (vue granulaire par prompt, pas dispo chez Profound entry)
-- 105 tests Vitest verts (avant : 76). Pas de tests E2E sur ces flows ajoutés (gap identifié pour PR dédiée).
-
-**Fichiers ajoutés** (16) :
-
-- `src/lib/plans/quotas.ts` (source de vérité quotas par plan)
-- `src/lib/auth/user-context.ts` (helper auth user → workspace + brand)
-- `src/lib/prompts/{schemas,schemas.test,queries}.ts`
-- `src/lib/competitors/{schemas,schemas.test,queries}.ts`
-- `src/lib/settings/{schemas,schemas.test}.ts`
-- `src/app/(app)/app/(with-nav)/prompts/page.tsx` + `actions.ts` + `prompts-list.tsx` + `prompt-form-dialog.tsx`
-- `src/app/(app)/app/(with-nav)/prompts/[id]/page.tsx`
-- `src/app/(app)/app/(with-nav)/competitors/page.tsx` + `actions.ts` + `competitors-list.tsx` + `competitor-form-dialog.tsx`
-- `src/app/(app)/app/(with-nav)/settings/actions.ts` + `workspace-form.tsx` + `brand-aliases-form.tsx`
-
-**Fichiers modifiés** :
-
-- `src/app/(app)/app/(with-nav)/settings/page.tsx` (wire les 2 forms d'édition)
-- `CLAUDE.md` (§ 9 — passe de 5 à 8 routes app authentifiées)
-
-**À revisiter** :
-
-- **Bulk upload CSV** de prompts (Pro = 100 prompts, fastidieux à entrer un par un). UX dédié en PR follow-up.
-- **Invitations équipe** Pro+ : nécessite système Better Auth invitations. Pas pris dans cette PR.
-- **Édition brand.name / brand.domain** : reportée car ces champs changent l'identité tracking (matching détection citation se base dessus). Si on les rend éditables, décider quoi faire des runs historiques.
-- **DELETE cascade prompts → runs** : actuellement irréversible. Si plaintes user, envisager un soft-delete (`deletedAt` colonne) + restauration 30j.
-- **Tests E2E** auth + app sur ces flows : gap connu CLAUDE.md, à faire en PR dédiée Playwright.
+**À revisiter** : bulk CSV prompts (Pro = 100, fastidieux) ; invitations Better Auth Pro+ ; édition brand.name/domain (impacte le matching détection — décider du sort des runs historiques) ; soft-delete prompts (`deletedAt` + restauration 30 j) si plaintes ; E2E Playwright sur ces flows.
 
 ---
 
@@ -2214,3 +1180,4 @@ Ce document est inutile s'il n'est pas tenu rigoureusement. Pour éviter qu'il d
 2. **Décisions importantes** : règle simple — si tu hésites > 1h sur un sujet, écris la décision finale dans ce doc
 3. **Honnêteté brute** : si un mois est mauvais, écris-le. C'est ce qui rend le doc précieux dans 12 mois quand tu fais ton bilan annuel
 4. **Pas de prose inutile** : bullets, chiffres, brefs commentaires. C'est un journal opérationnel, pas un mémoire
+

@@ -1,119 +1,81 @@
 # 03 — Architecture technique
 
+> Doc de référence technique : stack, schéma BDD, coûts LLM, stratégie de
+> test. Statut au 2026-06-11 : Phases A/B/C livrées, V0+ pré-lancement.
+
 ## Principes directeurs
 
-1. **Mono-repo unique** — une seule app Next.js qui contient marketing, blog et app SaaS authentifiée. Pas de séparation prématurée.
-2. **Stack alignée avec l'existant** — Next.js + TypeScript + Tailwind + Postgres + Stripe + Brevo (Max maîtrise déjà)
-3. **Solo-friendly** — pas de microservices, pas de Kubernetes, pas de monorepo Turborepo
-4. **Coûts variables maîtrisés** — les APIs LLM sont le poste de coût n°1, à instrumenter dès le jour 1
+1. **Mono-repo unique** — une seule app Next.js (marketing + blog + SaaS)
+2. **Stack alignée avec l'existant** — Next.js + TS + Tailwind + Postgres + Stripe + Brevo (Max maîtrise déjà)
+3. **Solo-friendly** — pas de microservices, pas de Kubernetes, pas de Turborepo
+4. **Coûts variables maîtrisés** — APIs LLM = poste de coût n°1, instrumenté dès J1
 5. **EU-hosted par défaut** — Neon EU + Vercel EU edge
-6. **Itération > perfection** — code lisible et testable plutôt que "scalable" prématurément
+6. **Itération > perfection** — lisible et testable plutôt que "scalable" prématuré
 
 ---
 
 ## Architecture en mono-repo
 
-**Décision actée le 2026-05-05** : un seul repo `mamie-geo`, une seule app Next.js, un seul déploiement Vercel, un seul domaine `mamie-geo.fr`.
+**Décision actée le 2026-05-05** : un seul repo `mamie-geo`, une seule app
+Next.js, un seul déploiement Vercel, un seul domaine `mamie-geo.fr`.
 
 ### Pourquoi mono-repo et pas séparation marketing / app
 
-- Solo founder = un seul projet à maintenir
-- Pas d'équipe à coordonner = pas besoin d'isolation par projet
-- Stack unique = pas de duplication de design system
-- Cohérence visuelle native (le marketing utilise les mêmes composants que l'app)
-- Déploiement unique = simplicité opérationnelle
+Solo founder : un seul projet, un seul design system, un seul déploiement,
+cohérence visuelle native (le marketing utilise les composants de l'app).
 
 ### Domaine et routes
 
-| Zone                    | URL                                      | Layout                              |
-| ----------------------- | ---------------------------------------- | ----------------------------------- |
-| Marketing               | `mamie-geo.fr/`                          | `(marketing)` route group           |
-| Pricing                 | `mamie-geo.fr/pricing`                   | `(marketing)`                       |
-| À propos                | `mamie-geo.fr/about`                     | `(marketing)`                       |
-| Outil gratuit           | `mamie-geo.fr/outils/test-visibilite-ia` | `(marketing)`                       |
-| Audit technique gratuit | `mamie-geo.fr/outils/audit-technique`    | `(marketing)` — V0+ ajoute section « Crawlabilité bots IA » |
-| Blog                    | `mamie-geo.fr/blog` et `/blog/[slug]`    | `(blog)` route group                |
-| Comparatifs (V0+)       | `mamie-geo.fr/comparatifs/[slug]`        | `(marketing)` — vs Profound (livré), vs Peec AI / vs Otterly / vs Rankscale (V0+) |
-| Login                   | `mamie-geo.fr/login`                     | layout dédié                        |
-| App SaaS                | `mamie-geo.fr/app/*`                     | `(app)` route group avec auth check |
-| URL drill-down (V0+)    | `mamie-geo.fr/app/sources/[id]`          | `(app)` — retrievals over time, citation rate, prompts qui retrouvent la source, marques voisines, runs réels |
-| API                     | `mamie-geo.fr/api/*`                     | API routes                          |
-| CSV exports (V0+)       | `mamie-geo.fr/api/export/{runs,metrics}.csv` | API routes — auth + filtre workspace |
+État réel des routes (vérifié code 2026-06-11) :
 
-Pas de subdomain `app.mamie-geo.fr` en V0 — un seul SSL, un seul cookie, simplicité maximale. Migration possible plus tard si besoin via middleware Next.js.
+| Zone               | URL                                                | Layout / notes |
+| ------------------ | -------------------------------------------------- | -------------- |
+| Marketing          | `/`, `/pricing`, `/demo`, `/legal/*`               | `(marketing)` |
+| Outils gratuits    | `/outils/test-visibilite-ia`, `/outils/audit-technique` | `(marketing)` — audit inclut section « Crawlabilité bots IA » (V0+ livré) |
+| Comparatif vs Profound | `/vs/profound`                                 | `(marketing)` |
+| Comparatifs V0+    | publiés comme articles `/blog/*` (vs Peec AI / Otterly / Rankscale, 2026-06-08) | route dédiée `/comparatifs/[slug]` reportée V1 si traction (cf. doc 06) |
+| Blog               | `/blog`, `/blog/[slug]`                            | `(blog)` |
+| Login              | `/login`                                           | layout dédié |
+| App SaaS           | `/app/dashboard`, `/app/prompts(+/[id])`, `/app/citations` (`?tab=ranking`), `/app/audits(+/new,/[id],/compare)`, `/app/conseils`, `/app/runs/[id]`, `/app/settings`, `/app/onboarding` | `(app)` route group, auth check |
+| URL drill-down     | `/app/citations/sources/[id]`                      | livré 2026-06-08 (planifié `/app/sources/[id]`, rangé sous citations) |
+| Admin              | `/app/admin/visuals`                               | guard email Max, visuels LinkedIn 1080×1350 |
+| API                | `/api/auth/*`, `/api/checkout`, `/api/portal`, `/api/webhooks/{stripe,brevo}`, `/api/cron/*`, `/api/runs/events` (SSE), `/api/blog/notify-publish` | API routes |
+| CSV exports        | `/api/export/{runs,metrics}.csv`                   | auth + scope workspace, livré 2026-06-08 |
+
+Pas de subdomain `app.mamie-geo.fr` en V0 — un seul SSL, un seul cookie.
+Migration possible plus tard via middleware Next.js. Pas de page `/about`
+(prévue à l'origine, jamais construite).
 
 ### Domaine mamie-seo.fr
 
-`mamie-seo.fr` (pas de SEO ni trafic existant) est **redirigé en 301 vers `mamie-geo.fr`** dès le lancement. Un fichier `next.config.ts` gère ça côté code, ou directement dans Vercel/registrar. Le domaine reste loué 1-2 ans en sécurité avant de l'abandonner.
+301 vers `mamie-geo.fr` (géré dans `next.config.ts`). Domaine loué 1-2 ans
+en sécurité avant abandon.
 
 ### Structure du repo
 
 ```
 mamie-geo/
 ├── geo-project/                    # docs markdown (00 à 10)
-├── CLAUDE.md                        # source de vérité Claude Code
-├── README.md
-├── package.json
-├── next.config.ts
-├── drizzle.config.ts
-├── playwright.config.ts
-├── vitest.config.ts
+├── CLAUDE.md                       # source de vérité Claude Code
+├── next.config.ts / drizzle.config.ts / playwright.config.ts / vitest.config.ts
 ├── .env.example
 │
 ├── src/
-│   ├── app/                        # Next.js App Router
-│   │   ├── (marketing)/            # site public
-│   │   │   ├── page.tsx            # /
-│   │   │   ├── pricing/page.tsx
-│   │   │   ├── about/page.tsx
-│   │   │   ├── outils/test-visibilite-ia/page.tsx
-│   │   │   └── layout.tsx
-│   │   │
-│   │   ├── (blog)/
-│   │   │   ├── blog/page.tsx
-│   │   │   ├── blog/[slug]/page.tsx
-│   │   │   └── layout.tsx
-│   │   │
-│   │   ├── (app)/                  # SaaS authentifié
-│   │   │   ├── app/dashboard/page.tsx
-│   │   │   ├── app/prompts/page.tsx
-│   │   │   ├── app/settings/page.tsx
-│   │   │   └── layout.tsx          # auth check
-│   │   │
-│   │   ├── api/
-│   │   │   ├── auth/[...all]/route.ts    # Better Auth
-│   │   │   ├── webhooks/stripe/route.ts
-│   │   │   └── cron/dispatch/route.ts
-│   │   │
+│   ├── app/
+│   │   ├── (marketing)/            # site public (+ _sections, outils, legal, vs)
+│   │   ├── (blog)/                 # /blog, /blog/[slug]
+│   │   ├── (app)/                  # SaaS authentifié : app/(with-nav)/* + onboarding + admin
+│   │   ├── api/                    # auth, checkout, portal, webhooks, cron, export
 │   │   ├── login/page.tsx
-│   │   └── layout.tsx              # root
+│   │   └── layout.tsx
 │   │
-│   ├── lib/                        # logique métier
-│   │   ├── llm/                    # clients LLM par provider
-│   │   ├── citation/               # détection + scoring
-│   │   ├── auth/                   # Better Auth config
-│   │   ├── stripe/
-│   │   └── queue/                  # Postgres-based queue
-│   │
-│   ├── db/                         # Drizzle
-│   │   ├── schema.ts
-│   │   ├── client.ts
-│   │   └── migrations/
-│   │
-│   ├── components/
-│   │   ├── ui/                     # shadcn customisé
-│   │   ├── marketing/
-│   │   ├── blog/
-│   │   └── app/
-│   │
-│   ├── workers/                    # logique des jobs
-│   │   ├── execute-prompt.ts
-│   │   ├── score-response.ts
-│   │   └── send-weekly-email.ts
-│   │
-│   └── content/                    # blog en MDX
-│       ├── qu-est-ce-que-le-geo.mdx
-│       └── ...
+│   ├── lib/                        # logique métier : llm/, citation/, auth/,
+│   │                               # stripe/, queue/, audit/, plans/, hardcap/,
+│   │                               # email/, metrics/, competitors/, csv/, ...
+│   ├── db/                         # schema.ts, client.ts, migrations/
+│   ├── components/                 # ui/ (shadcn customisé), marketing/, blog/, app/
+│   ├── workers/                    # execute-prompt, score-response, send-weekly-email, ...
+│   └── content/blog/               # articles MDX
 │
 ├── public/
 └── tests/
@@ -130,154 +92,142 @@ mamie-geo/
 │                  Vercel Edge (EU) — un seul déploiement         │
 │  ┌──────────────────┐    ┌──────────────────────────────────┐   │
 │  │  Next.js 15      │    │   API Routes / Server Actions    │   │
-│  │  - Marketing /   │    │   - Auth (Better Auth)           │   │
-│  │  - Blog /blog    │◄──►│   - REST endpoints               │   │
-│  │  - App /app      │    │   - Webhooks (Stripe, Brevo)     │   │
-│  │  - Outil gratuit │    │   - Cron /api/cron/dispatch      │   │
+│  │  - Marketing /   │◄──►│   - Auth (Better Auth)           │   │
+│  │  - Blog /blog    │    │   - Webhooks (Stripe, Brevo)     │   │
+│  │  - App /app      │    │   - Cron /api/cron/*             │   │
 │  └──────────────────┘    └────────────┬─────────────────────┘   │
 └─────────────────────────────────────────┼───────────────────────┘
-                                          │
                                           ▼
                     ┌─────────────────────────────────────┐
                     │     Postgres (Neon EU Frankfurt)    │
                     │  workspaces, brands, prompts, runs, │
-                    │  citations, queue_jobs, ...         │
+                    │  citation_metrics_daily, queue_jobs │
                     └─────────────────────────────────────┘
                                           ▲
-                                          │
 ┌─────────────────────────────────────────┼───────────────────────┐
-│           Vercel Cron toutes les 5 min → /api/cron/dispatch     │
-│  ┌──────────────────────────────────────┴────────────────────┐  │
-│  │  Workers (Postgres-based queue)                           │  │
-│  │  - dispatch (claim N pending jobs, dispatch en parallèle) │  │
-│  │  - execute-prompt (1 job = 1 prompt × 1 LLM)              │  │
-│  │  - score-response (parsing + détection citations)         │  │
-│  │  - send-weekly-email                                      │  │
-│  └────────────┬──────────────────────────────────────────────┘  │
+│  Vercel Cron 5 min → /api/cron/dispatch (queue Postgres)        │
+│  Workers : execute-prompt (1 prompt × 1 LLM = 1 job),           │
+│  score-response, recompute_metrics, send-weekly-email,          │
+│  audit_workspace_url                                            │
 └───────────────┼──────────────────────────────────────────────────┘
-                │
                 ▼
-   ┌───────────────────────────────────────────┐
-   │      APIs externes (natives, pas OpenRouter)
-   │  • OpenAI (ChatGPT + web_search)          │
-   │  • Anthropic (Claude + web_search)        │
-   │  • Mistral (Le Chat + tools web)          │
-   │  • Perplexity (sonar online)              │
-   │  • Google (Gemini + grounding)            │
-   │  • Stripe + Stripe Tax                    │
-   │  • Brevo (emails transactionnels)         │
-   └───────────────────────────────────────────┘
+   APIs externes natives (pas OpenRouter) : OpenAI (web_search),
+   Anthropic (web_search), Mistral, Perplexity (sonar), Google
+   (grounding), Stripe + Stripe Tax, Brevo
 ```
 
 ---
 
 ## Stack V0 — Décisions verrouillées (cheap + scalable + testable)
 
-**Critères de sélection** : (1) coût quasi-nul en V0 grâce aux free tiers, (2) chemin de mise à l'échelle clair sans réécrire, (3) testabilité native (pas de SDK lourd à mocker, pas d'API tierce inscrutable).
+Critères : (1) coût quasi-nul via free tiers, (2) chemin de scale sans
+réécriture, (3) testabilité native. Détail des justifications : doc 09 §
+2026-05-05.
 
 ### Frontend
 
-| Composant     | Choix                                                | Coût V0 | Justification                                                             |
-| ------------- | ---------------------------------------------------- | ------- | ------------------------------------------------------------------------- |
-| Framework     | **Next.js 15 (App Router)**                          | 0       | Connu, SSR, edge runtime EU, parfait pour Vercel                          |
-| Langage       | **TypeScript strict**                                | 0       | Standard, type-safety pour tests                                          |
-| Styling       | **Tailwind CSS v4**                                  | 0       | Rapide, peu de CSS custom                                                 |
-| UI components | **shadcn/ui** customisé avec design tokens du doc 10 | 0       | On part de shadcn et on le customise pour ne pas avoir le look par défaut |
-| Charts        | **Recharts**                                         | 0       | Suffit V0/V1, alternative Tremor si besoin de plus joli                   |
-| Forms         | **React Hook Form + Zod**                            | 0       | Validation partagée front/back                                            |
-| State serveur | **TanStack Query**                                   | 0       | Standard                                                                  |
+| Composant     | Choix                                  | Coût V0 |
+| ------------- | -------------------------------------- | ------- |
+| Framework     | **Next.js 15 (App Router)**            | 0 |
+| Langage       | **TypeScript strict**                  | 0 |
+| Styling       | **Tailwind CSS v4**                    | 0 |
+| UI components | **shadcn/ui** customisé (tokens doc 10) | 0 |
+| Charts        | **Recharts**                           | 0 |
+| Forms         | **React Hook Form + Zod**              | 0 |
+| State serveur | **TanStack Query**                     | 0 |
 
 ### Backend
 
-| Composant  | Choix                                   | Coût V0 | Justification                                                                                                                                                 |
-| ---------- | --------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Runtime    | **Node.js 22 LTS** sur Vercel           | inclus  | Standard                                                                                                                                                      |
-| API        | **Next.js API Routes + Server Actions** | 0       | Pas de serveur Express                                                                                                                                        |
-| ORM        | **Drizzle**                             | 0       | Plus léger que Prisma, edge-compatible, requêtes proches du SQL → tests plus simples, migrations versionnées en SQL pur                                       |
-| Validation | **Zod**                                 | 0       | Cohérent avec le front, schémas réutilisables                                                                                                                 |
-| Auth       | **Better Auth**                         | 0       | Open-source, free forever, pas de lock-in (vs Clerk $25/mo après 10K MAU). Stocke en Postgres → testable avec une DB de test, magic-link natif via Brevo SMTP |
+| Composant  | Choix                                   | Coût V0 | Note |
+| ---------- | --------------------------------------- | ------- | ---- |
+| Runtime    | **Node.js 22 LTS** sur Vercel           | inclus  | |
+| API        | **Next.js API Routes + Server Actions** | 0       | pas de serveur Express |
+| ORM        | **Drizzle**                             | 0       | edge-compatible, SQL-first, migrations SQL versionnées |
+| Validation | **Zod**                                 | 0       | schémas partagés front/back |
+| Auth       | **Better Auth**                         | 0       | free forever, pas de lock-in (vs Clerk $25/mo après 10K MAU), stocke en Postgres, magic-link via Brevo |
 
 ### Base de données et stockage
 
-| Composant          | Choix                             | Coût V0 | Justification                                                                                           |
-| ------------------ | --------------------------------- | ------- | ------------------------------------------------------------------------------------------------------- |
-| Postgres           | **Neon EU (Frankfurt)** free tier | 0       | 0,5 GB inclus, branching natif (= une branche par PR pour tests E2E isolés), scale-to-zero, conforme EU |
-| Cache / rate limit | **Upstash Redis** free tier       | 0       | 10K commandes/jour gratuites, suffit V0                                                                 |
-| Storage fichiers   | **Cloudflare R2** free tier       | 0       | 10 GB/mois inclus, **zéro frais d'egress** (gros avantage vs S3), API S3-compatible                     |
+| Composant          | Choix                             | Coût V0 | Note |
+| ------------------ | --------------------------------- | ------- | ---- |
+| Postgres           | **Neon EU (Frankfurt)** free tier | 0       | 0,5 GB inclus, branching natif (1 branche/PR pour tests), scale-to-zero |
+| Cache / rate limit | **Upstash Redis** free tier       | 0       | 10K commandes/jour |
+| Storage fichiers   | **Cloudflare R2** free tier       | 0       | 10 GB/mois, zéro egress, API S3-compatible |
 
 ### Workers et orchestration
 
-| Composant         | Choix V0                                                            | Coût V0 | Migration scale                                     |
-| ----------------- | ------------------------------------------------------------------- | ------- | --------------------------------------------------- |
-| Queue             | **Postgres-based custom queue** + **Vercel Cron**                   | 0       | À migrer vers Inngest si > 100K runs/mois           |
-| Cron              | **Vercel Cron** (un endpoint `/api/cron/dispatch` toutes les 5 min) | 0       | Idem                                                |
-| Long-running jobs | Découpés en petits jobs idempotents (1 prompt × 1 LLM = 1 job)      | 0       | OK même sur Vercel Hobby (10s timeout) ou Pro (60s) |
+| Composant         | Choix V0                                          | Migration scale |
+| ----------------- | ------------------------------------------------- | --------------- |
+| Queue             | **Postgres-based custom** (~150 lignes helpers)   | Inngest si > 100K runs/mois |
+| Cron              | **Vercel Cron** (dispatch toutes les 5 min)       | idem |
+| Long-running jobs | découpés en jobs idempotents (1 prompt × 1 LLM = 1 job) | OK timeouts Vercel (Hobby 10s / Pro 60s) |
 
-> **Pourquoi Postgres-queue plutôt qu'Inngest en V0** : Inngest est super, mais son free tier est de 50K steps/mois et un Pro à 100 prompts × 5 LLMs × 30j = 15K runs ; à 10 clients on est déjà à 150K (+ retries) → on bascule vers le payant. Une queue Postgres custom (~150 lignes) est gratuite, parfaitement testable (on lit les rows directement dans les tests), et idempotente. Migration vers Inngest possible plus tard sans réécriture côté business logic.
+> Pourquoi pas Inngest en V0 : free tier 50K steps/mois ; 1 Pro = 15K
+> runs/mois, 10 clients = 150K (+ retries) → payant immédiat. La queue
+> Postgres est gratuite, testable (lecture directe des rows en test),
+> idempotente. Migration Inngest possible sans réécrire la business logic.
 
 ### Observabilité et qualité
 
-| Composant         | Choix                           | Coût V0 | Justification                                      |
-| ----------------- | ------------------------------- | ------- | -------------------------------------------------- |
-| Errors            | **Sentry** free tier            | 0       | 5K événements/mois inclus, suffit V0               |
-| Analytics produit | **PostHog Cloud EU** free tier  | 0       | 1M événements/mois free, RGPD-friendly, EU         |
-| Logs              | Postgres `events` + Vercel logs | 0       | On centralise les logs métier en BDD jusqu'à scale |
-| Uptime            | **BetterStack** free tier       | 0       | 10 monitors gratuits                               |
+| Composant         | Choix                           | Note |
+| ----------------- | ------------------------------- | ---- |
+| Errors            | **Sentry** free                 | 5K événements/mois |
+| Analytics produit | **PostHog Cloud EU** free       | 1M événements/mois, RGPD |
+| Logs              | Postgres `events` + Vercel logs | logs métier en BDD jusqu'à scale |
+| Uptime            | **BetterStack** free            | 10 monitors |
 
 ### Email, paiement, comm
 
-| Composant            | Choix          | Coût V0            | Justification                              |
-| -------------------- | -------------- | ------------------ | ------------------------------------------ |
-| Email transactionnel | **Brevo**      | 0                  | Déjà maîtrisé, 300 emails/jour free        |
-| Email marketing      | **Brevo**      | 0                  | Mutualisation                              |
-| Paiement             | **Stripe**     | variable seulement | Standard FR/EU, déjà maîtrisé              |
-| TVA UE               | **Stripe Tax** | 0,5% du CA         | Indispensable pour vendre en UE proprement |
+| Composant            | Choix          | Coût V0 |
+| -------------------- | -------------- | ------- |
+| Email transac + marketing | **Brevo** | 0 (300 emails/jour free) |
+| Paiement             | **Stripe**     | variable |
+| TVA UE               | **Stripe Tax** | 0,5% du CA |
 
 ### LLMs (cf. discussion : pas d'OpenRouter pour le tracking)
 
-| Usage                          | Choix                                                                         | Coût V0                 |
-| ------------------------------ | ----------------------------------------------------------------------------- | ----------------------- |
-| Tracking ChatGPT (avec search) | **OpenAI API** native, modèle `gpt-4o-mini` + `web_search` tool               | $0.15-0.60 / 1M tokens  |
-| Tracking Claude (avec search)  | **Anthropic API** native, modèle `claude-haiku-4-5` + `web_search` tool       | $0.25-1.25 / 1M tokens  |
-| Tracking Perplexity            | **Perplexity API** native, modèle `sonar` (search natif)                      | $1 / 1M tokens          |
-| Tracking Gemini                | **Google AI Studio API** native, `gemini-2.5-flash` + grounding Google Search | $0.075-0.30 / 1M tokens |
-| Tracking Le Chat               | **Mistral API** native, `mistral-large-latest` + tools web                    | €1.5-4.5 / 1M tokens    |
-| Génération prompts onboarding  | **Anthropic Claude Haiku 4.5**                                                | inclus dans budget      |
-| Scoring/parsing des réponses   | **Anthropic Claude Haiku 4.5**                                                | inclus dans budget      |
+Les 5 providers tracking sont **livrés** (Phase C, 2026-05-18). Perplexity :
+code prêt, en attente d'achat crédit ($50 min) + `PERPLEXITY_API_KEY`.
+Activation automatique via `getConfiguredLLMs()` (`src/lib/llm/index.ts`) :
+provider actif si env var présente **et** `IMPLEMENTED_LLMS[llm] === true`.
 
-> **Pourquoi pas OpenRouter** : OpenRouter proxy les modèles mais n'expose pas fidèlement les capacités natives de recherche web (browse OpenAI, sonar Perplexity, grounding Google, tools Mistral). Or notre produit DOIT reproduire ce que l'utilisateur final voit dans l'app de chaque LLM. Fidélité = exigence non-négociable. En revanche, OpenRouter pourrait être utilisé plus tard pour le scoring si on veut multi-modèles à bas coût.
+| Usage                          | Choix                                                            | Tarif API |
+| ------------------------------ | ----------------------------------------------------------------- | --------- |
+| Tracking ChatGPT               | OpenAI native, `gpt-4o-mini` + `web_search` (Responses API)       | $0.15-0.60 / 1M tokens |
+| Tracking Claude                | Anthropic native, `claude-haiku-4-5-20251001` + `web_search_20250305` | $0.25-1.25 / 1M tokens (note : tarif réel Haiku 4.5 = $1 in / $5 out, cf. § coût par run) |
+| Tracking Perplexity            | Perplexity native, `sonar` (search natif)                         | $1 / 1M tokens |
+| Tracking Gemini                | Google AI Studio, `gemini-2.5-flash` + grounding Search           | $0.075-0.30 / 1M tokens |
+| Tracking Le Chat               | Mistral native, `mistral-large-latest` + tools web                | €1.5-4.5 / 1M tokens |
+| Génération prompts onboarding  | Claude Haiku 4.5 (`suggestPrompts`)                               | inclus budget |
+| Scoring/parsing des réponses   | Claude Haiku 4.5 (tool_use forcé)                                 | ~$0,003/scoring |
+
+> **Pourquoi pas OpenRouter** : il n'expose pas fidèlement les capacités
+> natives de recherche web (browse OpenAI, sonar, grounding Google, tools
+> Mistral) or le produit DOIT reproduire ce que voit l'utilisateur final
+> dans chaque app LLM. Fidélité non-négociable (idem Profound / Peec).
+> OpenRouter envisageable plus tard pour le scoring multi-modèles à bas coût.
 
 ### Total coûts fixes infra V0
 
-| Poste                                                       | Coût mensuel        |
-| ----------------------------------------------------------- | ------------------- |
-| Vercel **Pro** (commercial use, edge, bandwidth)            | $20                 |
-| Neon free tier (passe en Pro à $19 quand on dépasse 0,5 GB) | 0 puis $19          |
-| Upstash Redis free                                          | 0                   |
-| Cloudflare R2 free                                          | 0                   |
-| Sentry free                                                 | 0                   |
-| PostHog free                                                | 0                   |
-| BetterStack free                                            | 0                   |
-| Brevo Lite (300 emails/jour)                                | €0 ou €19 si volume |
-| Domaine + Google Workspace 1 user                           | $30                 |
-| **Total V0**                                                | **~$50/mois**       |
+| Poste                                                       | Coût mensuel |
+| ----------------------------------------------------------- | ------------ |
+| Vercel **Pro** (commercial use, edge, bandwidth)            | $20 |
+| Neon free (→ Pro $19 au-delà de 0,5 GB)                     | 0 puis $19 |
+| Upstash / R2 / Sentry / PostHog / BetterStack free          | 0 |
+| Brevo Lite                                                  | €0 ou €19 si volume |
+| Domaine + Google Workspace 1 user                           | $30 |
+| **Total V0**                                                | **~$50/mois** |
 
-À comparer aux $250-500/mois "estimés au doigt" du doc 04 d'origine. Le V0 réel est fortement free-tier.
+(Versus les $250-500/mois estimés au doigt dans le doc 04 d'origine.)
 
 ### À l'échelle (mois 8-12, ~50 clients)
 
-| Poste                       | Coût                               |
-| --------------------------- | ---------------------------------- |
-| Vercel Pro                  | $20                                |
-| Neon Pro                    | $19-69                             |
-| Inngest Pro (si migration)  | $20                                |
-| Upstash Redis Pay-as-you-go | $5-15                              |
-| R2 (croissance stockage)    | $5                                 |
-| Sentry Team                 | $26                                |
-| PostHog (au-delà du free)   | $0-50                              |
-| BetterStack Pro             | $25                                |
-| Brevo Business              | €69                                |
-| **Total scale**             | **~$200-300/mois** + variables LLM |
+| Poste | Coût |
+| ----- | ---- |
+| Vercel Pro $20 + Neon Pro $19-69 + Inngest Pro $20 (si migration) | ~$60-110 |
+| Upstash $5-15 + R2 $5 + Sentry Team $26 + PostHog $0-50 + BetterStack $25 | ~$60-120 |
+| Brevo Business | €69 |
+| **Total scale** | **~$200-300/mois** + variables LLM |
 
 ---
 
@@ -285,73 +235,67 @@ mamie-geo/
 
 ### Vue d'ensemble
 
-3 groupes de tables :
+19 tables dans `src/db/schema.ts`, 3 groupes :
 
-1. **Auth** (générées par Better Auth CLI) : `user`, `session`, `account`, `verification`
-2. **Métier** : `workspaces`, `workspace_members`, `brands`, `competitors`, `prompts`, `runs`, `citation_metrics_daily`
-3. **Plomberie** : `queue_jobs`, `events`, `subscription_events`, `usage_counters`, `prompt_cache`
+1. **Auth** (Better Auth CLI) : `user`, `session`, `account`, `verification`
+2. **Métier** : `workspaces`, `workspace_members`, `brands`, `competitors`, `prompts`, `runs`, `citation_metrics_daily`, `prompt_cache`, `technical_audits`, `audit_counters`
+3. **Plomberie** : `queue_jobs`, `events`, `subscription_events`, `usage_counters`
+
+Migrations versionnées : `0000_many_human_torch` (schéma initial),
+`0001_thick_husk` (enum plan + `solo`, 2026-05-14), `0002_classy_joshua_kane`
+(`technical_audits` + `audit_counters` + kind `audit_workspace_url`,
+2026-05-17), `0003_giant_jean_grey` (`brands.paused_at`, 2026-06-08),
+`0004_salty_molten_man` (funnel sources, 2026-06-08),
+`0005_per_prompt_cadence` (`prompts.cadence`, 2026-06-08).
 
 ### Tables Better Auth
 
-Générées via `npx @better-auth/cli generate` puis importées dans
-`src/db/schema.ts` (ne pas réécrire à la main, suivre la version officielle
-Better Auth pour rester compatible avec les évolutions du package).
+Générées via `npx @better-auth/cli generate`, importées dans
+`src/db/schema.ts` (ne pas réécrire à la main). Config magic-link uniquement :
 
-Tables attendues (V0, configuration magic-link uniquement) :
+- **`user`** : `id`, `email UNIQUE`, `email_verified`, `name`, `image`, timestamps
+- **`session`** : `id`, `user_id FK`, `expires_at`, `token UNIQUE`, `ip_address`, `user_agent`, timestamps
+- **`account`** : `id`, `user_id FK`, `provider_id`, `account_id`, `password` (inutilisé), timestamps
+- **`verification`** : `id`, `identifier`, `value`, `expires_at`, timestamps
 
-- **`user`** : `id`, `email UNIQUE`, `email_verified BOOLEAN`, `name`, `image`, `created_at`, `updated_at`
-- **`session`** : `id`, `user_id FK→user`, `expires_at`, `token UNIQUE`, `ip_address`, `user_agent`, `created_at`, `updated_at`
-- **`account`** : `id`, `user_id FK→user`, `provider_id`, `account_id`, `password` (non utilisé en magic-link), `created_at`, `updated_at`
-- **`verification`** : `id`, `identifier`, `value`, `expires_at`, `created_at`, `updated_at`
-
-> Note : on n'ajoute **pas** notre propre table `users` parallèle. Toutes les
-> références applicatives (workspace_members, etc.) pointent sur `user.id`
-> de Better Auth.
+Pas de table `users` applicative parallèle : tout référence `user.id` Better Auth.
 
 ### Tables métier
 
 ```sql
--- ──────────────────────────────────────────────────────────────────────
--- Workspaces et membres
--- ──────────────────────────────────────────────────────────────────────
-
--- États possibles de workspaces.plan :
---   'trialing'   = trial 7j actif (pas de carte requise — pivot 2026-05-13)
---   'starter'    = abonnement Starter actif
---   'pro'        = abonnement Pro actif
---   'agency'     = abonnement Agence actif
---   'enterprise' = abonnement Enterprise actif
---   'past_due'   = paiement échoué, accès complet pendant 7j de relance Stripe
---   'expired'    = trial fini sans CB OU past_due > 7j → lecture seule, suppression à J+30
---   'canceled'   = annulé par l'utilisateur, accès jusqu'à fin de période payée
+-- États de workspaces.plan (enum complet depuis migration 0001) :
+--   'trialing'   = compte sans subscription active. Quotas 0 → aucun run.
+--                  Depuis 2026-06-08 : trial Stripe 14 j AVEC carte requise
+--                  (subscription.status='trialing', trial_ends_at rempli) —
+--                  remplace « pas de trial auto » (2026-05-14), cf. doc 09.
+--   'solo' | 'starter' | 'pro' | 'agency' | 'enterprise' = abonnement actif
+--   'past_due'   = paiement échoué, accès complet 7 j de relance Stripe
+--   'expired'    = past_due > 7 j ou trial annulé → lecture seule, suppression J+30
+--   'canceled'   = annulé, accès jusqu'à fin de période payée
 CREATE TABLE workspaces (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
   slug TEXT UNIQUE NOT NULL,
   plan TEXT NOT NULL DEFAULT 'trialing'
-    CHECK (plan IN ('trialing','starter','pro','agency','enterprise','past_due','expired','canceled')),
+    CHECK (plan IN ('trialing','solo','starter','pro','agency','enterprise','past_due','expired','canceled')),
   stripe_customer_id TEXT UNIQUE,
   stripe_subscription_id TEXT UNIQUE,
   trial_ends_at TIMESTAMPTZ,
-  current_period_start TIMESTAMPTZ,  -- aligné sur la facturation Stripe
-  current_period_end   TIMESTAMPTZ,  -- idem
-  hard_cap_hit_at TIMESTAMPTZ,       -- timestamp si quota 200% LLM atteint (block actif)
+  current_period_start TIMESTAMPTZ,  -- aligné facturation Stripe
+  current_period_end   TIMESTAMPTZ,
+  hard_cap_hit_at TIMESTAMPTZ,       -- posé si quota 200% LLM atteint (block actif)
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE workspace_members (
   workspace_id UUID NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
-  user_id      TEXT NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,  -- FK vers Better Auth user.id
+  user_id      TEXT NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
   role TEXT NOT NULL DEFAULT 'member'
     CHECK (role IN ('owner','admin','member','viewer')),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   PRIMARY KEY (workspace_id, user_id)
 );
-
--- ──────────────────────────────────────────────────────────────────────
--- Marques trackées
--- ──────────────────────────────────────────────────────────────────────
 
 CREATE TABLE brands (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -360,7 +304,7 @@ CREATE TABLE brands (
   domain TEXT NOT NULL,
   description TEXT,
   aliases TEXT[] NOT NULL DEFAULT '{}',
-  paused_at TIMESTAMPTZ,                   -- V0+ : si non NULL, scheduler skip cette marque (Pause/Resume sans perte de setup)
+  paused_at TIMESTAMPTZ,  -- migration 0003 : si non NULL, scheduler skip (Pause/Resume sans perte de setup)
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 CREATE INDEX idx_brands_workspace ON brands(workspace_id);
@@ -376,10 +320,6 @@ CREATE TABLE competitors (
 );
 CREATE INDEX idx_competitors_brand ON competitors(brand_id);
 
--- ──────────────────────────────────────────────────────────────────────
--- Prompts et runs
--- ──────────────────────────────────────────────────────────────────────
-
 CREATE TABLE prompts (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   brand_id UUID NOT NULL REFERENCES brands(id) ON DELETE CASCADE,
@@ -388,11 +328,12 @@ CREATE TABLE prompts (
   language TEXT NOT NULL DEFAULT 'fr',
   is_active BOOLEAN NOT NULL DEFAULT TRUE,
   cadence TEXT NOT NULL DEFAULT 'inherit'
-    CHECK (cadence IN ('inherit','daily','weekly','monthly')),  -- V0+ : override de la cadence per-plan (cf. quotasFor()). 'inherit' = cadence du plan workspace.
+    CHECK (cadence IN ('inherit','daily','weekly','monthly')),
+    -- migration 0005 : override per-prompt de la cadence per-plan.
+    -- Cadence effective scheduler = cadence != 'inherit' ? cadence : plan.cadence
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 CREATE INDEX idx_prompts_brand_active ON prompts(brand_id) WHERE is_active = TRUE;
--- Scheduler V0+ : filtre par cadence effective = COALESCE(prompts.cadence WHERE != 'inherit', workspace_plan.cadence)
 
 -- 1 run = 1 prompt × 1 LLM × 1 date planifiée
 CREATE TABLE runs (
@@ -416,9 +357,9 @@ CREATE TABLE runs (
 CREATE INDEX idx_runs_prompt_executed ON runs(prompt_id, executed_at DESC);
 CREATE INDEX idx_runs_scheduled_pending ON runs(scheduled_at) WHERE status = 'pending';
 
--- Vue matérialisée des dashboards (recalculée par worker journalier)
--- V0+ 2026-05-17 : ajout du funnel sources 3 métriques (Apparition / Fréquence / Citation),
--- cf. doc 02 § Glossaire et veille concurrence 2026-05-11 (vocabulaire standard marché).
+-- Agrégat dashboards, recalculé par worker recompute_metrics.
+-- competitors_data historise les mentions concurrents par jour × LLM depuis
+-- la Phase A — c'est la source du leaderboard « Classement » (2026-06-10).
 CREATE TABLE citation_metrics_daily (
   brand_id UUID NOT NULL REFERENCES brands(id) ON DELETE CASCADE,
   llm TEXT NOT NULL,
@@ -427,26 +368,21 @@ CREATE TABLE citation_metrics_daily (
   brand_cited_count INTEGER NOT NULL,
   visibility_score DECIMAL(5, 2),  -- 0-100
   competitors_data JSONB,          -- { competitor_id: { citations, position_avg } }
-  -- Funnel sources V0+ — calculé par worker recompute_metrics à partir des runs.parsed_citations
-  retrieved_count   INTEGER NOT NULL DEFAULT 0,  -- nb de runs où ≥1 source de la marque apparaît dans le set de retrieval
-  retrievals_total  INTEGER NOT NULL DEFAULT 0,  -- somme des apparitions (une source peut apparaître plusieurs fois dans une réponse)
-  citations_count   INTEGER NOT NULL DEFAULT 0,  -- nb de retrievals convertis en citation explicite finale
-  -- Ratios dérivés (à la lecture, pas stockés) :
-  --   Apparition = retrieved_count / total_runs
-  --   Fréquence  = retrievals_total / retrieved_count  (si retrieved_count > 0, sinon 0)
-  --   Citation   = citations_count / retrievals_total  (si retrievals_total > 0, sinon 0)
+  -- Funnel sources (migration 0004, calculé depuis runs.parsed_citations,
+  -- helper src/lib/citation/source-match.ts ; pas de backfill rétro —
+  -- les anciens runs restent à 0) :
+  retrieved_count   INTEGER NOT NULL DEFAULT 0,  -- nb runs où ≥1 source de la marque apparaît
+  retrievals_total  INTEGER NOT NULL DEFAULT 0,  -- somme des apparitions
+  citations_count   INTEGER NOT NULL DEFAULT 0,  -- retrievals convertis en citation explicite
+  -- Ratios dérivés à la lecture : Apparition = retrieved/total_runs ;
+  -- Fréquence = retrievals_total/retrieved_count ; Citation = citations/retrievals_total
   PRIMARY KEY (brand_id, llm, date)
 );
 
--- ──────────────────────────────────────────────────────────────────────
--- Caching cross-clients (V0 optionnel, prévu mais peut-être désactivé)
--- ──────────────────────────────────────────────────────────────────────
-
--- Si deux workspaces trackent le même prompt textuellement identique sur
--- le même LLM, on ne paie qu'un seul appel par fenêtre de fraîcheur 24 h.
--- Économie estimée 20-40% sur Starter (cf. doc 03 § "Stratégies de réduction
--- des coûts"). Tableau ré-utilisé en lecture par le worker execute-prompt
--- avant tout nouvel appel LLM.
+-- Caching cross-clients : si 2 workspaces trackent le même prompt sur le
+-- même LLM, 1 seul appel par fenêtre 24 h. Économie estimée 20-40% Starter.
+-- ⚠️ État 2026-06-11 : table définie dans le schéma mais NON branchée
+-- (le worker execute-prompt n'y lit/écrit pas encore).
 CREATE TABLE prompt_cache (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   prompt_text_hash TEXT NOT NULL,   -- sha256(normalize(text))
@@ -456,26 +392,52 @@ CREATE TABLE prompt_cache (
   parsed_citations JSONB,
   cost_usd DECIMAL(10, 6),
   fetched_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  expires_at TIMESTAMPTZ NOT NULL,  -- = fetched_at + 24 h en V0
+  expires_at TIMESTAMPTZ NOT NULL,  -- = fetched_at + 24 h
   UNIQUE (prompt_text_hash, llm, language)
 );
 CREATE INDEX idx_prompt_cache_lookup ON prompt_cache(prompt_text_hash, llm, language)
   WHERE expires_at > NOW();
+
+-- Audits techniques app (migration 0002, Sprint 6 PR B — cf. doc 09 § 2026-05-17).
+-- Historise les audits lancés depuis l'app (le lead magnet public ne persiste rien).
+CREATE TABLE technical_audits (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  workspace_id UUID NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
+  brand_id UUID REFERENCES brands(id) ON DELETE SET NULL,  -- NULL pour audits concurrents
+  url TEXT NOT NULL,                 -- URL réellement auditée
+  is_competitor BOOLEAN NOT NULL DEFAULT FALSE,  -- filtre compare + pas d'alerte concurrent
+  score_global INTEGER NOT NULL,     -- 0-100 pondéré (computeGlobalScore)
+  sub_scores JSONB NOT NULL,         -- SEO/GEO/A11y/Perf
+  checks JSONB NOT NULL,             -- liste complète pour replay du rapport
+  html_size_kb DECIMAL(10,2),
+  http_status INTEGER NOT NULL,
+  psi_unavailable BOOLEAN NOT NULL DEFAULT FALSE,
+  fetched_at TIMESTAMPTZ NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX idx_technical_audits_workspace_created ON technical_audits(workspace_id, created_at);
+CREATE INDEX idx_technical_audits_workspace_url ON technical_audits(workspace_id, url);
+
+-- Quota audits par mois calendaire UTC (period_start = YYYY-MM-01)
+CREATE TABLE audit_counters (
+  workspace_id UUID NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
+  period_start DATE NOT NULL,
+  audits_count INTEGER NOT NULL DEFAULT 0,             -- audits "owned"
+  competitor_audits_count INTEGER NOT NULL DEFAULT 0,  -- quota séparé concurrents
+  PRIMARY KEY (workspace_id, period_start)
+);
 ```
 
 ### Tables plomberie
 
 ```sql
--- ──────────────────────────────────────────────────────────────────────
--- Queue Postgres-based (V0, ~150 lignes de code helpers)
--- ──────────────────────────────────────────────────────────────────────
-
 CREATE TABLE queue_jobs (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  kind TEXT NOT NULL                        -- ex : 'execute_prompt', 'score_response', 'send_weekly_email'
-    CHECK (kind IN ('execute_prompt','score_response','send_weekly_email','recompute_metrics')),
+  kind TEXT NOT NULL
+    CHECK (kind IN ('execute_prompt','score_response','send_weekly_email',
+                    'recompute_metrics','audit_workspace_url')),
   payload JSONB NOT NULL,                   -- ex : { prompt_id, llm, run_id }
-  idempotency_key TEXT NOT NULL UNIQUE,     -- ex : 'execute_prompt:{run_id}' ou 'execute_prompt:{prompt_id}:{llm}:{date}'
+  idempotency_key TEXT NOT NULL UNIQUE,
   status TEXT NOT NULL DEFAULT 'pending'
     CHECK (status IN ('pending','claimed','done','failed','dead')),
   scheduled_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -486,82 +448,64 @@ CREATE TABLE queue_jobs (
   last_error TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
-CREATE INDEX idx_queue_jobs_claim
-  ON queue_jobs(scheduled_at)
-  WHERE status = 'pending';
-CREATE INDEX idx_queue_jobs_dead
-  ON queue_jobs(finished_at)
-  WHERE status = 'dead';
+CREATE INDEX idx_queue_jobs_claim ON queue_jobs(scheduled_at) WHERE status = 'pending';
+CREATE INDEX idx_queue_jobs_dead  ON queue_jobs(finished_at)  WHERE status = 'dead';
 
--- ──────────────────────────────────────────────────────────────────────
--- Audit log applicatif (centralisation des événements métier en BDD)
--- ──────────────────────────────────────────────────────────────────────
-
--- Volontairement permissif sur le schéma (JSONB) : on logge tout ce qui a
--- une importance forensic ou produit. Purge à 90 jours (cron mensuel).
+-- Audit log applicatif. JSONB permissif (forensic + produit). Purge 90 j.
 CREATE TABLE events (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   workspace_id UUID REFERENCES workspaces(id) ON DELETE SET NULL,
   user_id TEXT REFERENCES "user"(id) ON DELETE SET NULL,
-  kind TEXT NOT NULL,                       -- ex : 'workspace.created', 'brand.added', 'run.completed', 'quota.warning_60', 'quota.hardcap_hit', 'plan.upgraded'
+  kind TEXT NOT NULL,   -- 'workspace.created', 'run.completed', 'quota.hardcap_hit', 'trial_email_sent', ...
   payload JSONB NOT NULL DEFAULT '{}',
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
-CREATE INDEX idx_events_workspace_kind_created
-  ON events(workspace_id, kind, created_at DESC);
-
--- ──────────────────────────────────────────────────────────────────────
--- Subscriptions
--- ──────────────────────────────────────────────────────────────────────
+CREATE INDEX idx_events_workspace_kind_created ON events(workspace_id, kind, created_at DESC);
 
 CREATE TABLE subscription_events (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   workspace_id UUID NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
   event_type TEXT NOT NULL
-    CHECK (event_type IN ('trial_started','trial_extended','created','upgraded','downgraded','canceled','reactivated','past_due','expired')),
+    CHECK (event_type IN ('trial_started','trial_extended','created','upgraded',
+                          'downgraded','canceled','reactivated','past_due','expired')),
   from_plan TEXT,
   to_plan TEXT,
-  stripe_event_id TEXT UNIQUE,              -- idempotence des webhooks Stripe
+  stripe_event_id TEXT UNIQUE,   -- idempotence des webhooks Stripe
   metadata JSONB NOT NULL DEFAULT '{}',
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 CREATE INDEX idx_subscription_events_workspace ON subscription_events(workspace_id, created_at DESC);
 
--- ──────────────────────────────────────────────────────────────────────
--- Usage counters — fenêtre = mois de facturation Stripe
--- ──────────────────────────────────────────────────────────────────────
-
--- period_start est l'UTC date de début de la période courante de facturation
--- Stripe (= workspaces.current_period_start::DATE). Un nouveau cycle Stripe
--- (renouvellement, upgrade) crée une nouvelle ligne. Pas de période glissante.
--- Reset = INSERT sur webhook 'invoice.created' au début de chaque cycle.
+-- Fenêtre = mois de facturation Stripe (period_start = current_period_start::DATE).
+-- Nouveau cycle (renouvellement, upgrade) = nouvelle ligne, pas de période
+-- glissante. Reset = INSERT au webhook 'invoice.created'.
 CREATE TABLE usage_counters (
   workspace_id UUID NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
   period_start DATE NOT NULL,
   prompts_count INTEGER NOT NULL DEFAULT 0,
   runs_count INTEGER NOT NULL DEFAULT 0,
   llm_cost_usd DECIMAL(10, 4) NOT NULL DEFAULT 0,
-  warned_at_60pct TIMESTAMPTZ,              -- alerte interne envoyée
-  warned_at_100pct TIMESTAMPTZ,             -- email client envoyé
-  hardcap_hit_at TIMESTAMPTZ,               -- block déclenché à 200%
+  warned_at_60pct TIMESTAMPTZ,    -- alerte interne envoyée
+  warned_at_100pct TIMESTAMPTZ,   -- email client envoyé
+  hardcap_hit_at TIMESTAMPTZ,     -- block déclenché à 200%
   PRIMARY KEY (workspace_id, period_start)
 );
 ```
 
 ### Idempotence des jobs LLM (formalisée)
 
-Règle : **un job ne peut pas être enqueue deux fois pour la même clé logique**.
-La colonne `idempotency_key TEXT UNIQUE NOT NULL` de `queue_jobs` matérialise
-cette propriété. Format imposé par `kind` :
+Règle : **un job ne peut pas être enqueue deux fois pour la même clé
+logique** (`idempotency_key TEXT UNIQUE NOT NULL`). Formats par `kind` :
 
-| `kind`              | format `idempotency_key`                                                                                  |
-| ------------------- | --------------------------------------------------------------------------------------------------------- |
-| `execute_prompt`    | `execute_prompt:{prompt_id}:{llm}:{scheduled_date_iso}` (ex : `execute_prompt:8fa1...:claude:2026-05-06`) |
-| `score_response`    | `score_response:{run_id}`                                                                                 |
-| `send_weekly_email` | `send_weekly_email:{workspace_id}:{iso_week}` (ex : `:2026-W18`)                                          |
-| `recompute_metrics` | `recompute_metrics:{brand_id}:{date_iso}`                                                                 |
+| `kind`                | format `idempotency_key` |
+| --------------------- | ------------------------ |
+| `execute_prompt`      | `execute_prompt:{prompt_id}:{llm}:{scheduled_date_iso}` (ex : `execute_prompt:8fa1...:claude:2026-05-06`) |
+| `score_response`      | `score_response:{run_id}` |
+| `send_weekly_email`   | `send_weekly_email:{workspace_id}:{iso_week}` (ex : `:2026-W18`) |
+| `recompute_metrics`   | `recompute_metrics:{brand_id}:{date_iso}` |
+| `audit_workspace_url` | `audit_workspace_url:{workspace_id}:{url}:{date_iso}` |
 
-Algorithme `enqueue` :
+`enqueue` :
 
 ```sql
 INSERT INTO queue_jobs (kind, payload, idempotency_key, scheduled_at, max_attempts)
@@ -570,12 +514,10 @@ ON CONFLICT (idempotency_key) DO NOTHING
 RETURNING id;
 ```
 
-Si `RETURNING id` est vide, le job était déjà en BDD : pas d'erreur, juste un
-no-op silencieux. Cron peut donc se redéclencher sans risque, et un dispatch
-redémarré ne crée pas de doublon.
+`RETURNING id` vide = job déjà en BDD, no-op silencieux → cron re-déclenché
+ou dispatch redémarré ne créent pas de doublon.
 
-Algorithme `claim` (worker pull-based, `FOR UPDATE SKIP LOCKED` pour
-parallélisme sûr) :
+`claim` (pull-based, `FOR UPDATE SKIP LOCKED` pour parallélisme sûr) :
 
 ```sql
 UPDATE queue_jobs
@@ -590,71 +532,43 @@ WHERE id IN (
 RETURNING *;
 ```
 
-Algorithme `complete` / `fail` :
-
-- `complete` : `UPDATE ... SET status='done', finished_at=NOW()`
-- `fail` (transient) : `UPDATE ... SET status='pending', last_error=$err, scheduled_at=NOW() + interval '1 hour'` si `attempts < max_attempts`, sinon `status='dead'`. Re-tentative h+1 puis h+6 (cf. doc 03 § "Fallback strategy").
+`complete` : `SET status='done', finished_at=NOW()`.
+`fail` transient : `SET status='pending', last_error=$err, scheduled_at=NOW()
++ interval '1 hour'` si `attempts < max_attempts`, sinon `status='dead'`.
+Re-tentative h+1 puis h+6 (cf. § "Fallback strategy").
 
 ### Algorithme du hard-cap LLM 200%
 
-Implémenté dans `src/lib/llm/quota-guard.ts`, appelé **avant chaque appel LLM**
-réel par le worker `execute-prompt`. Le hard-cap est 200% du quota théorique
-mensuel calculé à partir du plan + nombre de prompts × LLMs × fréquence.
+**Livré** (Sprint 4, 2026-05-16) dans `src/lib/hardcap/check.ts`
+(`checkQuotaBeforeRun`), appelé avant chaque appel LLM réel par
+`execute-prompt`. Ratio = `runs_count / théorique mensuel` (prompts × LLMs ×
+jours du cycle, selon plan) :
 
-```ts
-// pseudo-code, à implémenter Sprint 1
-async function checkQuotaOrBlock(workspaceId: string): Promise<"ok" | "blocked"> {
-  const ws = await db.workspaces.findById(workspaceId);
-  if (ws.plan === "expired" || ws.plan === "canceled") return "blocked";
-  if (ws.hard_cap_hit_at) return "blocked";
+- **≥ 60 %** (1ʳᵉ fois) : alerte interne (event `quota.warning_60` + email Max), `warned_at_60pct` posé
+- **≥ 100 %** (1ʳᵉ fois) : email client, `warned_at_100pct` posé, runs encore autorisés
+- **≥ 200 %** : block — `hardcap_hit_at` + `workspaces.hard_cap_hit_at` posés (transaction), event `quota.hardcap_hit`, email client + alerte interne
+- Plans `expired` / `canceled` ou `hard_cap_hit_at` déjà posé : blocked d'office
 
-  const counter = await db.usageCounters.findCurrent(workspaceId);
-  const theoreticalMaxRuns = computeTheoreticalRuns(ws.plan); // prompts × llms × jours du cycle
-  const ratio = counter.runs_count / theoreticalMaxRuns;
-
-  // Alerte interne à 60% (Slack/email Max), pas d'action client
-  if (ratio >= 0.6 && !counter.warned_at_60pct) {
-    await events.log({ workspaceId, kind: "quota.warning_60", payload: { ratio } });
-    await db.usageCounters.update(workspaceId, { warned_at_60pct: now() });
-    await alertInternal(`Workspace ${workspaceId} à ${(ratio * 100).toFixed(0)}%`);
-  }
-
-  // Alerte client à 100% du théorique, encore autorisé
-  if (ratio >= 1.0 && !counter.warned_at_100pct) {
-    await events.log({ workspaceId, kind: "quota.warning_100", payload: { ratio } });
-    await db.usageCounters.update(workspaceId, { warned_at_100pct: now() });
-    await sendEmail(ws, "quota_100pct");
-  }
-
-  // Hard-cap à 200% : block + email + alerte interne
-  if (ratio >= 2.0) {
-    await db.transaction(async (tx) => {
-      await tx.usageCounters.update(workspaceId, { hardcap_hit_at: now() });
-      await tx.workspaces.update(workspaceId, { hard_cap_hit_at: now() });
-    });
-    await events.log({ workspaceId, kind: "quota.hardcap_hit", payload: { ratio } });
-    await sendEmail(ws, "quota_hardcap_blocked");
-    await alertInternal(`HARD-CAP atteint sur ${workspaceId}, accès bloqué.`);
-    return "blocked";
-  }
-
-  return "ok";
-}
-```
-
-Le hard-cap est levé manuellement (admin UI ou requête SQL) après dialogue
-client : pas de levée automatique. Reset du compteur uniquement au prochain
-cycle de facturation Stripe (webhook `invoice.created`).
+Levée **manuelle uniquement** (SQL/admin) après dialogue client. Reset du
+compteur au prochain cycle Stripe (webhook `invoice.created`).
 
 ### Quotas par plan
 
-| Plan             | Brands   | Concurrents | Prompts   | LLMs           | Fréquence | Historique |
-| ---------------- | -------- | ----------- | --------- | -------------- | --------- | ---------- |
-| Trial 7j (= Pro) | 3        | 10          | 100       | 5              | Quotidien | 90j        |
-| Starter (49€)    | 1        | 5           | 25        | 5 dont Le Chat | Hebdo     | 90j        |
-| Pro (149€)       | 3        | 10          | 100       | 5              | Quotidien | 1 an       |
-| Agence (399€)    | 10       | 10/marque   | 300       | 5              | Quotidien | 1 an       |
-| Enterprise       | illimité | illimité    | sur devis | 5+             | sur devis | illimité   |
+Source de vérité code : `src/lib/plans/quotas.ts` (`quotasFor()`). État
+2026-06-11 :
+
+| Plan            | Brands | Concurrents | Prompts | Cadence | Audits/mois | Compare (concurrents auditables) |
+| --------------- | ------ | ----------- | ------- | ------- | ----------- | -------------------------------- |
+| trialing / past_due / expired / canceled | 1 | 0 | 0 | aucun run | 0 | 0 |
+| Solo (9,99 €)   | 1      | 3           | 5       | hebdo (lundi) | 5     | 0 (désactivé) |
+| Starter (49 €)  | 1      | 5           | 25      | quotidien | 30        | 3 |
+| Pro (149 €)     | 3      | 10          | 100     | quotidien | 100       | 10 |
+| Agence (399 €, sur devis) | 10 | ∞        | 300     | quotidien | ∞         | ∞ |
+| Enterprise      | ∞      | ∞           | sur devis | quotidien | ∞       | ∞ |
+
+5 LLMs sur tous les plans payants (Le Chat dès Starter sans condition).
+Historique data : Starter 90 j, Pro/Agence 1 an (non enforced en code à ce
+jour). Trial 14 j avec carte = quotas du plan choisi au checkout.
 
 ---
 
@@ -662,65 +576,65 @@ cycle de facturation Stripe (webhook `invoice.created`).
 
 ### APIs ciblées
 
-| LLM               | Modèle                           | Endpoint         | Web search ? | Coût input | Coût output |
-| ----------------- | -------------------------------- | ---------------- | ------------ | ---------- | ----------- |
-| ChatGPT           | gpt-4o-mini + `web_search` tool  | OpenAI API       | ✅           | $0.15/M    | $0.60/M     |
-| Claude            | claude-haiku-4-5 + web_search    | Anthropic API    | ✅           | $0.25/M    | $1.25/M     |
-| Perplexity        | sonar                            | Perplexity API   | ✅ natif     | $1/M       | $1/M        |
-| Gemini            | gemini-2.5-flash + grounding     | Google AI Studio | ✅           | $0.075/M   | $0.30/M     |
-| Le Chat (Mistral) | mistral-large-latest + web tools | Mistral API      | ✅           | €1.5/M     | €4.5/M      |
-
-> **Important** : pour reproduire fidèlement ce qu'un utilisateur voit dans ChatGPT.com, il faut activer le browsing/search. Sinon on teste le modèle sans contexte web et on rate les vraies citations. C'est ce que font Profound et Peec.
+Cf. tableau § "LLMs" ci-dessus (5 providers livrés). Point clé : pour
+reproduire fidèlement ce qu'un utilisateur voit dans ChatGPT.com et
+consorts, le browsing/search natif est activé partout — sinon on teste le
+modèle sans contexte web et on rate les vraies citations (c'est ce que font
+Profound et Peec).
 
 ### Estimation de coût par run
 
-**Hypothèse théorique initiale** :
+**Hypothèse théorique initiale** : ~500 tokens in + ~1500 out ≈ $0.003/appel.
 
-- 1 prompt envoyé → ~500 tokens input
-- Réponse moyenne avec sources → ~1500 tokens output
-- Coût moyen pondéré : ~$0.003 par appel LLM (ordre de grandeur)
-
-**Mesure réelle au 2026-05-07** (cf. `09-decisions-journal.md` § 2026-05-07) :
+**Mesure réelle 2026-05-07** (cf. doc 09 § 2026-05-07) :
 
 | Modèle                         | Tokens in | Tokens out | Web search | Coût mesuré |
 | ------------------------------ | --------- | ---------- | ---------- | ----------- |
 | `claude-sonnet-4-6` + search 5 | 21 925    | 2 113      | 1          | ~$0,107     |
 
-L'écart vient du tool serveur `web_search_20250305` qui injecte les
-résultats de recherche (~5 ko/search) en input du modèle. L'estimation
-$0.003 ignorait cet effet. **Conséquence Phase A** : le tracking V0
-utilise `claude-haiku-4-5-20251001` ($1 in / $5 out) avec `max_uses=2`
-et `max_tokens=4096` → coût mesuré attendu ~$0.02-0.04/run, soit ~5×
-moins cher que Sonnet 4.6 et compatible avec la marge Starter.
+L'écart vient du tool serveur `web_search_20250305` qui injecte ~5 ko/search
+en input. D'où le choix Phase A : tracking sur `claude-haiku-4-5-20251001`
+($1 in / $5 out) avec `max_uses=2` + `max_tokens=4096` → **~$0,02-0,04/run
+mesuré** (~5× moins cher que Sonnet). Scoring : ~$0,003/run.
 
-La bascule Sonnet 4.6 (ou autre modèle plus cher) est replanifiée pour
-Phase C (cf. `08-roadmap-execution.md`), avec arbitrage par plan
-(Starter sur Haiku, Pro/Agency sur Sonnet) ou par feature flag par
-workspace.
+**Smoke tests Phase C (2026-05-18)** : Mistral ~$0,02 ; OpenAI ~$0,01 (16
+sources) ; Gemini ~$0,035 (14 sources).
+
+La bascule Sonnet 4.6 (prévue Phase C) **n'a pas été faite** — le tracking
+reste sur Haiku 4.5. Arbitrage par plan (Starter Haiku, Pro/Agency Sonnet)
+ou feature flag par workspace : toujours ouvert.
 
 ### Coût par client
 
-| Plan          | Prompts × LLMs × jours | Runs/mois | Coût LLM/mois | Marge brute après LLM |
-| ------------- | ---------------------- | --------- | ------------- | --------------------- |
-| Starter (49€) | 25 × 5 × 4 (hebdo)     | 500       | ~$1.50        | ~96%                  |
-| Pro (149€)    | 100 × 5 × 30           | 15 000    | ~$45          | ~70%                  |
-| Agence (399€) | 300 × 5 × 30           | 45 000    | ~$135         | ~66%                  |
+Table d'origine (hypothèse $0,003/run), conservée pour trace :
 
-⚠️ **Le plan Pro est le moins margé.** À surveiller. Si les vrais coûts moyens sont 2x plus élevés (cas réels avec longues réponses), le Pro tombe à 40% de marge → renégocier le pricing ou réduire la fréquence par défaut.
+| Plan          | Runs/mois (hypothèse d'époque) | Coût LLM/mois | Marge brute |
+| ------------- | ------------------------------ | ------------- | ----------- |
+| Starter (49€) | 25 × 5 × 4 (hebdo) = 500       | ~$1.50        | ~96%        |
+| Pro (149€)    | 100 × 5 × 30 = 15 000          | ~$45          | ~70%        |
+| Agence (399€) | 300 × 5 × 30 = 45 000          | ~$135         | ~66%        |
+
+⚠️ **À recalculer avec les coûts mesurés** : (a) Starter est passé en
+cadence quotidienne (3 750 runs/mois au quota plein, pas 500), (b) le coût
+mesuré est ~$0,01-0,04/run selon provider, soit 3-13× l'hypothèse $0,003. Au
+quota plein, Pro = $150-600/mois de LLM pour 149 € de MRR. Mitigations :
+usage réel < quota, pre-screening regex qui skippe le scoring, prompt_cache
+(non branché), smart frequency. Marges à revalider dans doc 04 avant scale.
 
 ### Stratégies de réduction des coûts
 
-1. **Caching agressif** — si deux clients trackent le même prompt, on ne lance qu'une seule fois (avec un délai max de fraîcheur de 24h). Économie estimée : 20-40% côté Starter.
-2. **Smart frequency** — détecter les prompts à faible variance (réponse stable depuis 7 jours) et passer en hebdo automatiquement même sur plan Pro
-3. **Modèles moins chers pour le scoring** — utiliser Claude Haiku ou GPT-4o-mini pour analyser les réponses (pas pour les générer)
-4. **Batch API** — quand disponible (Anthropic, OpenAI), 50% de réduction
-5. **Retry intelligent** — pas de re-run sur erreur transitoire avant 1h
-6. **Hard cap par client** — 200% du quota théorique max alors block et email
-7. **Alerte interne** — si un client dépasse 60% de marge consommée, alerte slack/email
+1. **Caching cross-clients** — même prompt × même LLM = 1 appel / 24 h. Économie estimée 20-40% Starter. (Table `prompt_cache` en schéma, pas encore branchée.)
+2. **Smart frequency** — prompts à réponse stable depuis 7 j → bascule hebdo auto même sur Pro (non implémenté)
+3. **Modèles cheap pour le scoring** — Haiku 4.5 (en place)
+4. **Batch API** — Anthropic/OpenAI, -50% quand applicable
+5. **Retry intelligent** — pas de re-run sur erreur transitoire avant 1 h (en place)
+6. **Hard cap 200%** — block + email (en place)
+7. **Alerte interne 60%** — email Max (en place)
 
 ### Fallback strategy
 
-Si un LLM est down ou hors quota, le run est marqué `failed` mais ne bloque pas les autres. Un retry est tenté à h+1 puis h+6. Au-delà, on skip le jour et on note dans le dashboard.
+LLM down ou hors quota → run `failed`, ne bloque pas les autres. Retry h+1
+puis h+6 ; au-delà, skip du jour, visible dashboard.
 
 ---
 
@@ -728,56 +642,30 @@ Si un LLM est down ou hors quota, le run est marqué `failed` mais ne bloque pas
 
 ### Approche en deux étapes
 
-#### 1. Pre-screening regex (cheap)
+**1. Pre-screening regex (cheap)** — `src/lib/citation/detect.ts` :
+marque + aliases dans la réponse brute, domaine dans les URLs citées. Aucun
+match (cible ET concurrents trackés) → run skippé, pas d'appel scoring.
+Conséquence assumée : les marques citées « à la place » ne sont pas
+découvertes sur les runs skippés (étape 4 du ranking, à trancher, cf. doc 02).
 
-- Recherche de la marque + aliases dans la réponse brute
-- Recherche du domaine dans les URLs citées
-- Si **aucun match**, pas la peine de payer un LLM pour scorer → skip
+**2. LLM scoring (précis)** — `src/lib/citation/score.ts` : Claude Haiku
+4.5 en **tool_use forcé** (`tool_choice` sur le tool `report_scoring`,
+schéma validé par Anthropic — pas de prompt « retourne du JSON »). Sortie :
 
-#### 2. LLM scoring (expensive mais précis)
+- `target_cited` (bool), position dans la liste le cas échéant, sentiment (positive / neutral / negative)
+- concurrents cités : `{ name, sentiment, position }` — champ `position` requis depuis l'étape 3 ranking (2026-06-10), parsing lénient pour les anciens payloads
+- sources citées (URLs / domaines)
 
-Pour les réponses qui matchent au screening :
-
-- Envoyer la réponse brute + nom de la marque + concurrents à Claude Haiku
-- Demander en JSON :
-  - La marque cible est-elle citée ? (oui / non)
-  - Si oui, à quelle position dans la liste si liste il y a ? (1, 2, 3...)
-  - Sentiment : positif, neutre, négatif
-  - Concurrents cités : liste avec position
-
-```typescript
-const SCORING_PROMPT = `
-Tu es un analyste d'IA. On t'envoie une réponse générée par un LLM à un prompt utilisateur.
-Détermine si certaines marques y sont citées, leur position et le sentiment.
-
-Marque cible : ${brand.name} (aliases : ${brand.aliases.join(", ")})
-Concurrents : ${competitors.map((c) => c.name).join(", ")}
-
-Réponse à analyser :
-"""
-${rawResponse}
-"""
-
-Retourne UNIQUEMENT un JSON valide de la forme :
-{
-  "target_cited": boolean,
-  "target_position": number | null,
-  "target_sentiment": "positive" | "neutral" | "negative" | null,
-  "competitors": [
-    { "name": string, "position": number | null }
-  ],
-  "sources_cited": [string]  // URLs ou domaines mentionnés
-}
-`;
-```
+Résultat persisté dans `runs.parsed_brands` ; le score visibilité V0 =
+positionWeight × sentimentWeight (0-100).
 
 ### Edge cases à gérer
 
-- Marques avec noms communs ("Boulanger" peut être un boulanger lambda) → confirmation par contexte LLM nécessaire
+- Noms communs ("Boulanger" boulangerie vs enseigne) → confirmation par contexte LLM
 - Acronymes ("BNP" vs "BNP Paribas")
 - Variations orthographiques
 - Mentions sarcastiques ou négatives
-- Sources sans URL claire (ex: "selon les experts du domaine")
+- Sources sans URL claire ("selon les experts du domaine")
 
 ---
 
@@ -785,38 +673,32 @@ Retourne UNIQUEMENT un JSON valide de la forme :
 
 ### Hébergement (choix verrouillés cf. doc 09)
 
-- Postgres : **Neon EU (Frankfurt)**
-- App : **Vercel EU** (région `cdg1` Paris pour les fonctions runtime)
-- Stockage fichiers : **Cloudflare R2** (EU jurisdiction)
-- Workers : **Postgres-based queue + Vercel Cron** (EU edge), migration Inngest EU à $20/mo prévue > 100K runs/mois
+Neon EU Frankfurt (Postgres) · Vercel EU (`cdg1` Paris pour les fonctions)
+· Cloudflare R2 (EU jurisdiction) · queue Postgres + Vercel Cron, migration
+Inngest EU > 100K runs/mois.
 
 ### Données personnelles
 
-- Email + nom seulement (pas plus)
-- Pas de données client final stockées (sauf si Agency)
-- DPA standard mis à dispo des clients
-- Politique RGPD sur le site dès J0
-- Logs : 30 jours puis purge
+Email + nom seulement. Pas de données client final (sauf Agency). DPA
+standard dispo. Politique RGPD dès J0 (+ section « Analytics produit »
+PostHog EU ajoutée 2026-06-08). Logs : 30 jours puis purge. Export JSON
+article 20 + suppression de compte dans `/app/settings`.
 
 ### Authentification
 
-- Magic link par défaut (pas de mot de passe à stocker = simpler + safer)
-- 2FA optionnel via TOTP en V1
-- SSO SAML en Enterprise (V2)
+Magic link par défaut (pas de mot de passe stocké). 2FA TOTP en V1. SSO
+SAML Enterprise (V2).
 
 ### Sécurité applicative
 
-- Headers : CSP, HSTS, X-Frame-Options
-- Rate limiting via Upstash sur les endpoints publics
-- Secrets dans Vercel env vars ou Doppler
-- Pas de service-side logging des prompts contenant données sensibles
-- Audit trail des actions admin
+CSP / HSTS / X-Frame-Options · rate limiting Upstash sur endpoints publics
+· secrets en Vercel env vars · pas de logging serveur de prompts sensibles
+· audit trail des actions admin (table `events`).
 
 ### Conformité légale
 
-- RGPD : registre des traitements, DPO si > 250 employés (pas le cas), DPIA si traitement à risque (pas le cas en V0)
-- TVA : à collecter selon règles UE (Stripe Tax automatise)
-- CGU + CGV + politique de confidentialité dès J0 (templates avocats SaaS FR)
+RGPD : registre des traitements ; pas de DPO ni DPIA requis en V0. TVA UE
+via Stripe Tax. CGU + CGV + politique de confidentialité dès J0.
 
 ---
 
@@ -824,84 +706,70 @@ Retourne UNIQUEMENT un JSON valide de la forme :
 
 ### Environnements
 
-- **Local** : branche Neon dédiée par dev (`dev-{username}`), gratuite et instantanée. Pas de Docker Compose.
-- **Preview** : auto sur chaque PR via Vercel + branche Neon dédiée par PR (gratuit)
-- **Staging** : branche `staging` déployée sur `staging.mamie-geo.fr` (seed avec données fixtures)
-- **Production** : branche `main` déployée sur `mamie-geo.fr` (path-based, pas de subdomain `app.`)
+- **Local** : branche Neon par dev (`dev-{username}`). Pas de Docker Compose.
+- **Preview** : auto par PR (Vercel + branche Neon dédiée)
+- **Staging** : branche `staging` → `staging.mamie-geo.fr` (seed fixtures)
+- **Production** : `main` → `mamie-geo.fr` (path-based, pas de subdomain `app.`)
 
 ### CI/CD
 
-- **GitHub Actions** : lint, type-check, tests unit, tests E2E, déploiement preview
-- **Lint** : ESLint + Prettier + TypeScript strict mode
-- **Tests bloquants** : aucun merge si tests rouges
-- **Trunk-based** : pas de feature branches longues, PRs < 400 lignes
+GitHub Actions : lint (ESLint + Prettier + TS strict), type-check, tests
+unit, E2E, preview. Tests bloquants (pas de merge si rouge). Trunk-based,
+PRs < 400 lignes.
 
 ### Backups
 
-- Postgres : point-in-time recovery natif Neon (7 jours sur free tier, plus sur Pro)
-- Export hebdo automatique vers R2 (cron Vercel) pour worst-case
-- Restore drill testé tous les 2 mois
+Point-in-time recovery Neon (7 j free tier) + export hebdo auto vers R2
+(cron Vercel). Restore drill tous les 2 mois.
 
 ### Monitoring
 
-- Uptime BetterStack sur landing + API + endpoints critiques
-- Sentry pour erreurs front + back
-- PostHog pour funnels d'usage
-- Dashboard interne (admin Mamie GEO) : MRR, runs/jour, coûts LLM/jour, churn, jobs en queue
+BetterStack (uptime landing + API + endpoints critiques), Sentry
+(front + back), PostHog (funnels), dashboard interne admin (MRR, runs/jour,
+coûts LLM/jour, churn, queue). Crons prod : `logCronEvent()` + endpoint
+debug `GET /api/cron/dispatch?inspect=1` (état queue + env vars).
 
 ---
 
 ## Stratégie de test (priorité projet solo)
 
-Critère explicite : **un solo founder ne peut pas tester à la main 5 LLMs × 100 prompts à chaque déploiement**. La stack doit permettre une couverture de tests automatique sans payer cher en API LLM.
+Contrainte : un solo founder ne peut pas tester à la main 5 LLMs × 100
+prompts à chaque déploiement → couverture automatique sans payer d'API LLM.
 
 ### Pyramide de tests
 
-```
-         ┌────────────────┐
-         │  E2E Playwright│  5-10 scénarios critiques (signup, onboarding, payment, dashboard)
-         └────────────────┘
-       ┌────────────────────┐
-       │ Integration Vitest │  20-40 tests : routes API, workers, queue, parsing
-       └────────────────────┘
-    ┌─────────────────────────┐
-    │   Unit Vitest          │  100+ tests : fonctions pures, scoring, validation Zod
-    └─────────────────────────┘
-```
+- **E2E Playwright** : 5-10 scénarios business-critiques uniquement
+- **Integration Vitest** : 20-40 tests (routes API, workers, queue, parsing)
+- **Unit Vitest** : 100+ tests (fonctions pures, scoring, validation Zod)
 
 ### Outils
 
-- **Vitest** : unit + integration. Plus rapide que Jest, ESM natif, parfait avec TypeScript.
-- **Playwright** : E2E sur les 5-10 flows business-critiques uniquement.
-- **MSW (Mock Service Worker)** : intercepte les appels HTTP en test → on mock les LLMs.
-- **Drizzle test mode** : utilise une vraie BDD test (branche Neon dédiée ou Postgres local) avec rollback transactionnel entre tests.
-- **Faker.js / @faker-js/faker** : générer des fixtures réalistes en français.
+- **Vitest** (unit + integration, colocation `foo.test.ts`)
+- **Playwright** (E2E flows critiques)
+- **MSW** (interception HTTP → mock LLMs)
+- **Drizzle test mode** : vraie BDD test (branche Neon dédiée), rollback transactionnel entre tests
+- **@faker-js/faker** : fixtures réalistes FR
 
 ### Stratégie LLM en test
 
-Les appels LLM en test sont **interdits** (lents, chers, non-déterministes). Trois patterns :
+Appels LLM **interdits** en test (lents, chers, non-déterministes). Trois
+patterns autorisés :
 
-1. **Cassettes (recordings)** : on enregistre une fois la vraie réponse de chaque LLM pour 20 prompts types, on sauvegarde en JSON, on rejoue en test. Outils : `nock` ou `MSW` avec des fixtures statiques.
-
-2. **Faux clients LLM** : on définit une interface `LLMClient` et on a deux implémentations : `RealLLMClient` (prod) et `FakeLLMClient` (test). En test, le fake retourne des réponses configurées par scénario. Pattern Strategy / dependency injection.
-
-3. **Snapshot tests sur le scoring** : on alimente le détecteur de citation avec une réponse LLM fixe et on vérifie que le scoring retourne le bon JSON. Pas d'appel LLM, juste regex + parsing.
+1. **Cassettes** : vraies réponses enregistrées une fois (20 prompts types), JSON dans `tests/fixtures/`, rejouées via MSW/nock
+2. **`FakeLLMClient`** : interface `LLMClient` (`src/lib/llm/types.ts`) + DI, réponses configurées par scénario
+3. **Snapshot tests scoring** : réponse LLM fixe → vérification du JSON de scoring (regex + parsing seuls)
 
 ### Données de test
 
-- **Fixtures français réalistes** : marques fictives (`Boucherie du Centre`, `LeMagDigital`, etc.), prompts FR, concurrents.
-- **Snapshot d'une journée type** : 1 workspace + 3 marques + 25 prompts + 5 LLMs × 7 jours = base de test "proche de la prod".
-- **Seed scripts versionnés** : `pnpm db:seed:dev`, `pnpm db:seed:test`, `pnpm db:seed:demo` (pour démos clients).
+Fixtures FR réalistes (marques fictives type `Boucherie du Centre`),
+snapshot "journée type" (1 workspace + 3 marques + 25 prompts + 5 LLMs × 7
+jours), seeds versionnés : `pnpm db:seed:dev`, `db:seed:test`, `db:seed:demo`.
 
 ### CI
 
-Sur chaque PR :
-
-1. Lint + type-check (~15 secondes)
-2. Unit tests Vitest (~30 secondes)
-3. Integration tests sur Postgres test (~1-2 minutes)
-4. Playwright E2E sur preview Vercel + branche Neon dédiée (~3-5 minutes)
-5. Total < 10 minutes pour merger
+Par PR : lint + type-check (~15 s) → unit (~30 s) → integration Postgres
+(~1-2 min) → Playwright sur preview Vercel + branche Neon (~3-5 min).
+Total < 10 min.
 
 ### Tests business-critiques en E2E (les seuls obligatoires)
 
@@ -913,44 +781,25 @@ Sur chaque PR :
 6. Login magic link
 7. Page facturation Stripe Customer Portal accessible
 
-Tout le reste = tests unit/integration suffisent.
+Tout le reste = unit/integration. État 2026-06-11 : 5 specs Playwright
+livrées sur les flows **publics** (home, pricing, blog, lead-magnet, login —
+13 tests) ; les flows authentifiés/Stripe de la liste restent à couvrir.
 
 ---
 
 ## Décisions techniques verrouillées
 
-Après analyse coût × scalabilité × testabilité, voici les choix actés pour V0. À reporter dans 09-decisions-journal.md.
-
-| Domaine                     | Choix                                                             | Pourquoi                                                                                               |
-| --------------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| **Framework**               | Next.js 15 App Router                                             | Connu, edge EU, ecosystem                                                                              |
-| **Langage**                 | TypeScript strict                                                 | Type-safety pour tests                                                                                 |
-| **Styling**                 | Tailwind v4 + shadcn customisé                                    | Cf. doc 10 design                                                                                      |
-| **Auth**                    | Better Auth                                                       | Open source, free, testable, pas de lock-in                                                            |
-| **ORM**                     | Drizzle                                                           | Léger, edge-compatible, SQL-first → tests simples                                                      |
-| **Postgres**                | Neon EU free tier                                                 | Branching pour tests, scale-to-zero, EU                                                                |
-| **Cache/rate limit**        | Upstash Redis free                                                | 10K cmd/jour gratuites                                                                                 |
-| **Storage**                 | Cloudflare R2 free                                                | 0 frais d'egress, 10 GB free                                                                           |
-| **Queue V0**                | Postgres-based custom + Vercel Cron                               | Gratuit, testable, idempotent                                                                          |
-| **Queue scale**             | Inngest (migration > 100K runs/mois)                              | DX premium quand on peut payer                                                                         |
-| **Hébergement (mono-repo)** | Vercel Pro $20/mo                                                 | Une seule app Next.js pour marketing + blog + app SaaS, edge EU, preview deployments, intégration Neon |
-| **Errors**                  | Sentry free                                                       | Standard                                                                                               |
-| **Analytics produit**       | PostHog Cloud EU free                                             | RGPD, 1M events free                                                                                   |
-| **Uptime**                  | BetterStack free                                                  | 10 monitors gratuits                                                                                   |
-| **Email transactionnel**    | Brevo                                                             | Déjà maîtrisé, EU                                                                                      |
-| **Paiement**                | Stripe + Stripe Tax                                               | Standard, TVA UE auto                                                                                  |
-| **LLMs tracking**           | APIs natives (OpenAI / Anthropic / Mistral / Perplexity / Google) | Fidélité aux réponses utilisateur                                                                      |
-| **LLM scoring**             | Anthropic Claude Haiku 4.5                                        | Cheap + JSON mode fiable                                                                               |
-| **Tests unit/integration**  | Vitest + MSW + Drizzle                                            | Rapide, déterministe                                                                                   |
-| **Tests E2E**               | Playwright sur 7 flows critiques                                  | Couverture business                                                                                    |
-| **CI**                      | GitHub Actions                                                    | Standard                                                                                               |
+Synthèse stack : cf. tableaux § "Stack V0" ci-dessus et CLAUDE.md § 2
+(tableau identique + anti-décisions). Justifications datées : doc 09.
 
 ### Décisions restantes (à trancher en Sprint 0)
 
-- [ ] **Naming définitif** + domaine : ☐ mamie-geo.fr ☐ autre
-- [ ] **Direction artistique** : ☐ A (éditorial chaud) ☐ B (souverain) ☐ C (studio indie) — cf. doc 10
-- [ ] **Stack marketing site** : ☐ Framer ☐ Astro ☐ Next.js + template — cf. doc 10
-- [ ] **Statut juridique** : ☐ EI continue ☐ SAS dès lancement
+Toutes tranchées depuis (cf. doc 09) :
+
+- **Naming + domaine** : Mamie GEO sur `mamie-geo.fr` (301 depuis mamie-seo.fr)
+- **Direction artistique** : pivot Airbnb-like minimaliste 2026-05-07 ; dual-DA 2026-06-05 (persona « Mamie » réservée aux visuels externes LinkedIn/OG)
+- **Stack marketing** : Next.js mono-app (pas de Framer)
+- **Statut juridique** : EI continue, bascule SAS/EURL mois 6-9
 
 ---
 
@@ -958,64 +807,60 @@ Après analyse coût × scalabilité × testabilité, voici les choix actés pou
 
 ### V0 (semaines 1-8) — Livré 2026-05
 
-- Stack de base + Auth Better Auth magic-link + Stripe billing complet
-- Onboarding wizard 3 étapes + bouton skip (`quickSetup`) + suggestion IA prompts
-- Worker `execute_prompt` (Phase A Haiku 4.5, Phase C ajoutera OpenAI / Mistral / Perplexity / Google)
-- Détection citation (regex + scoring qualitatif Claude Haiku)
-- Dashboard principal (Stat cards + AreaChart + BreakdownBars)
-- Pages CRUD `/app/prompts`, `/app/competitors`, `/app/settings` (édition workspace + brand aliases)
-- Email hebdo (`send_weekly_email` worker)
-- Plans Solo / Starter / Pro avec quotas + cadence per-plan (`daily` ou `weekly`)
-- **Hard-cap LLM 200 %** (`src/lib/hardcap/`) — bloque les workspaces qui dépassent + emails warning 60/100/200 %
-- **SSE temps réel** `/api/runs/events` + `<RunActivityBar>` + toasts à chaque transition
-- **One-shot run gratuit post-onboarding** (1 prompt × Claude ~$0,04 par signup)
-- **Blog content-driven** `src/content/blog/*.mdx` + JSON-LD Article/FAQPage/BreadcrumbList + OG image dynamique + sitemap.ts + robots.ts
-- **Outil audit technique site sans LLM** `/outils/audit-technique` (30+ checks, knowledge base recommandations rédigée main, PageSpeed Insights API)
-- Lead magnet existant `/outils/test-visibilite-ia`
-- Page interne `/styleguide` (noindex) — référence visuelle complète du design system
+Stack de base, Better Auth magic-link, Stripe billing complet, onboarding
+wizard 3 étapes (+ skip `quickSetup` + suggestion IA), worker
+`execute_prompt` 5 LLMs, détection citations (regex + scoring Haiku),
+dashboard (Stat cards + AreaChart + BreakdownBars), CRUD prompts /
+concurrents / settings, email hebdo, plans Solo/Starter/Pro + cadence
+per-plan, hard-cap LLM 200 % (`src/lib/hardcap/`), SSE `/api/runs/events` +
+`<RunActivityBar>`, one-shot run gratuit post-onboarding (~$0,04/signup),
+blog MDX content-driven (JSON-LD Article/FAQPage/Breadcrumb, OG dynamique,
+sitemap/robots), lead magnets `/outils/test-visibilite-ia` et
+`/outils/audit-technique` (30+ checks sans LLM, PSI API), `/styleguide`
+interne (noindex).
 
 ### V0+ (60 jours post-lancement) — issu de la veille 2026-05-11
 
-Chantiers planifiés en V0+ qui touchent l'archi (cf. doc 02 § V0+ pour le détail produit et § Glossaire pour le vocabulaire) :
+**Tout livré le 2026-06-08** (détail produit : doc 02 § V0+) :
 
-- **Migration schéma `citation_metrics_daily`** — ajout `retrieved_count`, `retrievals_total`, `citations_count` (funnel Apparition/Fréquence/Citation). Worker `recompute_metrics` étendu pour calculer ces 3 colonnes à partir de `runs.parsed_citations`. Backfill par one-shot job sur l'historique.
-- **`prompts.cadence`** (`inherit \| daily \| weekly \| monthly`) — per-prompt override de la cadence per-plan. Scheduler `/api/cron/schedule-runs` filtre par cadence effective.
-- **`brands.paused_at`** — Pause/Resume du tracking sans perte du setup. Scheduler skip les marques pausées. Pas de reset des compteurs Stripe (les credits ne sont juste pas consommés).
-- **`/app/sources/[id]`** — URL drill-down avec vues SQL (retrievals over time, citation rate par modèle, prompts qui retrouvent la source, marques voisines, runs réels). Pas de nouvelle table — vues sur `runs.parsed_citations`.
-- **`/api/export/{runs,metrics}.csv`** — exports auth + filtrés workspace, streaming Node.js pour fichiers > 10K lignes.
-- **Crawlabilité bots IA dans `src/lib/audit/`** — nouveau check `crawlability-ai-bots` : parse `/robots.txt` cible, croise avec table de bots connus (`GPTBot`, `ClaudeBot`, `Claude-Web`, `PerplexityBot`, `Google-Extended`, `Bytespider`, `CCBot`, `Amazonbot`, `meta-externalagent`, etc.), retourne table autorisé/bloqué. Section dédiée du rapport public (pas d'outil séparé `/crawlability`). Liste de bots à maintenir versionnée dans `src/lib/audit/ai-bots.ts`.
-- **Bouton « Régénérer prompts depuis le profil »** sur `/app/onboarding` et `/app/prompts` — server action qui appelle `suggestPrompts(brand)` (Haiku 4.5, cf. mémoire user `feedback_aux_llm_cost`).
-- **`BrandMultiSelect`** dans `src/components/app/` — filtre multi-sélection groupé (Your brand / Competitors) appliqué aux vues dashboard et drill-down.
-- **Save-as-PNG** sur charts Recharts — wrapper `<ChartExport>` autour de `LineChart` / `BarChart` / `AreaChart` (html2canvas ou similaire). 1-2 j de dev, pas trivial avec SSR + theming.
-- **Comparison pages `/comparatifs/[slug]`** — articles MDX dans `src/content/comparatifs/` (vs Peec AI, vs Otterly, vs Rankscale en V0+ ; vs Profound déjà publié blog).
+| Item | Implémentation réelle |
+| ---- | --------------------- |
+| Funnel sources Apparition/Fréquence/Citation | migration 0004, 3 colonnes `citation_metrics_daily`, helper `src/lib/citation/source-match.ts` (12 tests), worker `aggregateSourcesFunnel` (6 tests). **Pas de backfill rétro** (le plan initial en prévoyait un — abandonné, anciens runs restent à 0) |
+| `prompts.cadence` per-prompt | migration 0005, scheduler filtre par cadence effective |
+| Pause/Resume (`brands.paused_at`) | migration 0003 + index partiel `idx_brands_active`, scheduler skip, actions `pauseBrand`/`resumeBrand`, toggle dans `/app/settings` |
+| URL drill-down | `/app/citations/sources/[id]` (pas `/app/sources/[id]`), vues sur `runs.parsed_citations`, pas de nouvelle table |
+| CSV exports | `/api/export/{runs,metrics}.csv`, helper RFC 4180 + BOM UTF-8 (`src/lib/csv/`), cap 50 k lignes + header `X-Export-Truncated`, plage 90 j par défaut |
+| Crawlabilité bots IA | check `crawlability-ai-bots` dans `src/lib/audit/`, table de bots versionnée `src/lib/audit/ai-bots.ts` (GPTBot, ClaudeBot, PerplexityBot, Google-Extended, Bytespider, CCBot, Amazonbot, meta-externalagent, ...) |
+| Régénérer prompts depuis profil | server action `suggestPrompts(brand)` (Haiku 4.5, cf. mémoire `feedback_aux_llm_cost`) |
+| `BrandMultiSelect` | filtre multi-sélection dashboard/drill-down |
+| Save-as-PNG charts | wrapper export autour des charts Recharts |
+| Comparison pages | 3 articles MDX publiés dans `/blog/` (vs Peec AI / Otterly / Rankscale) — route dédiée `/comparatifs/[slug]` reportée V1 |
+
+S'y ajoutent (2026-06-10) : onglet **Classement** `/app/citations?tab=ranking`
+(`computeRanking()` dans `src/lib/competitors/ranking.ts`, lit
+`competitors_data` — zéro migration) + `position` par concurrent dans le
+tool schema scoring. Cf. doc 09 § 2026-06-10.
 
 ### V1 (mois 3-6)
 
-- Crawler AI-readiness
-- Score AI-readiness + recommandations
-- Recrawl périodique
+- Crawler AI-readiness + score + recommandations + recrawl périodique
 - Vue concurrents avancée
 - Notifications Slack
 - API basic (read-only)
-- **Programme partenaire + annuaire public** (cf. doc 06 § Programme partenaire) — tracking Stripe affiliate, commission lifetime 20-25 %, page CMS-style listant les agences signées
-- **Query fan-out tracking** (mode advanced view tier Pro/Agence) — scraping détaillé des sub-queries que ChatGPT/consorts fan-out en interne, parsing des sources/citations
-- **MCP Server Mamie GEO (conditionnel)** — read-only sur la data utilisateur, accessible depuis Claude/Cursor/Windsurf. Activé seulement si demande client claire émerge (cible PME/freelance FR ≠ devs power-users).
+- **Programme partenaire + annuaire public** (cf. doc 06) — tracking Stripe affiliate, commission lifetime 20-25 %
+- **Query fan-out tracking** (tier Pro/Agence) — sub-queries internes ChatGPT & co, parsing sources/citations
+- **MCP Server Mamie GEO (conditionnel)** — read-only, activé seulement si demande client claire (cible PME/freelance FR ≠ devs power-users)
+- Route dédiée `/comparatifs/[slug]` si traction des comparatifs blog
 
 ### V2 (mois 6-12)
 
-- Multi-workspaces
-- Marque blanche
-- Rapports PDF auto
-- Intégrations GA4 + Search Console
-- API write
-- Webhooks
+Multi-workspaces · marque blanche · rapports PDF auto · intégrations GA4 +
+Search Console · API write · webhooks.
 
 ### V3 (mois 12-18)
 
-- Prompt Library FR par secteur
-- Sentiment analysis avancé
-- AI Traffic Attribution
-- Mobile app (si demandé)
+Prompt Library FR par secteur · sentiment analysis avancé · AI Traffic
+Attribution · mobile app (si demandé).
 
 ---
 

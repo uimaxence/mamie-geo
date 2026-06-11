@@ -2,163 +2,80 @@
 
 ## Principes GTM
 
-1. **L'organique en premier** — mamie-seo est un asset gratuit à activer, c'est notre canal n°1
-2. **Le canal agence est notre accélérateur** — un client agence vaut 5-15 leads sous-jacents
-3. **Pas d'ads avant PMF clair** — gaspillage de cash en pré-product/market fit
-4. **Le contenu fait le job** — chaque post LinkedIn, chaque article, chaque vidéo travaille en background
-5. **Le bouche-à-oreille FR fonctionne** — communautés SEO compactes, viral en interne au secteur
+1. **L'organique en premier** — mamie-seo est un asset gratuit à activer, canal n°1
+2. **Le canal agence est notre accélérateur** — un client agence = 5-15 leads sous-jacents
+3. **Pas d'ads avant PMF clair**
+4. **Le contenu fait le job** — chaque post, article, vidéo travaille en background
+5. **Le bouche-à-oreille FR fonctionne** — communautés SEO compactes
 
 ---
 
 ## Plan 90 jours détaillé
 
+> État 2026-06-11 : la phase « Avant J1 » est quasi terminée (produit en prod, Stripe LIVE). Le hard launch public n'a pas encore eu lieu — les phases Jours 1-90 restent le plan à exécuter.
+
 ### Avant J1 — Préparation (2-3 semaines)
 
 #### Côté produit
 
-- V0 fonctionnelle minimum (Tracker pour 5 LLMs, dashboard, email, paiement)
-- Onboarding wizard testé sur 5 personnes
-- Page pricing publique
-- CGU / CGV / politique de confidentialité publiées
-- Page mentions légales
+✅ Fait : V0 complète (Tracker 5 LLMs, dashboard, email hebdo, Stripe + trial 14 j carte requise), onboarding wizard, pricing public, pages légales (CGU/CGV/confidentialité/mentions).
 
 #### Côté marque
 
-- Naming définitif validé
-- Logo + identité visuelle minimum (1-2 jours Figma)
-- Landing page de lancement
-- Compte LinkedIn personnel mis à jour ("Founder Mamie GEO")
-- Compte Twitter/X (optionnel mais utile pour l'écosystème indie tech FR)
+✅ Fait : naming (Mamie GEO / mamie-geo.fr), logo + DA (doc 10), landing.
+- [ ] Compte LinkedIn personnel mis à jour ("Founder Mamie GEO")
+- [ ] Compte Twitter/X (optionnel, écosystème indie tech FR)
 
 #### Côté contenu
 
-- 5 articles déjà publiés sur mamie-seo.fr orientés GEO (cf. doc 06)
-- 1 outil gratuit lancé : "Test ma visibilité IA"
-- 1 video YouTube de 5 min "Qu'est-ce que le GEO ?"
-- 1 newsletter Mamie GEO créée et 100 abonnés activés
+✅ Fait : 6 articles blog publiés (3 fond + 3 comparatifs Peec/Otterly/Rankscale), outil gratuit `/outils/test-visibilite-ia` + `/outils/audit-technique`, form newsletter blog (reste `BREVO_BLOG_LIST_ID` à configurer).
+- [ ] 1 vidéo YouTube 5 min "Qu'est-ce que le GEO ?"
+- [ ] 100 abonnés newsletter activés
 
 #### Côté distribution
 
-- Liste de 100 prospects agences SEO françaises (depuis SEO Camp directory, Google Partners, Stratégies)
-- Liste de 50 freelances SEO FR connus (LinkedIn)
-- 5 contacts journalistes ou bloggeurs (BDM, Journal du Net, Frenchweb, Maddyness)
-- Communauté SEO Camp Slack rejointe
-- Discord et Slack tech FR identifiés
+- [ ] Liste de 100 prospects agences SEO FR (SEO Camp directory, Google Partners, Stratégies)
+- [ ] Liste de 50 freelances SEO FR connus (LinkedIn)
+- [ ] 5 contacts journalistes/bloggeurs (BDM, Journal du Net, Frenchweb, Maddyness)
+- [ ] Rejoindre SEO Camp Slack + identifier Discord/Slack tech FR
 
 ---
 
 ### Jours 1-30 — Beta privée
 
-#### Objectif
+**Objectif** : 15-20 beta testeurs gratuits actifs quotidiens, feedback, futurs ambassadeurs.
 
-Avoir 15-20 beta testeurs gratuits qui utilisent le produit chaque jour, donnent du feedback, et deviennent ambassadeurs.
+- **S1** : annonce LinkedIn "je cherche 15 beta testeurs freelances/agences SEO FR" + email aux 100 prospects agences (3 mois gratuits) + posts SEO Camp Slack / Indie Hackers FR
+- **S2-3** : onboarding 1:1 (30 min) par testeur, collecte structurée (Notion, NPS, features manquantes), itération quotidienne, retour produit hebdo public
+- **S4** : préparation lancement, 1er témoignage/case study, article retex "30 jours en beta"
 
-#### Actions
-
-**Semaine 1**
-
-- Annonce LinkedIn : "Je lance Mamie GEO, je cherche 15 beta testeurs gratuits parmi les freelances et agences SEO francophones"
-- Email aux 100 prospects agences avec offre beta (3 mois gratuits)
-- Post sur SEO Camp Slack (avec autorisation)
-- Post Indie Hackers FR
-
-**Semaine 2-3**
-
-- Onboarding 1:1 par appel 30 min avec chaque beta testeur
-- Collecte structurée : Notion shared, NPS, fonctionnalités manquantes
-- Itération rapide quotidienne sur le produit
-- Premier retour produit hebdo : "Ce que j'ai appris cette semaine grâce à vos feedbacks"
-
-**Semaine 4**
-
-- Préparation lancement public
-- Premier témoignage / case study écrit avec un beta testeur volontaire
-- Article retex : "30 jours en beta : ce qu'on a appris du marché GEO français"
-
-#### KPI
-
-- 15 beta testeurs actifs
-- NPS > 40
-- 3-5 témoignages publiables
-- 1 case study chiffré
+**KPI** : 15 beta actifs · NPS > 40 · 3-5 témoignages publiables · 1 case study chiffré
 
 ---
 
 ### Jours 31-60 — Lancement public payant
 
-#### Objectif
+**Objectif** : 15-25 clients payants, tunnel mamie-geo haute intensité.
 
-Convertir 15-25 clients payants. Activer le tunnel mamie-seo en mode haute intensité.
+- **S5 (lancement)** : article de lancement (lourd SEO + GEO méta-jeu), annonce LinkedIn perso, X, ProductHunt FR + worldwide, update Indie Hackers, email beta testeurs ("6 mois gratuits supplémentaires")
+- **S6-7 (amplification)** : pitch presse BDM/Journal du Net/Frenchweb/Stratégies, tribune LinkedIn "Le SEO français doit devenir GEO", 2 webinars (grand public + agences), outreach LinkedIn 10 messages/jour
+- **S8 (tunnel)** : analytics review, A/B test landing (3 headlines), raccourcir onboarding, lancement affiliation (20% récurrent)
 
-#### Actions
-
-**Semaine 5 — Lancement officiel**
-
-- Article de lancement sur mamie-seo.fr (lourd en SEO + GEO meta-jeu)
-- Annonce LinkedIn personnelle (Max raconte le pourquoi)
-- Annonce sur Twitter/X
-- Producthunt (FR + worldwide) — préparer maker community
-- Indie Hackers : update du post initial avec metrics
-- Email aux beta testeurs : "Vous restez gratuits 6 mois supplémentaires en remerciement"
-
-**Semaine 6-7 — Amplification**
-
-- 1 article ou interview pitché à BDM, Journal du Net, Frenchweb, Stratégies
-- Tribune LinkedIn pulse "Le SEO français doit devenir GEO"
-- 2 webinars : un grand public, un agences (cf. plus bas)
-- Outreach LinkedIn manuel : 10 messages/jour aux freelances et agences ciblées
-
-**Semaine 8 — Optimisation tunnel**
-
-- Analytics review : où on perd les visiteurs
-- A/B test landing page (3 variantes pour la headline)
-- Optimisation onboarding (raccourcir étapes)
-- Premier programme d'affiliation lancé (20% récurrent)
-
-#### KPI
-
-- 1 500+ visiteurs uniques landing
-- 80+ inscriptions trial
-- 15-25 conversions payantes
-- MRR 2-4 K€
+**KPI** : 1 500+ visiteurs uniques · 80+ trials · 15-25 payants · MRR 2-4 K€
 
 ---
 
 ### Jours 61-90 — Canal agence en marche forcée
 
-#### Objectif
+**Objectif** : 3-5 agences en marque blanche signées.
 
-Signer 3-5 agences en marque blanche, qui pourront eux-mêmes onboarder leurs clients.
+> La marque blanche complète arrive en V2 (mois 6-12). En attendant : "early access agency program" avec multi-workspaces basique.
 
-> Note : la marque blanche complète arrive en V2 (mois 6-12). En attendant, on propose un "early access agency program" avec multi-workspaces basique.
+- **S9-10** : liste affinée 30 agences SEO FR (3-15 personnes), email perso dirigeant (template ci-dessous), follow-up LinkedIn J+3, demande visio 30 min
+- **S11** : webinar agences "Comment vendre du GEO à vos clients en 2026" (80-150 inscrits, conversion 10-20% en demo)
+- **S12** : demos 1:1, offre "founder partner" (-50% à vie pour les 5 premières agences avant fin M3), closing 3-5
 
-#### Actions
-
-**Semaine 9-10 — Outreach agences ciblé**
-
-- Liste affinée de 30 agences SEO FR taille 3-15 personnes
-- Email perso à chaque dirigeant (template ci-dessous)
-- LinkedIn message follow-up à J+3 si pas de réponse
-- Demande de visio 30 min
-
-**Semaine 11 — Webinar agences**
-
-- Webinar dédié "Comment vendre du GEO à vos clients en 2026"
-- Pitch produit en fin
-- Inscription 80-150 personnes, conversion 10-20% en demo
-
-**Semaine 12 — Closing agences**
-
-- Demos 1:1 avec les agences intéressées
-- Offre "founder partner" : 50% de réduction à vie pour les 5 premières agences signées avant fin du mois 3
-- Closing 3-5 agences
-
-#### KPI
-
-- 80+ contacts agences en pipeline
-- 15-20 demos réalisées
-- 3-5 agences signées
-- MRR 5-8 K€ fin M3
+**KPI** : 80+ contacts en pipeline · 15-20 demos · 3-5 agences signées · MRR 5-8 K€ fin M3
 
 ---
 
@@ -168,11 +85,11 @@ Signer 3-5 agences en marque blanche, qui pourront eux-mêmes onboarder leurs cl
 
 - **Canal** : LinkedIn, SEO Camp Slack, Twitter SEO FR
 - **Message** : "Tes clients vont te demander si ChatGPT parle d'eux. Aie la réponse en 5 minutes."
-- **Lead magnet** : audit GEO gratuit one-shot via outil mamie-seo
+- **Lead magnet** : audit GEO gratuit one-shot
 
 ### Thomas (CMO PME industrielle)
 
-- **Canal** : LinkedIn (par référence ou outbound), articles BDM/Stratégies
+- **Canal** : LinkedIn (référence ou outbound), articles BDM/Stratégies
 - **Message** : "Mesurez l'invisible : votre marque dans ChatGPT, en français."
 - **Lead magnet** : webinar "GEO pour PME, par où commencer"
 
@@ -184,7 +101,7 @@ Signer 3-5 agences en marque blanche, qui pourront eux-mêmes onboarder leurs cl
 
 ### Marc (CMO ETI souveraineté)
 
-- **Canal** : Référence professionnelle, salon E-Marketing Paris
+- **Canal** : référence pro, salon E-Marketing Paris
 - **Message** : "Le seul outil de GEO hébergé en France et qui couvre Mistral Le Chat."
 - **Lead magnet** : appel direct, démo + DPA
 
@@ -194,44 +111,27 @@ Signer 3-5 agences en marque blanche, qui pourront eux-mêmes onboarder leurs cl
 
 ### Piliers de contenu (mamie-seo.fr)
 
-#### Pilier 1 — Définir la catégorie GEO en français (40% du contenu)
+#### Pilier 1 — Définir la catégorie GEO en français (40%)
 
-- "Qu'est-ce que le GEO ?"
-- "GEO vs SEO : la différence"
-- "Comment fonctionne ChatGPT Search"
-- "Comprendre Le Chat de Mistral pour le marketing"
-- "AEO, GEO, AIO : démêler la jargonologie"
+"Qu'est-ce que le GEO ?" · "GEO vs SEO" · "Comment fonctionne ChatGPT Search" · "Comprendre Le Chat pour le marketing" · "AEO, GEO, AIO : démêler la jargonologie"
 
-> ⭐ Méta-jeu : ces articles vont eux-mêmes être citables par les LLM. Plus on en publie, plus on devient une source de référence en FR sur le GEO. **Recursive** : on devient cité par ChatGPT quand quelqu'un demande "qu'est-ce que le GEO" → on attire des clients qui veulent eux aussi être cités → on les facture.
+> ⭐ Méta-jeu récursif : ces articles deviennent eux-mêmes citables par les LLM → on est cité quand quelqu'un demande "qu'est-ce que le GEO" → on attire des clients qui veulent être cités.
 
 #### Pilier 2 — Tactiques d'optimisation (30%)
 
-- "10 actions concrètes pour être cité par ChatGPT"
-- "llms.txt : le nouveau robots.txt à mettre à jour"
-- "Comment structurer une page FAQ pour les LLM"
-- "Schema.org pour le GEO : quels types prioriser"
-- "Comment Mistral Le Chat sélectionne ses sources"
+"10 actions pour être cité par ChatGPT" · "llms.txt : le nouveau robots.txt" · "Structurer une FAQ pour les LLM" · "Schema.org pour le GEO" · "Comment Le Chat sélectionne ses sources"
 
 #### Pilier 3 — Études de cas et benchmarks FR (20%)
 
-- "Visibilité IA des 50 plus grandes marques françaises"
-- "Quelles agences SEO FR sont les mieux citées dans ChatGPT"
-- "Le top 100 des sources les plus citées dans Le Chat (étude exclusive)"
-- "Avant / après : comment marque X est passée de 12% à 67% de visibilité"
+"Visibilité IA des 50 plus grandes marques FR" · "Quelles agences SEO FR sont citées dans ChatGPT" · "Top 100 des sources citées dans Le Chat (étude exclusive)" · "Avant/après : de 12% à 67% de visibilité"
 
 #### Pilier 4 — Tooling et meta (10%)
 
-- Updates produit
-- Comparatifs Mamie GEO vs concurrents
-- Roadmap publique
-- Storytelling founder (Max raconte)
+Updates produit · comparatifs vs concurrents (✅ 3 publiés 2026-06-08) · roadmap publique · storytelling founder
 
 ### Cadence
 
-- **2 articles/semaine** sur le blog mamie-seo
-- **1 newsletter** par semaine (compilation + insights)
-- **3-5 posts LinkedIn** par semaine (contenu adapté)
-- **1 vidéo YouTube** par mois (deep-dive sur un sujet)
+2 articles/semaine blog · 1 newsletter/semaine · 3-5 posts LinkedIn/semaine · 1 vidéo YouTube/mois
 
 ### SEO ciblé — top 30 mots-clés à attaquer
 
@@ -253,6 +153,8 @@ Signer 3-5 agences en marque blanche, qui pourront eux-mêmes onboarder leurs cl
 ---
 
 ## Templates outreach
+
+> ⚠️ Pricing à jour 2026-06-11 : Solo 9,99 € / Starter 49 € / Pro 149 €, Agency **hors grille publique** (sur devis) depuis 2026-05-14, trial 14 j carte requise. Adapter les chiffres ci-dessous avant envoi.
 
 ### Template email — agences SEO FR
 
@@ -276,8 +178,8 @@ marque dans ChatGPT, Claude, Perplexity, Gemini et Le Chat (Mistral)
 — tout en français.
 
 On lance un programme "founder partner" pour les 5 premières agences
-qui rejoignent : 50% de réduction à vie sur le plan Agence (199€/mois
-au lieu de 399€), avec marque blanche complète pour vos clients.
+qui rejoignent : 50% de réduction à vie sur le plan Agence (sur
+devis), avec marque blanche complète pour vos clients.
 
 Vous prendriez 15 minutes pour une démo cette semaine ?
 
@@ -323,7 +225,7 @@ are English-first, US-hosted, expensive ($99-499), and don't
 track Le Chat — which is becoming the AI assistant of choice
 in French B2B and public sector.
 
-Pricing: €49/49/399 for Starter/Pro/Agency, free 14-day trial.
+Pricing: €9.99 / €49 / €149 (Solo / Starter / Pro), 14-day trial.
 
 Big thanks if you check it out and share feedback!
 ```
@@ -334,26 +236,13 @@ Big thanks if you check it out and share feedback!
 
 ### Webinar grand public — "GEO en France, ce qu'il faut savoir en 2026"
 
-- Durée : 45 min + 15 min Q&A
-- Cible : 200 inscriptions, 80 présents
-- Contenu :
-  - Évolution du search (15 min)
-  - Démo live de 5 marques aléatoires (15 min)
-  - Méthode en 5 étapes pour s'optimiser (15 min)
-  - Pitch produit 5 min en fin
-- Cadence : mensuel à partir du mois 2
+45 min + 15 min Q&A · cible 200 inscrits / 80 présents · mensuel dès M2.
+Contenu : évolution du search (15') + démo live 5 marques aléatoires (15') + méthode 5 étapes (15') + pitch 5'.
 
 ### Webinar agences — "Comment vendre du GEO à vos clients en 2026"
 
-- Durée : 60 min
-- Cible : 100 inscriptions, 40 présents
-- Contenu :
-  - Pourquoi les agences SEO sont mal placées si elles ne pivotent pas
-  - Comment positionner une offre GEO (méthodologie + pricing)
-  - Démo marque blanche
-  - Q&A
-  - Offre founder partner
-- Cadence : trimestriel
+60 min · cible 100 inscrits / 40 présents · trimestriel.
+Contenu : pourquoi les agences SEO doivent pivoter + positionner une offre GEO (méthodo + pricing) + démo marque blanche + Q&A + offre founder partner.
 
 ---
 
@@ -362,20 +251,17 @@ Big thanks if you check it out and share feedback!
 ### Partenariats stratégiques
 
 - **SEO Camp** : sponsoring conf annuelle, booth, talk
-- **Mistral AI** : trouver le bon contact pour proposer "le tracker officiel pour Le Chat" (long shot mais possible)
+- **Mistral AI** : "le tracker officiel pour Le Chat" (long shot)
 - **France Num** : partenariat éducatif PME
 - **Frenchweb / Maddyness** : articles invités
 
 ### Affiliations
 
-- 20% commission récurrente pour parrainage
-- Affiliés cibles : consultants SEO indépendants, blogueurs marketing FR, formateurs IA
+20% commission récurrente. Cibles : consultants SEO indés, blogueurs marketing FR, formateurs IA.
 
 ### Co-marketing
 
-- Étude annuelle conjointe avec un acteur SEO complémentaire (ex: Yourtext.guru, Visiblis, Babbar)
-- Webinar conjoint
-- Listes d'emails croisées
+Étude annuelle conjointe avec un acteur SEO complémentaire (Yourtext.guru, Visiblis, Babbar) · webinar conjoint · listes d'emails croisées.
 
 ---
 
@@ -398,51 +284,36 @@ Big thanks if you check it out and share feedback!
 
 ### Acquisition
 
-- Visiteurs uniques landing/mois
-- Sources de trafic (organique, direct, social, email, referral, paid)
-- Inscriptions trial / mois
-- Taux de conversion landing → trial
+Visiteurs uniques landing/mois · sources de trafic · trials/mois · conversion landing → trial
 
 ### Engagement
 
-- Newsletter : taux d'ouverture, clic, désabonnement
-- LinkedIn : impressions, engagement rate, abonnés
-- Webinar : inscriptions, présents, no-show, conversion en trial
+Newsletter (ouverture, clic, désabo) · LinkedIn (impressions, engagement, abonnés) · webinars (inscrits, présents, no-show, conversion trial)
 
 ### Conversion
 
-- Taux trial → payant
-- Délai moyen trial → payant
-- Conversion par canal d'acquisition
+Taux trial → payant · délai moyen · conversion par canal
 
 ### Revenue
 
-- MRR par canal
-- CAC par canal
-- LTV par canal
-- Top 3 canaux qui génèrent le plus de MRR
+MRR / CAC / LTV par canal · top 3 canaux MRR
 
 ---
 
 ## Plan de communication crise
 
-Si jamais un journal écrit un papier négatif ou un client important fait du bruit publiquement :
+Si papier négatif ou client bruyant publiquement :
 
 1. Pas de réponse défensive publique pendant 24h
-2. Réponse privée immédiate au plaignant pour comprendre
-3. Si fondé : correction publique rapide + acte concret (refund, fix, etc.)
-4. Si non fondé : réponse calme, factuelle, publique et brève
-5. Documentation interne dans 09 pour leçons
+2. Réponse privée immédiate au plaignant
+3. Si fondé : correction publique rapide + acte concret (refund, fix)
+4. Si non fondé : réponse calme, factuelle, publique, brève
+5. Leçons documentées dans 09
 
 ---
 
 ## Veille concurrentielle (rituel mensuel)
 
-Le 1er de chaque mois, 30 min :
+Le 1er du mois, 30 min : pricing/features Profound, Peec, Goodie, Otterly · snapshot landing pages (archive.org) · lecture blogs concurrents · note stratégique dans 09.
 
-- Mise à jour pricing et features de Profound, Peec AI, Goodie, Otterly
-- Snapshot landing pages (archive.org backup)
-- Lecture des derniers articles de blog des concurrents
-- Note dans 09-decisions-journal.md des éléments stratégiques
-
-→ Voir [06-activation-mamie-seo.md](./06-activation-mamie-seo.md) pour les détails du levier média.
+→ Voir [06-activation-mamie-seo.md](./06-activation-mamie-seo.md) pour le levier média.

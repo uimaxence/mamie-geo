@@ -10,13 +10,11 @@
 | 2028  | 3,09 Md$ (projection CAGR 45,5%) | Idem                             |
 | 2034  | 17,02 Md$                        | Idem                             |
 
-**CAGR 45,5%.** Hypercroissance comparable au SaaS de 2010-2015.
+CAGR 45,5% — hypercroissance comparable au SaaS 2010-2015.
 
 ### Estimation France (calcul interne)
 
-Méthode : France ≈ 4-5% du marché mondial logiciel B2B → 60-75 M€ en 2026, croissance similaire. Mais marché GEO en France est sous-pénétré vs US (les SMB françaises n'ont pas commencé), donc **réservoir de croissance > marché actuel**.
-
-**Hypothèse de travail** : marché adressable français 2026 ≈ 30-40 M€ (acteurs early adopters), avec doublement annuel pour 3-4 ans.
+France ≈ 4-5% du marché mondial logiciel B2B → 60-75 M€ en 2026. Marché sous-pénétré vs US (les SMB FR n'ont pas commencé) → réservoir de croissance > marché actuel. **Hypothèse de travail** : adressable FR 2026 ≈ 30-40 M€, doublement annuel 3-4 ans.
 
 ### TAM / SAM / SOM cibles
 
@@ -30,10 +28,10 @@ Méthode : France ≈ 4-5% du marché mondial logiciel B2B → 60-75 M€ en 202
 ### Métriques clés du comportement utilisateur
 
 - 44% des Français en âge de travailler utilisent ChatGPT, Mistral ou Gemini (francenum.gouv.fr, fév. 2026)
-- 65% des recherches en 2026 = zéro-clic, 83% quand l'IA fournit la réponse
-- Le trafic provenant des LLM convertit 23x plus que le trafic de recherche organique traditionnel
-- Citation drift de 40-60% par mois sur les domaines cités par les LLM majeurs
-- 87% d'enterprise marketing teams ont une initiative GEO en 2026 ; majorité des SMB n'ont pas commencé → fenêtre
+- 65% des recherches 2026 = zéro-clic, 83% quand l'IA fournit la réponse
+- Trafic LLM convertit 23x plus que l'organique traditionnel
+- Citation drift 40-60%/mois sur les domaines cités par les LLM majeurs
+- 87% des enterprise marketing teams ont une initiative GEO en 2026 ; majorité des SMB n'ont pas commencé → fenêtre
 
 ---
 
@@ -43,71 +41,44 @@ Méthode : France ≈ 4-5% du marché mondial logiciel B2B → 60-75 M€ en 202
 
 #### Profound — leader enterprise US
 
-- **Origine** : New York, USA
-- **Pricing** : $99 (ChatGPT only) → $399 Growth → $499+ Enterprise
-- **Forces** : 8+ LLMs trackés, SOC 2 Type II, HIPAA, intégrations AWS/Cloudflare/Akamai, Prompt Volumes (400M+ conversations dataset), MCP integration, Personas
-- **Faiblesses** : prix élevé, anglais-first, pas de Le Chat, pas de marque blanche dans entry tier
-- **Cible** : Fortune 1000, agences enterprise
-- **Levée** : VC-backed, croissance forte
+- NY, USA. VC-backed, croissance forte. Cible Fortune 1000 + agences enterprise
+- Pricing : $99 (ChatGPT only) → $399 Growth → $499+ Enterprise
+- Forces : 8+ LLMs, SOC 2 Type II, HIPAA, intégrations AWS/Cloudflare/Akamai, Prompt Volumes (400M+ conversations), MCP, Personas
+- Faiblesses : cher, anglais-first, pas de Le Chat, pas de marque blanche en entry tier
 
 #### Peec AI — challenger mid-market EU
 
-- **Origine** : Berlin, Allemagne (lancé début 2025)
-- **Pricing** : €89 (Starter) → Pro → €499 Enterprise
-- **Forces** : UI clean, support direct (Slack), pricing accessible, croissance fulgurante (€650K ARR en 4 mois), levée de $29M en 8 mois
-- **Faiblesses** : couverture LLM limitée à 3 par défaut (ChatGPT, Perplexity, Google AI), pas de SOC 2, pas de Le Chat, contenu/UI principalement en anglais
-- **Cible** : SMB B2B et agences mid-market
-- **Le concurrent direct le plus dangereux pour nous**
+- Berlin (début 2025). Cible SMB B2B + agences mid-market. **Concurrent direct le plus dangereux**
+- Pricing : €89 Starter → Pro → €499 Enterprise
+- Forces : UI clean, support Slack direct, croissance fulgurante (€650K ARR en 4 mois, levée $29M en 8 mois)
+- Faiblesses : 3 LLMs par défaut (ChatGPT, Perplexity, Google AI), pas de SOC 2, pas de Le Chat, contenu/UI anglais
 
 #### Goodie AI — premium positioning
 
-- **Origine** : NY, USA (2023)
-- **Pricing** : à partir de $495/mois
-- **Forces** : produit GEO-first dès le départ, vision intégrée monitoring + optimization + attribution + content intelligence
-- **Faiblesses** : prix haut, pas de Le Chat, pas adapté SMB
-- **Cible** : enterprises sérieuses
+- NY (2023). Dès $495/mois. GEO-first, vision intégrée monitoring + optimization + attribution + content intelligence. Pas de Le Chat, pas adapté SMB
 
 #### AthenaHQ — enterprise analytics
 
-- **Origine** : USA
-- **Pricing** : Enterprise (custom)
-- **Forces** : exec-level dashboards, competitive intelligence cross-modèles
-- **Faiblesses** : trop lourd pour SMB, prix opaque
+- USA, pricing enterprise custom. Exec dashboards + competitive intelligence cross-modèles. Trop lourd SMB, prix opaque
 
 ### Acteurs entry-level
 
-#### Otterly.ai
-
-- **Pricing** : $29/mois Lite, $189 Standard
-- **Forces** : pas cher, GEO Audit tool apprécié, simple
-- **Faiblesses** : peu de LLMs (pas Claude, DeepSeek, Grok, Meta AI), pas d'API export, intégrations limitées
-
-#### Rankscale.ai
-
-- **Pricing** : €20/mois entry, jusqu'à $780 Enterprise
-- **Forces** : pricing très bas
-- **Faiblesses** : peu connu, écosystème limité
-
-#### Promptmonitor
-
-- **Pricing** : $29/mois
-- **Forces** : couverture 8+ engines en entry tier
-- **Faiblesses** : pas de content/optimization, monitoring brut
+- **Otterly.ai** : $29 Lite / $189 Standard. GEO Audit apprécié, simple. Peu de LLMs (pas Claude/DeepSeek/Grok/Meta AI), pas d'API export
+- **Rankscale.ai** : €20 entry → $780 Enterprise. Très bas prix, peu connu, écosystème limité
+- **Promptmonitor** : $29/mois. 8+ engines en entry, mais monitoring brut sans content/optimization
 
 ### Acteurs SEO traditionnels avec module GEO
 
 #### Semrush
 
-- **Pricing** : $139-499/mois, modules GEO inclus
-- **Forces** : déjà installé chez la plupart des SEO français, AI Content Generator + Content Audit GEO-friendly
-- **Faiblesses** : ergonomie ajoutée, pas natif GEO, lourd pour solo
-- **Le risque qu'ils intensifient leur module GEO en 2026-2027 est élevé**
+- $139-499/mois, modules GEO inclus. Déjà installé chez la plupart des SEO FR. AI Content Generator + Content Audit GEO-friendly
+- Faiblesses : ergonomie ajoutée, pas natif GEO, lourd pour solo. **Risque élevé qu'ils intensifient le module GEO en 2026-2027**
 
 ##### Snapshot AI SEO Overview (analyse 2026-05-13)
 
-Analyse de la page produit `https://www.semrush.com/ai-seo/overview/` au 2026-05-13. Sert de référence pour le refresh home Mamie GEO (cf. doc 09 § 2026-05-13).
+Page `semrush.com/ai-seo/overview/` au 2026-05-13 — référence pour le refresh home (cf. doc 09 § 2026-05-13).
 
-**12 features nommées exposées par Semrush** (verbatim) :
+**12 features nommées** (verbatim) :
 
 | Feature                            | Cœur de ce que ça fait                                    | LLMs trackés                              |
 | ---------------------------------- | --------------------------------------------------------- | ----------------------------------------- |
@@ -124,19 +95,11 @@ Analyse de la page produit `https://www.semrush.com/ai-seo/overview/` au 2026-05
 | **Content Toolkit AI Search Opt.** | Analyse drafts contre facteurs de probabilité de citation | Toutes                                    |
 | **Semrush Enterprise AIO**         | Plateforme custom multi-marché / multi-brand à scale      | Toutes + custom                           |
 
-**Vocabulaire métrique Semrush** : `AI Visibility Score`, `Share of Voice`, `Sentiment` (positive/neutral/négatif), `Mentions` vs `Citations` (distinction explicite).
+**Vocabulaire métrique** : `AI Visibility Score`, `Share of Voice`, `Sentiment`, `Mentions` vs `Citations` (distinction explicite).
 
-**Claims chiffrés marketing** (sources Semrush blog) :
+**Claims chiffrés marketing** (publics, réutilisables dans notre home — section « Pourquoi maintenant ? ») : ×6 trafic AI search (jan-mai 2025 vs 2024) · ×4,4 conversion AI search vs Google trad · 60% zero-click post AI Overviews · 700 M users hebdo ChatGPT · 44,3% des pages top 10 Google citées dans ≥ 1 réponse IA.
 
-- **×6** trafic AI search (jan-mai 2025 vs 2024)
-- **×4,4** conversion AI search vs Google trad
-- **60 %** zero-click (post AI Overviews)
-- **700 M** utilisateurs hebdo ChatGPT
-- **44,3 %** des pages top 10 Google citées dans au moins une réponse IA
-
-**Funnel Semrush** : 6 tiers de pricing (Free → $99 → $199 → $549 → Enterprise custom), CTAs « Sign Up » + « Request live demo », **pas** de lead magnet one-shot, freemium gate côté SEO classique (Domain Overview, Site Audit).
-
-**Tone Semrush** : impersonnel B2B (« Your brand can… »), pas de tutoiement, pas d'humour, data-driven. Anglais natif, traductions FR machine probable.
+**Funnel** : 6 tiers (Free → $99 → $199 → $549 → Enterprise custom), CTAs Sign Up + demo, pas de lead magnet one-shot. **Tone** : impersonnel B2B EN, traductions FR machine probable.
 
 **Positionnement différenciateur Mamie GEO** (en regard) :
 
@@ -144,26 +107,22 @@ Analyse de la page produit `https://www.semrush.com/ai-seo/overview/` au 2026-05
 | -------------------------- | ----------------------------------- | ------------------------------------------------------------ |
 | Tonalité                   | Impersonnel B2B EN                  | **Tu/direct/honest** FR — Semrush ne peut pas pivoter dessus |
 | Le Chat de Mistral         | Tracké (mention vague « 20+ LLMs ») | **Inclus dès Starter explicitement** — différenciateur n°1   |
-| Hébergement                | US (Semrush HQ Boston)              | **EU (Vercel Paris, Neon Frankfurt), RGPD natif**            |
-| Pricing                    | 6 tiers + demo gate                 | **3 plans transparents + trial 7j sans CB**                  |
-| Persona                    | Enterprise / mid-market             | **SMB FR (freelance, PME, agence) — pricing 49-399 €/mois**  |
+| Hébergement                | US (HQ Boston)                      | **EU (Vercel Paris, Neon Frankfurt), RGPD natif**            |
+| Pricing                    | 6 tiers + demo gate                 | **3 plans transparents + trial 14 j (carte requise)**        |
+| Persona                    | Enterprise / mid-market             | **SMB FR (freelance, PME, agence) — 9,99-149 €/mois**        |
 | Lead magnet                | Aucun                               | **`/outils/test-visibilite-ia`** (audit gratuit one-shot)    |
 | Humanisation               | « Success stories » corporate       | **3 personas humains** (Sophie, Thomas, Aline)               |
 | Honest competitor mentions | Compare sans agressivité            | **Section explicite « n'est PAS Profound »** dans la home    |
 
-**Conclusion stratégique** : Semrush a la profondeur de catalogue (12 features) et le scale (261M prompts), mais reste **anglo-saxon et impersonnel**. Mamie GEO ne peut pas concurrencer sur le catalogue — on doit gagner sur **focus FR + Le Chat + transparence + tone humain**. Les chiffres marketing (×6, ×4,4, 60 %) sont **publics et réutilisables** dans notre home — c'est ce qu'on fait dans la section « Pourquoi maintenant ? ».
+**Conclusion** : Semrush gagne sur catalogue (12 features) et scale (261M prompts) ; on gagne sur **focus FR + Le Chat + transparence + tone humain**.
 
 #### Ahrefs
 
-- **Pricing** : ~€129+/mois
-- **Forces** : Brand Radar + AI citations dans les rapports, base SEO solide
-- **Faiblesses** : module GEO encore jeune
+- ~€129+/mois. Brand Radar + AI citations dans les rapports, base SEO solide ; module GEO encore jeune
 
 #### SE Ranking
 
-- **Pricing** : €129/mois, AI search add-on +$71
-- **Forces** : tout-en-un, francophone disponible
-- **Faiblesses** : mid-tier généraliste, pas focus GEO
+- €129/mois, AI search add-on +$71. Tout-en-un, francophone disponible ; mid-tier généraliste, pas focus GEO
 
 ### Niches verticales
 
@@ -183,22 +142,20 @@ Analyse de la page produit `https://www.semrush.com/ai-seo/overview/` au 2026-05
 
 ### Vrais concurrents directs en France
 
-**Aucun.**
-
-À ce jour, il n'existe pas d'outil SaaS francophone GEO-first conçu pour le marché FR. C'est le trou stratégique.
+**Aucun.** Pas d'outil SaaS francophone GEO-first conçu pour le marché FR. C'est le trou stratégique.
 
 ### Quasi-acteurs (à surveiller)
 
-- **Agences SEO françaises** vendant du "audit GEO" en service manuel : Eskimoz, Natural-Net, OnCrawl Consulting, Agence WAM, Resoneo. **Ce sont des prospects pour le canal agence en marque blanche, pas des concurrents**.
-- **Outils internes développés par grandes agences** : possible mais pas industrialisé, pas vendu en SaaS
+- **Agences SEO FR** vendant de l'audit GEO manuel : Eskimoz, Natural-Net, OnCrawl Consulting, Agence WAM, Resoneo → **prospects marque blanche, pas concurrents**
+- **Outils internes de grosses agences** : possible, pas industrialisé ni vendu en SaaS
 - **Initiatives universitaires / France Num** : sensibilisation, pas de produit
-- **Mistral lui-même** : pourrait ajouter des analytics pour les marques mentionnées dans Le Chat (peu probable horizon 2 ans)
+- **Mistral lui-même** : analytics marques dans Le Chat peu probable horizon 2 ans
 
 ### Ce qui pourrait apparaître
 
-- Localisation française sérieuse de Peec AI (probabilité : haute, horizon 6-12 mois)
-- Module Semrush dédié FR (probabilité : moyenne, horizon 12-18 mois)
-- Spinoff d'une grosse agence SEO française (probabilité : moyenne)
+- Localisation FR sérieuse de Peec AI (probabilité haute, 6-12 mois)
+- Module Semrush dédié FR (probabilité moyenne, 12-18 mois)
+- Spinoff d'une grosse agence SEO FR (probabilité moyenne)
 
 ---
 
@@ -221,23 +178,23 @@ Analyse de la page produit `https://www.semrush.com/ai-seo/overview/` au 2026-05
 
 ### Gaps en notre faveur (avantage concurrentiel)
 
-1. **Le Chat (Mistral) couverture native** — aucun concurrent ne le fait, et Mistral devient un canal de découverte en B2B FR, surtout pour comptes IT/banques/secteur public sensibles à la souveraineté
-2. **Vocabulaire et UI 100% français** — le SEO français a son propre lexique (référencement, balise titre, ancre, autorité de domaine) que les outils US traduisent mal
-3. **Hébergement EU + RGPD natif** — différentiateur fort sur tous les comptes français B2B avec DPO
-4. **Pricing entry agressif** (€49 vs €89 Peec, $99 Profound) — démocratise le GEO pour les freelances et TPE
-5. **Marque blanche en cœur d'offre dès le tier Pro/Agence** — Profound la met en premium tier, Peec partiellement, on en fait notre spécialité
-6. **Support client en français pendant heures FR** — banal mais discriminant
-7. **Audience pré-existante via mamie-seo.fr** — capital marketing à zéro coût
-8. **Connaissance terrain du marché FR** — pricing, cycles de décision, salons (SEO Camp, We Love SEO, Salon E-Marketing)
+1. **Le Chat (Mistral) couverture native** — aucun concurrent ; canal de découverte B2B FR, comptes IT/banques/public sensibles à la souveraineté
+2. **Vocabulaire et UI 100% français** — lexique SEO FR (référencement, balise titre, ancre…) mal traduit par les outils US
+3. **Hébergement EU + RGPD natif** — fort sur tous les comptes FR B2B avec DPO
+4. **Pricing entry agressif** (Solo 9,99 € / Starter 49 € vs €89 Peec, $99 Profound) — démocratise le GEO freelances/TPE
+5. **Marque blanche en cœur d'offre** — Profound la met en premium tier, Peec partiellement ; on en fait notre spécialité
+6. **Support client FR pendant heures FR** — banal mais discriminant
+7. **Audience pré-existante mamie-seo.fr** — capital marketing à coût zéro
+8. **Connaissance terrain FR** — pricing, cycles de décision, salons (SEO Camp, We Love SEO, Salon E-Marketing)
 
 ### Gaps contre nous (risques)
 
-1. **Pas de SOC 2 / pas de SSO entreprise** au début — on perdra les RFP grands comptes
-2. **Pas de levée de fonds** = vitesse de feature catch-up limitée
-3. **Pas de notoriété établie** vs Profound (qui apparaît dans les classements G2)
-4. **Couverture LLM moindre** que Profound (5 vs 8+) — partiellement compensé par Le Chat
-5. **Pas de Prompt Volumes dataset** comme Profound (qui a 400M+ conversations indexées) — feature lourde à reproduire
-6. **Marché FR plus petit** = course de vitesse pour atteindre seuil de viabilité
+1. **Pas de SOC 2 / SSO entreprise** au début — RFP grands comptes perdus
+2. **Pas de levée** = vitesse de feature catch-up limitée
+3. **Pas de notoriété** vs Profound (classements G2)
+4. **Couverture LLM moindre** (5 vs 8+) — partiellement compensé par Le Chat
+5. **Pas de Prompt Volumes dataset** type Profound (400M+ conversations) — lourd à reproduire
+6. **Marché FR plus petit** = course de vitesse vers le seuil de viabilité
 
 ---
 
@@ -245,23 +202,23 @@ Analyse de la page produit `https://www.semrush.com/ai-seo/overview/` au 2026-05
 
 ### Tendances qui nous favorisent
 
-- AI Overviews Google déployés en France (annoncé pour 2026)
-- Mistral Le Chat continue son expansion B2B (annoncé revenus 1 Md€ pour fin 2026 par Mensch à Davos)
-- Loi européenne sur la souveraineté numérique pousse les comptes publics et grandes ETI vers des solutions EU
-- Saturation des outils SEO classiques (Semrush, Ahrefs) → recherche d'alternatives spécialisées
+- AI Overviews Google déployés en France (annoncé 2026)
+- Le Chat en expansion B2B (revenus 1 Md€ annoncés fin 2026 par Mensch à Davos)
+- Loi EU souveraineté numérique pousse comptes publics / ETI vers solutions EU
+- Saturation des outils SEO classiques → recherche d'alternatives spécialisées
 
 ### Tendances neutres ou ambiguës
 
-- Consolidation à venir (Ignite Visibility a acquis AI Hack en 2025) — opportunité de sortie ?
-- ChatGPT introduit son propre moteur d'exploration → indexation native → moins dépendant des liens
-- Citations drift croissant → demande de monitoring continu
+- Consolidation (Ignite Visibility a acquis AI Hack en 2025) — opportunité de sortie ?
+- Moteur d'exploration propre ChatGPT → indexation native, moins dépendant des liens
+- Citation drift croissant → demande de monitoring continu
 
 ### Tendances contre nous
 
 - Semrush, Ahrefs, SE Ranking accélèrent leurs modules GEO
-- Peec AI lève fortement et probablement va se localiser FR
-- Convergence GEO + Content Generation (Scalenut, ContentMonk) — risque que les acheteurs préfèrent un combo
-- Standardisation des protocoles (llms.txt) → certaines features de monitoring deviennent commoditisées
+- Peec AI lève fortement, localisation FR probable
+- Convergence GEO + Content Generation (Scalenut, ContentMonk) — risque préférence combo
+- Standardisation (llms.txt) → commoditisation partielle du monitoring
 
 ---
 
@@ -269,11 +226,11 @@ Analyse de la page produit `https://www.semrush.com/ai-seo/overview/` au 2026-05
 
 ### Sources de veille à mettre en place
 
-- **Newsletter** : Search Engine Land, Aleyda Solis, Lily Ray
-- **Communautés FR** : SEO Camp, WebRankInfo, French Tech, Slack/Discord SEO français
-- **Anglo** : r/SEO, r/SaaS, Indie Hackers, X (suivre fondateurs Profound, Peec, Otterly)
-- **Veille concurrentielle automatisée** : ChangeTower ou Distill.io sur les pages pricing des 8 concurrents principaux
-- **Mistral / IA française** : suivre les annonces officielles Mistral, Le Chat, Hugging Face FR
+- Newsletters : Search Engine Land, Aleyda Solis, Lily Ray
+- Communautés FR : SEO Camp, WebRankInfo, French Tech, Slack/Discord SEO FR
+- Anglo : r/SEO, r/SaaS, Indie Hackers, X (fondateurs Profound, Peec, Otterly)
+- Automatisé : ChangeTower ou Distill.io sur les pages pricing des 8 concurrents principaux
+- Mistral / IA FR : annonces officielles Mistral, Le Chat, Hugging Face FR
 
 ### Sources marché et études citées dans ce doc
 
@@ -289,16 +246,14 @@ Analyse de la page produit `https://www.semrush.com/ai-seo/overview/` au 2026-05
 
 ### Veille à automatiser dès le mois 1
 
-- Alerte Google "Profound AI", "Peec AI", "GEO Mistral"
-- Suivi des prix concurrents tous les mois (snapshot dans 09-decisions-journal.md)
+- Alertes Google : "Profound AI", "Peec AI", "GEO Mistral"
+- Snapshot prix concurrents mensuel → doc 09 (§ Snapshots veille concurrentielle)
 - Veille Reddit r/SEO et r/SEMrush sur la perception des outils GEO
 
 ---
 
 ## Conclusion stratégique du chapitre
 
-Le marché existe, est en hypercroissance, et a un trou français évident. Les concurrents internationaux sont structurellement mal placés pour servir le segment SMB francophone : trop chers, trop anglo-saxons, et pas équipés pour Mistral.
+Marché en hypercroissance, trou français évident, concurrents internationaux structurellement mal placés sur le SMB francophone (trop chers, anglo-saxons, pas Mistral). Fenêtre 12-18 mois avant que Peec ou Semrush ne ferment le gap. **L'enjeu n'est pas de faire mieux que Profound — c'est d'arriver vite et de capturer le francophone avant la localisation anglo-saxonne.**
 
-La fenêtre est de 12-18 mois avant que Peec ou Semrush ne ferment ce gap. **L'enjeu n'est pas de faire mieux que Profound — c'est d'arriver vite, bien, et de capturer le marché francophone avant que les anglo-saxons localisent**.
-
-→ Voir [02-produit-roadmap.md](./02-produit-roadmap.md) pour la traduction en spec produit.
+→ Voir [02-produit-roadmap.md](./02-produit-roadmap.md). Note : 3 articles comparatifs publiés sur le blog (vs Peec, vs Otterly, vs Rankscale — 2026-06-08, cf. doc 06 § Comparison pages).

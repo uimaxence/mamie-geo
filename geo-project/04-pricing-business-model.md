@@ -3,193 +3,124 @@
 ## Philosophie pricing
 
 1. **Pricing transparent et public** — pas de "contact us" sauf Enterprise et Agency
-2. **Sous Peec AI sur l'entrée de gamme** (Solo 9,99 € + Starter 49 €, vs Peec 89 €) pour démocratiser et capter freelances
-3. **Marque blanche réservée Agency sur devis** — différenciateur agence majeur, retiré de la grille publique 2026-05-14
-4. **Annuel à -15-20%** pour favoriser cashflow et réduire churn
-5. **Pas de freemium permanent, pas de trial automatique** (pivot 2026-05-14) — garantie remboursement 14 jours sur toute première souscription + outils gratuits one-shot pour démontrer la valeur
+2. **Sous Peec AI sur l'entrée de gamme** (Solo 9,99 € + Starter 49 €, vs Peec 89 €) pour capter freelances et PME
+3. **Marque blanche réservée Agency sur devis** — retiré de la grille publique 2026-05-14
+4. **Annuel à -20 %** pour cashflow et réduction du churn
+5. **Trial 14 j AVEC carte requise** (pivot 2026-06-08, cf. doc 09) + **garantie remboursement 14 j** sur toute première souscription. Pas de freemium permanent.
 6. **Pas de remises silencieuses** — annuel, ETI, education clairement affichés
-7. **Pricing en EUR** sur le marché FR/EU, USD pour exports si besoin
+7. **Pricing en EUR** sur FR/EU, USD pour exports si besoin
 
 ---
 
 ## Stratégie freemium en 3 couches
 
-Le freemium permanent dans le SaaS B2B early-stage est un piège classique : il attire des utilisateurs qui ne paient pas, alourdit le support, et coûte cher en LLM (1,50-5 €/mois par freemium même bridé). Profound, Peec et Goodie n'en proposent pas. Ils proposent des trials.
-
-**Notre approche** : pas de tier gratuit dans l'app, mais un funnel free-to-paid intelligent en 3 couches qui sépare la valeur gratuite (média, lead magnet) de la valeur payante (SaaS récurrent).
+Pas de tier gratuit dans l'app (piège classique : coût LLM 1,50-5 €/mois par freemium, support, conversion 1-3 %. Profound/Peec/Goodie n'en proposent pas). Funnel free-to-paid en 3 couches : valeur gratuite (média + lead magnets) séparée de la valeur payante (SaaS).
 
 ### Couche 1 — mamie-geo.fr en média gratuit (blog + ressources)
 
-Le blog (`/blog`), les articles, la newsletter, les guides téléchargeables, les études exclusives. C'est le **freemium éditorial**. Tout reste gratuit, indéfiniment. Cette couche existe pour acquérir l'attention et établir l'autorité, pas pour avoir des utilisateurs gratuits du SaaS.
-
-`mamie-seo.fr` (sans trafic existant) est redirigé en 301 vers `mamie-geo.fr`. Tout le contenu vit sous le domaine principal.
-
-→ Détail dans [06-activation-mamie-seo.md](./06-activation-mamie-seo.md).
+Blog `/blog`, newsletter, guides, études exclusives = freemium éditorial, gratuit indéfiniment. Rôle : attention + autorité. `mamie-seo.fr` (0 trafic) redirigé 301 vers `mamie-geo.fr`. Détail : doc 06.
 
 ### Couche 2 — outil "Test ma visibilité IA" en one-shot gratuit
 
-Sur le site marketing, un outil web public :
+`/outils/test-visibilite-ia` (livré) : email requis, domaine + 5 prompts, rapport score/position/concurrents/sources, CTA vers `/pricing`.
 
-- Email requis (pas de compte SaaS complet)
-- L'utilisateur entre son domaine + 5 prompts
-- L'outil lance 1 LLM (ChatGPT) avec recherche web
-- Rapport délivré en 60 secondes : score, position, concurrents cités, sources
-- CTA fin : "Voulez-vous le suivi quotidien sur 5 LLMs ? → Essayer Mamie GEO 7 jours"
+- Coût : ~$0,20 par audit (5 prompts × 1 LLM, coût mesuré $0,04/run — l'estimation initiale $0,015 était pré-mesure). Cap 100/jour.
+- Conversion attendue : 5-10 % des audits → trial → 15-25 % en payant (~0,5-2,5 % audit → client).
+- C'est le pont média gratuit → SaaS payant.
 
-**Économique** : ~$0.015 par audit. Cap à 100/jour = ~$45/mois maximum.
-
-**Conversion attendue** : 5-10% des audits → trial → 15-25% en payant. Soit ~0,5-2,5% de l'audit gratuit en client final, ce qui est excellent.
-
-C'est le **pont** entre le média gratuit et le SaaS payant. Il fait quasiment tout le travail d'acquisition.
+Second one-shot gratuit : `/outils/audit-technique` (30+ checks, 0 € LLM, cf. doc 06).
 
 ### Couche 3 — pas de trial automatique + garantie remboursement 14 jours
 
-**Pivot 2026-05-14** (cf. doc 09 § 2026-05-14). Le trial automatique a été supprimé du parcours d'inscription.
+> **Titre conservé pour les références, contenu mis à jour.** Chronologie :
+> trial 7 j sans carte acté 2026-05-13 → **supprimé 2026-05-14** (coût LLM :
+> ~$3/trial mono-LLM, ~$15 en multi-LLM, soit ~$1 425 / 100 signups à 5 % conv
+> — non finançable, cf. doc 09 § 2026-05-14) → **trial 14 j AVEC carte requise
+> acté 2026-06-08** (cf. doc 09 § 2026-06-08 refonte funnel).
 
-À la place :
+État courant (2026-06-11) :
 
-- **Pas de tracking gratuit** : un compte créé sans paiement (`plan: "trialing"`) a `quotasFor() = { prompts: 0, competitors: 0, cadence: "weekly" }` → aucun run lancé tant que pas de subscription. Le user peut explorer l'UI (dashboard vide, pages CRUD vides) mais l'engagement matériel est zéro côté infra.
-- **Garantie remboursement 14 jours** : sur toute première souscription, l'utilisateur peut demander un remboursement intégral sous 14 jours par email à `hello@mamie-geo.fr`. Refund manuel via portal Stripe — pas de mécanisme self-service en V0 (acceptable car volume early-access faible).
-- **Free taster reste `/outils/test-visibilite-ia`** (couche 2) : audit one-shot ~$0,20 LLM coût, démo qualitative sans inscription.
-
-**Pourquoi ce pivot** :
-
-- Coût LLM réel ~$0,043 / run (Haiku + scoring). Un trial 7j moyen (10 prompts × 1 LLM) = ~$3 LLM gaspillés. Sur 100 signups à 5 % conv = $285 de perte sèche.
-- En Phase C complète (5 LLMs), le coût grimpe à ~$15 / trial user → ~$1 425 / 100 signups. **Non finançable** en early access.
-- L'outil one-shot `/outils/test-visibilite-ia` joue déjà le rôle de « démo de qualité » sans coût récurrent.
-- La garantie 14j a le même effet rassurant côté commercial, mais le coût n'est dépensé qu'en cas de refund explicite (rare).
-
-**À revisiter quand capital disponible** (typiquement après 50+ payants stabilisés) : ajouter un trial 7 jours **avec carte requise** (mode `subscription.trial_period_days` natif Stripe). Conversion attendue 50-70 % au lieu de 5-15 % parce que la carte est déjà saisie. Le risque coût LLM reste mais le ROI est bien meilleur.
+- **Trial 14 j avec carte requise** : `subscription_data.trial_period_days: 14` + `payment_method_collection: "always"` au checkout Stripe. Pas de risque LLM (carte posée, bascule auto en active sauf annulation). Conversion attendue 50-70 % (vs 5-15 % sans carte). Plan picker post-onboarding + sidebar Subscribe + emails relance J-4/J-1/expiry.
+- **Garantie remboursement 14 j conservée** (coexiste avec le trial) : refund manuel via portal Stripe sur email à `hello@mamie-geo.fr`. Pas de self-service V0.
+- **Compte sans subscription** : `plan: "trialing"` sans checkout = `quotasFor() = { prompts: 0, competitors: 0, cadence: "weekly" }` → zéro run, zéro coût infra. UI explorable à vide.
+- **Free taster** : `/outils/test-visibilite-ia` (couche 2).
 
 ### Pas de couche freemium permanente dans le SaaS
 
-Question récurrente : "Pourquoi pas un free tier dans le SaaS, genre 1 marque + 5 prompts + 1 LLM gratuit pour toujours ?"
-
-**Réponses** :
-
-- Coûts LLM réels même bridés : ~50-100 € de coût par 100 freemium = perte sèche
-- Les freemium consomment du support comme des payants
-- Conversion freemium → payant en B2B SaaS = 1-3% (très faible)
-- Le lead magnet "Test ma visibilité IA" donne déjà la même valeur d'amorçage sans le coût récurrent
-- Différenciation produit : ne pas dévaluer le payant en proposant trop en gratuit
-
-**Si vraiment un free tier devient nécessaire** (par exemple pour répondre à une concurrence agressive de Peec qui passerait freemium), on l'ouvrira sous forme de "1 audit one-shot gratuit par mois sur l'outil web", **pas dans l'app**. Les deux espaces restent étanches.
+Refusé (anti-décision) : coût LLM ~50-100 €/100 freemium, support équivalent aux payants, conversion B2B 1-3 %, lead magnets couvrent déjà l'amorçage, ne pas dévaluer le payant. Si un jour nécessaire (ex. Peec passe freemium) : "1 audit one-shot gratuit/mois sur l'outil web", **jamais dans l'app**.
 
 ### Note sur mamie-seo.fr
 
-`mamie-seo.fr` n'ayant ni trafic ni autorité SEO valorisable, il est **redirigé en 301 vers `mamie-geo.fr`** dès J1. Tout l'effort de contenu et SEO se concentre sur le domaine unique. Pas de stratégie multi-domaines en V0.
+301 vers `mamie-geo.fr` dès J1 (0 trafic, rien à préserver). Pas de multi-domaines en V0.
 
 ---
 
 ## Grille tarifaire détaillée
 
+Prices annuels -20 % : **Solo 95,90 € / Starter 470 € / Pro 1 430 € HT/an** (≈ 7,99 / 39 / 119 €/mois). Prices Stripe annuels à créer dans le Dashboard + env vars `STRIPE_PRICE_*_ANNUAL` (fallback gracieux mensuel tant qu'absents).
+
 ### Plan Solo — 9,99 €/mois (ou 7,99 €/mois en annuel)
 
-**Cible** : freelance qui veut tester GEO sans engagement, première brique d'acquisition.
+**Cible** : freelance qui teste GEO sans engagement. Ajouté 2026-05-14 (cf. doc 09).
 
-- 1 marque trackée
-- **3 concurrents** trackés
-- **5 prompts** trackés
-- 5 LLMs : ChatGPT, Claude, Perplexity, Gemini, Le Chat (inclus sans condition dès Solo)
-- Fréquence **hebdomadaire** : 1 run le lundi 6h UTC
-- Historique : 90 jours
-- Dashboard + email récap hebdo
-- 1 utilisateur
-- Support : email, réponse J+3
+- 1 marque, 3 concurrents, 5 prompts, 5 LLMs (Le Chat inclus sans condition)
+- Fréquence **hebdomadaire** (run lundi 6h UTC), historique 90 j
+- Dashboard + email récap hebdo, 1 utilisateur, support email J+3
 
-**Ajouté 2026-05-14** (cf. doc 09 § 2026-05-14). Marge brute LLM ~75 % en Phase A (Haiku 4.5), ~59 % en Phase C complète. Hook commercial : « ton bilan visibilité IA chaque lundi pour le prix d'un café ». Limite produit : 1 run/semaine = pas adapté pour qui veut piloter activement → motive l'upgrade Starter.
+Marge brute LLM ~75 % mono-LLM, ~59 % multi-LLM. Hook : « ton bilan visibilité IA chaque lundi pour le prix d'un café ». Limite voulue : 1 run/semaine → motive l'upgrade Starter.
 
 ### Plan Starter — 49 €/mois (ou 39 €/mois en annuel)
 
-**Cible** : freelances, solopreneurs, TPE, premier essai
+**Cible** : freelances, solopreneurs, TPE.
 
-- 1 marque trackée
-- 5 concurrents trackés
-- 25 prompts trackés
-- 5 LLMs : ChatGPT, Claude, Perplexity, Gemini, Le Chat
-- Fréquence **hebdomadaire**
-- Historique : **90 jours**
-- Email hebdo + dashboard
-- Export CSV
-- 1 utilisateur
-- Support : email, réponse < 48h
+- 1 marque, 5 concurrents, 25 prompts, 5 LLMs
+- Fréquence **hebdomadaire**, historique 90 j
+- Email hebdo + dashboard, export CSV, 1 utilisateur, support email < 48 h
 
 ### Plan Pro — 149 €/mois (ou 119 €/mois en annuel)
 
-**Cible** : PME avec marketing in-house, freelances avec plusieurs clients
+**Cible** : PME marketing in-house, freelances multi-clients.
 
-- **3 marques** trackées
-- 10 concurrents par marque
-- **100 prompts** au total (peut être réparti)
-- 5 LLMs (idem)
-- Fréquence **quotidienne**
-- Historique : **1 an**
-- Notifications Slack / Discord
-- Alertes automatiques (drop de score > 10%)
-- Export CSV + JSON
-- 3 utilisateurs
-- Support : email + chat, réponse < 24h
-- Module **AI-readiness audit** (à partir de V1, mois 4)
+- **3 marques**, 10 concurrents/marque, **100 prompts** (répartissables), 5 LLMs
+- Fréquence **quotidienne**, historique 1 an
+- Notifications Slack/Discord, alertes drop > 10 %, export CSV + JSON
+- 3 utilisateurs, support email + chat < 24 h
+- Module AI-readiness audit (V1, mois 4)
 
 ### Plan Agence — 399 €/mois (ou 319 €/mois en annuel) — sur devis depuis 2026-05-14
 
-**Statut UI** : retiré de la grille publique `/pricing` (cf. doc 09 § 2026-05-14). Remplacé par CTA « Plus de volume ? Contact » dans la page pricing. Reste disponible dans l'enum DB `workspaces.plan` pour les contrats négociés ou les workspaces grand-fathered. La fiche ci-dessous reste valable comme référence commerciale interne.
+Retiré de `/pricing` (cf. doc 09 § 2026-05-14), remplacé par CTA « Plus de volume ? Contact ». Reste dans l'enum DB pour contrats négociés / grand-fathered. Fiche = référence commerciale interne :
 
-**Cible** : agences SEO/marketing, consultants avec portefeuille clients
-
-- **10 marques** trackées
-- 10 concurrents / marque
-- **300 prompts** au total
-- 5 LLMs
-- Fréquence quotidienne
-- Historique : 1 an
-- **Marque blanche complète** : logo personnalisé, sous-domaine custom (geo.agence-x.fr), couleurs personnalisées
-- **Multi-workspaces** : un par client
-- **Permissions granulaires** : viewers (clients) vs admins (agence)
-- **Rapports PDF mensuels automatiques** envoyés à chaque client
-- **Facturation centralisée**
-- 10 utilisateurs
-- Support : email + chat + onboarding 1h offert, réponse < 12h
-- Audit module inclus
+- **10 marques**, 10 concurrents/marque, **300 prompts**, 5 LLMs, quotidien, 1 an
+- **Marque blanche complète** (logo, sous-domaine custom, couleurs), multi-workspaces (1/client), permissions granulaires viewers/admins
+- Rapports PDF mensuels auto par client, facturation centralisée
+- 10 utilisateurs, support email + chat + onboarding 1h offert < 12 h, audit module inclus
 
 ### Plan Enterprise — sur devis (à partir de 1 500 €/mois)
 
-**Cible** : ETI / grands comptes / collectivités / banques
-
-- Tout le plan Agence et plus
-- Marques illimitées
-- Prompts illimités
-- LLMs sur demande (incluant tests internes Mistral, modèles spécifiques)
-- Historique illimité
-- **Hébergement EU dédié** (sur option)
-- **SSO SAML / OIDC**
-- **DPA personnalisé**, ISO 27001 (à viser pour 2027)
-- **API illimitée**
-- Account manager dédié
-- SLA 99.5% avec pénalités
-- Support : Slack Connect, réponse < 4h ouvrées
+**Cible** : ETI / grands comptes / collectivités / banques. Tout Agence plus : marques + prompts illimités, LLMs sur demande, historique illimité, hébergement EU dédié (option), SSO SAML/OIDC, DPA personnalisé (ISO 27001 visée 2027), API illimitée, account manager, SLA 99.5 % avec pénalités, Slack Connect < 4 h ouvrées.
 
 ---
 
 ## Add-ons et options
 
-| Option                                                   | Prix           |
-| -------------------------------------------------------- | -------------- |
-| Marque supplémentaire (Pro)                              | +29 €/mois     |
-| Pack 100 prompts supplémentaires                         | +49 €/mois     |
-| Tracking d'un LLM spécifique custom (ex: DeepSeek, Grok) | +99 €/mois     |
-| Onboarding accompagné (1h Visio)                         | 149 € one-shot |
-| Audit GEO complet sur mesure                             | 990 € one-shot |
-| Formation équipe (2h Visio)                              | 590 €          |
+| Option | Prix |
+|---|---|
+| Marque supplémentaire (Pro) | +29 €/mois |
+| Pack 100 prompts supplémentaires | +49 €/mois |
+| Tracking d'un LLM custom (ex: DeepSeek, Grok) | +99 €/mois |
+| Onboarding accompagné (1h Visio) | 149 € one-shot |
+| Audit GEO complet sur mesure | 990 € one-shot |
+| Formation équipe (2h Visio) | 590 € |
 
 ---
 
 ## Réductions
 
-- **Annuel** : -20% (cf. tableau)
-- **Étudiants / étudiantes** : -50% sur Starter (avec preuve)
-- **OSS / non-profit** : Starter gratuit pendant 12 mois
-- **Affiliation agence partenaire** : 20% commission récurrente sur les clients référés (ne s'applique pas au plan Agence elle-même)
+- **Annuel** : -20 %
+- **Étudiants / étudiantes** : -50 % sur Starter (avec preuve)
+- **OSS / non-profit** : Starter gratuit 12 mois
+- **Affiliation agence partenaire** : 20 % commission récurrente sur clients référés (hors plan Agence lui-même)
 
 ---
 
@@ -197,51 +128,46 @@ Question récurrente : "Pourquoi pas un free tier dans le SaaS, genre 1 marque +
 
 ### Coût d'acquisition (CAC) cible
 
-| Canal                       | CAC cible | Note                                         |
-| --------------------------- | --------- | -------------------------------------------- |
-| Organique (mamie-seo + SEO) | 0-50 €    | Coût du temps de création de contenu réparti |
-| LinkedIn outbound           | 80-150 €  | Quelques heures de prospection par signup    |
-| Webinar / event             | 100-200 € | Coût d'organisation rapporté                 |
-| Google Ads                  | 100-300 € | À tester ponctuellement                      |
-| Affiliation                 | 30-100 €  | Selon commission                             |
+| Canal | CAC cible | Note |
+|---|---|---|
+| Organique (mamie-seo + SEO) | 0-50 € | temps de création de contenu réparti |
+| LinkedIn outbound | 80-150 € | heures de prospection par signup |
+| Webinar / event | 100-200 € | coût d'organisation rapporté |
+| Google Ads | 100-300 € | à tester ponctuellement |
+| Affiliation | 30-100 € | selon commission |
 
 ### LTV cible
 
-Calcul de référence pour le plan Pro (149 €/mois) :
-
-- Churn mensuel cible : 5% (industrie SaaS B2B = 3-7%)
-- LTV = ARPU / churn = 149 / 0.05 = **~2 980 €**
+Référence plan Pro : churn mensuel cible 5 % (B2B SaaS = 3-7 %) → LTV = 149 / 0,05 = **~2 980 €**.
 
 ### Ratio LTV/CAC cible
 
-- **> 3** = sain
-- **5-10** = excellent
-- < 3 = on creuse
+**> 3** = sain, **5-10** = excellent, < 3 = on creuse.
 
 ### Marge brute par plan (après coûts LLM uniquement)
 
-Coût LLM par run = ~$0,043 (Haiku 4.5 tracking + scoring). Phase C (5 LLMs simultanés) multiplie par ~5.
+Coût LLM mesuré ~$0,043/run (tracking $0,04 + scoring $0,003, Haiku 4.5). 5 LLMs simultanés ≈ ×5.
 
-| Plan               | Prix HT | Cadence | Runs/mois Phase A | Coût LLM/mois | Marge brute Phase A |
-| ------------------ | ------- | ------- | ----------------- | ------------- | ------------------- |
-| **Solo**           | 9,99 €  | weekly  | 20 (5×4 sem)      | ~$0,86        | **~91 %**           |
-| **Starter**        | 49 €    | daily   | 750 (25×30)       | ~$32          | **~39 %**           |
-| **Pro**            | 149 €   | daily   | 3000 (100×30)     | ~$129         | **~18 %** ⚠️        |
-| Agency (sur devis) | 399 €   | daily   | 9000              | ~$390         | **~3 %** ⚠️         |
+| Plan | Prix HT | Cadence | Runs/mois (1 LLM) | Coût LLM/mois | Marge brute |
+|---|---|---|---|---|---|
+| **Solo** | 9,99 € | weekly | 20 (5×4 sem) | ~$0,86 | **~91 %** |
+| **Starter** | 49 € | daily | 750 (25×30) | ~$32 | **~39 %** |
+| **Pro** | 149 € | daily | 3000 (100×30) | ~$129 | **~18 %** ⚠️ |
+| Agency (sur devis) | 399 € | daily | 9000 | ~$390 | **~3 %** ⚠️ |
 
-> ⚠️ Phase C (5 LLMs simultanés) — Pro et Agency basculeront sur Sonnet 4.6 (plus cher mais qualité supérieure). Marge à recalculer dès que la bascule LLMs aura lieu. Solo reste sur Haiku (cadence weekly suffit).
+> ⚠️ Multi-LLM (livré Phase C) : Pro et Agency basculeront sur Sonnet 4.6 (plus cher, qualité sup.) — marge à recalculer à la bascule. Solo reste sur Haiku.
 
 ### Marge brute après tous coûts variables
 
-Ajout : Stripe (1,5 % + 0,25 €), Brevo (forfait absorbé), hébergement (réparti), traitement (cheerio audit) :
+Avec Stripe (1,5 % + 0,25 €), Brevo, hébergement, cheerio audit :
 
-| Plan    | Marge nette ~ Phase A |
-| ------- | --------------------- |
-| Solo    | ~88 %                 |
-| Starter | ~36 %                 |
-| Pro     | ~15 %                 |
+| Plan | Marge nette ~ (1 LLM) |
+|---|---|
+| Solo | ~88 % |
+| Starter | ~36 % |
+| Pro | ~15 % |
 
-**Conclusion** : Solo est le plus profitable en valeur relative (cadence hebdo + faible volume). Starter reste viable. **Pro doit basculer Sonnet 4.6 + tarif à reconsidérer** avant Phase C — sinon marge insuffisante pour absorber le coût d'acquisition.
+**Conclusion** : Solo le plus profitable en relatif, Starter viable, **Pro doit basculer Sonnet 4.6 + tarif à reconsidérer** avant montée en charge multi-LLM.
 
 ---
 
@@ -249,123 +175,82 @@ Ajout : Stripe (1,5 % + 0,25 €), Brevo (forfait absorbé), hébergement (répa
 
 ### Hypothèses de mix client
 
-> Mise à jour 2026-05-16 — refonte du mix avec ajout du plan Solo 9,99 €
-> (le plus accessible, recrute les freelances ultra-budget). Le mix
-> historique 50/35/13/2 est obsolète.
+> Mise à jour 2026-05-16 (ajout Solo) — mix historique 50/35/13/2 obsolète.
 
-À l'équilibre (mois 12), répartition cible :
-
-- **20 % Solo** (entry-point freelance, conversion principale via /pricing + outils gratuits)
-- **45 % Starter** (cœur de marché)
-- **25 % Pro** (PME marketing)
-- **8 % Agency** (sur devis)
-- **2 % Enterprise**
-
-ARPU blended cible : ~110 €/mois (vs ~140 € avant ajout Solo)
-
-> Note : la baisse d'ARPU est compensée par un volume de signups supérieur attendu — Solo capte des prospects qui n'auraient pas converti à 49 € minimum. Net positif sur le revenu total si conversion Solo → Starter à 12 mois ≥ 25 %.
+Cible mois 12 : **20 % Solo / 45 % Starter / 25 % Pro / 8 % Agency / 2 % Enterprise**. ARPU blended ~110 €/mois (vs ~140 € avant Solo) — baisse compensée par volume signups supérieur ; net positif si conversion Solo → Starter à 12 mois ≥ 25 %.
 
 ### Scénario conservateur — mois par mois
 
-| Mois | Starter | Pro | Agence | Ent. | MRR      | Coûts variables | Marge contrib. |
-| ---- | ------- | --- | ------ | ---- | -------- | --------------- | -------------- |
-| M1   | 5       | 1   | 0      | 0    | 394 €    | 50 €            | 344 €          |
-| M2   | 10      | 3   | 0      | 0    | 937 €    | 150 €           | 787 €          |
-| M3   | 18      | 6   | 1      | 0    | 2 178 €  | 350 €           | 1 828 €        |
-| M4   | 25      | 10  | 2      | 0    | 3 513 €  | 600 €           | 2 913 €        |
-| M5   | 35      | 15  | 3      | 0    | 5 167 €  | 900 €           | 4 267 €        |
-| M6   | 45      | 20  | 4      | 0    | 6 801 €  | 1 250 €         | 5 551 €        |
-| M7   | 55      | 25  | 5      | 0    | 8 415 €  | 1 600 €         | 6 815 €        |
-| M8   | 65      | 30  | 6      | 1    | 11 029 € | 2 000 €         | 9 029 €        |
-| M9   | 75      | 35  | 7      | 1    | 12 633 € | 2 350 €         | 10 283 €       |
-| M10  | 85      | 40  | 8      | 1    | 14 237 € | 2 700 €         | 11 537 €       |
-| M11  | 95      | 45  | 9      | 2    | 17 351 € | 3 100 €         | 14 251 €       |
-| M12  | 105     | 50  | 10     | 2    | 18 945 € | 3 450 €         | 15 495 €       |
+| Mois | Starter | Pro | Agence | Ent. | MRR | Coûts var. | Marge contrib. |
+|---|---|---|---|---|---|---|---|
+| M1 | 5 | 1 | 0 | 0 | 394 € | 50 € | 344 € |
+| M2 | 10 | 3 | 0 | 0 | 937 € | 150 € | 787 € |
+| M3 | 18 | 6 | 1 | 0 | 2 178 € | 350 € | 1 828 € |
+| M4 | 25 | 10 | 2 | 0 | 3 513 € | 600 € | 2 913 € |
+| M5 | 35 | 15 | 3 | 0 | 5 167 € | 900 € | 4 267 € |
+| M6 | 45 | 20 | 4 | 0 | 6 801 € | 1 250 € | 5 551 € |
+| M7 | 55 | 25 | 5 | 0 | 8 415 € | 1 600 € | 6 815 € |
+| M8 | 65 | 30 | 6 | 1 | 11 029 € | 2 000 € | 9 029 € |
+| M9 | 75 | 35 | 7 | 1 | 12 633 € | 2 350 € | 10 283 € |
+| M10 | 85 | 40 | 8 | 1 | 14 237 € | 2 700 € | 11 537 € |
+| M11 | 95 | 45 | 9 | 2 | 17 351 € | 3 100 € | 14 251 € |
+| M12 | 105 | 50 | 10 | 2 | 18 945 € | 3 450 € | 15 495 € |
 
-**Résumé scénario conservateur** :
-
-- MRR fin M12 : ~19 K€
-- ARR fin M12 : ~227 K€
-- Marge contributive M12 : ~15.5 K€/mois
+**Résumé** : MRR fin M12 ~19 K€, ARR ~227 K€, marge contributive ~15,5 K€/mois.
 
 ### Scénario base (le plus probable)
 
-Multiplier le scénario conservateur par 1.3 :
-
-- MRR fin M12 : ~25 K€
-- ARR fin M12 : ~300 K€
-- Marge contributive M12 : ~20 K€/mois
+Conservateur × 1.3 : MRR M12 ~25 K€, ARR ~300 K€, marge contributive ~20 K€/mois.
 
 ### Scénario optimiste
 
-Multiplier par 2 :
-
-- MRR fin M12 : ~38 K€
-- ARR fin M12 : ~456 K€
-- Marge contributive M12 : ~30 K€/mois
+× 2 : MRR M12 ~38 K€, ARR ~456 K€, marge contributive ~30 K€/mois.
 
 ---
 
 ## Coûts fixes mensuels (estimation solo)
 
-| Poste                                | Coût mensuel                                           |
-| ------------------------------------ | ------------------------------------------------------ |
-| Vercel Pro                           | $20                                                    |
-| Neon Postgres                        | 0 (free tier V0) puis $19 Pro                          |
-| Queue (Postgres-based + Vercel Cron) | 0 en V0 ; migration Inngest $20 quand > 100K runs/mois |
-| Sentry                               | Free → $26                                             |
-| PostHog cloud                        | Free tier puis $0-50                                   |
-| BetterStack                          | $10                                                    |
-| Brevo                                | €19-69 selon volume                                    |
-| Stripe                               | 0 (variable seulement)                                 |
-| Domaine + emails Google Workspace    | $30                                                    |
-| Outils dev (Cursor, GitHub)          | $50                                                    |
-| Comptable expert (mensuel forfait)   | €150                                                   |
-| Total approximatif                   | **~€350-600**                                          |
+| Poste | Coût mensuel |
+|---|---|
+| Vercel Pro | $20 |
+| Neon Postgres | 0 (free tier V0) puis $19 Pro |
+| Queue (Postgres + Vercel Cron) | 0 en V0 ; Inngest $20 quand > 100K runs/mois |
+| Sentry | Free → $26 |
+| PostHog cloud | Free tier puis $0-50 |
+| BetterStack | $10 |
+| Brevo | €19-69 selon volume |
+| Stripe | 0 (variable seulement) |
+| Domaine + Google Workspace | $30 |
+| Outils dev (Cursor, GitHub) | $50 |
+| Comptable expert (forfait) | €150 |
+| Total approximatif | **~€350-600** |
 
-À ajouter pour année 1 :
-
-- Outils marketing (Buffer, Notion, Figma, ConvertKit) : ~50€/mois
-- Eventuellement budget pub : variable
-- Frais juridiques setup CGV/CGU : 800-1500€ one-shot
+Année 1 en plus : outils marketing (Buffer, Notion, Figma, ConvertKit) ~50 €/mois, budget pub variable, juridique CGV/CGU 800-1 500 € one-shot.
 
 ---
 
 ## P&L simplifié année 1 (scénario conservateur)
 
-| Poste                                   | Année 1                             |
-| --------------------------------------- | ----------------------------------- |
-| **Revenus (MRR cumulé annualisé)**      | ~ 70 000 €                          |
-| Coûts variables (LLM, Stripe, Brevo)    | ~ 14 000 €                          |
-| Coûts fixes (infra, outils, compta)     | ~ 6 000 €                           |
-| Coûts setup (juridique, design, naming) | ~ 3 000 €                           |
-| **Marge avant rémunération**            | **~ 47 000 €**                      |
-| Rémunération solo (à dégager)           | 0-30 000 € (selon montée en charge) |
+| Poste | Année 1 |
+|---|---|
+| **Revenus (MRR cumulé annualisé)** | ~ 70 000 € |
+| Coûts variables (LLM, Stripe, Brevo) | ~ 14 000 € |
+| Coûts fixes (infra, outils, compta) | ~ 6 000 € |
+| Coûts setup (juridique, design, naming) | ~ 3 000 € |
+| **Marge avant rémunération** | **~ 47 000 €** |
+| Rémunération solo (à dégager) | 0-30 000 € (selon montée en charge) |
 
-→ Si Max s'octroie 30 K€ de rémunération sur l'année 1, il reste ~17 K€ de réserve pour réinvestir.
-→ Si en parallèle il garde 30-50% de freelance, le cash personnel est sécurisé (60-90 K€ supplémentaires).
+→ Rémunération 30 K€ → ~17 K€ de réserve réinvestissable. Freelance 30-50 % en parallèle = cash perso sécurisé (60-90 K€ supplémentaires).
 
 ---
 
 ## Stratégie d'upsell
 
-### Du Starter vers Pro
-
-- Trigger : utilisateur atteint 80% de ses prompts ou consulte plusieurs marques
-- Email automatique : "Votre tracking semble décollé, passez à Pro pour 3 marques + tracking quotidien"
-- Conversion cible : 15-25% des Starter en 3 mois
-
-### Du Pro vers Agence
-
-- Trigger : utilisateur ajoute plus de 2 marques externes (ses clients)
-- Email + appel : "Vous gérez plusieurs marques, le plan Agence vous donne accès à la marque blanche"
-- Conversion cible : 20% des Pro multi-marques
-
-### Du Agence vers Enterprise
-
-- Trigger : agence atteint 8+ workspaces ou demande SSO / API
-- Touch commercial direct (Max au téléphone)
-- Cible : 1-2 conversions / an en année 1, croissant
+| Upsell | Trigger | Action | Cible conversion |
+|---|---|---|---|
+| Starter → Pro | 80 % des prompts atteints / multi-marques | Email auto « passe à Pro : 3 marques + daily » | 15-25 % des Starter en 3 mois |
+| Pro → Agence | > 2 marques externes (clients) | Email + appel (marque blanche) | 20 % des Pro multi-marques |
+| Agence → Enterprise | 8+ workspaces ou demande SSO / API | Touch commercial direct (Max) | 1-2 conversions/an année 1 |
 
 ---
 
@@ -373,36 +258,34 @@ Multiplier par 2 :
 
 ### Si le coût LLM moyen est 2x plus élevé que prévu
 
-| Plan    | Coût LLM | Marge nette       |
-| ------- | -------- | ----------------- |
-| Starter | 3 €      | 94% (OK)          |
-| Pro     | 90 €     | 40% (limite)      |
-| Agence  | 270 €    | 32% (insuffisant) |
+| Plan | Coût LLM | Marge nette |
+|---|---|---|
+| Starter | 3 € | 94% (OK) |
+| Pro | 90 € | 40% (limite) |
+| Agence | 270 € | 32% (insuffisant) |
 
-→ **Action** : reprice Agence à 599€ ou cap usage à 200 prompts.
+→ **Action** : reprice Agence à 599 € ou cap usage à 200 prompts.
 
 ### Si le churn est 10% au lieu de 5%
 
-LTV / 2 → ratio LTV/CAC tombe à 1.5 → modèle non viable.
-→ **Action** : prioriser absolument le NPS et la rétention en V0.
+LTV / 2 → LTV/CAC tombe à 1.5 → non viable. → **Action** : prioriser NPS et rétention en V0.
 
 ### Si l'acquisition organique mamie-seo ne décolle pas
 
-Plan B : LinkedIn outbound + paid Google Ads (CAC 200-400€)
-→ marges suffisantes pour absorber, mais cashflow plus tendu
+Plan B : LinkedIn outbound + paid Google Ads (CAC 200-400 €) → marges absorbent, cashflow plus tendu.
 
 ---
 
 ## Décisions de pricing à figer
 
-À trancher avant ouverture des inscriptions, à logger dans 09 :
+Statut 2026-06-11 (historique dans doc 09) :
 
-- [ ] Prix exact entrée Starter (49€ vs 39€ vs 59€)
-- [x] Trial gratuit : 7 jours (acté 2026-05-13)
-- [ ] Carte requise au trial : oui ou non
-- [ ] Annuel discount : 15%, 20% ou 25%
-- [ ] Plan gratuit permanent : oui (rapport one-shot par mois) ou non
-- [ ] Stripe Tax oui/non dès J0
-- [ ] Pricing page A/B test : tester 2 versions différentes en sprint 1
+- [x] Prix Starter : **49 €** (en prod)
+- [x] Trial : 7 j acté 2026-05-13 → supprimé 2026-05-14 (garantie 14 j refund) → **trial 14 j AVEC carte requise** acté 2026-06-08. Garantie remboursement 14 j conservée.
+- [x] Carte requise au trial : **oui** (2026-06-08)
+- [x] Annuel discount : **-20 %** (Prices Stripe annuels à créer dans le Dashboard)
+- [x] Plan gratuit permanent : **non** (anti-décision, outils one-shot uniquement)
+- [x] Stripe Tax : **oui dès J0** (actif)
+- [ ] Pricing page A/B test : pas encore fait (scaffold feature flags PostHog dispo)
 
 → Voir [05-go-to-market.md](./05-go-to-market.md) pour activer ces tarifs sur le marché.

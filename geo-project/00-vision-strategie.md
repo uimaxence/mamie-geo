@@ -10,7 +10,7 @@
 
 ## La proposition de valeur
 
-> **Mamie GEO** (nom de travail) est le premier outil francophone de tracking et d'optimisation de visibilité dans les moteurs IA — couverture native de Le Chat (Mistral) + ChatGPT, Claude, Perplexity, Gemini. Conçu pour les freelances, PME et agences SEO françaises qui ne peuvent ou ne veulent pas payer 500 €/mois pour un outil enterprise américain.
+> **Mamie GEO** est le premier outil francophone de tracking et d'optimisation de visibilité dans les moteurs IA — couverture native de Le Chat (Mistral) + ChatGPT, Claude, Perplexity, Gemini. Conçu pour les freelances, PME et agences SEO françaises qui ne peuvent ou ne veulent pas payer 500 €/mois pour un outil enterprise américain.
 
 ### En une phrase sales
 
@@ -72,7 +72,7 @@
 - 30-50 clients payants
 - 8 K€ MRR
 - 3-5 agences en marque blanche
-- mamie-seo.fr basculé sur thématique GEO, 3K visiteurs/mois
+- mamie-geo.fr à 3K visiteurs/mois (mamie-seo.fr redirige 301 depuis 2026-05)
 
 ### Mois 12 — Référence francophone
 
@@ -119,25 +119,11 @@ Anti-vision claire pour éviter la dispersion :
 
 ## Le naming et la marque
 
-### Option A — "Mamie GEO" (continuité Mamie SEO)
-
-- ✅ Capitalise sur l'audience existante de mamie-seo.fr
-- ✅ Différenciant, mémorable, ton décalé
-- ✅ SEO ready (faible concurrence)
-- ⚠️ Peut paraître peu sérieux pour des grands comptes — à réserver à V2
-
-### Option B — Nom plus institutionnel (ex: "Citée", "Visia", "Citably")
-
-- ✅ Plus crédible pour cibler enterprise plus tard
-- ⚠️ Coût d'acquisition à zéro à reconstruire
-
-### Recommandation
-
-Lancer en double-marque : **"Mamie GEO by [Sa marque pro]"** ou **"Mamie GEO"** seul mais avec une charte plus pro que mamie-seo.fr. À trancher avec un test A/B sur landing.
+✅ **Tranché** : **Mamie GEO** seul, sur `mamie-geo.fr` (redirect 301 défensif `mamie-seo.fr`). Charte plus pro que mamie-seo.fr historique. L'option "nom institutionnel" (Citée, Visia…) a été écartée — capitaliser sur l'audience existante prime ; le risque "peu sérieux grands comptes" sera réévalué en V2.
 
 ### Identité visuelle (à briefer)
 
-- Esprit pas-trop-startup-clichée, références plutôt SaaS européens (Linear, Notion, Tally) que SaaS US
-- Couleur dominante : à définir, mais sortir du bleu canonique tech
-- Typo : sans-serif moderne (Inter, Geist)
-- Mascotte mamie : optionnelle, à creuser
+✅ Actée (cf. doc 10 + doc 09 § 2026-05-07 / 2026-06-03 / 2026-06-05) :
+
+- App + site marketing : Airbnb-like minimaliste, blanc + gris, accent bleu brand `#329CFF`, police unique Inter, pas de mascotte
+- Visuels marketing externes (carrousels LinkedIn, OG) : persona « Mamie » chaude (cf. `linkedindesign.md`) — dual-DA volontaire
