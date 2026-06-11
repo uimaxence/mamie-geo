@@ -1,7 +1,7 @@
 import { eq, sql } from "drizzle-orm";
 import { db } from "@/db/client";
 import { brands, competitors, prompts, runs, usageCounters } from "@/db/schema";
-import { detectMentions, shouldScoreWithLLM, type MentionTarget } from "@/lib/citation/detect";
+import { detectMentions, type MentionTarget } from "@/lib/citation/detect";
 import { createAnthropicScoringClient, type ScoringClient } from "@/lib/citation/score";
 import type { ParsedBrandsPayload } from "@/lib/citation/types";
 import { env } from "@/lib/env";
@@ -15,11 +15,14 @@ export { parseScoreResponsePayload, type ScoreResponsePayload } from "./score-re
 //
 // Flow :
 //   1. Load run.success → prompt → brand + concurrents
-//   2. Pre-screening regex (detectMentions, gratuit). Si 0 mention,
-//      on persiste le résultat "neutre" sans appeler le LLM (économie
-//      ~$0,003/run sur les prompts qui ne ramènent pas la marque).
-//   3. Sinon, appel Haiku 4.5 en tool_use forcé pour scoring qualitatif
-//      (sentiment, position, concurrents avec sentiment).
+//   2. Détection regex (detectMentions, gratuit) — persistée pour debug
+//      et baseline.
+//   3. Appel Haiku 4.5 en tool_use forcé pour scoring qualitatif
+//      (sentiment, position, concurrents avec sentiment). Scoring
+//      SYSTÉMATIQUE depuis 2026-06-11 (étape 4 ranking, doc 09) : même
+//      quand la regex ne détecte aucune cible trackée, le LLM extrait
+//      les marques citées « à ta place » — c'est l'info la plus
+//      précieuse quand tu es invisible (~$0,003/run additionnel).
 //   4. UPDATE runs.parsedBrands (jsonb) avec detection + scoring +
 //      coût scoring. UPSERT usage_counters pour refléter le coût.
 //
@@ -76,25 +79,7 @@ export async function scoreResponse(
   ];
   const detection = detectMentions(run.rawResponse, targets);
 
-  // 4. Skip scoring LLM si rien à analyser
-  if (!shouldScoreWithLLM(detection)) {
-    const payload: ParsedBrandsPayload = {
-      detection,
-      scoring: { skipped: true, reason: "no_mention_detected_by_regex" },
-      scoredAt: new Date().toISOString(),
-    };
-    await db.update(runs).set({ parsedBrands: payload }).where(eq(runs.id, runId));
-    // Recompute metrics inline — capture cette run dans l'agrégat même
-    // si pas de mention détectée (totalRuns inclut tous les runs).
-    await recomputeMetricsForBrandLLMDate({
-      brandId: brand.id,
-      llm: run.llm as LLMValue,
-      date: today(),
-    });
-    return;
-  }
-
-  // 5. Appel scoring LLM. Client injectable pour tests, sinon construit
+  // 4. Appel scoring LLM. Client injectable pour tests, sinon construit
   //    avec ANTHROPIC_API_KEY (Haiku 4.5).
   const scoringClient =
     options.scoringClient ??
@@ -111,7 +96,7 @@ export async function scoreResponse(
     language: prompt.language as "fr" | "en",
   });
 
-  // 6. Persister
+  // 5. Persister
   const persisted: ParsedBrandsPayload = {
     detection,
     scoring,
@@ -119,7 +104,7 @@ export async function scoreResponse(
   };
   await db.update(runs).set({ parsedBrands: persisted }).where(eq(runs.id, runId));
 
-  // 7. Compter le coût scoring dans usage_counters (séparé du coût
+  // 6. Compter le coût scoring dans usage_counters (séparé du coût
   //    tracking pour pouvoir distinguer les deux postes plus tard).
   const periodStart = startOfCurrentMonth();
   await db
@@ -138,7 +123,7 @@ export async function scoreResponse(
       },
     });
 
-  // 8. Recompute des metrics quotidiens. Inline car la queue ne peut pas
+  // 7. Recompute des metrics quotidiens. Inline car la queue ne peut pas
   //    garantir l'ordre des messages : si on enqueuait recompute_metrics
   //    après chaque score_response, l'idempotency_key bloquerait les
   //    suivants alors qu'ils ont des données plus à jour. Inline = simple

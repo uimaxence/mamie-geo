@@ -301,7 +301,10 @@ plan dans `src/lib/plans/quotas.ts`) :
   cadence per-prompt
 - `citations` — table concurrents + onglet « Classement » (`?tab=ranking`,
   leaderboard 30 j, filtre LLM, delta J-7, hint fiabilité < 14 j de
-  données, bouton « Suivre » sur marques détectées)
+  données, bouton « Suivre » sur marques détectées, statut compétitif
+  « n°X — à Y citations de Z », chart évolution du rang + export PNG).
+  Scoring **systématique** depuis 2026-06-11 (étape 4 : skip regex levé,
+  prompt élargi à toutes les marques citées)
 - `audits` (+`new`/`[id]`/`compare`) — quotas par plan, cron hebdo,
   rapport ScoreRing/SegmentBar/ScoreBar, checks groupés par sévérité,
   bulle notif sidebar
@@ -362,9 +365,15 @@ publics. DB Neon : 18 tables + migrations 0001-0004.
 4. **Hard launch public** : communication LinkedIn + communautés FR
    (DNS Brevo + Stripe LIVE déjà OK).
 5. **Drip d'éducation post-signup**.
-6. **Ranking** : étape 4 (scoring systématique, ~$0,003/run skippé) à
-   trancher ; chart évolution du rang reporté ; empty state explicite
-   sur données concurrents vides à faire.
+6. **Gamification suite** (doc 02 § Gamification) : rang dans le weekly
+   email, badges de statut N°1/Top 3 (dashboard + BrandSwitcher),
+   événements de rang (V1). Surveiller le coût scoring systématique
+   (`usage_counters.llmCostUsd`) après 2 semaines de prod.
+7. **« Scan express visibilité IA »** (lead magnet n°1bis, doc 06) à
+   trancher : scan instantané 1 LLM via API Mistral free tier, email
+   gate, cap 50/jour.
+8. **Contenu étude 50 marques** : pipeline dérivé doc 11 § 3.4 (3 posts
+   LinkedIn restants, 2 articles, 1 carrousel DA Mamie).
 
 ### Décisions verrouillées (rappel)
 

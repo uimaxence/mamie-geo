@@ -125,6 +125,61 @@ export function computeRanking(options: ComputeRankingOptions): RankingEntry[] {
   }));
 }
 
+// ── Évolution du rang (chart, doc 02 § Ranking étape 2 « reporté ») ──
+
+export interface RankHistoryPoint {
+  /** YYYY-MM-DD (UTC). */
+  date: string;
+  /** Rang de ta marque ce jour-là (fenêtre glissante), 1-based. */
+  rank: number;
+  /** Taille du classement ce jour-là (toi + marques citées + trackés). */
+  outOf: number;
+}
+
+export interface ComputeRankHistoryOptions {
+  rows: readonly RankingDailyRow[];
+  /** Nombre de jours d'historique à produire (déf. 30). */
+  windowDays: number;
+  /** Fenêtre glissante de lissage pour le rang d'un jour (déf. 7). */
+  smoothDays?: number;
+  brand: { name: string; aliases: readonly string[]; domain: string | null };
+  competitors: readonly RankingCompetitorInput[];
+  llm?: LLMValue;
+  now: Date;
+}
+
+const DEFAULT_SMOOTH_DAYS = 7;
+
+/**
+ * Série quotidienne du rang de ta marque sur les `windowDays` derniers
+ * jours. Le rang d'un jour J est calculé sur la sous-fenêtre glissante
+ * ]J-smoothDays, J] pour lisser les prompts en cadence weekly — même
+ * logique d'agrégation que le leaderboard (computeRanking). Les jours
+ * sans aucun run dans leur sous-fenêtre ne produisent pas de point
+ * (pas de donnée ≠ rang stable).
+ */
+export function computeRankHistory(options: ComputeRankHistoryOptions): RankHistoryPoint[] {
+  const { windowDays, brand, competitors, now } = options;
+  const smoothDays = options.smoothDays ?? DEFAULT_SMOOTH_DAYS;
+  const rows = options.llm ? options.rows.filter((r) => r.llm === options.llm) : options.rows;
+
+  const points: RankHistoryPoint[] = [];
+  for (let daysAgo = windowDays - 1; daysAgo >= 0; daysAgo--) {
+    const dayEnd = isoDaysAgo(now, daysAgo);
+    const dayStart = isoDaysAgo(now, daysAgo + smoothDays);
+    const windowRows = rows.filter((r) => r.date > dayStart && r.date <= dayEnd);
+    if (!windowRows.some((r) => r.totalRuns > 0)) continue;
+
+    const { entities } = aggregateWindow(windowRows, brand, competitors);
+    const sorted = [...entities.values()];
+    sortEntities(sorted);
+    const rank = sorted.findIndex((e) => e.key === "you") + 1;
+    if (rank === 0) continue;
+    points.push({ date: dayEnd, rank, outOf: sorted.length });
+  }
+  return points;
+}
+
 interface WindowEntity {
   key: string;
   name: string;

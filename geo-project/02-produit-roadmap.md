@@ -252,13 +252,34 @@ Plan par étapes, du gratuit vers le payant :
 | Étape | Quoi | Coût LLM | Effort |
 |---|---|---|---|
 | **1. Leaderboard fenêtre** ✅ livré 2026-06-10 | Rank global + par LLM sur 30 j, tri par mentions, ligne marque highlightée + marques détectées non suivies (cap 5). Onglet « Classement » sur `/app/citations`. | **0 €** (pure agrégation) | 1 PR |
-| **2. Historisation du rang** ✅ livré 2026-06-10 (delta J-7) | **Pas de nouvelle table** : `citation_metrics_daily.competitors_data` (jsonb) historisait déjà les mentions concurrents par jour × LLM depuis la Phase A. Delta de rang vs J-7 dans le leaderboard. Chart « évolution du rang » **reporté** (LineChart câblé couleurs LLM, à généraliser quand l'historique aura quelques semaines). | **0 €** | 1 PR, zéro migration |
+| **2. Historisation du rang** ✅ livré 2026-06-10 (delta J-7) + chart évolution ✅ 2026-06-11 | **Pas de nouvelle table** : `citation_metrics_daily.competitors_data` (jsonb) historisait déjà les mentions concurrents par jour × LLM depuis la Phase A. Delta de rang vs J-7 dans le leaderboard. Chart « Évolution de ton rang » (`RankLineChart`, axe Y inversé, 1 point/jour sur sous-fenêtre glissante 7 j via `computeRankHistory`, export PNG via `DownloadableChart`). | **0 €** | 1 PR, zéro migration |
 | **3. Position par concurrent** ✅ livré 2026-06-10 | `position` (first_paragraph/middle/end) ajoutée aux `competitorsMentioned` du tool schema scoring + parsing lénient (anciens payloads valides). La donnée s'accumule → ranking de prééminence branchable plus tard. | **≈ 0** (même appel Haiku) | petite PR |
-| **4. Scoring systématique** (à trancher) | Le pre-screening regex **skippe le scoring quand aucune cible trackée n'est détectée** (cas réel mamie-vege : 60/61 runs skippés) → les marques citées « à ta place » sont perdues. Lever le skip = découverte de concurrents non trackés + ranking exhaustif même quand tu es invisible. | ~$0,003/run skippé : Starter (~2 250 runs/mois) ≈ **+7 $/mois** worst case, Pro ≈ +22 $ | PR + décision pricing |
+| **4. Scoring systématique** ✅ livré 2026-06-11 (doc 09) | Skip regex levé : le scoring Haiku tourne sur **tous** les runs success, et le prompt demande explicitement **toutes** les marques citées (trackées ou non) → découverte des marques recommandées « à ta place », ranking exhaustif même quand tu es invisible. Validé par l'étude 50 marques (doc 11) : l'omission est le signal n°1. | ~$0,003/run anciennement skippé : Solo ≈ +0,3 $/mois, Starter ≈ +7 $, Pro ≈ +22 $ worst case | PR livrée |
 
-Mitigations étape 4 si les marges coincent : gate Starter+ (Solo garde le ranking fenêtre), ou échantillonnage (scoring complet 1 jour/semaine).
+Mitigations étape 4 si les marges coincent (à activer si `llmCostUsd` scoring > 10 % du MRR) : gate Starter+ (Solo garde le ranking fenêtre), ou échantillonnage (scoring complet 1 jour/semaine).
 
-Dépendance UX : quand un concurrent n'est jamais cité, `/app/citations` affiche des « — » muets — le ranking doit rendre ce cas explicite (« jamais cité sur la fenêtre »).
+Dépendance UX ✅ 2026-06-11 : le cas « ta marque n'est jamais citée » est rendu explicite par le bloc statut au-dessus du leaderboard (« le classement montre qui est recommandé à ta place ») au lieu de tirets muets.
+
+### Gamification par le rang (2026-06-11, demandé par Max)
+
+Parti pris : **le rang EST le jeu**. Dans un outil de mesure B2B, les
+mécaniques de jeu artificielles (points, niveaux, streaks, badges
+décoratifs cumulables, confettis) font gadget et abîment la crédibilité
+data. La compétition réelle entre marques fournit déjà la boucle de
+motivation — il suffit de la mettre en scène.
+
+| Mécanique | Statut | Détail |
+|---|---|---|
+| **Statut compétitif** (leaderboard) | ✅ 2026-06-11 | Bloc au-dessus du classement : « Ta marque est n°2 sur 8 — à 3 citations de X (n°1) ». Trophée si n°1 + avance sur le n°2. Objectif concret, pas de métrique vanity. |
+| **Chart évolution du rang + export PNG** | ✅ 2026-06-11 | La courbe qui monte = dopamine honnête. PNG partageable (rapport client, LinkedIn) = boucle virale gratuite. |
+| **Rang dans le weekly email** | à faire (V0+) | Ligne « Classement : n°2 (↑1 vs semaine dernière) » dans le recap lundi — le moment de célébration hebdo. Réutiliser `computeRanking` dans `send-weekly-email.ts`. |
+| **Badges de statut** (pas de collection) | à faire (V1) | Pill « N°1 » / « Top 3 » sur la card brand du dashboard et dans le BrandSwitcher. Statut courant, perdable — pas un trophée acquis à vie. |
+| **Événements de rang** (notification) | V1 | « Tu viens de passer n°2 sur ChatGPT » in-app + email optionnel. Déclencheur : changement de rang détecté au recompute quotidien. |
+
+Anti-décisions gamification : ❌ points/XP, ❌ streaks de connexion,
+❌ badges décoratifs cumulables, ❌ confettis/animations de célébration
+lourdes, ❌ leaderboard inter-clients (les données d'un workspace ne
+sortent pas de son périmètre).
 
 ---
 

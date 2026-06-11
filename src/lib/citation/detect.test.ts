@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { detectMentions, shouldScoreWithLLM, type MentionTarget } from "./detect";
+import { detectMentions, type MentionTarget } from "./detect";
 
 const BRAND_MAMIE: MentionTarget = {
   id: "brand-1",
@@ -79,19 +79,5 @@ describe("detectMentions", () => {
     const mentions = detectMentions(text, [BRAND_MAMIE]);
     expect(mentions[0]?.firstIndex).toBeGreaterThan(0);
     expect(mentions[0]?.firstIndex).toBeLessThan(text.length);
-  });
-});
-
-describe("shouldScoreWithLLM", () => {
-  it("retourne false si aucune détection (skip Haiku)", () => {
-    expect(shouldScoreWithLLM([])).toBe(false);
-  });
-
-  it("retourne true dès qu'au moins une mention est détectée", () => {
-    expect(
-      shouldScoreWithLLM([
-        { targetId: "x", name: "X", type: "brand", occurrences: 1, firstIndex: 0 },
-      ]),
-    ).toBe(true);
   });
 });

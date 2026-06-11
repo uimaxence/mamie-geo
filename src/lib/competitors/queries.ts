@@ -13,7 +13,13 @@ import {
   type CompetitorMetrics,
   type SuggestedCompetitor,
 } from "./metrics";
-import { computeRanking, type RankingDailyRow, type RankingEntry } from "./ranking";
+import {
+  computeRanking,
+  computeRankHistory,
+  type RankHistoryPoint,
+  type RankingDailyRow,
+  type RankingEntry,
+} from "./ranking";
 
 // Queries pour la page /app/citations (onglet Concurrents).
 
@@ -196,6 +202,10 @@ export interface RankingData {
   all: RankingEntry[];
   /** Classement par LLM (clés = `llms`). */
   byLlm: Record<string, RankingEntry[]>;
+  /** Évolution quotidienne du rang de ta marque, tous LLMs confondus. */
+  history: RankHistoryPoint[];
+  /** Évolution du rang par LLM (clés = `llms`). */
+  historyByLlm: Record<string, RankHistoryPoint[]>;
 }
 
 /**
@@ -282,5 +292,11 @@ export async function getRankingData(
     llms,
     all: computeRanking(base),
     byLlm: Object.fromEntries(llms.map((llm) => [llm, computeRanking({ ...base, llm })])),
+    // Les rows chargées remontent à windowDays+deltaDays — assez pour la
+    // sous-fenêtre de lissage (7 j) du premier point d'historique.
+    history: computeRankHistory(base),
+    historyByLlm: Object.fromEntries(
+      llms.map((llm) => [llm, computeRankHistory({ ...base, llm })]),
+    ),
   };
 }

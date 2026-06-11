@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { computeRanking, type RankingDailyRow } from "./ranking";
+import { computeRanking, computeRankHistory, type RankingDailyRow } from "./ranking";
 
 // Tests de la fonction pure computeRanking — données issues de
 // citation_metrics_daily (brandCitedCount + competitorsData).
@@ -188,5 +188,66 @@ describe("computeRanking", () => {
     expect(entries).toHaveLength(3); // toi + 2 trackés
     expect(entries.every((e) => e.mentions === 0 && e.apparitionPct === 0)).toBe(true);
     expect(entries[0]?.key).toBe("you"); // à égalité, ta marque d'abord
+  });
+});
+
+describe("computeRankHistory", () => {
+  it("produit un point par jour avec données, rang lissé sur la sous-fenêtre", () => {
+    const rows = [
+      // J-3 : Profound devant (4 vs 1)
+      row({ date: "2026-06-07", brandCitedCount: 1, competitorsData: [comp("Profound", 4)] }),
+      // J-1 : la marque repasse devant sur la fenêtre glissante (1+6 vs 4+2)
+      row({ date: "2026-06-09", brandCitedCount: 6, competitorsData: [comp("Profound", 2)] }),
+    ];
+    const points = computeRankHistory({
+      rows,
+      windowDays: 5,
+      smoothDays: 7,
+      brand: BRAND,
+      competitors: COMPETITORS,
+      now: NOW,
+    });
+
+    // Tous les jours J-4..J-0 dont la sous-fenêtre contient ≥ 1 run.
+    expect(points.map((p) => p.date)).toEqual([
+      "2026-06-07",
+      "2026-06-08",
+      "2026-06-09",
+      "2026-06-10",
+    ]);
+    // J-3 : seule la row du 07 est dans la sous-fenêtre → Profound n°1.
+    expect(points[0]?.rank).toBe(2);
+    // J-1 et J-0 : les deux rows cumulées → la marque n°1.
+    expect(points[2]?.rank).toBe(1);
+    expect(points[3]?.rank).toBe(1);
+    // outOf : toi + Profound cité + Peec tracké jamais cité.
+    expect(points[0]?.outOf).toBe(3);
+  });
+
+  it("ne produit aucun point sans run et filtre par LLM", () => {
+    expect(
+      computeRankHistory({
+        rows: [],
+        windowDays: 30,
+        brand: BRAND,
+        competitors: COMPETITORS,
+        now: NOW,
+      }),
+    ).toEqual([]);
+
+    const rows = [
+      row({ date: "2026-06-09", llm: "claude", brandCitedCount: 2, competitorsData: [comp("Profound", 5)] }),
+      row({ date: "2026-06-09", llm: "chatgpt", brandCitedCount: 9, competitorsData: [comp("Profound", 1)] }),
+    ];
+    const claudeOnly = computeRankHistory({
+      rows,
+      windowDays: 2,
+      brand: BRAND,
+      competitors: COMPETITORS,
+      llm: "claude",
+      now: NOW,
+    });
+    // Sur Claude seul, Profound (5) devance la marque (2).
+    expect(claudeOnly.at(-1)?.rank).toBe(2);
   });
 });

@@ -75,15 +75,6 @@ export function detectMentions(
   return results;
 }
 
-/**
- * Décide si l'appel LLM de scoring est nécessaire. Si aucune mention
- * détectée par regex, le scoring n'apportera rien (et coûte ~$0,005).
- * Cf. doc 03 § 690 — pre-screening regex avant LLM.
- */
-export function shouldScoreWithLLM(detections: readonly DetectedMention[]): boolean {
-  return detections.length > 0;
-}
-
 // Normalise pour matcher insensible à la casse et aux accents (NFD →
 // strip diacritics → lowercase). On garde apostrophes et tirets qui font
 // partie de noms de marques (« Le Chat », « Peec AI »).

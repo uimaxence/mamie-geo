@@ -2,11 +2,13 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
-import { ArrowDown, ArrowUp, Info, Minus, Plus, Trophy } from "lucide-react";
+import { ArrowDown, ArrowUp, Info, Minus, Plus, Target, Trophy } from "lucide-react";
 import { toast } from "sonner";
 import { Badge, EmptyState, EntityTypeBadge, SegmentedControl } from "@/components/ui";
 import { BrandFavicon } from "@/components/app/brand-favicon";
+import { DownloadableChart } from "@/components/charts/downloadable-chart";
 import { LLM_LABELS } from "@/components/charts/llm-colors";
+import { RankLineChart } from "@/components/charts/rank-line-chart";
 import { capture } from "@/lib/posthog-client";
 import type { RankingData } from "@/lib/competitors/queries";
 import { RANKING_RELIABLE_AFTER_DAYS, type RankingEntry } from "@/lib/competitors/ranking";
@@ -52,6 +54,7 @@ export function RankingTab({ data }: { data: RankingData }) {
   }
 
   const entries = scope === "all" ? data.all : (data.byLlm[scope] ?? data.all);
+  const history = scope === "all" ? data.history : (data.historyByLlm[scope] ?? []);
   const scopeOptions = [
     { value: "all", label: "Tous les LLMs" },
     ...data.llms.map((llm) => ({ value: llm, label: LLM_LABELS[llm] ?? llm })),
@@ -107,6 +110,8 @@ export function RankingTab({ data }: { data: RankingData }) {
           </span>
         </p>
       )}
+
+      <RankStatus entries={entries} scopeLabel={scopeLabel(scope)} />
 
       <div className="mt-4 overflow-x-auto rounded-[var(--radius-xl)] border border-[color:var(--color-border)] bg-white">
         <table className="w-full">
@@ -194,7 +199,102 @@ export function RankingTab({ data }: { data: RankingData }) {
         Les marques « détectées » sont citées par les IA dans les réponses à tes prompts mais pas
         encore suivies — clique « Suivre » pour les ajouter à tes concurrents.
       </p>
+
+      {/* Évolution du rang : un point par jour (sous-fenêtre glissante 7 j),
+       * affichée dès 2 points pour éviter un chart vide le premier jour.
+       * Export PNG pour partage (rapport client, LinkedIn). */}
+      {history.length >= 2 && (
+        <section className="mt-8">
+          <h3 className="text-sm font-semibold text-[color:var(--color-ink)]">
+            Évolution de ton rang
+            {scope !== "all" && ` · ${LLM_LABELS[scope] ?? scope}`}
+          </h3>
+          <div className="mt-3 rounded-[var(--radius-xl)] border border-[color:var(--color-border)] bg-white p-4">
+            <DownloadableChart filename={`rang-${scope}`} className="pt-2">
+              <RankLineChart
+                data={history.map((p) => ({ date: formatDay(p.date), rank: p.rank }))}
+                maxRank={Math.max(...history.map((p) => p.outOf))}
+              />
+            </DownloadableChart>
+          </div>
+        </section>
+      )}
     </div>
+  );
+}
+
+function scopeLabel(scope: Scope): string {
+  return scope === "all" ? "tous LLMs confondus" : `sur ${LLM_LABELS[scope] ?? scope}`;
+}
+
+function formatDay(iso: string): string {
+  const [, month, day] = iso.split("-");
+  return `${day}/${month}`;
+}
+
+// Statut compétitif au-dessus du leaderboard : où tu en es + le prochain
+// objectif concret (gamification par le rang, cf. doc 02 § Gamification
+// 2026-06-11 — pas de points ni de badges décoratifs, le rang EST le jeu).
+function RankStatus({
+  entries,
+  scopeLabel,
+}: {
+  entries: RankingEntry[];
+  scopeLabel: string;
+}) {
+  const you = entries.find((e) => e.type === "you");
+  if (!you || you.mentions === 0) {
+    // Cas « zéro citation » : runs présents mais ta marque jamais citée —
+    // rendre l'invisibilité explicite plutôt qu'un tableau de tirets muets.
+    const someoneCited = entries.some((e) => e.mentions > 0);
+    return (
+      <p className="mt-4 flex items-start gap-2 rounded-[var(--radius-lg)] border border-[color:var(--color-border)] bg-[color:var(--color-gray-50)] px-4 py-3 text-[0.8125rem] text-[color:var(--color-ink-soft)]">
+        <Target size={14} strokeWidth={2} aria-hidden className="mt-0.5 shrink-0" />
+        <span>
+          Ta marque n&apos;a pas encore été citée sur la fenêtre, {scopeLabel}.{" "}
+          {someoneCited
+            ? "Le classement ci-dessous montre qui est recommandé à ta place — c'est ton point de départ."
+            : "Aucune marque suivie n'a été citée non plus : les IA répondent sans recommander de marque sur tes prompts actuels, ou les marques citées ne sont pas encore détectées."}
+        </span>
+      </p>
+    );
+  }
+
+  const above = entries.find((e) => e.rank === you.rank - 1);
+  const below = entries.find((e) => e.rank === you.rank + 1);
+  return (
+    <p className="mt-4 flex items-start gap-2 rounded-[var(--radius-lg)] border border-[color:var(--color-border)] bg-[color:var(--color-gray-50)] px-4 py-3 text-[0.8125rem] text-[color:var(--color-ink-soft)]">
+      {you.rank === 1 ? (
+        <Trophy size={14} strokeWidth={2} aria-hidden className="mt-0.5 shrink-0 text-[color:var(--color-accent)]" />
+      ) : (
+        <Target size={14} strokeWidth={2} aria-hidden className="mt-0.5 shrink-0" />
+      )}
+      <span>
+        {you.rank === 1 ? (
+          <>
+            <strong className="font-semibold text-[color:var(--color-ink)]">
+              Ta marque est n°1
+            </strong>{" "}
+            {scopeLabel}
+            {below &&
+              (you.mentions === below.mentions
+                ? ` — à égalité de citations avec ${below.name}.`
+                : ` — ${you.mentions - below.mentions} citation${you.mentions - below.mentions > 1 ? "s" : ""} d'avance sur ${below.name}.`)}
+          </>
+        ) : (
+          <>
+            <strong className="font-semibold text-[color:var(--color-ink)]">
+              Ta marque est n°{you.rank}
+            </strong>{" "}
+            sur {entries.length} {scopeLabel}
+            {above &&
+              (above.mentions === you.mentions
+                ? ` — à égalité de citations avec ${above.name} (n°${above.rank}).`
+                : ` — à ${above.mentions - you.mentions} citation${above.mentions - you.mentions > 1 ? "s" : ""} de ${above.name} (n°${above.rank}).`)}
+          </>
+        )}
+      </span>
+    </p>
   );
 }
 

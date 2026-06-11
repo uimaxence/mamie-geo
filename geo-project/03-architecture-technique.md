@@ -618,8 +618,10 @@ Table d'origine (hypothèse $0,003/run), conservée pour trace :
 cadence quotidienne (3 750 runs/mois au quota plein, pas 500), (b) le coût
 mesuré est ~$0,01-0,04/run selon provider, soit 3-13× l'hypothèse $0,003. Au
 quota plein, Pro = $150-600/mois de LLM pour 149 € de MRR. Mitigations :
-usage réel < quota, pre-screening regex qui skippe le scoring, prompt_cache
-(non branché), smart frequency. Marges à revalider dans doc 04 avant scale.
+usage réel < quota, prompt_cache (non branché), smart frequency. Le
+pre-screening regex ne skippe **plus** le scoring depuis 2026-06-11 (étape 4
+ranking : +$0,003/run anciennement skippé, cf. doc 09). Marges à revalider
+dans doc 04 avant scale.
 
 ### Stratégies de réduction des coûts
 
@@ -642,18 +644,20 @@ puis h+6 ; au-delà, skip du jour, visible dashboard.
 
 ### Approche en deux étapes
 
-**1. Pre-screening regex (cheap)** — `src/lib/citation/detect.ts` :
-marque + aliases dans la réponse brute, domaine dans les URLs citées. Aucun
-match (cible ET concurrents trackés) → run skippé, pas d'appel scoring.
-Conséquence assumée : les marques citées « à la place » ne sont pas
-découvertes sur les runs skippés (étape 4 du ranking, à trancher, cf. doc 02).
+**1. Détection regex (cheap)** — `src/lib/citation/detect.ts` :
+marque + aliases dans la réponse brute, domaine dans les URLs citées.
+Persistée pour debug/baseline. Depuis 2026-06-11 (étape 4 ranking, doc 09)
+elle ne **gate plus** l'appel scoring : le skip « aucun match → pas de
+scoring » est levé, les anciens payloads `{skipped: true}` restent valides
+en lecture.
 
-**2. LLM scoring (précis)** — `src/lib/citation/score.ts` : Claude Haiku
-4.5 en **tool_use forcé** (`tool_choice` sur le tool `report_scoring`,
-schéma validé par Anthropic — pas de prompt « retourne du JSON »). Sortie :
+**2. LLM scoring (précis, systématique)** — `src/lib/citation/score.ts` :
+Claude Haiku 4.5 en **tool_use forcé** (`tool_choice` sur le tool
+`report_scoring`, schéma validé par Anthropic — pas de prompt « retourne du
+JSON »). Tourne sur **tous** les runs success (~$0,003/run). Sortie :
 
 - `target_cited` (bool), position dans la liste le cas échéant, sentiment (positive / neutral / negative)
-- concurrents cités : `{ name, sentiment, position }` — champ `position` requis depuis l'étape 3 ranking (2026-06-10), parsing lénient pour les anciens payloads
+- concurrents cités : `{ name, sentiment, position }` — champ `position` requis depuis l'étape 3 ranking (2026-06-10), parsing lénient pour les anciens payloads. Le prompt demande **toutes** les marques citées, y compris hors liste trackée (découverte, étape 4)
 - sources citées (URLs / domaines)
 
 Résultat persisté dans `runs.parsed_brands` ; le score visibilité V0 =

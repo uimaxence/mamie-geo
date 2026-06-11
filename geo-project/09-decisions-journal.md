@@ -161,6 +161,18 @@ haut et l'entrée "2026-05-05 — Réponses aux 10 questions de bootstrap".
 
 ### Décisions enregistrées
 
+#### 2026-06-11 — Ranking étape 4 (scoring systématique) + gamification par le rang
+
+**Contexte** : le pre-screening regex skippait le scoring Haiku quand aucune cible trackée n'était détectée (cas mamie-vege : 60/61 runs skippés) → les marques recommandées « à ta place » étaient perdues, exactement le signal que l'étude 50 marques (doc 11) identifie comme n°1 (l'omission, pas le dénigrement). Max a demandé de pousser ranking + comparaison + gamification.
+
+**Options considérées** : A) lever le skip pour tous les plans / B) gate Starter+ / C) échantillonnage 1 j/semaine.
+
+**Choix** : A — scoring systématique pour tous les plans, plus prompt de scoring explicitement élargi à **toutes** les marques citées (trackées ou non). ⚠️ Décision prise par Claude faute d'arbitrage : coût worst case Solo +0,3 $/mois, Starter +7 $, Pro +22 $ — marges OK, et le ranking est le différenciateur produit. Mitigations B/C documentées dans doc 02, à activer si le poste scoring dépasse ~10 % du MRR.
+
+**Aussi livré** : chart « Évolution de ton rang » (`computeRankHistory` + `RankLineChart` axe inversé + export PNG), statut compétitif au-dessus du leaderboard (« n°2 — à 3 citations de X »), cas « jamais citée » rendu explicite. Orientation gamification actée dans doc 02 : le rang est le jeu, ❌ points/streaks/badges décoratifs ; reste à faire : rang dans le weekly email, badges de statut N°1/Top 3, événements de rang.
+
+**À revisiter** : coût scoring dans `usage_counters.llmCostUsd` après 2 semaines de prod ; weekly email rang (prochaine PR).
+
 #### 2026-06-11 — Publication de l'étude « 50 marques × 5 IA » + doc 11
 
 **Contexte** : première étude publique Mamie GEO (50 marques FR, 40 prompts, 5 plateformes, 613 détections, snapshot 2026-06-10). Données et protocole dans `geo-project/` (`resultats.json`, `scoring.csv`, `methodologie.md`, `angles.md`).
