@@ -138,6 +138,31 @@ Cibles V1 : porter `vs Profound` en landing dédiée si traction ; `vs Goodie` (
 
 **Section « Crawlabilité bots IA »** (décidée 2026-05-17, **livrée 2026-06-08**) : parse `/robots.txt` × table de bots IA (`src/lib/audit/ai-bots.ts` : GPTBot, ClaudeBot, Claude-Web, PerplexityBot, Google-Extended, Bytespider, CCBot, Amazonbot, meta-externalagent…) → autorisé/bloqué/non spécifié + reco contextuelle. Pas de slug séparé `/crawlability` (dilution d'autorité refusée). Attendu : +30-50 % partage social.
 
+### Lead magnet n°1bis — « Scan express visibilité IA » (proposition 2026-06-11, à trancher)
+
+Version **instantanée et automatique** du test n°1, complémentaire (le
+n°1 reste l'audit complet 5 LLMs sous 24 h ; le scan express donne la
+gratification immédiate qui maximise la conversion du formulaire).
+
+- **UX** : marque + secteur + email → 3 prompts générés (templates par
+  secteur, pas de LLM pour la génération) → posés en live à **1 LLM**
+  → détection regex de la marque + des marques citées → mini-résultat
+  à l'écran en ~20 s : cité ou pas, qui est cité à ta place, position.
+  CTA : « Pour les 5 IA, le suivi quotidien et l'évolution → trial. »
+- **Moteur** : API Mistral (`mistral-small-latest`). Le free tier de La
+  Plateforme couvre largement le volume (rate-limited, 0 €) ; fallback
+  payant ≈ 0,2 ¢/scan. Aligné avec la mémoire « auxiliary LLM → cheapest
+  model ». Vérifier les conditions du free tier au moment du build
+  (usage commercial + data opt-out).
+- **Anti-abus** : email gate avant le scan, cap global 50 scans/jour
+  (compteur Upstash), cache 24 h par marque normalisée, honeypot.
+- **Pourquoi pas les 5 LLMs en live** : coût (web_search OpenAI/Gemini
+  ≈ $0,04/run) et latence. 1 LLM suffit pour le « aha moment » ;
+  l'écart 1 vs 5 LLMs est précisément l'argument de vente (cf. étude
+  doc 11 : variance inter-LLM ×8).
+- **Effort estimé** : 1 PR (route marketing + action serveur + appel
+  Mistral + regex existante `detectMentions` réutilisée telle quelle).
+
 ### Lead magnet n°2 — Newsletter Mamie GEO
 
 > (Numérotation dupliquée historique, titre conservé pour les références.)
