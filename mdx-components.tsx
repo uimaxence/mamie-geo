@@ -1,6 +1,13 @@
 import type { MDXComponents } from "mdx/types";
 import type { ReactNode } from "react";
 import { BlogFAQ } from "@/components/blog/blog-faq";
+import {
+  EtudeClassement,
+  EtudeMoyennesPlateforme,
+  EtudePositions,
+  EtudeProfilMarque,
+  EtudeSources,
+} from "@/components/blog/etude-50-marques-charts";
 
 // MDX components — mapping global pour que les .mdx rendent avec notre
 // design system (cf. doc 10 § Direction). Tous les `<h1>` MDX appliquent
@@ -8,6 +15,7 @@ import { BlogFAQ } from "@/components/blog/blog-faq";
 //
 // Composants métier exposés globalement (cf. doc 09 § 2026-05-16) :
 //   - <BlogFAQ items=[{q,a},…]/> — bloc FAQ accessible + JSON-LD auto
+//   - <Etude*/> — charts CSS-only de l'étude 50 marques (doc 09 § 2026-06-11)
 //
 // Fichier au root (next to package.json) selon convention @next/mdx :
 // https://nextjs.org/docs/app/building-your-application/configuring/mdx
@@ -84,6 +92,11 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
     ),
     // Composants métier blog exposés sans import explicite dans les .mdx.
     BlogFAQ,
+    EtudeClassement,
+    EtudeMoyennesPlateforme,
+    EtudePositions,
+    EtudeProfilMarque,
+    EtudeSources,
     ...components,
   };
 }
