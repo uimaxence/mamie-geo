@@ -206,6 +206,7 @@ Source : `geo-project/03-architecture-technique.md` § Structure du repo.
 | « Timeline mois par mois ? Sprint 0 checklist ? »      | `08-roadmap-execution.md`         |
 | « Pourquoi on a pris cette décision ? KPI mensuels ? » | `09-decisions-journal.md` ⭐      |
 | « Direction artistique ? Patterns obligatoires ? »     | `10-design-direction.md`          |
+| « Étude 50 marques × 5 IA ? Enseignements ? »          | `11-etude-50-marques.md`          |
 
 ---
 

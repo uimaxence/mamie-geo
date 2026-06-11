@@ -1,0 +1,414 @@
+{
+  "version": "2026-06",
+  "note": "Aliases reconnus au scoring comme la meme marque. Attention: l'alias 'Le Chat' de Mistral AI ne doit pas etre confondu avec la plateforme Le Chat lors du scoring.",
+  "marques": [
+    {
+      "id": "M01",
+      "nom": "BNP Paribas",
+      "secteur": "Banque",
+      "aliases": [
+        "BNP"
+      ],
+      "domaine": "bnpparibas.fr"
+    },
+    {
+      "id": "M02",
+      "nom": "Crédit Agricole",
+      "secteur": "Banque",
+      "aliases": [
+        "CA"
+      ],
+      "domaine": "credit-agricole.fr"
+    },
+    {
+      "id": "M03",
+      "nom": "Société Générale",
+      "secteur": "Banque",
+      "aliases": [
+        "SG",
+        "SocGen"
+      ],
+      "domaine": "societegenerale.fr"
+    },
+    {
+      "id": "M04",
+      "nom": "BoursoBank",
+      "secteur": "Banque",
+      "aliases": [
+        "Boursorama",
+        "Boursorama Banque",
+        "Bourso"
+      ],
+      "domaine": "boursobank.com"
+    },
+    {
+      "id": "M05",
+      "nom": "Fortuneo",
+      "secteur": "Banque",
+      "aliases": [],
+      "domaine": "fortuneo.fr"
+    },
+    {
+      "id": "M06",
+      "nom": "Hello bank!",
+      "secteur": "Banque",
+      "aliases": [
+        "Hello Bank",
+        "Hello bank"
+      ],
+      "domaine": "hellobank.fr"
+    },
+    {
+      "id": "M07",
+      "nom": "La Banque Postale",
+      "secteur": "Banque",
+      "aliases": [
+        "Banque Postale"
+      ],
+      "domaine": "labanquepostale.fr"
+    },
+    {
+      "id": "M08",
+      "nom": "Crédit Mutuel",
+      "secteur": "Banque",
+      "aliases": [
+        "CM"
+      ],
+      "domaine": "creditmutuel.fr"
+    },
+    {
+      "id": "M09",
+      "nom": "CIC",
+      "secteur": "Banque",
+      "aliases": [],
+      "domaine": "cic.fr"
+    },
+    {
+      "id": "M10",
+      "nom": "Qonto",
+      "secteur": "Banque",
+      "aliases": [],
+      "domaine": "qonto.com"
+    },
+    {
+      "id": "M11",
+      "nom": "AXA",
+      "secteur": "Assurance",
+      "aliases": [],
+      "domaine": "axa.fr"
+    },
+    {
+      "id": "M12",
+      "nom": "MAIF",
+      "secteur": "Assurance",
+      "aliases": [],
+      "domaine": "maif.fr"
+    },
+    {
+      "id": "M13",
+      "nom": "MACIF",
+      "secteur": "Assurance",
+      "aliases": [],
+      "domaine": "macif.fr"
+    },
+    {
+      "id": "M14",
+      "nom": "Matmut",
+      "secteur": "Assurance",
+      "aliases": [],
+      "domaine": "matmut.fr"
+    },
+    {
+      "id": "M15",
+      "nom": "Groupama",
+      "secteur": "Assurance",
+      "aliases": [],
+      "domaine": "groupama.fr"
+    },
+    {
+      "id": "M16",
+      "nom": "GMF",
+      "secteur": "Assurance",
+      "aliases": [],
+      "domaine": "gmf.fr"
+    },
+    {
+      "id": "M17",
+      "nom": "MMA",
+      "secteur": "Assurance",
+      "aliases": [],
+      "domaine": "mma.fr"
+    },
+    {
+      "id": "M18",
+      "nom": "Direct Assurance",
+      "secteur": "Assurance",
+      "aliases": [
+        "Direct Assur"
+      ],
+      "domaine": "direct-assurance.fr"
+    },
+    {
+      "id": "M19",
+      "nom": "Alan",
+      "secteur": "Assurance",
+      "aliases": [],
+      "domaine": "alan.com"
+    },
+    {
+      "id": "M20",
+      "nom": "Leocare",
+      "secteur": "Assurance",
+      "aliases": [
+        "Le ocare"
+      ],
+      "domaine": "leocare.eu"
+    },
+    {
+      "id": "M21",
+      "nom": "Orange",
+      "secteur": "Telecom & énergie",
+      "aliases": [],
+      "domaine": "orange.fr"
+    },
+    {
+      "id": "M22",
+      "nom": "Free",
+      "secteur": "Telecom & énergie",
+      "aliases": [
+        "Free Mobile",
+        "Freebox"
+      ],
+      "domaine": "free.fr"
+    },
+    {
+      "id": "M23",
+      "nom": "SFR",
+      "secteur": "Telecom & énergie",
+      "aliases": [],
+      "domaine": "sfr.fr"
+    },
+    {
+      "id": "M24",
+      "nom": "Bouygues Telecom",
+      "secteur": "Telecom & énergie",
+      "aliases": [
+        "Bouygues"
+      ],
+      "domaine": "bouyguestelecom.fr"
+    },
+    {
+      "id": "M25",
+      "nom": "Sosh",
+      "secteur": "Telecom & énergie",
+      "aliases": [],
+      "domaine": "sosh.fr"
+    },
+    {
+      "id": "M26",
+      "nom": "RED by SFR",
+      "secteur": "Telecom & énergie",
+      "aliases": [
+        "RED"
+      ],
+      "domaine": "red-by-sfr.fr"
+    },
+    {
+      "id": "M27",
+      "nom": "EDF",
+      "secteur": "Telecom & énergie",
+      "aliases": [],
+      "domaine": "edf.fr"
+    },
+    {
+      "id": "M28",
+      "nom": "Engie",
+      "secteur": "Telecom & énergie",
+      "aliases": [],
+      "domaine": "engie.fr"
+    },
+    {
+      "id": "M29",
+      "nom": "TotalEnergies",
+      "secteur": "Telecom & énergie",
+      "aliases": [
+        "Total Energies",
+        "Total Énergies"
+      ],
+      "domaine": "totalenergies.fr"
+    },
+    {
+      "id": "M30",
+      "nom": "Mint Énergie",
+      "secteur": "Telecom & énergie",
+      "aliases": [
+        "Mint Energie",
+        "Mint"
+      ],
+      "domaine": "mint-energie.com"
+    },
+    {
+      "id": "M31",
+      "nom": "E.Leclerc",
+      "secteur": "Retail & e-commerce",
+      "aliases": [
+        "Leclerc"
+      ],
+      "domaine": "e.leclerc"
+    },
+    {
+      "id": "M32",
+      "nom": "Carrefour",
+      "secteur": "Retail & e-commerce",
+      "aliases": [],
+      "domaine": "carrefour.fr"
+    },
+    {
+      "id": "M33",
+      "nom": "Fnac",
+      "secteur": "Retail & e-commerce",
+      "aliases": [],
+      "domaine": "fnac.com"
+    },
+    {
+      "id": "M34",
+      "nom": "Darty",
+      "secteur": "Retail & e-commerce",
+      "aliases": [],
+      "domaine": "darty.com"
+    },
+    {
+      "id": "M35",
+      "nom": "Decathlon",
+      "secteur": "Retail & e-commerce",
+      "aliases": [],
+      "domaine": "decathlon.fr"
+    },
+    {
+      "id": "M36",
+      "nom": "Leroy Merlin",
+      "secteur": "Retail & e-commerce",
+      "aliases": [
+        "LeroyMerlin"
+      ],
+      "domaine": "leroymerlin.fr"
+    },
+    {
+      "id": "M37",
+      "nom": "Cdiscount",
+      "secteur": "Retail & e-commerce",
+      "aliases": [],
+      "domaine": "cdiscount.com"
+    },
+    {
+      "id": "M38",
+      "nom": "La Redoute",
+      "secteur": "Retail & e-commerce",
+      "aliases": [],
+      "domaine": "laredoute.fr"
+    },
+    {
+      "id": "M39",
+      "nom": "Back Market",
+      "secteur": "Retail & e-commerce",
+      "aliases": [
+        "Backmarket"
+      ],
+      "domaine": "backmarket.fr"
+    },
+    {
+      "id": "M40",
+      "nom": "ManoMano",
+      "secteur": "Retail & e-commerce",
+      "aliases": [
+        "Mano Mano"
+      ],
+      "domaine": "manomano.fr"
+    },
+    {
+      "id": "M41",
+      "nom": "Doctolib",
+      "secteur": "Tech & services FR",
+      "aliases": [],
+      "domaine": "doctolib.fr"
+    },
+    {
+      "id": "M42",
+      "nom": "BlaBlaCar",
+      "secteur": "Tech & services FR",
+      "aliases": [
+        "Blablacar",
+        "Bla Bla Car"
+      ],
+      "domaine": "blablacar.fr"
+    },
+    {
+      "id": "M43",
+      "nom": "Leboncoin",
+      "secteur": "Tech & services FR",
+      "aliases": [
+        "Le Bon Coin",
+        "Le boncoin"
+      ],
+      "domaine": "leboncoin.fr"
+    },
+    {
+      "id": "M44",
+      "nom": "Deezer",
+      "secteur": "Tech & services FR",
+      "aliases": [],
+      "domaine": "deezer.com"
+    },
+    {
+      "id": "M45",
+      "nom": "OVHcloud",
+      "secteur": "Tech & services FR",
+      "aliases": [
+        "OVH"
+      ],
+      "domaine": "ovhcloud.com"
+    },
+    {
+      "id": "M46",
+      "nom": "PayFit",
+      "secteur": "Tech & services FR",
+      "aliases": [
+        "Payfit"
+      ],
+      "domaine": "payfit.com"
+    },
+    {
+      "id": "M47",
+      "nom": "Swile",
+      "secteur": "Tech & services FR",
+      "aliases": [],
+      "domaine": "swile.co"
+    },
+    {
+      "id": "M48",
+      "nom": "Yuka",
+      "secteur": "Tech & services FR",
+      "aliases": [],
+      "domaine": "yuka.io"
+    },
+    {
+      "id": "M49",
+      "nom": "Sumeria",
+      "secteur": "Tech & services FR",
+      "aliases": [
+        "Lydia"
+      ],
+      "domaine": "sumeria.fr"
+    },
+    {
+      "id": "M50",
+      "nom": "Mistral AI",
+      "secteur": "Tech & services FR",
+      "aliases": [
+        "Mistral",
+        "Le Chat"
+      ],
+      "domaine": "mistral.ai"
+    }
+  ]
+}

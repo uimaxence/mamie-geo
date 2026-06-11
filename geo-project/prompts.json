@@ -1,0 +1,205 @@
+{
+  "version": "2026-06",
+  "prompts": [
+    {
+      "id": "P01",
+      "secteur": "Banque",
+      "prompt": "Quelle est la meilleure banque en ligne en France ?"
+    },
+    {
+      "id": "P02",
+      "secteur": "Banque",
+      "prompt": "Quelle banque choisir quand on est jeune actif en France ?"
+    },
+    {
+      "id": "P03",
+      "secteur": "Banque",
+      "prompt": "Quelles sont les banques françaises avec les frais les plus bas ?"
+    },
+    {
+      "id": "P04",
+      "secteur": "Banque",
+      "prompt": "Quelle banque recommandes-tu pour un compte pro de freelance en France ?"
+    },
+    {
+      "id": "P05",
+      "secteur": "Banque",
+      "prompt": "Quelle est la banque la plus fiable en France ?"
+    },
+    {
+      "id": "P06",
+      "secteur": "Banque",
+      "prompt": "Fais-moi un comparatif des meilleures banques françaises en 2026"
+    },
+    {
+      "id": "P07",
+      "secteur": "Banque",
+      "prompt": "Quelle banque choisir pour un premier crédit immobilier en France ?"
+    },
+    {
+      "id": "P08",
+      "secteur": "Banque",
+      "prompt": "Quelles banques françaises ont la meilleure application mobile ?"
+    },
+    {
+      "id": "P09",
+      "secteur": "Assurance",
+      "prompt": "Quelle est la meilleure assurance auto en France ?"
+    },
+    {
+      "id": "P10",
+      "secteur": "Assurance",
+      "prompt": "Quelle assurance habitation choisir en France ?"
+    },
+    {
+      "id": "P11",
+      "secteur": "Assurance",
+      "prompt": "Quelles sont les mutuelles santé les plus recommandées en France ?"
+    },
+    {
+      "id": "P12",
+      "secteur": "Assurance",
+      "prompt": "Quelle assurance auto choisir pour un jeune conducteur en France ?"
+    },
+    {
+      "id": "P13",
+      "secteur": "Assurance",
+      "prompt": "Quel assureur français a le meilleur rapport qualité prix ?"
+    },
+    {
+      "id": "P14",
+      "secteur": "Assurance",
+      "prompt": "Fais-moi un comparatif des assurances habitation en France en 2026"
+    },
+    {
+      "id": "P15",
+      "secteur": "Assurance",
+      "prompt": "Quelle complémentaire santé pour un indépendant en France ?"
+    },
+    {
+      "id": "P16",
+      "secteur": "Assurance",
+      "prompt": "Quelles sont les assurances les moins chères en France ?"
+    },
+    {
+      "id": "P17",
+      "secteur": "Telecom & énergie",
+      "prompt": "Quel est le meilleur opérateur mobile en France ?"
+    },
+    {
+      "id": "P18",
+      "secteur": "Telecom & énergie",
+      "prompt": "Quelle box internet choisir en France ?"
+    },
+    {
+      "id": "P19",
+      "secteur": "Telecom & énergie",
+      "prompt": "Quel forfait mobile pas cher recommandes-tu en France ?"
+    },
+    {
+      "id": "P20",
+      "secteur": "Telecom & énergie",
+      "prompt": "Quel est le fournisseur d'électricité le moins cher en France ?"
+    },
+    {
+      "id": "P21",
+      "secteur": "Telecom & énergie",
+      "prompt": "Quel fournisseur d'énergie choisir en France en 2026 ?"
+    },
+    {
+      "id": "P22",
+      "secteur": "Telecom & énergie",
+      "prompt": "Quel opérateur a le meilleur réseau mobile en France ?"
+    },
+    {
+      "id": "P23",
+      "secteur": "Telecom & énergie",
+      "prompt": "Quelle est la meilleure offre fibre en France ?"
+    },
+    {
+      "id": "P24",
+      "secteur": "Telecom & énergie",
+      "prompt": "Quels sont les fournisseurs d'électricité verte recommandés en France ?"
+    },
+    {
+      "id": "P25",
+      "secteur": "Retail & e-commerce",
+      "prompt": "Quel est le meilleur site e-commerce français ?"
+    },
+    {
+      "id": "P26",
+      "secteur": "Retail & e-commerce",
+      "prompt": "Où acheter de l'électroménager pas cher en France ?"
+    },
+    {
+      "id": "P27",
+      "secteur": "Retail & e-commerce",
+      "prompt": "Quelle enseigne de bricolage choisir en France ?"
+    },
+    {
+      "id": "P28",
+      "secteur": "Retail & e-commerce",
+      "prompt": "Où acheter un smartphone reconditionné en France ?"
+    },
+    {
+      "id": "P29",
+      "secteur": "Retail & e-commerce",
+      "prompt": "Quelle enseigne de grande distribution est la moins chère en France ?"
+    },
+    {
+      "id": "P30",
+      "secteur": "Retail & e-commerce",
+      "prompt": "Où acheter du matériel de sport en France ?"
+    },
+    {
+      "id": "P31",
+      "secteur": "Retail & e-commerce",
+      "prompt": "Où acheter du high-tech en ligne en France ?"
+    },
+    {
+      "id": "P32",
+      "secteur": "Retail & e-commerce",
+      "prompt": "Quelles sont les meilleures enseignes françaises pour équiper sa maison ?"
+    },
+    {
+      "id": "P33",
+      "secteur": "Tech & services FR",
+      "prompt": "Quelle application pour prendre rendez-vous chez un médecin en France ?"
+    },
+    {
+      "id": "P34",
+      "secteur": "Tech & services FR",
+      "prompt": "Quel est le meilleur site de covoiturage en France ?"
+    },
+    {
+      "id": "P35",
+      "secteur": "Tech & services FR",
+      "prompt": "Où vendre ses objets d'occasion en ligne en France ?"
+    },
+    {
+      "id": "P36",
+      "secteur": "Tech & services FR",
+      "prompt": "Quelle alternative française à Spotify ?"
+    },
+    {
+      "id": "P37",
+      "secteur": "Tech & services FR",
+      "prompt": "Quel hébergeur cloud français choisir pour une entreprise ?"
+    },
+    {
+      "id": "P38",
+      "secteur": "Tech & services FR",
+      "prompt": "Quel logiciel de paie recommandes-tu pour une PME française ?"
+    },
+    {
+      "id": "P39",
+      "secteur": "Tech & services FR",
+      "prompt": "Quelle carte titres restaurant choisir pour ses salariés en France ?"
+    },
+    {
+      "id": "P40",
+      "secteur": "Tech & services FR",
+      "prompt": "Quelle application pour scanner les produits alimentaires et vérifier leur qualité ?"
+    }
+  ]
+}

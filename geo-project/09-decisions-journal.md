@@ -161,6 +161,16 @@ haut et l'entrée "2026-05-05 — Réponses aux 10 questions de bootstrap".
 
 ### Décisions enregistrées
 
+#### 2026-06-11 — Publication de l'étude « 50 marques × 5 IA » + doc 11
+
+**Contexte** : première étude publique Mamie GEO (50 marques FR, 40 prompts, 5 plateformes, 613 détections, snapshot 2026-06-10). Données et protocole dans `geo-project/` (`resultats.json`, `scoring.csv`, `methodologie.md`, `angles.md`).
+
+**Choix** : publication d'un article interactif sur le blog (`/blog/etude-visibilite-ia-50-marques-francaises`, catégorie Étude) avec des charts **CSS-only** réutilisant le pattern `BreakdownBars` de l'app (pas de recharts côté blog pour préserver PageSpeed ≥ 98). Composants dédiés exposés via `mdx-components.tsx`. Enseignements produit/playbook/marketing consolidés dans `geo-project/11-etude-50-marques.md` (nouveau doc, référencé dans CLAUDE.md § 5).
+
+**Conséquences attendues** : asset de lancement LinkedIn + SEO ; pipeline de contenu dérivé (4 posts, 2 articles, 1 carrousel, cf. doc 11 § 3.4) ; étude rejouable trimestriellement pour un format récurrent « évolution ».
+
+**À revisiter** : édition T3 2026 (≥ 3 runs par couple, couverture prompts de toutes les marques, cf. doc 11 § 3.6).
+
 #### 2026-06-11 — Compression documentaire globale (CLAUDE.md + geo-project)
 
 **Contexte** : les 14 fichiers markdown pesaient ~525 KB ; CLAUDE.md (50 KB, chargé à chaque session Claude) empilait ~430 lignes d'historique « Précédente (…) » dupliquant ce journal ; plusieurs docs contredisaient l'état courant (trial, pricing, routes, faux ✅ blog).

@@ -1,0 +1,1986 @@
+{
+  "meta": {
+    "date_snapshot": "2026-06-10",
+    "plateformes": [
+      "chatgpt",
+      "lechat",
+      "perplexity",
+      "gemini",
+      "claude"
+    ],
+    "n_marques": 50,
+    "n_prompts": 40,
+    "n_runs_collectes": 200,
+    "n_detections": 613,
+    "formules": {
+      "score_visibilite_ia": "moyenne sur les 8 prompts du secteur de (positionWeight x sentimentWeight x 100), absent=0",
+      "positionWeight": {
+        "first_paragraph": 1.0,
+        "middle": 0.5,
+        "end": 0.25,
+        "absent": 0.0
+      },
+      "sentimentWeight": {
+        "positive": 1.0,
+        "neutral": 0.5,
+        "negative": 0.0,
+        "absent": 0.0
+      },
+      "part_de_voix": "citations_marque / citations_secteur x 100"
+    },
+    "restriction": "scoring intra-secteur uniquement",
+    "sources_note": "Extraction best-effort des domaines dans les sections Sources. Domaines uniques=337. La majorite des plateformes citent par nom d'editeur sans URL; Perplexity est la seule a fournir des liens systematiques.",
+    "sources_domaines_par_plateforme": {
+      "chatgpt": 361,
+      "lechat": 299,
+      "perplexity": 45,
+      "claude": 17
+    }
+  },
+  "classement_general": [
+    {
+      "rang": 1,
+      "marque": "BoursoBank",
+      "secteur": "Banque",
+      "score_global": 66.87,
+      "scores_plateforme": {
+        "chatgpt": 67.19,
+        "lechat": 53.12,
+        "perplexity": 62.5,
+        "gemini": 73.44,
+        "claude": 78.12
+      },
+      "sentiment_dominant": "positive",
+      "strongest_model": "claude",
+      "weakest_model": "lechat"
+    },
+    {
+      "rang": 2,
+      "marque": "Fortuneo",
+      "secteur": "Banque",
+      "score_global": 49.06,
+      "scores_plateforme": {
+        "chatgpt": 43.75,
+        "lechat": 46.88,
+        "perplexity": 50.0,
+        "gemini": 42.19,
+        "claude": 62.5
+      },
+      "sentiment_dominant": "positive",
+      "strongest_model": "claude",
+      "weakest_model": "gemini"
+    },
+    {
+      "rang": 3,
+      "marque": "Free",
+      "secteur": "Telecom & énergie",
+      "score_global": 40.31,
+      "scores_plateforme": {
+        "chatgpt": 50.0,
+        "lechat": 31.25,
+        "perplexity": 37.5,
+        "gemini": 32.81,
+        "claude": 50.0
+      },
+      "sentiment_dominant": "positive",
+      "strongest_model": "chatgpt",
+      "weakest_model": "lechat"
+    },
+    {
+      "rang": 4,
+      "marque": "BNP Paribas",
+      "secteur": "Banque",
+      "score_global": 38.44,
+      "scores_plateforme": {
+        "chatgpt": 40.62,
+        "lechat": 34.38,
+        "perplexity": 34.38,
+        "gemini": 35.94,
+        "claude": 46.88
+      },
+      "sentiment_dominant": "positive",
+      "strongest_model": "claude",
+      "weakest_model": "lechat"
+    },
+    {
+      "rang": 5,
+      "marque": "Orange",
+      "secteur": "Telecom & énergie",
+      "score_global": 37.5,
+      "scores_plateforme": {
+        "chatgpt": 43.75,
+        "lechat": 34.38,
+        "perplexity": 43.75,
+        "gemini": 28.12,
+        "claude": 37.5
+      },
+      "sentiment_dominant": "positive",
+      "strongest_model": "chatgpt",
+      "weakest_model": "gemini"
+    },
+    {
+      "rang": 6,
+      "marque": "SFR",
+      "secteur": "Telecom & énergie",
+      "score_global": 37.5,
+      "scores_plateforme": {
+        "chatgpt": 43.75,
+        "lechat": 37.5,
+        "perplexity": 31.25,
+        "gemini": 25.0,
+        "claude": 50.0
+      },
+      "sentiment_dominant": "positive",
+      "strongest_model": "claude",
+      "weakest_model": "gemini"
+    },
+    {
+      "rang": 7,
+      "marque": "Bouygues Telecom",
+      "secteur": "Telecom & énergie",
+      "score_global": 34.37,
+      "scores_plateforme": {
+        "chatgpt": 43.75,
+        "lechat": 28.12,
+        "perplexity": 40.62,
+        "gemini": 28.12,
+        "claude": 31.25
+      },
+      "sentiment_dominant": "positive",
+      "strongest_model": "chatgpt",
+      "weakest_model": "lechat"
+    },
+    {
+      "rang": 8,
+      "marque": "MAIF",
+      "secteur": "Assurance",
+      "score_global": 32.81,
+      "scores_plateforme": {
+        "chatgpt": 40.62,
+        "lechat": 18.75,
+        "perplexity": 32.81,
+        "gemini": 28.12,
+        "claude": 43.75
+      },
+      "sentiment_dominant": "positive",
+      "strongest_model": "claude",
+      "weakest_model": "lechat"
+    },
+    {
+      "rang": 9,
+      "marque": "Direct Assurance",
+      "secteur": "Assurance",
+      "score_global": 31.87,
+      "scores_plateforme": {
+        "chatgpt": 37.5,
+        "lechat": 40.62,
+        "perplexity": 34.38,
+        "gemini": 18.75,
+        "claude": 28.12
+      },
+      "sentiment_dominant": "positive",
+      "strongest_model": "lechat",
+      "weakest_model": "gemini"
+    },
+    {
+      "rang": 10,
+      "marque": "Crédit Agricole",
+      "secteur": "Banque",
+      "score_global": 28.44,
+      "scores_plateforme": {
+        "chatgpt": 37.5,
+        "lechat": 25.0,
+        "perplexity": 21.88,
+        "gemini": 23.44,
+        "claude": 34.38
+      },
+      "sentiment_dominant": "positive",
+      "strongest_model": "chatgpt",
+      "weakest_model": "perplexity"
+    },
+    {
+      "rang": 11,
+      "marque": "Hello bank!",
+      "secteur": "Banque",
+      "score_global": 27.19,
+      "scores_plateforme": {
+        "chatgpt": 35.94,
+        "lechat": 31.25,
+        "perplexity": 18.75,
+        "gemini": 21.88,
+        "claude": 28.12
+      },
+      "sentiment_dominant": "positive",
+      "strongest_model": "chatgpt",
+      "weakest_model": "perplexity"
+    },
+    {
+      "rang": 12,
+      "marque": "Crédit Mutuel",
+      "secteur": "Banque",
+      "score_global": 25.94,
+      "scores_plateforme": {
+        "chatgpt": 15.62,
+        "lechat": 21.88,
+        "perplexity": 21.88,
+        "gemini": 32.81,
+        "claude": 37.5
+      },
+      "sentiment_dominant": "positive",
+      "strongest_model": "claude",
+      "weakest_model": "chatgpt"
+    },
+    {
+      "rang": 13,
+      "marque": "AXA",
+      "secteur": "Assurance",
+      "score_global": 25.62,
+      "scores_plateforme": {
+        "chatgpt": 37.5,
+        "lechat": 31.25,
+        "perplexity": 25.0,
+        "gemini": 6.25,
+        "claude": 28.12
+      },
+      "sentiment_dominant": "positive",
+      "strongest_model": "chatgpt",
+      "weakest_model": "gemini"
+    },
+    {
+      "rang": 14,
+      "marque": "Cdiscount",
+      "secteur": "Retail & e-commerce",
+      "score_global": 25.0,
+      "scores_plateforme": {
+        "chatgpt": 12.5,
+        "lechat": 31.25,
+        "perplexity": 25.0,
+        "gemini": 15.62,
+        "claude": 40.62
+      },
+      "sentiment_dominant": "positive",
+      "strongest_model": "claude",
+      "weakest_model": "chatgpt"
+    },
+    {
+      "rang": 15,
+      "marque": "RED by SFR",
+      "secteur": "Telecom & énergie",
+      "score_global": 24.37,
+      "scores_plateforme": {
+        "chatgpt": 25.0,
+        "lechat": 25.0,
+        "perplexity": 31.25,
+        "gemini": 15.62,
+        "claude": 25.0
+      },
+      "sentiment_dominant": "positive",
+      "strongest_model": "perplexity",
+      "weakest_model": "gemini"
+    },
+    {
+      "rang": 16,
+      "marque": "Société Générale",
+      "secteur": "Banque",
+      "score_global": 24.06,
+      "scores_plateforme": {
+        "chatgpt": 6.25,
+        "lechat": 28.12,
+        "perplexity": 15.62,
+        "gemini": 17.19,
+        "claude": 53.12
+      },
+      "sentiment_dominant": "neutral",
+      "strongest_model": "claude",
+      "weakest_model": "chatgpt"
+    },
+    {
+      "rang": 17,
+      "marque": "Back Market",
+      "secteur": "Retail & e-commerce",
+      "score_global": 24.06,
+      "scores_plateforme": {
+        "chatgpt": 18.75,
+        "lechat": 18.75,
+        "perplexity": 14.06,
+        "gemini": 31.25,
+        "claude": 37.5
+      },
+      "sentiment_dominant": "positive",
+      "strongest_model": "claude",
+      "weakest_model": "perplexity"
+    },
+    {
+      "rang": 18,
+      "marque": "MMA",
+      "secteur": "Assurance",
+      "score_global": 21.88,
+      "scores_plateforme": {
+        "chatgpt": 21.88,
+        "lechat": 18.75,
+        "perplexity": 25.0,
+        "gemini": 6.25,
+        "claude": 37.5
+      },
+      "sentiment_dominant": "positive",
+      "strongest_model": "claude",
+      "weakest_model": "gemini"
+    },
+    {
+      "rang": 19,
+      "marque": "Darty",
+      "secteur": "Retail & e-commerce",
+      "score_global": 21.87,
+      "scores_plateforme": {
+        "chatgpt": 15.62,
+        "lechat": 15.62,
+        "perplexity": 18.75,
+        "gemini": 21.88,
+        "claude": 37.5
+      },
+      "sentiment_dominant": "positive",
+      "strongest_model": "claude",
+      "weakest_model": "chatgpt"
+    },
+    {
+      "rang": 20,
+      "marque": "Matmut",
+      "secteur": "Assurance",
+      "score_global": 21.25,
+      "scores_plateforme": {
+        "chatgpt": 28.12,
+        "lechat": 12.5,
+        "perplexity": 18.75,
+        "gemini": 25.0,
+        "claude": 21.88
+      },
+      "sentiment_dominant": "positive",
+      "strongest_model": "chatgpt",
+      "weakest_model": "lechat"
+    },
+    {
+      "rang": 21,
+      "marque": "Fnac",
+      "secteur": "Retail & e-commerce",
+      "score_global": 21.25,
+      "scores_plateforme": {
+        "chatgpt": 18.75,
+        "lechat": 25.0,
+        "perplexity": 6.25,
+        "gemini": 12.5,
+        "claude": 43.75
+      },
+      "sentiment_dominant": "positive",
+      "strongest_model": "claude",
+      "weakest_model": "perplexity"
+    },
+    {
+      "rang": 22,
+      "marque": "GMF",
+      "secteur": "Assurance",
+      "score_global": 20.63,
+      "scores_plateforme": {
+        "chatgpt": 21.88,
+        "lechat": 18.75,
+        "perplexity": 6.25,
+        "gemini": 18.75,
+        "claude": 37.5
+      },
+      "sentiment_dominant": "positive",
+      "strongest_model": "claude",
+      "weakest_model": "perplexity"
+    },
+    {
+      "rang": 23,
+      "marque": "Leroy Merlin",
+      "secteur": "Retail & e-commerce",
+      "score_global": 20.0,
+      "scores_plateforme": {
+        "chatgpt": 25.0,
+        "lechat": 25.0,
+        "perplexity": 18.75,
+        "gemini": 12.5,
+        "claude": 18.75
+      },
+      "sentiment_dominant": "positive",
+      "strongest_model": "chatgpt",
+      "weakest_model": "gemini"
+    },
+    {
+      "rang": 24,
+      "marque": "Groupama",
+      "secteur": "Assurance",
+      "score_global": 16.56,
+      "scores_plateforme": {
+        "chatgpt": 25.0,
+        "lechat": 12.5,
+        "perplexity": 25.0,
+        "gemini": 7.81,
+        "claude": 12.5
+      },
+      "sentiment_dominant": "positive",
+      "strongest_model": "chatgpt",
+      "weakest_model": "gemini"
+    },
+    {
+      "rang": 25,
+      "marque": "Leocare",
+      "secteur": "Assurance",
+      "score_global": 16.25,
+      "scores_plateforme": {
+        "chatgpt": 12.5,
+        "lechat": 34.38,
+        "perplexity": 0.0,
+        "gemini": 6.25,
+        "claude": 28.12
+      },
+      "sentiment_dominant": "positive",
+      "strongest_model": "lechat",
+      "weakest_model": "perplexity"
+    },
+    {
+      "rang": 26,
+      "marque": "Sosh",
+      "secteur": "Telecom & énergie",
+      "score_global": 15.62,
+      "scores_plateforme": {
+        "chatgpt": 18.75,
+        "lechat": 12.5,
+        "perplexity": 15.62,
+        "gemini": 12.5,
+        "claude": 18.75
+      },
+      "sentiment_dominant": "positive",
+      "strongest_model": "chatgpt",
+      "weakest_model": "lechat"
+    },
+    {
+      "rang": 27,
+      "marque": "EDF",
+      "secteur": "Telecom & énergie",
+      "score_global": 15.0,
+      "scores_plateforme": {
+        "chatgpt": 18.75,
+        "lechat": 9.38,
+        "perplexity": 6.25,
+        "gemini": 28.12,
+        "claude": 12.5
+      },
+      "sentiment_dominant": "neutral",
+      "strongest_model": "gemini",
+      "weakest_model": "perplexity"
+    },
+    {
+      "rang": 28,
+      "marque": "E.Leclerc",
+      "secteur": "Retail & e-commerce",
+      "score_global": 14.06,
+      "scores_plateforme": {
+        "chatgpt": 12.5,
+        "lechat": 9.38,
+        "perplexity": 7.81,
+        "gemini": 18.75,
+        "claude": 21.88
+      },
+      "sentiment_dominant": "positive",
+      "strongest_model": "claude",
+      "weakest_model": "perplexity"
+    },
+    {
+      "rang": 29,
+      "marque": "PayFit",
+      "secteur": "Tech & services FR",
+      "score_global": 13.12,
+      "scores_plateforme": {
+        "chatgpt": 15.62,
+        "lechat": 12.5,
+        "perplexity": 12.5,
+        "gemini": 12.5,
+        "claude": 12.5
+      },
+      "sentiment_dominant": "positive",
+      "strongest_model": "chatgpt",
+      "weakest_model": "lechat"
+    },
+    {
+      "rang": 30,
+      "marque": "Decathlon",
+      "secteur": "Retail & e-commerce",
+      "score_global": 12.5,
+      "scores_plateforme": {
+        "chatgpt": 12.5,
+        "lechat": 12.5,
+        "perplexity": 6.25,
+        "gemini": 18.75,
+        "claude": 12.5
+      },
+      "sentiment_dominant": "positive",
+      "strongest_model": "gemini",
+      "weakest_model": "perplexity"
+    },
+    {
+      "rang": 31,
+      "marque": "BlaBlaCar",
+      "secteur": "Tech & services FR",
+      "score_global": 12.5,
+      "scores_plateforme": {
+        "chatgpt": 12.5,
+        "lechat": 12.5,
+        "perplexity": 12.5,
+        "gemini": 12.5,
+        "claude": 12.5
+      },
+      "sentiment_dominant": "positive",
+      "strongest_model": "chatgpt",
+      "weakest_model": "chatgpt"
+    },
+    {
+      "rang": 32,
+      "marque": "Leboncoin",
+      "secteur": "Tech & services FR",
+      "score_global": 12.5,
+      "scores_plateforme": {
+        "chatgpt": 12.5,
+        "lechat": 12.5,
+        "perplexity": 12.5,
+        "gemini": 12.5,
+        "claude": 12.5
+      },
+      "sentiment_dominant": "positive",
+      "strongest_model": "chatgpt",
+      "weakest_model": "chatgpt"
+    },
+    {
+      "rang": 33,
+      "marque": "OVHcloud",
+      "secteur": "Tech & services FR",
+      "score_global": 12.5,
+      "scores_plateforme": {
+        "chatgpt": 12.5,
+        "lechat": 12.5,
+        "perplexity": 12.5,
+        "gemini": 12.5,
+        "claude": 12.5
+      },
+      "sentiment_dominant": "positive",
+      "strongest_model": "chatgpt",
+      "weakest_model": "chatgpt"
+    },
+    {
+      "rang": 34,
+      "marque": "Swile",
+      "secteur": "Tech & services FR",
+      "score_global": 12.5,
+      "scores_plateforme": {
+        "chatgpt": 12.5,
+        "lechat": 12.5,
+        "perplexity": 12.5,
+        "gemini": 12.5,
+        "claude": 12.5
+      },
+      "sentiment_dominant": "positive",
+      "strongest_model": "chatgpt",
+      "weakest_model": "chatgpt"
+    },
+    {
+      "rang": 35,
+      "marque": "Doctolib",
+      "secteur": "Tech & services FR",
+      "score_global": 11.25,
+      "scores_plateforme": {
+        "chatgpt": 12.5,
+        "lechat": 12.5,
+        "perplexity": 12.5,
+        "gemini": 12.5,
+        "claude": 6.25
+      },
+      "sentiment_dominant": "positive",
+      "strongest_model": "chatgpt",
+      "weakest_model": "claude"
+    },
+    {
+      "rang": 36,
+      "marque": "Deezer",
+      "secteur": "Tech & services FR",
+      "score_global": 11.25,
+      "scores_plateforme": {
+        "chatgpt": 12.5,
+        "lechat": 12.5,
+        "perplexity": 6.25,
+        "gemini": 12.5,
+        "claude": 12.5
+      },
+      "sentiment_dominant": "positive",
+      "strongest_model": "chatgpt",
+      "weakest_model": "perplexity"
+    },
+    {
+      "rang": 37,
+      "marque": "Yuka",
+      "secteur": "Tech & services FR",
+      "score_global": 11.25,
+      "scores_plateforme": {
+        "chatgpt": 6.25,
+        "lechat": 12.5,
+        "perplexity": 12.5,
+        "gemini": 12.5,
+        "claude": 12.5
+      },
+      "sentiment_dominant": "positive",
+      "strongest_model": "lechat",
+      "weakest_model": "chatgpt"
+    },
+    {
+      "rang": 38,
+      "marque": "MACIF",
+      "secteur": "Assurance",
+      "score_global": 10.31,
+      "scores_plateforme": {
+        "chatgpt": 9.38,
+        "lechat": 12.5,
+        "perplexity": 1.56,
+        "gemini": 15.62,
+        "claude": 12.5
+      },
+      "sentiment_dominant": "positive",
+      "strongest_model": "gemini",
+      "weakest_model": "perplexity"
+    },
+    {
+      "rang": 39,
+      "marque": "Qonto",
+      "secteur": "Banque",
+      "score_global": 10.0,
+      "scores_plateforme": {
+        "chatgpt": 12.5,
+        "lechat": 12.5,
+        "perplexity": 12.5,
+        "gemini": 6.25,
+        "claude": 6.25
+      },
+      "sentiment_dominant": "positive",
+      "strongest_model": "chatgpt",
+      "weakest_model": "gemini"
+    },
+    {
+      "rang": 40,
+      "marque": "La Redoute",
+      "secteur": "Retail & e-commerce",
+      "score_global": 7.5,
+      "scores_plateforme": {
+        "chatgpt": 6.25,
+        "lechat": 0.0,
+        "perplexity": 3.12,
+        "gemini": 12.5,
+        "claude": 15.62
+      },
+      "sentiment_dominant": "positive",
+      "strongest_model": "claude",
+      "weakest_model": "lechat"
+    },
+    {
+      "rang": 41,
+      "marque": "La Banque Postale",
+      "secteur": "Banque",
+      "score_global": 6.25,
+      "scores_plateforme": {
+        "chatgpt": 0.0,
+        "lechat": 9.38,
+        "perplexity": 0.0,
+        "gemini": 3.12,
+        "claude": 18.75
+      },
+      "sentiment_dominant": "neutral",
+      "strongest_model": "claude",
+      "weakest_model": "chatgpt"
+    },
+    {
+      "rang": 42,
+      "marque": "ManoMano",
+      "secteur": "Retail & e-commerce",
+      "score_global": 6.25,
+      "scores_plateforme": {
+        "chatgpt": 9.38,
+        "lechat": 6.25,
+        "perplexity": 6.25,
+        "gemini": 0.0,
+        "claude": 9.38
+      },
+      "sentiment_dominant": "positive",
+      "strongest_model": "chatgpt",
+      "weakest_model": "gemini"
+    },
+    {
+      "rang": 43,
+      "marque": "Mint Énergie",
+      "secteur": "Telecom & énergie",
+      "score_global": 5.62,
+      "scores_plateforme": {
+        "chatgpt": 15.62,
+        "lechat": 3.12,
+        "perplexity": 6.25,
+        "gemini": 3.12,
+        "claude": 0.0
+      },
+      "sentiment_dominant": "positive",
+      "strongest_model": "chatgpt",
+      "weakest_model": "claude"
+    },
+    {
+      "rang": 44,
+      "marque": "Engie",
+      "secteur": "Telecom & énergie",
+      "score_global": 5.31,
+      "scores_plateforme": {
+        "chatgpt": 9.38,
+        "lechat": 1.56,
+        "perplexity": 3.12,
+        "gemini": 6.25,
+        "claude": 6.25
+      },
+      "sentiment_dominant": "positive",
+      "strongest_model": "chatgpt",
+      "weakest_model": "lechat"
+    },
+    {
+      "rang": 45,
+      "marque": "Alan",
+      "secteur": "Assurance",
+      "score_global": 5.0,
+      "scores_plateforme": {
+        "chatgpt": 3.12,
+        "lechat": 3.12,
+        "perplexity": 3.12,
+        "gemini": 12.5,
+        "claude": 3.12
+      },
+      "sentiment_dominant": "neutral",
+      "strongest_model": "gemini",
+      "weakest_model": "chatgpt"
+    },
+    {
+      "rang": 46,
+      "marque": "Carrefour",
+      "secteur": "Retail & e-commerce",
+      "score_global": 4.06,
+      "scores_plateforme": {
+        "chatgpt": 0.0,
+        "lechat": 3.12,
+        "perplexity": 1.56,
+        "gemini": 3.12,
+        "claude": 12.5
+      },
+      "sentiment_dominant": "neutral",
+      "strongest_model": "claude",
+      "weakest_model": "chatgpt"
+    },
+    {
+      "rang": 47,
+      "marque": "TotalEnergies",
+      "secteur": "Telecom & énergie",
+      "score_global": 3.75,
+      "scores_plateforme": {
+        "chatgpt": 6.25,
+        "lechat": 0.0,
+        "perplexity": 6.25,
+        "gemini": 0.0,
+        "claude": 6.25
+      },
+      "sentiment_dominant": "neutral",
+      "strongest_model": "chatgpt",
+      "weakest_model": "lechat"
+    },
+    {
+      "rang": 48,
+      "marque": "CIC",
+      "secteur": "Banque",
+      "score_global": 3.12,
+      "scores_plateforme": {
+        "chatgpt": 0.0,
+        "lechat": 12.5,
+        "perplexity": 0.0,
+        "gemini": 3.12,
+        "claude": 0.0
+      },
+      "sentiment_dominant": "neutral",
+      "strongest_model": "lechat",
+      "weakest_model": "chatgpt"
+    },
+    {
+      "rang": 49,
+      "marque": "Sumeria",
+      "secteur": "Tech & services FR",
+      "score_global": 0.0,
+      "scores_plateforme": {
+        "chatgpt": 0.0,
+        "lechat": 0.0,
+        "perplexity": 0.0,
+        "gemini": 0.0,
+        "claude": 0.0
+      },
+      "sentiment_dominant": "absent",
+      "strongest_model": null,
+      "weakest_model": null
+    },
+    {
+      "rang": 50,
+      "marque": "Mistral AI",
+      "secteur": "Tech & services FR",
+      "score_global": 0.0,
+      "scores_plateforme": {
+        "chatgpt": 0.0,
+        "lechat": 0.0,
+        "perplexity": 0.0,
+        "gemini": 0.0,
+        "claude": 0.0
+      },
+      "sentiment_dominant": "absent",
+      "strongest_model": null,
+      "weakest_model": null
+    }
+  ],
+  "matrice_score_marque_plateforme": {
+    "BNP Paribas": {
+      "chatgpt": 40.62,
+      "lechat": 34.38,
+      "perplexity": 34.38,
+      "gemini": 35.94,
+      "claude": 46.88
+    },
+    "Crédit Agricole": {
+      "chatgpt": 37.5,
+      "lechat": 25.0,
+      "perplexity": 21.88,
+      "gemini": 23.44,
+      "claude": 34.38
+    },
+    "Société Générale": {
+      "chatgpt": 6.25,
+      "lechat": 28.12,
+      "perplexity": 15.62,
+      "gemini": 17.19,
+      "claude": 53.12
+    },
+    "BoursoBank": {
+      "chatgpt": 67.19,
+      "lechat": 53.12,
+      "perplexity": 62.5,
+      "gemini": 73.44,
+      "claude": 78.12
+    },
+    "Fortuneo": {
+      "chatgpt": 43.75,
+      "lechat": 46.88,
+      "perplexity": 50.0,
+      "gemini": 42.19,
+      "claude": 62.5
+    },
+    "Hello bank!": {
+      "chatgpt": 35.94,
+      "lechat": 31.25,
+      "perplexity": 18.75,
+      "gemini": 21.88,
+      "claude": 28.12
+    },
+    "La Banque Postale": {
+      "chatgpt": 0.0,
+      "lechat": 9.38,
+      "perplexity": 0.0,
+      "gemini": 3.12,
+      "claude": 18.75
+    },
+    "Crédit Mutuel": {
+      "chatgpt": 15.62,
+      "lechat": 21.88,
+      "perplexity": 21.88,
+      "gemini": 32.81,
+      "claude": 37.5
+    },
+    "CIC": {
+      "chatgpt": 0.0,
+      "lechat": 12.5,
+      "perplexity": 0.0,
+      "gemini": 3.12,
+      "claude": 0.0
+    },
+    "Qonto": {
+      "chatgpt": 12.5,
+      "lechat": 12.5,
+      "perplexity": 12.5,
+      "gemini": 6.25,
+      "claude": 6.25
+    },
+    "AXA": {
+      "chatgpt": 37.5,
+      "lechat": 31.25,
+      "perplexity": 25.0,
+      "gemini": 6.25,
+      "claude": 28.12
+    },
+    "MAIF": {
+      "chatgpt": 40.62,
+      "lechat": 18.75,
+      "perplexity": 32.81,
+      "gemini": 28.12,
+      "claude": 43.75
+    },
+    "MACIF": {
+      "chatgpt": 9.38,
+      "lechat": 12.5,
+      "perplexity": 1.56,
+      "gemini": 15.62,
+      "claude": 12.5
+    },
+    "Matmut": {
+      "chatgpt": 28.12,
+      "lechat": 12.5,
+      "perplexity": 18.75,
+      "gemini": 25.0,
+      "claude": 21.88
+    },
+    "Groupama": {
+      "chatgpt": 25.0,
+      "lechat": 12.5,
+      "perplexity": 25.0,
+      "gemini": 7.81,
+      "claude": 12.5
+    },
+    "GMF": {
+      "chatgpt": 21.88,
+      "lechat": 18.75,
+      "perplexity": 6.25,
+      "gemini": 18.75,
+      "claude": 37.5
+    },
+    "MMA": {
+      "chatgpt": 21.88,
+      "lechat": 18.75,
+      "perplexity": 25.0,
+      "gemini": 6.25,
+      "claude": 37.5
+    },
+    "Direct Assurance": {
+      "chatgpt": 37.5,
+      "lechat": 40.62,
+      "perplexity": 34.38,
+      "gemini": 18.75,
+      "claude": 28.12
+    },
+    "Alan": {
+      "chatgpt": 3.12,
+      "lechat": 3.12,
+      "perplexity": 3.12,
+      "gemini": 12.5,
+      "claude": 3.12
+    },
+    "Leocare": {
+      "chatgpt": 12.5,
+      "lechat": 34.38,
+      "perplexity": 0.0,
+      "gemini": 6.25,
+      "claude": 28.12
+    },
+    "Orange": {
+      "chatgpt": 43.75,
+      "lechat": 34.38,
+      "perplexity": 43.75,
+      "gemini": 28.12,
+      "claude": 37.5
+    },
+    "Free": {
+      "chatgpt": 50.0,
+      "lechat": 31.25,
+      "perplexity": 37.5,
+      "gemini": 32.81,
+      "claude": 50.0
+    },
+    "SFR": {
+      "chatgpt": 43.75,
+      "lechat": 37.5,
+      "perplexity": 31.25,
+      "gemini": 25.0,
+      "claude": 50.0
+    },
+    "Bouygues Telecom": {
+      "chatgpt": 43.75,
+      "lechat": 28.12,
+      "perplexity": 40.62,
+      "gemini": 28.12,
+      "claude": 31.25
+    },
+    "Sosh": {
+      "chatgpt": 18.75,
+      "lechat": 12.5,
+      "perplexity": 15.62,
+      "gemini": 12.5,
+      "claude": 18.75
+    },
+    "RED by SFR": {
+      "chatgpt": 25.0,
+      "lechat": 25.0,
+      "perplexity": 31.25,
+      "gemini": 15.62,
+      "claude": 25.0
+    },
+    "EDF": {
+      "chatgpt": 18.75,
+      "lechat": 9.38,
+      "perplexity": 6.25,
+      "gemini": 28.12,
+      "claude": 12.5
+    },
+    "Engie": {
+      "chatgpt": 9.38,
+      "lechat": 1.56,
+      "perplexity": 3.12,
+      "gemini": 6.25,
+      "claude": 6.25
+    },
+    "TotalEnergies": {
+      "chatgpt": 6.25,
+      "lechat": 0.0,
+      "perplexity": 6.25,
+      "gemini": 0.0,
+      "claude": 6.25
+    },
+    "Mint Énergie": {
+      "chatgpt": 15.62,
+      "lechat": 3.12,
+      "perplexity": 6.25,
+      "gemini": 3.12,
+      "claude": 0.0
+    },
+    "E.Leclerc": {
+      "chatgpt": 12.5,
+      "lechat": 9.38,
+      "perplexity": 7.81,
+      "gemini": 18.75,
+      "claude": 21.88
+    },
+    "Carrefour": {
+      "chatgpt": 0.0,
+      "lechat": 3.12,
+      "perplexity": 1.56,
+      "gemini": 3.12,
+      "claude": 12.5
+    },
+    "Fnac": {
+      "chatgpt": 18.75,
+      "lechat": 25.0,
+      "perplexity": 6.25,
+      "gemini": 12.5,
+      "claude": 43.75
+    },
+    "Darty": {
+      "chatgpt": 15.62,
+      "lechat": 15.62,
+      "perplexity": 18.75,
+      "gemini": 21.88,
+      "claude": 37.5
+    },
+    "Decathlon": {
+      "chatgpt": 12.5,
+      "lechat": 12.5,
+      "perplexity": 6.25,
+      "gemini": 18.75,
+      "claude": 12.5
+    },
+    "Leroy Merlin": {
+      "chatgpt": 25.0,
+      "lechat": 25.0,
+      "perplexity": 18.75,
+      "gemini": 12.5,
+      "claude": 18.75
+    },
+    "Cdiscount": {
+      "chatgpt": 12.5,
+      "lechat": 31.25,
+      "perplexity": 25.0,
+      "gemini": 15.62,
+      "claude": 40.62
+    },
+    "La Redoute": {
+      "chatgpt": 6.25,
+      "lechat": 0.0,
+      "perplexity": 3.12,
+      "gemini": 12.5,
+      "claude": 15.62
+    },
+    "Back Market": {
+      "chatgpt": 18.75,
+      "lechat": 18.75,
+      "perplexity": 14.06,
+      "gemini": 31.25,
+      "claude": 37.5
+    },
+    "ManoMano": {
+      "chatgpt": 9.38,
+      "lechat": 6.25,
+      "perplexity": 6.25,
+      "gemini": 0.0,
+      "claude": 9.38
+    },
+    "Doctolib": {
+      "chatgpt": 12.5,
+      "lechat": 12.5,
+      "perplexity": 12.5,
+      "gemini": 12.5,
+      "claude": 6.25
+    },
+    "BlaBlaCar": {
+      "chatgpt": 12.5,
+      "lechat": 12.5,
+      "perplexity": 12.5,
+      "gemini": 12.5,
+      "claude": 12.5
+    },
+    "Leboncoin": {
+      "chatgpt": 12.5,
+      "lechat": 12.5,
+      "perplexity": 12.5,
+      "gemini": 12.5,
+      "claude": 12.5
+    },
+    "Deezer": {
+      "chatgpt": 12.5,
+      "lechat": 12.5,
+      "perplexity": 6.25,
+      "gemini": 12.5,
+      "claude": 12.5
+    },
+    "OVHcloud": {
+      "chatgpt": 12.5,
+      "lechat": 12.5,
+      "perplexity": 12.5,
+      "gemini": 12.5,
+      "claude": 12.5
+    },
+    "PayFit": {
+      "chatgpt": 15.62,
+      "lechat": 12.5,
+      "perplexity": 12.5,
+      "gemini": 12.5,
+      "claude": 12.5
+    },
+    "Swile": {
+      "chatgpt": 12.5,
+      "lechat": 12.5,
+      "perplexity": 12.5,
+      "gemini": 12.5,
+      "claude": 12.5
+    },
+    "Yuka": {
+      "chatgpt": 6.25,
+      "lechat": 12.5,
+      "perplexity": 12.5,
+      "gemini": 12.5,
+      "claude": 12.5
+    },
+    "Sumeria": {
+      "chatgpt": 0.0,
+      "lechat": 0.0,
+      "perplexity": 0.0,
+      "gemini": 0.0,
+      "claude": 0.0
+    },
+    "Mistral AI": {
+      "chatgpt": 0.0,
+      "lechat": 0.0,
+      "perplexity": 0.0,
+      "gemini": 0.0,
+      "claude": 0.0
+    }
+  },
+  "part_de_voix_par_secteur": {
+    "Banque": {
+      "BoursoBank": 17.8,
+      "Fortuneo": 15.2,
+      "BNP Paribas": 14.7,
+      "Hello bank!": 13.1,
+      "Crédit Agricole": 12.0,
+      "Crédit Mutuel": 10.5,
+      "Société Générale": 9.4,
+      "La Banque Postale": 2.6,
+      "Qonto": 2.6,
+      "CIC": 2.1
+    },
+    "Assurance": {
+      "MAIF": 15.6,
+      "Direct Assurance": 14.8,
+      "AXA": 12.6,
+      "MMA": 10.4,
+      "Matmut": 9.6,
+      "GMF": 9.6,
+      "Groupama": 8.9,
+      "Leocare": 7.4,
+      "MACIF": 6.7,
+      "Alan": 4.4
+    },
+    "Telecom & énergie": {
+      "Free": 16.3,
+      "SFR": 15.6,
+      "Orange": 14.9,
+      "Bouygues Telecom": 14.2,
+      "RED by SFR": 11.3,
+      "Sosh": 8.5,
+      "EDF": 7.8,
+      "Engie": 4.3,
+      "Mint Énergie": 4.3,
+      "TotalEnergies": 2.8
+    },
+    "Retail & e-commerce": {
+      "Darty": 16.2,
+      "Fnac": 15.2,
+      "Cdiscount": 15.2,
+      "Back Market": 12.4,
+      "E.Leclerc": 9.5,
+      "Leroy Merlin": 9.5,
+      "Carrefour": 5.7,
+      "Decathlon": 5.7,
+      "ManoMano": 5.7,
+      "La Redoute": 4.8
+    },
+    "Tech & services FR": {
+      "PayFit": 14.6,
+      "Doctolib": 12.2,
+      "BlaBlaCar": 12.2,
+      "Leboncoin": 12.2,
+      "Deezer": 12.2,
+      "OVHcloud": 12.2,
+      "Swile": 12.2,
+      "Yuka": 12.2,
+      "Sumeria": 0.0,
+      "Mistral AI": 0.0
+    }
+  },
+  "part_de_voix_par_secteur_plateforme": {
+    "Banque": {
+      "chatgpt": {
+        "BNP Paribas": 19.4,
+        "BoursoBank": 19.4,
+        "Hello bank!": 16.7,
+        "Crédit Agricole": 13.9,
+        "Fortuneo": 13.9,
+        "Crédit Mutuel": 8.3,
+        "Société Générale": 5.6,
+        "Qonto": 2.8,
+        "La Banque Postale": 0.0,
+        "CIC": 0.0
+      },
+      "lechat": {
+        "BoursoBank": 14.6,
+        "Fortuneo": 14.6,
+        "Hello bank!": 14.6,
+        "BNP Paribas": 12.2,
+        "Crédit Agricole": 9.8,
+        "Société Générale": 9.8,
+        "Crédit Mutuel": 9.8,
+        "CIC": 7.3,
+        "La Banque Postale": 4.9,
+        "Qonto": 2.4
+      },
+      "perplexity": {
+        "BoursoBank": 19.2,
+        "BNP Paribas": 15.4,
+        "Crédit Agricole": 15.4,
+        "Fortuneo": 15.4,
+        "Hello bank!": 11.5,
+        "Crédit Mutuel": 11.5,
+        "Société Générale": 7.7,
+        "Qonto": 3.8,
+        "La Banque Postale": 0.0,
+        "CIC": 0.0
+      },
+      "gemini": {
+        "BoursoBank": 17.0,
+        "BNP Paribas": 14.9,
+        "Fortuneo": 14.9,
+        "Crédit Agricole": 12.8,
+        "Crédit Mutuel": 12.8,
+        "Société Générale": 10.6,
+        "Hello bank!": 10.6,
+        "La Banque Postale": 2.1,
+        "CIC": 2.1,
+        "Qonto": 2.1
+      },
+      "claude": {
+        "BoursoBank": 19.5,
+        "Fortuneo": 17.1,
+        "BNP Paribas": 12.2,
+        "Société Générale": 12.2,
+        "Hello bank!": 12.2,
+        "Crédit Agricole": 9.8,
+        "Crédit Mutuel": 9.8,
+        "La Banque Postale": 4.9,
+        "Qonto": 2.4,
+        "CIC": 0.0
+      }
+    },
+    "Assurance": {
+      "chatgpt": {
+        "MAIF": 17.6,
+        "Direct Assurance": 17.6,
+        "AXA": 14.7,
+        "Matmut": 11.8,
+        "Groupama": 8.8,
+        "GMF": 8.8,
+        "MMA": 8.8,
+        "MACIF": 5.9,
+        "Alan": 2.9,
+        "Leocare": 2.9
+      },
+      "lechat": {
+        "Direct Assurance": 19.0,
+        "Leocare": 19.0,
+        "AXA": 14.3,
+        "MAIF": 9.5,
+        "GMF": 9.5,
+        "MMA": 9.5,
+        "MACIF": 4.8,
+        "Matmut": 4.8,
+        "Groupama": 4.8,
+        "Alan": 4.8
+      },
+      "perplexity": {
+        "MAIF": 18.2,
+        "Direct Assurance": 18.2,
+        "AXA": 13.6,
+        "Groupama": 13.6,
+        "MMA": 13.6,
+        "Matmut": 9.1,
+        "MACIF": 4.5,
+        "GMF": 4.5,
+        "Alan": 4.5,
+        "Leocare": 0.0
+      },
+      "gemini": {
+        "MAIF": 14.8,
+        "MACIF": 14.8,
+        "Matmut": 11.1,
+        "Groupama": 11.1,
+        "GMF": 11.1,
+        "Direct Assurance": 11.1,
+        "AXA": 7.4,
+        "Alan": 7.4,
+        "Leocare": 7.4,
+        "MMA": 3.7
+      },
+      "claude": {
+        "MAIF": 16.1,
+        "MMA": 16.1,
+        "AXA": 12.9,
+        "GMF": 12.9,
+        "Matmut": 9.7,
+        "Direct Assurance": 9.7,
+        "Leocare": 9.7,
+        "Groupama": 6.5,
+        "MACIF": 3.2,
+        "Alan": 3.2
+      }
+    },
+    "Telecom & énergie": {
+      "chatgpt": {
+        "Free": 15.2,
+        "SFR": 15.2,
+        "Orange": 12.1,
+        "Bouygues Telecom": 12.1,
+        "RED by SFR": 9.1,
+        "EDF": 9.1,
+        "Mint Énergie": 9.1,
+        "Sosh": 6.1,
+        "Engie": 6.1,
+        "TotalEnergies": 6.1
+      },
+      "lechat": {
+        "SFR": 20.0,
+        "Orange": 16.0,
+        "Free": 16.0,
+        "Bouygues Telecom": 16.0,
+        "RED by SFR": 12.0,
+        "EDF": 8.0,
+        "Sosh": 4.0,
+        "Engie": 4.0,
+        "Mint Énergie": 4.0,
+        "TotalEnergies": 0.0
+      },
+      "perplexity": {
+        "Orange": 16.7,
+        "Free": 16.7,
+        "Bouygues Telecom": 16.7,
+        "SFR": 13.3,
+        "RED by SFR": 13.3,
+        "Sosh": 10.0,
+        "EDF": 3.3,
+        "Engie": 3.3,
+        "TotalEnergies": 3.3,
+        "Mint Énergie": 3.3
+      },
+      "gemini": {
+        "Orange": 14.8,
+        "Free": 14.8,
+        "Bouygues Telecom": 14.8,
+        "Sosh": 14.8,
+        "SFR": 11.1,
+        "RED by SFR": 11.1,
+        "EDF": 11.1,
+        "Engie": 3.7,
+        "Mint Énergie": 3.7,
+        "TotalEnergies": 0.0
+      },
+      "claude": {
+        "Free": 19.2,
+        "SFR": 19.2,
+        "Orange": 15.4,
+        "Bouygues Telecom": 11.5,
+        "RED by SFR": 11.5,
+        "Sosh": 7.7,
+        "EDF": 7.7,
+        "Engie": 3.8,
+        "TotalEnergies": 3.8,
+        "Mint Énergie": 0.0
+      }
+    },
+    "Retail & e-commerce": {
+      "chatgpt": {
+        "Fnac": 17.6,
+        "Darty": 17.6,
+        "Leroy Merlin": 11.8,
+        "Cdiscount": 11.8,
+        "Back Market": 11.8,
+        "ManoMano": 11.8,
+        "E.Leclerc": 5.9,
+        "Decathlon": 5.9,
+        "La Redoute": 5.9,
+        "Carrefour": 0.0
+      },
+      "lechat": {
+        "Fnac": 22.2,
+        "Cdiscount": 16.7,
+        "E.Leclerc": 11.1,
+        "Darty": 11.1,
+        "Leroy Merlin": 11.1,
+        "Back Market": 11.1,
+        "Carrefour": 5.6,
+        "Decathlon": 5.6,
+        "ManoMano": 5.6,
+        "La Redoute": 0.0
+      },
+      "perplexity": {
+        "Darty": 16.7,
+        "Cdiscount": 16.7,
+        "E.Leclerc": 11.1,
+        "Fnac": 11.1,
+        "Leroy Merlin": 11.1,
+        "Back Market": 11.1,
+        "Carrefour": 5.6,
+        "Decathlon": 5.6,
+        "La Redoute": 5.6,
+        "ManoMano": 5.6
+      },
+      "gemini": {
+        "Darty": 20.0,
+        "Cdiscount": 15.0,
+        "Back Market": 15.0,
+        "E.Leclerc": 10.0,
+        "Fnac": 10.0,
+        "Decathlon": 10.0,
+        "Leroy Merlin": 10.0,
+        "Carrefour": 5.0,
+        "La Redoute": 5.0,
+        "ManoMano": 0.0
+      },
+      "claude": {
+        "Fnac": 15.6,
+        "Darty": 15.6,
+        "Cdiscount": 15.6,
+        "Back Market": 12.5,
+        "E.Leclerc": 9.4,
+        "Carrefour": 9.4,
+        "Leroy Merlin": 6.2,
+        "La Redoute": 6.2,
+        "ManoMano": 6.2,
+        "Decathlon": 3.1
+      }
+    },
+    "Tech & services FR": {
+      "chatgpt": {
+        "PayFit": 22.2,
+        "Doctolib": 11.1,
+        "BlaBlaCar": 11.1,
+        "Leboncoin": 11.1,
+        "Deezer": 11.1,
+        "OVHcloud": 11.1,
+        "Swile": 11.1,
+        "Yuka": 11.1,
+        "Sumeria": 0.0,
+        "Mistral AI": 0.0
+      },
+      "lechat": {
+        "Doctolib": 12.5,
+        "BlaBlaCar": 12.5,
+        "Leboncoin": 12.5,
+        "Deezer": 12.5,
+        "OVHcloud": 12.5,
+        "PayFit": 12.5,
+        "Swile": 12.5,
+        "Yuka": 12.5,
+        "Sumeria": 0.0,
+        "Mistral AI": 0.0
+      },
+      "perplexity": {
+        "Doctolib": 12.5,
+        "BlaBlaCar": 12.5,
+        "Leboncoin": 12.5,
+        "Deezer": 12.5,
+        "OVHcloud": 12.5,
+        "PayFit": 12.5,
+        "Swile": 12.5,
+        "Yuka": 12.5,
+        "Sumeria": 0.0,
+        "Mistral AI": 0.0
+      },
+      "gemini": {
+        "Doctolib": 12.5,
+        "BlaBlaCar": 12.5,
+        "Leboncoin": 12.5,
+        "Deezer": 12.5,
+        "OVHcloud": 12.5,
+        "PayFit": 12.5,
+        "Swile": 12.5,
+        "Yuka": 12.5,
+        "Sumeria": 0.0,
+        "Mistral AI": 0.0
+      },
+      "claude": {
+        "Doctolib": 12.5,
+        "BlaBlaCar": 12.5,
+        "Leboncoin": 12.5,
+        "Deezer": 12.5,
+        "OVHcloud": 12.5,
+        "PayFit": 12.5,
+        "Swile": 12.5,
+        "Yuka": 12.5,
+        "Sumeria": 0.0,
+        "Mistral AI": 0.0
+      }
+    }
+  },
+  "sentiment_par_marque": {
+    "BNP Paribas": {
+      "positive": 20,
+      "neutral": 8,
+      "negative": 0,
+      "dominant": "positive"
+    },
+    "Crédit Agricole": {
+      "positive": 13,
+      "neutral": 10,
+      "negative": 0,
+      "dominant": "positive"
+    },
+    "Société Générale": {
+      "positive": 8,
+      "neutral": 10,
+      "negative": 0,
+      "dominant": "neutral"
+    },
+    "BoursoBank": {
+      "positive": 28,
+      "neutral": 6,
+      "negative": 0,
+      "dominant": "positive"
+    },
+    "Fortuneo": {
+      "positive": 27,
+      "neutral": 2,
+      "negative": 0,
+      "dominant": "positive"
+    },
+    "Hello bank!": {
+      "positive": 15,
+      "neutral": 10,
+      "negative": 0,
+      "dominant": "positive"
+    },
+    "La Banque Postale": {
+      "positive": 2,
+      "neutral": 3,
+      "negative": 0,
+      "dominant": "neutral"
+    },
+    "Crédit Mutuel": {
+      "positive": 14,
+      "neutral": 6,
+      "negative": 0,
+      "dominant": "positive"
+    },
+    "CIC": {
+      "positive": 1,
+      "neutral": 3,
+      "negative": 0,
+      "dominant": "neutral"
+    },
+    "Qonto": {
+      "positive": 5,
+      "neutral": 0,
+      "negative": 0,
+      "dominant": "positive"
+    },
+    "AXA": {
+      "positive": 14,
+      "neutral": 3,
+      "negative": 0,
+      "dominant": "positive"
+    },
+    "MAIF": {
+      "positive": 17,
+      "neutral": 4,
+      "negative": 0,
+      "dominant": "positive"
+    },
+    "MACIF": {
+      "positive": 5,
+      "neutral": 4,
+      "negative": 0,
+      "dominant": "positive"
+    },
+    "Matmut": {
+      "positive": 10,
+      "neutral": 3,
+      "negative": 0,
+      "dominant": "positive"
+    },
+    "Groupama": {
+      "positive": 9,
+      "neutral": 3,
+      "negative": 0,
+      "dominant": "positive"
+    },
+    "GMF": {
+      "positive": 11,
+      "neutral": 2,
+      "negative": 0,
+      "dominant": "positive"
+    },
+    "MMA": {
+      "positive": 10,
+      "neutral": 4,
+      "negative": 0,
+      "dominant": "positive"
+    },
+    "Direct Assurance": {
+      "positive": 14,
+      "neutral": 6,
+      "negative": 0,
+      "dominant": "positive"
+    },
+    "Alan": {
+      "positive": 2,
+      "neutral": 4,
+      "negative": 0,
+      "dominant": "neutral"
+    },
+    "Leocare": {
+      "positive": 8,
+      "neutral": 2,
+      "negative": 0,
+      "dominant": "positive"
+    },
+    "Orange": {
+      "positive": 19,
+      "neutral": 2,
+      "negative": 0,
+      "dominant": "positive"
+    },
+    "Free": {
+      "positive": 21,
+      "neutral": 2,
+      "negative": 0,
+      "dominant": "positive"
+    },
+    "SFR": {
+      "positive": 22,
+      "neutral": 0,
+      "negative": 0,
+      "dominant": "positive"
+    },
+    "Bouygues Telecom": {
+      "positive": 18,
+      "neutral": 2,
+      "negative": 0,
+      "dominant": "positive"
+    },
+    "Sosh": {
+      "positive": 8,
+      "neutral": 4,
+      "negative": 0,
+      "dominant": "positive"
+    },
+    "RED by SFR": {
+      "positive": 14,
+      "neutral": 2,
+      "negative": 0,
+      "dominant": "positive"
+    },
+    "EDF": {
+      "positive": 5,
+      "neutral": 6,
+      "negative": 0,
+      "dominant": "neutral"
+    },
+    "Engie": {
+      "positive": 3,
+      "neutral": 3,
+      "negative": 0,
+      "dominant": "positive"
+    },
+    "TotalEnergies": {
+      "positive": 2,
+      "neutral": 2,
+      "negative": 0,
+      "dominant": "neutral"
+    },
+    "Mint Énergie": {
+      "positive": 4,
+      "neutral": 2,
+      "negative": 0,
+      "dominant": "positive"
+    },
+    "E.Leclerc": {
+      "positive": 5,
+      "neutral": 5,
+      "negative": 0,
+      "dominant": "positive"
+    },
+    "Carrefour": {
+      "positive": 1,
+      "neutral": 5,
+      "negative": 0,
+      "dominant": "neutral"
+    },
+    "Fnac": {
+      "positive": 13,
+      "neutral": 3,
+      "negative": 0,
+      "dominant": "positive"
+    },
+    "Darty": {
+      "positive": 13,
+      "neutral": 4,
+      "negative": 0,
+      "dominant": "positive"
+    },
+    "Decathlon": {
+      "positive": 5,
+      "neutral": 1,
+      "negative": 0,
+      "dominant": "positive"
+    },
+    "Leroy Merlin": {
+      "positive": 10,
+      "neutral": 0,
+      "negative": 0,
+      "dominant": "positive"
+    },
+    "Cdiscount": {
+      "positive": 12,
+      "neutral": 4,
+      "negative": 0,
+      "dominant": "positive"
+    },
+    "La Redoute": {
+      "positive": 3,
+      "neutral": 2,
+      "negative": 0,
+      "dominant": "positive"
+    },
+    "Back Market": {
+      "positive": 12,
+      "neutral": 1,
+      "negative": 0,
+      "dominant": "positive"
+    },
+    "ManoMano": {
+      "positive": 4,
+      "neutral": 2,
+      "negative": 0,
+      "dominant": "positive"
+    },
+    "Doctolib": {
+      "positive": 4,
+      "neutral": 1,
+      "negative": 0,
+      "dominant": "positive"
+    },
+    "BlaBlaCar": {
+      "positive": 5,
+      "neutral": 0,
+      "negative": 0,
+      "dominant": "positive"
+    },
+    "Leboncoin": {
+      "positive": 5,
+      "neutral": 0,
+      "negative": 0,
+      "dominant": "positive"
+    },
+    "Deezer": {
+      "positive": 4,
+      "neutral": 1,
+      "negative": 0,
+      "dominant": "positive"
+    },
+    "OVHcloud": {
+      "positive": 5,
+      "neutral": 0,
+      "negative": 0,
+      "dominant": "positive"
+    },
+    "PayFit": {
+      "positive": 6,
+      "neutral": 0,
+      "negative": 0,
+      "dominant": "positive"
+    },
+    "Swile": {
+      "positive": 5,
+      "neutral": 0,
+      "negative": 0,
+      "dominant": "positive"
+    },
+    "Yuka": {
+      "positive": 4,
+      "neutral": 1,
+      "negative": 0,
+      "dominant": "positive"
+    },
+    "Sumeria": {
+      "positive": 0,
+      "neutral": 0,
+      "negative": 0,
+      "dominant": "absent"
+    },
+    "Mistral AI": {
+      "positive": 0,
+      "neutral": 0,
+      "negative": 0,
+      "dominant": "absent"
+    }
+  },
+  "top20_sources": [
+    {
+      "domaine": "comparabanques.fr",
+      "citations": 36,
+      "type": "comparateur"
+    },
+    {
+      "domaine": "selectra.info",
+      "citations": 22,
+      "type": "comparateur"
+    },
+    {
+      "domaine": "lelynx.fr",
+      "citations": 16,
+      "type": "comparateur"
+    },
+    {
+      "domaine": "meilleurtaux.com",
+      "citations": 11,
+      "type": "comparateur"
+    },
+    {
+      "domaine": "resilier.com",
+      "citations": 11,
+      "type": "comparateur"
+    },
+    {
+      "domaine": "fournisseurs-electricite.com",
+      "citations": 11,
+      "type": "comparateur"
+    },
+    {
+      "domaine": "moneyvox.fr",
+      "citations": 10,
+      "type": "comparateur"
+    },
+    {
+      "domaine": "monde.fr",
+      "citations": 9,
+      "type": "presse"
+    },
+    {
+      "domaine": "lesfurets.com",
+      "citations": 9,
+      "type": "comparateur"
+    },
+    {
+      "domaine": "pricebank.fr",
+      "citations": 8,
+      "type": "comparateur"
+    },
+    {
+      "domaine": "assursante.fr",
+      "citations": 8,
+      "type": "comparateur"
+    },
+    {
+      "domaine": "echosdunet.net",
+      "citations": 8,
+      "type": "comparateur"
+    },
+    {
+      "domaine": "les10meilleurs.net",
+      "citations": 8,
+      "type": "comparateur"
+    },
+    {
+      "domaine": "frandroid.com",
+      "citations": 7,
+      "type": "presse"
+    },
+    {
+      "domaine": "kelwatt.fr",
+      "citations": 7,
+      "type": "comparateur"
+    },
+    {
+      "domaine": "companeo.com",
+      "citations": 7,
+      "type": "autre"
+    },
+    {
+      "domaine": "moncomparateur.com",
+      "citations": 6,
+      "type": "comparateur"
+    },
+    {
+      "domaine": "lecomparateurassurance.com",
+      "citations": 6,
+      "type": "comparateur"
+    },
+    {
+      "domaine": "avis-assurances.com",
+      "citations": 6,
+      "type": "autre"
+    },
+    {
+      "domaine": "magnolia.fr",
+      "citations": 6,
+      "type": "comparateur"
+    }
+  ],
+  "sources_type_repartition": {
+    "presse": 44,
+    "comparateur": 233,
+    "autre": 429,
+    "site de marque": 12,
+    "UGC": 4
+  },
+  "moyennes_plateforme": {
+    "chatgpt": 20.0,
+    "lechat": 18.16,
+    "perplexity": 16.66,
+    "gemini": 16.62,
+    "claude": 24.0
+  }
+}
