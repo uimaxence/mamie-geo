@@ -7,6 +7,13 @@ import { BotsSlide as GeminiBotsSlide } from "@/components/admin/visuals/etre-ci
 import { RobotsSlide as GeminiRobotsSlide } from "@/components/admin/visuals/etre-cite-par-gemini/robots-slide";
 import { ExtractionSlide as GeminiExtractionSlide } from "@/components/admin/visuals/etre-cite-par-gemini/extraction-slide";
 import { CtaSlide as GeminiCtaSlide } from "@/components/admin/visuals/etre-cite-par-gemini/cta-slide";
+import { CoverSlide as EtudeCoverSlide } from "@/components/admin/visuals/etude-50-marques/cover-slide";
+import { InvisiblesSlide as EtudeInvisiblesSlide } from "@/components/admin/visuals/etude-50-marques/invisibles-slide";
+import { SentimentSlide as EtudeSentimentSlide } from "@/components/admin/visuals/etude-50-marques/sentiment-slide";
+import { SourcesSlide as EtudeSourcesSlide } from "@/components/admin/visuals/etude-50-marques/sources-slide";
+import { VarianceSlide as EtudeVarianceSlide } from "@/components/admin/visuals/etude-50-marques/variance-slide";
+import { CtaSlide as EtudeCtaSlide } from "@/components/admin/visuals/etude-50-marques/cta-slide";
+import { ArticleCover as EtudeArticleCover } from "@/components/admin/visuals/etude-50-marques/article-cover";
 
 // Registry des visuels marketing (LinkedIn carousels, OG images, blog
 // covers). Source de vérité pour /app/admin/visuals.
@@ -46,6 +53,7 @@ export interface VisualMeta {
 export const FORMATS = {
   linkedinPortrait: { width: 1080, height: 1350, label: "LinkedIn portrait" },
   linkedinSquare: { width: 1080, height: 1080, label: "LinkedIn carré" },
+  linkedinArticleCover: { width: 1920, height: 1080, label: "LinkedIn article cover 16:9" },
   ogImage: { width: 1200, height: 630, label: "Open Graph 1.91:1" },
 } as const satisfies Record<string, VisualFormat>;
 
@@ -77,6 +85,29 @@ export const VISUALS: VisualMeta[] = [
       { key: "extraction", label: "3 réflexes d'extraction", Component: GeminiExtractionSlide },
       { key: "cta", label: "CTA guide complet", Component: GeminiCtaSlide },
     ],
+  },
+  {
+    slug: "etude-50-marques",
+    title: "Étude 50 marques × 5 IA — Carousel 6 slides",
+    description:
+      "Carousel LinkedIn d'amplification du post de lancement de l'étude (2026-06-11), DA Mamie v2 (fond blanc) : cover hook (50 marques × 5 IA, 613 citations) + 3 résultats (géants invisibles, 0 % de sentiment négatif, 2,3 % de sources site de marque) + bonus variance inter-LLM (SocGen 6 vs 53) + CTA article blog (terracotta).",
+    format: FORMATS.linkedinPortrait,
+    slides: [
+      { key: "cover", label: "Cover hook (50 × 5)", Component: EtudeCoverSlide },
+      { key: "invisibles", label: "Résultat 1 — géants invisibles", Component: EtudeInvisiblesSlide },
+      { key: "sentiment", label: "Résultat 2 — 0 % négatif", Component: EtudeSentimentSlide },
+      { key: "sources", label: "Résultat 3 — 2,3 % site de marque", Component: EtudeSourcesSlide },
+      { key: "variance", label: "Bonus — variance inter-LLM", Component: EtudeVarianceSlide },
+      { key: "cta", label: "CTA étude complète", Component: EtudeCtaSlide },
+    ],
+  },
+  {
+    slug: "etude-50-marques-article-cover",
+    title: "Étude 50 marques — Cover article LinkedIn",
+    description:
+      "Image de couverture 1920×1080 (16:9) pour l'article LinkedIn long format de l'étude (texte : geo-project/linkedin-article-etude-50-marques.md). DA Mamie v2 : fond blanc, surligneur miel sur « 5 IA », pills de stats bleu brand.",
+    format: FORMATS.linkedinArticleCover,
+    slides: [{ key: "cover", label: "Cover article 16:9", Component: EtudeArticleCover }],
   },
 ];
 

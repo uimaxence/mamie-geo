@@ -48,7 +48,18 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false, noarchive: true, nosnippet: true },
 };
 
-const ADMIN_EMAILS = new Set(["maxencecailleau.pro@gmail.com"]);
+// Founder toujours admin ; emails supplémentaires (dev local, autres
+// admins) via env `ADMIN_EMAILS` (séparés par virgules). Permet
+// d'autoriser un compte seedé local (hello@/demo@mamie-geo.fr) sans
+// modifier le code.
+const ADMIN_EMAILS = new Set(
+  [
+    "maxencecailleau.pro@gmail.com",
+    ...(process.env.ADMIN_EMAILS?.split(",") ?? []),
+  ]
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean),
+);
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await auth.api.getSession({ headers: await headers() });

@@ -9,8 +9,10 @@
 
 export const COLORS = {
   // Neutres (fonds & texte)
-  cream: "#FBF4E9", // fond par défaut, le plus fréquent
+  white: "#FFFFFF", // fond PAR DÉFAUT depuis la v2 (2026-06-05 soir)
+  cream: "#FBF4E9", // fond alternatif occasionnel (1-2 slides max par carrousel en v2)
   sand: "#F0E3CF", // fond alternatif / cartes secondaires
+  grayLine: "#F5F0E8", // séparateurs/bordures discrets sur fond blanc
   ink: "#2E2620", // texte principal (brun très foncé, jamais noir pur)
   inkSoft: "#5A4A3C", // texte secondaire
 
@@ -48,10 +50,11 @@ export const FONTS = {
   caveat: "var(--font-caveat), 'Brush Script MT', cursive",
 } as const;
 
-// 5 fonds principaux combinables pour rythmer le carrousel (alterner
-// crème → sable → terracotta → crème → sauge). Le rose et le pervenche
+// Fonds combinables pour rythmer le carrousel. Depuis la v2 :
+// BLANC par défaut, crème/sable occasionnels (1-2 max par carrousel),
+// terracotta réservé à la slide CTA finale. Le rose et le pervenche
 // sont des ACCENTS uniquement, jamais des fonds pleins de slide.
-export type SlideBackground = "cream" | "sand" | "terracotta" | "honey" | "sage";
+export type SlideBackground = "white" | "cream" | "sand" | "terracotta" | "honey" | "sage";
 
 interface BackgroundTheme {
   bg: string;
@@ -65,6 +68,13 @@ interface BackgroundTheme {
 }
 
 export const BACKGROUND_THEMES: Record<SlideBackground, BackgroundTheme> = {
+  white: {
+    bg: COLORS.white,
+    text: COLORS.ink,
+    textSoft: COLORS.inkSoft,
+    brandTint: COLORS.brandBlue,
+    dark: false,
+  },
   cream: {
     bg: COLORS.cream,
     text: COLORS.ink,
