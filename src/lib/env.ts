@@ -70,6 +70,13 @@ const schema = z.object({
   CRON_SECRET: z.string().min(16),
   ADMIN_ALERT_EMAIL: z.string().email(),
 
+  // Brave Search API — alimente /outils/comparateurs (découverte des
+  // comparateurs du secteur + check de présence `site:`), cf. doc 09 §
+  // 2026-06-12. Optionnelle : sans clé, l'outil répond « indisponible »
+  // gracieusement. 5 $ de crédits offerts/mois (≈ 1 000 req ≈ 100 scans),
+  // puis 5 $/1 000 req, carte requise. Clé : https://brave.com/search/api/.
+  BRAVE_SEARCH_API_KEY: z.string().min(1).optional(),
+
   // Google PageSpeed Insights API — clé optionnelle. Sans clé, l'API
   // est limitée à 25K req/jour partagés par IP, ce qui suffit pour V0.
   // Avec clé gratuite, illimité. cf. /outils/audit-technique.

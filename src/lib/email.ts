@@ -581,3 +581,32 @@ PS : si tu veux aller plus vite, tu peux créer un compte directement (garantie 
     throw new Error(`Envoi demande d'audit échoué : ${message}`);
   }
 }
+
+/**
+ * Notification interne (hello@) quand un lead utilise le scan
+ * comparateurs (/outils/comparateurs). Pas d'auto-reply prospect : le
+ * résultat est affiché à l'écran immédiatement, l'email n'apporterait
+ * rien. Plain text, lu en interne uniquement.
+ */
+export async function sendComparatorLeadEmail(params: {
+  prospectEmail: string;
+  brandName: string;
+  sector: string;
+  presentCount: number;
+  totalChecked: number;
+}) {
+  const { prospectEmail, brandName, sector, presentCount, totalChecked } = params;
+  await sendTransactional({
+    to: "hello@mamie-geo.fr",
+    replyTo: prospectEmail,
+    subject: `[Scan comparateurs] ${brandName} (${sector}) — ${presentCount}/${totalChecked}`,
+    text: `Lead depuis /outils/comparateurs
+
+Prospect  : ${prospectEmail}
+Marque    : ${brandName}
+Secteur   : ${sector}
+Résultat  : présent sur ${presentCount}/${totalChecked} comparateurs
+
+Relance possible : proposer le suivi quotidien 5 IA (trial 14 j).`,
+  });
+}

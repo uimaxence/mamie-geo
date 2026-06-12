@@ -264,7 +264,7 @@ la doc devient un cimetière.
 
 ---
 
-## 9. État du projet (snapshot — 2026-06-11)
+## 9. État du projet (snapshot — 2026-06-12)
 
 > Ce snapshot décrit l'état **courant** uniquement. L'historique détaillé
 > de chaque évolution (le « comment on en est arrivé là ») vit dans
@@ -316,9 +316,12 @@ plan dans `src/lib/plans/quotas.ts`) :
 `<PageContainer>` sur 100 % des pages, tables responsive
 (`hidden md:table-cell`), AppTopBar horizontale + BrandSwitcher.
 
-**Marketing/blog** : home, pricing, 4 pages légales, 2 lead magnets
+**Marketing/blog** : home, pricing, 4 pages légales, 3 lead magnets
 (`/outils/test-visibilite-ia` capture Brevo ; `/outils/audit-technique`
-30+ checks SEO/GEO + PSI, 0 € LLM, promu en home). Blog MDX
+30+ checks SEO/GEO + PSI, 0 € LLM, promu en home ;
+`/outils/comparateurs` scan présence comparateurs via Brave Search API,
+0 LLM, 2026-06-12 — `BRAVE_SEARCH_API_KEY` requise) + hub `/outils`
+linké en nav « Outils gratuits » (pastille « Nouveau »). Blog MDX
 content-driven (`src/content/blog/*.mdx`, FAQPage JSON-LD, OG dynamique,
 related, TOC, sitemap auto) : 3 articles de fond + 3 comparatifs (Peec,
 Otterly, Rankscale). Newsletter Brevo prête (`BREVO_BLOG_LIST_ID`
@@ -364,6 +367,10 @@ publics. DB Neon : 18 tables + migrations 0001-0004.
    (95,90 / 470 / 1 430 € HT/an).
 4. **Hard launch public** : communication LinkedIn + communautés FR
    (DNS Brevo + Stripe LIVE déjà OK).
+4bis. **Clé Brave Search** (`BRAVE_SEARCH_API_KEY`, brave.com/search/api,
+   5 $ de crédits offerts/mois ≈ 100 scans, carte requise) en prod →
+   active `/outils/comparateurs` sans redeploy. À faire AVANT le post
+   LinkedIn qui promeut le tool.
 5. **Drip d'éducation post-signup**.
 6. **Gamification suite** (doc 02 § Gamification) : rang dans le weekly
    email, badges de statut N°1/Top 3 (dashboard + BrandSwitcher),

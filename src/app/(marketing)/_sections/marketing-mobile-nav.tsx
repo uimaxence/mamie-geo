@@ -10,9 +10,12 @@ import { Logo } from "@/components/marketing/logo";
 // sur mobile via `hidden sm:flex` ; ce composant prend le relais et
 // affiche les liens + CTAs auth dans une Sheet slide-in.
 
-const NAV_LINKS = [
+const NAV_LINKS: { href: string; label: string; isNew?: boolean }[] = [
   { href: "/#how-it-works", label: "Fonctionnalités" },
   { href: "/demo", label: "Démo" },
+  // Pastille à retirer quelques semaines après le lancement du scan
+  // comparateurs (2026-06-12), comme côté desktop.
+  { href: "/outils", label: "Outils gratuits", isNew: true },
   { href: "/pricing", label: "Tarif" },
   { href: "/blog", label: "Blog" },
   { href: "/#faq", label: "FAQ" },
@@ -47,9 +50,14 @@ export function MarketingMobileNav({ isLoggedIn = false }: { isLoggedIn?: boolea
                 key={link.href}
                 href={link.href}
                 onClick={close}
-                className="rounded-[var(--radius-md)] px-3 py-2.5 text-[15px] font-medium text-[color:var(--color-ink-soft)] transition hover:bg-[color:var(--color-gray-50)] hover:text-[color:var(--color-ink)]"
+                className="flex items-center gap-2 rounded-[var(--radius-md)] px-3 py-2.5 text-[15px] font-medium text-[color:var(--color-ink-soft)] transition hover:bg-[color:var(--color-gray-50)] hover:text-[color:var(--color-ink)]"
               >
                 {link.label}
+                {link.isNew && (
+                  <span className="rounded-[var(--radius-pill)] bg-[color:var(--color-accent)] px-1.5 py-0.5 text-[10px] font-semibold leading-none text-white">
+                    Nouveau
+                  </span>
+                )}
               </Link>
             ))}
           </nav>

@@ -53,6 +53,17 @@ export async function MarketingHeader() {
               Démo
             </Link>
             <Link
+              href="/outils"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]"
+            >
+              Outils gratuits
+              {/* Pastille à retirer quelques semaines après le lancement
+               * du scan comparateurs (2026-06-12). */}
+              <span className="rounded-[var(--radius-pill)] bg-[color:var(--color-accent)] px-1.5 py-0.5 text-[10px] font-semibold leading-none text-white">
+                Nouveau
+              </span>
+            </Link>
+            <Link
               href="/pricing"
               className="text-sm font-medium text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)]"
             >

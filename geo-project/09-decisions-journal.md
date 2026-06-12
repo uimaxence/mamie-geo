@@ -161,6 +161,23 @@ haut et l'entrée "2026-05-05 — Réponses aux 10 questions de bootstrap".
 
 ### Décisions enregistrées
 
+#### 2026-06-12 — Lead magnet « Scan comparateurs » (/outils/comparateurs) + Brave Search API + nav « Outils gratuits »
+
+**Contexte** : priorité acquisition avant hard launch (demande Max : « il faut mettre le paquet sur l'acquisition »). L'enseignement n°1 de l'étude 50 marques (doc 11) — 32 % des sources citées par les IA sont des comparateurs, 1,7 % le site des marques — se prête à un free tool actionnable : « es-tu présent sur les sites que les IA citent ? ». Post LinkedIn de lancement prévu le jour même (article étude + tool). Cible PME/petites agences/freelances → secteur en champ libre, pas de jargon.
+
+**Options considérées** :
+- A : vérification de présence par LLM + web search natif (OpenAI/Gemini) — ~0,04 $/scan, non déterministe.
+- B : checklist statique sans vérification live — pas de « aha moment », c'est un article déguisé.
+- C : API de recherche web classique (Brave Search vs Serper.dev) — découverte des comparateurs via les SERP réelles + check `site:{domaine} "{marque}"` déterministe.
+
+**Choix** : C avec **Brave Search API** (REST pur, zéro dépendance npm, env `BRAVE_SEARCH_API_KEY`). ⚠️ Brave vs Serper tranché par Claude faute de mieux : 5 $ de crédits offerts/mois (≈ 1 000 req ≈ 100 scans gratuits, vérifié sur le pricing officiel 2026-06-12 — l'ancien free tier 2 000 req/mois a été supprimé en février 2026), puis 5 $/1 000 req, carte requise ; vs Serper 50 $ d'entrée. Si la qualité des résultats FR déçoit, le client est derrière une interface `SearchFn` injectable — swap en 1 fichier (`src/lib/comparators/brave.ts`).
+
+**Justification** : 0 LLM (déterministe, montrable « vraies recherches web »), ~10 req/scan ≈ 0,05 $ payant worst case, rate limit 50 req/s → scan parallélisé en ~5-10 s, et la découverte par SERP « meilleur {secteur} » est exactement le proxy des sources que les IA lisent (validé doc 11). Curaté étude (≈13 secteurs) fusionné avec la découverte live pour couvrir la longue traîne PME.
+
+**Conséquences attendues** : 3ᵉ lead magnet livré (cf. doc 06 § n°1ter pour le détail produit), hub `/outils` + onglet nav « Outils gratuits » avec pastille « Nouveau », notification lead interne par scan, events PostHog. Anti-abus : email gate, honeypot, 5 scans/h/IP, cap 150/jour, cache 24 h marque×secteur — caps in-memory (best effort par lambda), le vrai plafond de coût est le plan Brave.
+
+**À revisiter** : retirer la pastille « Nouveau » ~4 semaines après le lancement ; surveiller la conso Brave au-delà des 5 $ de crédits mensuels (≈ 100 scans) ; typologie des sources dans le SaaS (V1, doc 11) pour faire du tool un teaser de la feature payante ; rate-limit Upstash si les caps in-memory se montrent trop poreux.
+
 #### 2026-06-11 — Ranking étape 4 (scoring systématique) + gamification par le rang
 
 **Contexte** : le pre-screening regex skippait le scoring Haiku quand aucune cible trackée n'était détectée (cas mamie-vege : 60/61 runs skippés) → les marques recommandées « à ta place » étaient perdues, exactement le signal que l'étude 50 marques (doc 11) identifie comme n°1 (l'omission, pas le dénigrement). Max a demandé de pousser ranking + comparaison + gamification.

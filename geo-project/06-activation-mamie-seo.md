@@ -138,6 +138,38 @@ Cibles V1 : porter `vs Profound` en landing dédiée si traction ; `vs Goodie` (
 
 **Section « Crawlabilité bots IA »** (décidée 2026-05-17, **livrée 2026-06-08**) : parse `/robots.txt` × table de bots IA (`src/lib/audit/ai-bots.ts` : GPTBot, ClaudeBot, Claude-Web, PerplexityBot, Google-Extended, Bytespider, CCBot, Amazonbot, meta-externalagent…) → autorisé/bloqué/non spécifié + reco contextuelle. Pas de slug séparé `/crawlability` (dilution d'autorité refusée). Attendu : +30-50 % partage social.
 
+### Lead magnet n°1ter — « Scan comparateurs » — **livré 2026-06-12**
+
+`/outils/comparateurs` (route `(marketing)`, moteur `src/lib/comparators/`).
+Décision et choix Brave Search API : doc 09 § 2026-06-12.
+
+Né de l'enseignement n°1 de l'étude 50 marques (doc 11) : 32 % des
+sources citées par les IA sont des comparateurs, 1,7 % le site des
+marques. Cible PME / petites agences / freelances.
+
+- **UX** : marque + secteur (champ libre) + site optionnel + email
+  (gate) + honeypot → scan live ~10-20 s → verdict présent/absent par
+  comparateur avec lien de la page trouvée, plan d'action en 3 étapes
+  pour les absences, chiffres étude, CTA trial + lien article étude.
+- **Moteur (0 LLM, déterministe)** : 2 temps via Brave Search API —
+  (1) découverte : recherches « meilleur {secteur} » / « {secteur}
+  comparatif avis » (les pages qui rankent = celles que les IA lisent),
+  fusionnées avec un mapping curaté de ~13 secteurs issu de l'étude ;
+  (2) présence : `site:{domaine} "{marque}"` par comparateur (max 8).
+  Appels parallélisés (rate limit Brave 50 req/s, retry unique sur 429),
+  scan complet en ~5-10 s.
+- **Coût** : ~10 requêtes/scan. 5 $ de crédits Brave offerts/mois
+  (≈ 1 000 req ≈ 100 scans gratuits), puis 5 $/1 000 req
+  (≈ 0,05 $/scan, carte requise). Cap in-memory 150 scans/jour +
+  5/h/IP + cache résultat 24 h par marque×secteur.
+- **Lead** : notification interne hello@ par scan + events PostHog
+  (`tool_lead_form_submitted`, `public_comparator_scan_completed`).
+- **Activation** : `BRAVE_SEARCH_API_KEY` en prod (sans clé → message
+  « temporairement indisponible », pas de crash).
+
+Au même moment : nav marketing « Outils gratuits » (pastille « Nouveau »,
+desktop + burger) → hub `/outils` listant les 3 outils.
+
 ### Lead magnet n°1bis — « Scan express visibilité IA » (proposition 2026-06-11, à trancher)
 
 Version **instantanée et automatique** du test n°1, complémentaire (le
@@ -204,7 +236,8 @@ mamie-geo.fr
 ├── /about
 ├── /blog/                           # 17 articles (dont 4 comparatifs vs Profound/Peec/Otterly/Rankscale)
 ├── /comparatifs/                    # V1 — landings dédiées si traction (V0+ = slugs /blog/)
-├── /outils/
+├── /outils/                         # hub outils gratuits (nav « Outils gratuits »)
+│   ├── /comparateurs                # lead magnet n°1ter — scan comparateurs (2026-06-12)
 │   ├── /test-visibilite-ia          # lead magnet n°1
 │   └── /audit-technique             # lead magnet n°2
 ├── /etudes/                         # études exclusives (à venir)
