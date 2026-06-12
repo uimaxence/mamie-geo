@@ -121,13 +121,31 @@ Cibles V1 : porter `vs Profound` en landing dédiée si traction ; `vs Goodie` (
 
 ## Lead magnets (outils gratuits)
 
-### Lead magnet n°1 — « Test ma visibilité IA »
+### Lead magnet n°1 — « Test ma visibilité IA » (funnel refondu 2026-06-12)
 
-`/outils/test-visibilite-ia` (livré, route `(marketing)`).
+`/outils/test-visibilite-ia` (route `(marketing)`, moteur `src/lib/express-scan/`).
+Décision : doc 09 § 2026-06-12 (refonte funnel). Le n°1bis « scan
+express » est **tranché et fusionné ici** : le scan live est devenu le
+funnel principal, l'audit manuel 24 h est l'upsell post-scan.
 
-- UX : marque + domaine + 5 prompts (suggestion Haiku optionnelle) → audit généré manuellement sous 24 h ouvrées (rapport email) → CTA `/pricing` (trial 14 j carte requise depuis 2026-06-08 + garantie remboursement 14 j).
-- Coût : ~10 min humain + ~$0,20 LLM (5 prompts × 1 LLM). Limite 1/marque.
-- Cible : 30-50 audits/mois (manuel scalable à 100), conversion 10-20 % → 5-10 clients payants/mois.
+- **UX** : marque + secteur + site optionnel + email (gate) + honeypot
+  → 3 prompts templates posés **en live à Le Chat (mistral-small)** →
+  verdict immédiat par question (cité/absent, position, marques que
+  l'IA recommande à la place) → bloc « les 4 autres IA » **verrouillé**
+  (pas de fausses données floutées — argument variance ×8 de l'étude)
+  → CTA trial. Puis upsell « analyse humaine complète » : 1 champ
+  (site) → `submitAuditRequest` (audit manuel 24 h, inchangé côté ops).
+- **Verdict cité/absent** : regex `detectMentions` (la même que le
+  tracking) OU jugement de l'appel d'extraction Mistral — attrape les
+  variantes de nom (« BoursoBank » vs « Boursorama Banque », faux
+  négatif constaté au premier test réel).
+- **Coût** : 3 réponses mistral-small + 1 extraction ≈ 0,002 €/scan.
+  Cap 50 scans/jour + 5/h/IP + cache 24 h marque×secteur (in-memory).
+- **Lead** : notification interne hello@ + events PostHog
+  (`public_express_scan_completed`, `tool_lead_form_submitted` modes
+  `express` / `manual-followup`).
+- Cible inchangée : conversion vers trial en premier, audit manuel
+  (10-20 % de conversion) en filet.
 
 ### Lead magnet n°2 — « Audit technique site » (sans LLM)
 
@@ -178,7 +196,12 @@ marques. Cible PME / petites agences / freelances.
 Au même moment : nav marketing « Outils gratuits » (pastille « Nouveau »,
 desktop + burger) → hub `/outils` listant les 3 outils.
 
-### Lead magnet n°1bis — « Scan express visibilité IA » (proposition 2026-06-11, à trancher)
+### Lead magnet n°1bis — « Scan express visibilité IA » — ✅ tranché 2026-06-12, fusionné dans le n°1
+
+> Spec historique conservée ci-dessous pour référence. Implémentation
+> livrée 2026-06-12 directement dans `/outils/test-visibilite-ia` (cf.
+> n°1) avec deux deltas : bloc « 4 IA verrouillées » (au lieu d'un
+> simple CTA) et jugement LLM des variantes de nom en plus de la regex.
 
 Version **instantanée et automatique** du test n°1, complémentaire (le
 n°1 reste l'audit complet 5 LLMs sous 24 h ; le scan express donne la

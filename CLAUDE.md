@@ -320,8 +320,11 @@ plan dans `src/lib/plans/quotas.ts`) :
 (`hidden md:table-cell`), AppTopBar horizontale + BrandSwitcher.
 
 **Marketing/blog** : home, pricing, 4 pages légales, 3 lead magnets
-(`/outils/test-visibilite-ia` capture Brevo ; `/outils/audit-technique`
-30+ checks SEO/GEO + PSI, 0 € LLM, promu en home ;
+(`/outils/test-visibilite-ia` scan express live 2026-06-12 : 3 prompts
+× Le Chat mistral-small ~0,002 €/scan, verdict regex OU jugement LLM
+des variantes de nom, 4 autres IA verrouillées → CTA trial, audit
+manuel 24 h en upsell post-scan ; `/outils/audit-technique` 30+ checks
+SEO/GEO + PSI, 0 € LLM, promu en home ;
 `/outils/comparateurs` scan présence comparateurs 2026-06-12 :
 vérification Brave Search API — `BRAVE_SEARCH_API_KEY` requise —,
 enrichissement Mistral Small ~0,0001 $/scan, scans persistés dans
@@ -381,11 +384,11 @@ publics. DB Neon : 19 tables + migrations 0000-0006.
    email, badges de statut N°1/Top 3 (dashboard + BrandSwitcher),
    événements de rang (V1). Surveiller le coût scoring systématique
    (`usage_counters.llmCostUsd`) après 2 semaines de prod.
-7. **« Scan express visibilité IA »** (lead magnet n°1bis, doc 06) à
-   trancher : scan instantané 1 LLM via API Mistral free tier, email
-   gate, cap 50/jour.
-8. **Contenu étude 50 marques** : pipeline dérivé doc 11 § 3.4 (3 posts
+7. **Contenu étude 50 marques** : pipeline dérivé doc 11 § 3.4 (3 posts
    LinkedIn restants, 2 articles, 1 carrousel DA Mamie).
+8. **Suivi conversion lead magnets** (~4 semaines post-lancement) :
+   express vs ex-funnel manuel, scans comparateurs → trial (PostHog) ;
+   retirer la pastille « Nouveau » de la nav.
 
 ### Décisions verrouillées (rappel)
 

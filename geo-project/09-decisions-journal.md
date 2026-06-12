@@ -161,6 +161,23 @@ haut et l'entrée "2026-05-05 — Réponses aux 10 questions de bootstrap".
 
 ### Décisions enregistrées
 
+#### 2026-06-12 — Funnel /outils/test-visibilite-ia refondu : scan express live + 4 IA verrouillées (n°1bis tranché)
+
+**Contexte** : Max veut remplacer le funnel « formulaire → rapport manuel sous 24 h » par une analyse en direct avec une partie masquée pour pousser vers l'app. Le lead magnet n°1bis « Scan express » (doc 06, proposé 2026-06-11) couvrait déjà l'analyse live — restait à trancher, et à décider comment masquer.
+
+**Options considérées** :
+- A : flouter de fausses données multi-LLM — rejeté : pour un outil de *mesure*, simuler des données derrière un flou est un risque de crédibilité fatal si découvert.
+- B : verrouiller les 4 autres IA (lignes 🔒, pas de données) avec l'argument variance ×8 de l'étude — honnête, même effet de curiosité.
+- C : scanner réellement les 5 IA en live — rejeté (déjà acté doc 06 : coût web_search ~0,04 $/run × 4 + latence, et l'écart 1 vs 5 IA EST l'argument de vente).
+
+**Choix** : B. Scan express = 3 prompts templates × Le Chat (`mistral-small-latest`, ~0,002 €/scan) en première intention ; l'audit manuel 24 h devient l'upsell post-scan (1 champ site) — son canal de conversion 10-20 % est conservé, pas remplacé.
+
+**Découverte au premier test réel** : faux négatif sur les variantes de nom — Mistral (sans web search, knowledge figée) cite « Boursorama Banque » alors que le prospect saisit « BoursoBank » → la regex `detectMentions` seule rendait « absent » en contradiction avec la liste des marques affichée. Fix : l'appel d'extraction juge aussi « cible citée y compris sous un autre nom » ; verdict = regex OU jugement LLM, position connue seulement via regex. C'est le même problème que les aliases du SaaS — bon argument produit.
+
+**Conséquences** : moteur `src/lib/express-scan/` (templates/run/extract/cache/schemas, DI testable, 11 tests), anti-abus spec n°1bis (cap 50/j, 5/h/IP, cache 24 h, honeypot non-sémantique), events PostHog dédiés, notification lead interne. `audit-request-form.tsx` supprimé (remplacé par le mini-form upsell).
+
+**À revisiter** : comparer conversion express → trial vs ex-funnel manuel (PostHog, ~4 semaines) ; passer le teaser sur de vraies données multi-LLM quand un 2ᵉ provider cheap sera branchable en public ; surveiller le cap 50 scans/jour si le tool est promu.
+
 #### 2026-06-12 — Scan comparateurs : enrichissement Mistral Small + persistance DB (DeepSeek refusé)
 
 **Contexte** : suite immédiate du lancement du scan comparateurs (entrée ci-dessous). Max propose d'utiliser un LLM « le moins cher » pour le free tool — y compris DeepSeek — et veut que les scans nourrissent notre base de données (niches, meilleurs sites, comment les cibles ressortent) pour améliorer le ranking long terme.

@@ -610,3 +610,32 @@ Résultat  : présent sur ${presentCount}/${totalChecked} comparateurs
 Relance possible : proposer le suivi quotidien 5 IA (trial 14 j).`,
   });
 }
+
+/**
+ * Notification interne (hello@) quand un lead utilise le scan express
+ * visibilité IA (/outils/test-visibilite-ia). Même logique que le scan
+ * comparateurs : résultat affiché à l'écran, pas d'auto-reply prospect.
+ */
+export async function sendExpressScanLeadEmail(params: {
+  prospectEmail: string;
+  brandName: string;
+  sector: string;
+  citedCount: number;
+  totalPrompts: number;
+  websiteDomain?: string;
+}) {
+  const { prospectEmail, brandName, sector, citedCount, totalPrompts, websiteDomain } = params;
+  await sendTransactional({
+    to: "hello@mamie-geo.fr",
+    replyTo: prospectEmail,
+    subject: `[Scan express] ${brandName} (${sector}) — cité ${citedCount}/${totalPrompts} sur Le Chat`,
+    text: `Lead depuis /outils/test-visibilite-ia (scan express live)
+
+Prospect  : ${prospectEmail}
+Marque    : ${brandName}
+Secteur   : ${sector}${websiteDomain ? `\nSite      : ${websiteDomain}` : ""}
+Résultat  : cité ${citedCount}/${totalPrompts} fois sur Le Chat (mistral-small)
+
+Relance possible : audit manuel 5 IA complet, ou trial 14 j.`,
+  });
+}
