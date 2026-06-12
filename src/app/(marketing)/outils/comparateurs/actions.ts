@@ -7,7 +7,7 @@ import { logCronEvent } from "@/lib/cron-logger";
 import { sendComparatorLeadEmail, sendScanConfirmationEmail } from "@/lib/email";
 import { env } from "@/lib/env";
 import { createBraveSearch } from "@/lib/comparators/brave";
-import { enrichChecks } from "@/lib/comparators/enrich";
+import { enrichScanReport } from "@/lib/comparators/enrich";
 import {
   checkScanRateLimit,
   getCachedScanReport,
@@ -94,14 +94,19 @@ export async function runComparatorScanAction(
       search: createBraveSearch({ apiKey: env.BRAVE_SEARCH_API_KEY }),
     });
     if (result.ok) {
-      // Classification + conseils d'inclusion Mistral Small (~0,0001 $/scan),
-      // best effort : sans clé ou sur erreur, les checks restent intacts.
+      // Classification + conseils d'inclusion + filtre de pertinence des
+      // concurrents, Mistral Small (~0,0001 $/scan), best effort : sans
+      // clé ou sur erreur, checks et concurrents restent intacts.
       if (env.MISTRAL_API_KEY) {
-        result.report.checks = await enrichChecks({
+        const enriched = await enrichScanReport({
           apiKey: env.MISTRAL_API_KEY,
           sector,
+          brand,
           checks: result.report.checks,
+          competitors: result.report.competitorsSpotted,
         });
+        result.report.checks = enriched.checks;
+        result.report.competitorsSpotted = enriched.competitors;
       }
       storeScanReport(cacheKey, result.report);
     }

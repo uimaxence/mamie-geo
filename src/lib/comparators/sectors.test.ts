@@ -75,6 +75,18 @@ describe("labelFromDomain", () => {
     expect(labelFromDomain("hello-watt.fr")).toBe("Hello Watt");
     expect(labelFromDomain("appvizer.fr")).toBe("Appvizer");
   });
+
+  it("prend le label enregistrable, pas le sous-domaine", () => {
+    expect(labelFromDomain("fr.qr-man.com")).toBe("Qr Man");
+    expect(labelFromDomain("fr.trustpilot.com")).toBe("Trustpilot");
+    expect(labelFromDomain("www.selectra.info")).toBe("Selectra");
+  });
+
+  it("gère les TLD à deux niveaux et les domaines courts", () => {
+    expect(labelFromDomain("acme.co.uk")).toBe("Acme");
+    expect(labelFromDomain("lc.cx")).toBe("Lc");
+    expect(labelFromDomain("localhost")).toBe("Localhost");
+  });
 });
 
 describe("sortChecksForDisplay", () => {

@@ -49,9 +49,9 @@ function cleanCity(raw: string): string | null {
   return city;
 }
 
-/** Récupère la home d'un domaine, null si inaccessible. */
-export async function fetchHomeHtml(
-  domain: string,
+/** Récupère une page HTML, null si inaccessible. */
+export async function fetchPageHtml(
+  url: string,
   fetchImpl: typeof fetch = fetch,
 ): Promise<string | null> {
   try {
@@ -59,8 +59,14 @@ export async function fetchHomeHtml(
     const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
     let response: Response;
     try {
-      response = await fetchImpl(`https://${domain}/`, {
-        headers: { "User-Agent": USER_AGENT, Accept: "text/html,application/xhtml+xml" },
+      response = await fetchImpl(url, {
+        headers: {
+          "User-Agent": USER_AGENT,
+          Accept: "text/html,application/xhtml+xml",
+          // Les sites multilingues servent leur version FR — c'est elle
+          // qu'on veut analyser pour un prospect français.
+          "Accept-Language": "fr-FR,fr;q=0.9,en;q=0.5",
+        },
         signal: controller.signal,
         redirect: "follow",
       });
@@ -72,6 +78,14 @@ export async function fetchHomeHtml(
   } catch {
     return null;
   }
+}
+
+/** Récupère la home d'un domaine, null si inaccessible. */
+export async function fetchHomeHtml(
+  domain: string,
+  fetchImpl: typeof fetch = fetch,
+): Promise<string | null> {
+  return fetchPageHtml(`https://${domain}/`, fetchImpl);
 }
 
 /** Signaux de localisation déterministes d'une home déjà parsée. */

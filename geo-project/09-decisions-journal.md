@@ -161,6 +161,30 @@ haut et l'entrée "2026-05-05 — Réponses aux 10 questions de bootstrap".
 
 ### Décisions enregistrées
 
+#### 2026-06-12 — Détection de profil site : compréhension renforcée + Mistral Medium ; concurrents filtrés par pertinence
+
+**Contexte** : test réel Max sur taap.it (SaaS multi-produits : link in bio, deeplinks, QR codes, analytics). Trois défauts en chaîne : (1) le secteur détecté était une énumération de fonctionnalités (« outil de gestion de liens et qr codes ») → requêtes de découverte inutilisables ; (2) la liste « concurrents » était le bac à restes des résultats non-listicle, sans jugement (Canva remonté en concurrent) ; (3) la racine taap.it est en anglais, la home FR vit sur /fr — path jeté par la normalisation.
+
+**Options considérées** :
+- A : durcir le prompt de détection sur Mistral Small
+- B : crawler des sous-pages produit pour mieux comprendre l'offre
+- C : passer la détection sur Mistral Medium + enrichir les signaux de la home seule
+
+**Choix** : C (B refusé par Max : « tu peux comprendre juste avec la home »), plus filtre de pertinence des concurrents dans l'enrichissement existant.
+
+**Justification** : testé en réel sur taap.it/fr — Small, même avec prompt durci, invente des catégories (« outils de lien unique ») ou sur-généralise (« outils de marketing digital »), de façon instable. Medium nomme la catégorie de marché établie (« link in bio »), stable sur 3 runs, et respecte la règle zone=null pour les produits en ligne. Surcoût ~0,001 € vs ~0,0002 €/détection — négligeable devant les ~10 requêtes Brave du scan.
+
+**Livré** :
+- `site-profile.ts` : prompt « proposition d'abord » (le LLM formule ce que vend l'entreprise avant de catégoriser — champ `proposition` logué pour le debug qualité) ; signaux enrichis (liens de navigation = gamme produit réelle, paragraphes `<p>` pour les pages JS-rendered, fallback og:description) ; garde-fou anti-énumération (> 5 mots → null → saisie manuelle) ; règle zone=null pour SaaS/e-commerce même avec adresse de siège ; modèle `mistral-medium-latest`.
+- `location-actions.ts` + `utils.ts` : le path saisi est respecté (`taap.it/fr` → analyse de /fr) ; `Accept-Language: fr` sur les fetchs (les sites multilingues servent leur version FR).
+- `enrich.ts` : l'appel d'enrichissement (toujours Mistral Small, 1 seul appel) juge aussi chaque concurrent repéré — concurrent direct du secteur ou non (médias, comparateurs, géants généralistes dont le secteur n'est qu'une feature → écartés) — et renvoie le nom commercial exact. `labelFromDomain` corrigé (domaine enregistrable, plus « Fr » pour fr.qr-man.com).
+
+**Validé en réel** (taap.it/fr) : proposition correcte (« centraliser, gérer et analyser des liens »), secteur « link in bio » stable, Canva/Bitly écartés des concurrents, Korli/Lnk.Bio/Taplink conservés et bien nommés.
+
+**Limite assumée** : la détection reflète ce que la home communique. Taap met « Link in Bio » en premier dans son title → tous les modèles (Small/Medium/Large) suivent ce positionnement ; le « tracking de liens » que Max sait être le cœur du produit n'est pas dérivable automatiquement depuis la home. Le mode manuel reste l'override.
+
+**À revisiter** : si les logs `tool_profile_detected` (champ `proposition`) montrent des secteurs systématiquement à côté sur un type de site, envisager une validation du secteur par la découverte Brave elle-même (catégorie sans listicle correspondant → re-demander).
+
 #### 2026-06-12 — Scan comparateurs : concurrents séparés des sources + clarté « sources vs réponses IA »
 
 **Contexte** : retour Max après test réel (Fenêtres sur Loir) — (1) la découverte « meilleur menuiserie à X » fait ranker des sites de **concurrents**, qu'on listait comme « comparateurs où demander l'inclusion » (absurde : un concurrent ne cite pas ta marque sur son site) ; (2) confusion possible entre les 2 outils — le scan comparateurs cherche sur le **web** (présence sur les sources des IA), pas dans les **réponses** des LLM (ça, c'est le test de visibilité + l'app). Demande : peaufiner l'analyse, clarifier le wording, et faire des concurrents un CTA vers l'app.

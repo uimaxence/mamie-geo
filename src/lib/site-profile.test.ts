@@ -38,6 +38,38 @@ describe("extractSiteContext", () => {
     expect(ctx.footerExcerpt).toContain("Seiches-sur-le-Loir");
     expect(ctx.localityHint).toBe("Seiches-sur-le-Loir");
   });
+
+  it("extrait les paragraphes substantiels en bodyExcerpt", () => {
+    const html = `<html><body>
+      <p>ok</p>
+      <p>Notre plateforme centralise vos liens et simplifie le partage sur tous vos réseaux sociaux.</p>
+    </body></html>`;
+    const ctx = extractSiteContext("acme.fr", html);
+    expect(ctx.bodyExcerpt).toContain("centralise vos liens");
+    expect(ctx.bodyExcerpt).not.toContain("ok");
+  });
+
+  it("og:description en fallback de la meta description", () => {
+    const html = `<html><head>
+      <meta property="og:description" content="Pitch de secours pour les pages sans meta description." />
+    </head><body></body></html>`;
+    const ctx = extractSiteContext("acme.fr", html);
+    expect(ctx.metaDescription).toBe("Pitch de secours pour les pages sans meta description.");
+  });
+
+  it("extrait les liens de nav (gamme produit) en excluant légal/auth/blog", () => {
+    const html = `<html><body><nav>
+      <a href="/conversion">Conversion Tracking</a>
+      <a href="/linkinbio">Link in bio</a>
+      <a href="/linkinbio">Link in bio</a>
+      <a href="/pricing">Tarifs</a>
+      <a href="/blog">Blog</a>
+      <a href="/cgu">CGU</a>
+      <a href="/login">Connexion</a>
+    </nav></body></html>`;
+    const ctx = extractSiteContext("taap.it", html);
+    expect(ctx.navLinks).toEqual(["Conversion Tracking", "Link in bio", "Tarifs"]);
+  });
 });
 
 describe("detectSiteProfile", () => {
@@ -49,6 +81,7 @@ describe("detectSiteProfile", () => {
         { body: HOME_HTML },
         {
           body: mistralResponse({
+            proposition: "Pose de fenêtres et menuiseries en Anjou.",
             marque: "Fenêtres sur Loir",
             secteur: "Menuiserie",
             zone: "Angers",
@@ -60,7 +93,22 @@ describe("detectSiteProfile", () => {
       brandName: "Fenêtres sur Loir",
       sector: "menuiserie",
       zone: "Angers",
+      proposition: "Pose de fenêtres et menuiseries en Anjou.",
     });
+  });
+
+  it("analyse la page au path saisi (home localisée)", async () => {
+    const fetchMock = fakeFetchSequence([
+      { body: HOME_HTML },
+      { body: mistralResponse({ marque: "Taap", secteur: "tracking de liens", zone: null }) },
+    ]);
+    await detectSiteProfile({
+      domain: "taap.it",
+      pagePath: "/fr",
+      apiKey: "test-key",
+      fetch: fetchMock,
+    });
+    expect(vi.mocked(fetchMock).mock.calls[0]?.[0]).toBe("https://taap.it/fr");
   });
 
   it("zone null pour une activité nationale", async () => {
@@ -94,6 +142,24 @@ describe("detectSiteProfile", () => {
       domain: "down.fr",
       apiKey: "test-key",
       fetch: fakeFetchSequence([{ body: "", status: 503 }]),
+    });
+    expect(profile).toBeNull();
+  });
+
+  it("null si le secteur est une énumération (bascule en saisie manuelle)", async () => {
+    const profile = await detectSiteProfile({
+      domain: "taap.it",
+      apiKey: "test-key",
+      fetch: fakeFetchSequence([
+        { body: HOME_HTML },
+        {
+          body: mistralResponse({
+            marque: "Taap",
+            secteur: "outil de gestion de liens et qr codes",
+            zone: null,
+          }),
+        },
+      ]),
     });
     expect(profile).toBeNull();
   });

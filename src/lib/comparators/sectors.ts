@@ -229,9 +229,18 @@ export function isKnownDirectoryDomain(domain: string): boolean {
   );
 }
 
-/** Label lisible pour un domaine découvert en live ("hello-watt.fr" → "Hello Watt"). */
+// TLD à deux niveaux (.co.uk, .com.br…) : le label utile est un cran plus haut.
+const SECOND_LEVEL_TLDS = new Set(["co", "com", "org", "net", "gouv", "asso", "ac"]);
+
+/** Label lisible pour un domaine découvert en live ("fr.qr-man.com" → "Qr Man"). */
 export function labelFromDomain(domain: string): string {
-  const base = domain.split(".")[0] ?? domain;
+  // Le nom vit dans le label enregistrable, pas dans le sous-domaine
+  // (bug constaté 2026-06-12 : "fr.qr-man.com" → "Fr").
+  const parts = domain.split(".").filter(Boolean);
+  let base = (parts.length >= 2 ? parts[parts.length - 2] : parts[0]) ?? domain;
+  if (parts.length >= 3 && SECOND_LEVEL_TLDS.has(base)) {
+    base = parts[parts.length - 3] ?? base;
+  }
   return base
     .split("-")
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))

@@ -345,9 +345,13 @@ sur `/pricing` (3 créneaux/trimestre, constantes `SLOTS_LEFT`/
 lien = event support en attendant l'event dédié). Les 2 scans publics
 ne demandent que **site + email** : marque, secteur et zone de
 chalandise détectés depuis la home (`src/lib/site-profile.ts` :
-scraping cheerio + Mistral Small, zones nationales neutralisées, mode
-manuel en fallback/correction) + `ScoreRing` + events
-`tool_cta_clicked` / `tool_profile_autodetected` sur chaque étape.
+scraping cheerio — title/meta/nav/paragraphes —, path saisi respecté,
+**Mistral Medium** « proposition d'abord » — Small inventait des
+catégories, cf. doc 09 § 2026-06-12 —, zones nationales/SaaS
+neutralisées, mode manuel en fallback/correction) + `ScoreRing` +
+events `tool_cta_clicked` / `tool_profile_autodetected` sur chaque
+étape. Concurrents repérés filtrés par pertinence (enrichissement
+Mistral Small : géants généralistes/médias écartés).
 
 **Billing Stripe** : checkout + portal + webhooks idempotents + Stripe
 Tax + cron expire-past-due. **Trial 14 j avec carte requise**

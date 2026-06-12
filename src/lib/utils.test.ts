@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cn, normalizeDomainInput } from "./utils";
+import { cn, normalizeDomainInput, pathFromDomainInput } from "./utils";
 
 describe("normalizeDomainInput()", () => {
   it("accepte une URL complète collée", () => {
@@ -41,5 +41,18 @@ describe("cn()", () => {
 
   it("accepte des tableaux conditionnels (clsx)", () => {
     expect(cn(["foo", "bar"], { baz: true, qux: false })).toBe("foo bar baz");
+  });
+});
+
+describe("pathFromDomainInput()", () => {
+  it("extrait le path d'une URL ou d'un domaine+path", () => {
+    expect(pathFromDomainInput("taap.it/fr")).toBe("/fr");
+    expect(pathFromDomainInput("https://taap.it/fr/")).toBe("/fr");
+    expect(pathFromDomainInput("https://www.monsite.fr/page?utm=x#s")).toBe("/page");
+  });
+
+  it("vide pour un domaine nu ou une racine", () => {
+    expect(pathFromDomainInput("monsite.fr")).toBe("");
+    expect(pathFromDomainInput("https://monsite.fr/")).toBe("");
   });
 });
