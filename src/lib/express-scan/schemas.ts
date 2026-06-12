@@ -11,6 +11,8 @@ export const expressScanSchema = z.object({
     .string()
     .min(3, "Décris ton secteur (ex: « agence seo », « plombier », « logiciel de caisse »)")
     .max(80),
+  // Ville/zone optionnelle pour les PME locales — localise les questions.
+  location: z.string().max(80).optional().or(z.literal("")),
   // Optionnel — sert à pré-remplir la demande d'audit manuel post-scan.
   // Accepte une URL collée telle quelle.
   websiteDomain: z.preprocess(

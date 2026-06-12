@@ -15,6 +15,7 @@ export function ExpressScanForm() {
   const [email, setEmail] = useState("");
   const [brandName, setBrandName] = useState("");
   const [sector, setSector] = useState("");
+  const [location, setLocation] = useState("");
   const [websiteDomain, setWebsiteDomain] = useState("");
   const [hpField, setHpField] = useState(""); // honeypot (nom non-sémantique)
   const [report, setReport] = useState<ExpressScanReport | null>(null);
@@ -30,6 +31,7 @@ export function ExpressScanForm() {
       mode: "express",
       sector: sector.trim().toLowerCase(),
       brand_name: brandName.trim(),
+      has_location: location.trim().length > 0,
     });
     identify(email.trim().toLowerCase(), { email: email.trim().toLowerCase() });
 
@@ -38,6 +40,7 @@ export function ExpressScanForm() {
         email: email.trim(),
         brandName: brandName.trim(),
         sector: sector.trim(),
+        location: location.trim() || "",
         websiteDomain: websiteDomain.trim() || "",
         hpField,
       });
@@ -89,6 +92,15 @@ export function ExpressScanForm() {
             onChange={(e) => setSector(e.target.value)}
             maxLength={80}
             required
+          />
+        </Field>
+        <Field label="Ta ville (optionnel)" hint="Si tes clients sont locaux">
+          <Input
+            type="text"
+            placeholder="Ex : Tours"
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            maxLength={80}
           />
         </Field>
         <Field label="Ton site (optionnel)" hint="Pour l'audit complet ensuite">

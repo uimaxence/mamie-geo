@@ -32,6 +32,8 @@ export interface ComparatorCheck {
 export interface ComparatorScanReport {
   brand: string;
   sector: string;
+  /** Ville/zone si le prospect vise une visibilité locale. */
+  location?: string;
   checks: ComparatorCheck[];
   presentCount: number;
   totalChecked: number;

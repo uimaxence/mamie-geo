@@ -75,9 +75,10 @@ export async function runComparatorScanAction(
   const email = data.email.trim().toLowerCase();
   const brand = data.brandName.trim();
   const sector = data.sector.trim();
+  const location = data.location?.trim() || undefined;
   const websiteDomain = data.websiteDomain?.trim().toLowerCase() || undefined;
 
-  const cacheKey = scanCacheKey(brand, sector);
+  const cacheKey = scanCacheKey(brand, sector, location);
   const cached = getCachedScanReport(cacheKey);
 
   const startedAt = Date.now();
@@ -88,6 +89,7 @@ export async function runComparatorScanAction(
     result = await runComparatorScan({
       brand,
       sector,
+      location,
       websiteDomain,
       search: createBraveSearch({ apiKey: env.BRAVE_SEARCH_API_KEY }),
     });
@@ -136,6 +138,7 @@ export async function runComparatorScanAction(
       brandName: brand,
       sector,
       sectorNormalized: normalizeText(sector),
+      location: location ?? null,
       websiteDomain: websiteDomain ?? null,
       presentCount: result.report.presentCount,
       totalChecked: result.report.totalChecked,
@@ -174,6 +177,7 @@ export async function runComparatorScanAction(
     properties: {
       brand,
       sector,
+      has_location: Boolean(location),
       present_count: result.report.presentCount,
       total_checked: result.report.totalChecked,
       score_pct: result.report.scorePct,

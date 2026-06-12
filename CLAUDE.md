@@ -336,6 +336,13 @@ Otterly, Rankscale). Newsletter Brevo prête (`BREVO_BLOG_LIST_ID`
 manquant). SEO : host canonique non-www, noindex `.vercel.app`,
 canonicals auto-référentes.
 
+**Offre accompagnement done-for-you** (2026-06-12, doc 04) : section
+sur `/pricing` (3 créneaux/trimestre, constantes `SLOTS_LEFT`/
+`SLOTS_PERIOD` à maintenir à la main) → `/contact` (Cal.com inline ;
+lien = event support en attendant l'event dédié). Les 2 scans publics
+ont un champ ville optionnel (PME locales) + `ScoreRing` + events
+`tool_cta_clicked` sur chaque CTA.
+
 **Billing Stripe** : checkout + portal + webhooks idempotents + Stripe
 Tax + cron expire-past-due. **Trial 14 j avec carte requise**
 (2026-06-08) : PlanPickerModal post-onboarding (3 variants), sidebar
@@ -364,7 +371,7 @@ Grotesk/Caveat, crème + terracotta `#DD6B45`, brief
 `geo-project/linkedindesign.md`), rendus dans `/app/admin/visuals`.
 
 **Tests** : Vitest colocation (100+ tests) + 13 E2E Playwright flows
-publics. DB Neon : 19 tables + migrations 0000-0006.
+publics. DB Neon : 19 tables + migrations 0000-0007.
 
 ### Reste à faire (V0+ / pré-lancement)
 

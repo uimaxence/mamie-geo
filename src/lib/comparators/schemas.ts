@@ -10,6 +10,9 @@ export const comparatorScanSchema = z.object({
     .string()
     .min(3, "Décris ton secteur (ex: « agence seo », « plombier », « logiciel de caisse »)")
     .max(80),
+  // Ville/zone optionnelle pour les PME locales — localise la découverte
+  // (« meilleur plombier tours » fait remonter les annuaires locaux).
+  location: z.string().max(80).optional().or(z.literal("")),
   // Accepte une URL collée telle quelle ("https://www.monsite.fr/page"),
   // normalisée en domaine nu avant validation.
   websiteDomain: z.preprocess(

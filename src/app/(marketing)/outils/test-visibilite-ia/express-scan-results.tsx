@@ -1,19 +1,27 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useTransition } from "react";
 import { CheckCircle2, Lock, XCircle } from "lucide-react";
-import { Badge, Button, Field, Input, LinkButton } from "@/components/ui";
+import { Badge, Button, Field, Input, LinkButton, ScoreRing } from "@/components/ui";
 import { capture } from "@/lib/posthog-client";
 import { normalizeText } from "@/lib/comparators/sectors";
 import type { ExpressPromptResult, ExpressScanReport } from "@/lib/express-scan/types";
 import { submitAuditRequest } from "./actions";
 
 // Écran de résultat du scan express : verdict par question sur Le Chat
-// (en clair), puis les 4 autres IA verrouillées (CTA trial — on ne
-// floute pas de fausses données, on verrouille avec l'argument variance
-// ×8 de l'étude), puis upsell audit manuel 24 h.
+// (en clair, ScoreRing — même composant que le rapport d'audit de
+// l'app, cohérence DA), puis les 4 autres IA verrouillées et CLIQUABLES
+// vers le funnel signup (on ne floute pas de fausses données, on
+// verrouille avec l'argument variance ×8 de l'étude), puis upsell
+// audit manuel 24 h. Chaque CTA émet un event PostHog `tool_cta_clicked`.
 
 const LOCKED_LLMS = ["ChatGPT", "Claude", "Gemini", "Perplexity"];
+const SIGNUP_HREF = "/login?mode=signup&from=scan-express";
+
+function trackCta(cta: string, extra?: Record<string, unknown>) {
+  capture("tool_cta_clicked", { tool: "test-visibilite-ia", cta, ...extra });
+}
 
 const POSITION_LABEL: Record<string, string> = {
   debut: "en début de réponse",
@@ -36,16 +44,15 @@ export function ExpressScanResults({
     <div className="mx-auto max-w-3xl">
       {/* Verdict Le Chat */}
       <div className="rounded-[var(--radius-xl)] border border-[color:var(--color-border)] bg-white p-6 shadow-[var(--shadow-sm)] sm:p-8">
-        <div className="flex flex-col items-center gap-2 text-center">
+        <div className="flex flex-col items-center gap-3 text-center">
           <p className="type-eyebrow">
-            {report.brand} · {report.llmLabel} · en direct
+            {report.brand} · {report.sector}
+            {report.location ? ` (${report.location})` : ""} · {report.llmLabel} · en direct
           </p>
-          <p className="text-5xl font-bold tabular-nums tracking-tight">
-            {report.citedCount}
-            <span className="text-2xl font-semibold text-[color:var(--color-ink-soft)]">
-              /{report.totalPrompts}
-            </span>
-          </p>
+          <ScoreRing
+            value={(report.citedCount / report.totalPrompts) * 100}
+            suffix={`cité ${report.citedCount}/${report.totalPrompts}`}
+          />
           <p className="type-body max-w-md">{verdictText(report)}</p>
         </div>
 
@@ -66,22 +73,32 @@ export function ExpressScanResults({
         </p>
         <div className="mt-5 flex flex-col gap-2">
           {LOCKED_LLMS.map((llm) => (
-            <div
+            <Link
               key={llm}
-              className="flex items-center justify-between rounded-[var(--radius-lg)] border border-[color:var(--color-border)] bg-[color:var(--color-gray-50)] px-4 py-3"
+              href={SIGNUP_HREF}
+              onClick={() => trackCta("locked_llm", { llm })}
+              className="group flex items-center justify-between rounded-[var(--radius-lg)] border border-[color:var(--color-border)] bg-[color:var(--color-gray-50)] px-4 py-3 transition hover:border-[color:var(--color-ink)] hover:bg-white"
             >
               <span className="text-sm font-medium text-[color:var(--color-ink)]">{llm}</span>
-              <span className="inline-flex items-center gap-1.5 text-xs font-medium text-[color:var(--color-faint)]">
-                <Lock size={13} /> suivi quotidien dans l&apos;app
+              <span className="inline-flex items-center gap-1.5 text-xs font-medium text-[color:var(--color-faint)] transition group-hover:text-[color:var(--color-ink)]">
+                <Lock size={13} /> débloquer
               </span>
-            </div>
+            </Link>
           ))}
         </div>
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
-          <LinkButton href="/login?mode=signup" variant="accent" size="lg">
-            Voir les 5 IA — essai 14 jours
+          <LinkButton
+            href={SIGNUP_HREF}
+            variant="accent"
+            size="lg"
+            className="w-full whitespace-nowrap sm:w-auto"
+            onClick={() => trackCta("trial", { cited_count: report.citedCount })}
+          >
+            Débloquer les 5 IA
           </LinkButton>
-          <span className="type-meta">Garantie remboursement 14 jours, annulable en 1 clic.</span>
+          <span className="type-meta">
+            Essai 14 jours · garantie remboursement 14 jours, annulable en 1 clic.
+          </span>
         </div>
       </div>
 

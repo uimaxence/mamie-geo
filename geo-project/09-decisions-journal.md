@@ -161,6 +161,17 @@ haut et l'entrée "2026-05-05 — Réponses aux 10 questions de bootstrap".
 
 ### Décisions enregistrées
 
+#### 2026-06-12 — Offre accompagnement done-for-you + page /contact + localisation des scans + cohérence DA outils
+
+**Contexte** : Max veut (1) une offre où il booste personnellement le SEO + GEO du client, avec rareté affichée (« 3 créneaux ») et CTA vers son Cal ; (2) que les scans servent les PME locales (« meilleur plombier » ne citera jamais un artisan tourangeau, « meilleur plombier à Tours » si) ; (3) que les outils gratuits réutilisent les composants de l'app (DA cohérente) et que chaque clic prospect soit tracké.
+
+**Livré** :
+- **Offre done-for-you** : section dédiée sur `/pricing` (sous les 3 plans, détail pricing doc 04) + page `/contact` avec Cal.com inline. ⚠️ Deux choix faits par Claude faute d'info : (a) le lien Cal pointe sur l'event support existant `mc.maxence/support-mamie-geo` (seul lien connu) — à remplacer dans `cal-contact-embed.tsx` (constante unique) dès que Max crée l'event « appel découverte » ; (b) la rareté affiche **T3 2026** alors que Max a écrit « Q2 2026 » — Q2 se termine le 30 juin, vendre 3 créneaux pour 2 semaines n'avait pas de sens ; constante `SLOTS_PERIOD` à corriger si l'intention était bien Q2.
+- **Localisation** : champ « Ta ville (optionnel) » sur les deux scans. Express : les 3 prompts deviennent « … à {ville} » ; comparateurs : découverte « meilleur {secteur} {ville} » (fait remonter les annuaires locaux). Colonne `comparator_scans.location` (migration `0007_calm_nomad`) pour l'agrégation par niche locale. Clés de cache incluent la ville.
+- **Cohérence DA + tracking** : les 2 écrans de résultats utilisent `ScoreRing` (le même que le rapport d'audit de l'app) ; lignes des 4 IA verrouillées **cliquables** → `/login?mode=signup&from=scan-express` ; fix CTA accent qui wrappait ; event `tool_cta_clicked` {tool, cta, …} sur chaque CTA (trial, locked_llm, etude) + `from=` dans les URLs signup pour l'attribution.
+
+**À revisiter** : remplacer le lien Cal placeholder ; décrémenter `SLOTS_LEFT` à chaque vente ; cadrer le prix de l'accompagnement après les premiers appels (doc 04).
+
 #### 2026-06-12 — Funnel /outils/test-visibilite-ia refondu : scan express live + 4 IA verrouillées (n°1bis tranché)
 
 **Contexte** : Max veut remplacer le funnel « formulaire → rapport manuel sous 24 h » par une analyse en direct avec une partie masquée pour pousser vers l'app. Le lead magnet n°1bis « Scan express » (doc 06, proposé 2026-06-11) couvrait déjà l'analyse live — restait à trancher, et à décider comment masquer.

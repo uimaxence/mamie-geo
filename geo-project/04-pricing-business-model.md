@@ -100,6 +100,25 @@ Retiré de `/pricing` (cf. doc 09 § 2026-05-14), remplacé par CTA « Plus de v
 
 **Cible** : ETI / grands comptes / collectivités / banques. Tout Agence plus : marques + prompts illimités, LLMs sur demande, historique illimité, hébergement EU dédié (option), SSO SAML/OIDC, DPA personnalisé (ISO 27001 visée 2027), API illimitée, account manager, SLA 99.5 % avec pénalités, Slack Connect < 4 h ouvrées.
 
+### Offre « Accompagnement done-for-you » — sur devis (ajoutée 2026-06-12, doc 09)
+
+Max prend en main **personnellement** le SEO + GEO d'une marque :
+audit complet, inclusion sur les comparateurs/annuaires que les IA
+citent, implémentation des correctifs avec le client, suivi Mamie GEO
+Pro inclus, point mensuel + rapport d'évolution du rang.
+
+- **Rareté réelle** : 3 créneaux max par trimestre (le temps fondateur
+  ne scale pas) — affichée sur `/pricing` (section dédiée sous les
+  plans), constantes `SLOTS_LEFT` / `SLOTS_PERIOD` dans
+  `pricing-done-for-you.tsx` à décrémenter à la main à chaque vente.
+- **Funnel** : `/pricing` → `/contact` (Cal.com inline, appel
+  découverte 30 min gratuit). Event PostHog
+  `pricing_done_for_you_cta_clicked`.
+- **Pricing** : sur devis, engagement trimestriel. À cadrer après les
+  premiers appels (ancrage suggéré : ≥ 1 500-2 500 €/mois vu le coût
+  d'opportunité du temps fondateur — l'audit sur mesure one-shot est
+  déjà à 990 €).
+
 ---
 
 ## Add-ons et options

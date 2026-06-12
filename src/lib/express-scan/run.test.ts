@@ -18,6 +18,12 @@ describe("buildExpressPrompts", () => {
     expect(prompts).toHaveLength(3);
     for (const p of prompts) expect(p).toContain("menuiserie");
   });
+
+  it("localise les 3 prompts quand une ville est fournie", () => {
+    const prompts = buildExpressPrompts("plombier", " Tours ");
+    for (const p of prompts) expect(p).toContain("à Tours");
+    expect(prompts[0]).not.toContain("en France");
+  });
 });
 
 describe("runExpressScan", () => {

@@ -1,13 +1,20 @@
 "use client";
 
 import { CheckCircle2, ExternalLink, XCircle } from "lucide-react";
-import { Badge, Button, LinkButton } from "@/components/ui";
+import { Badge, Button, LinkButton, ScoreRing } from "@/components/ui";
+import { capture } from "@/lib/posthog-client";
 import { sortChecksForDisplay } from "@/lib/comparators/sectors";
 import type { ComparatorCheck, ComparatorScanReport } from "@/lib/comparators/types";
 
-// Écran de résultat du scan comparateurs : verdict global, détail par
-// site (présents d'abord — preuves, puis absents — plan d'action),
-// rappel des chiffres de l'étude 50 marques, CTA trial.
+// Écran de résultat du scan comparateurs : verdict global (ScoreRing —
+// même composant que le rapport d'audit de l'app, cohérence DA), détail
+// par site (présents d'abord — preuves, puis absents — plan d'action),
+// rappel des chiffres de l'étude 50 marques, CTA trial. Chaque CTA émet
+// un event PostHog `tool_cta_clicked`.
+
+function trackCta(cta: string, extra?: Record<string, unknown>) {
+  capture("tool_cta_clicked", { tool: "comparateurs", cta, ...extra });
+}
 
 export function ComparatorResults({
   report,
@@ -23,14 +30,15 @@ export function ComparatorResults({
     <div className="mx-auto max-w-3xl">
       {/* Verdict global */}
       <div className="rounded-[var(--radius-xl)] border border-[color:var(--color-border)] bg-white p-6 shadow-[var(--shadow-sm)] sm:p-8">
-        <div className="flex flex-col items-center gap-2 text-center">
-          <p className="type-eyebrow">{report.brand} · {report.sector}</p>
-          <p className="text-5xl font-bold tabular-nums tracking-tight">
-            {report.presentCount}
-            <span className="text-2xl font-semibold text-[color:var(--color-ink-soft)]">
-              /{report.totalChecked}
-            </span>
+        <div className="flex flex-col items-center gap-3 text-center">
+          <p className="type-eyebrow">
+            {report.brand} · {report.sector}
+            {report.location ? ` (${report.location})` : ""}
           </p>
+          <ScoreRing
+            value={report.scorePct}
+            suffix={`présent ${report.presentCount}/${report.totalChecked}`}
+          />
           <p className="type-body max-w-md">
             {verdictText(report.presentCount, report.totalChecked)}
           </p>
@@ -103,13 +111,21 @@ export function ComparatorResults({
           la première action GEO, avant même de toucher à ton propre site.
         </p>
         <div className="mt-5 flex flex-col gap-3 sm:flex-row">
-          <LinkButton href="/login?mode=signup" variant="accent" size="md">
+          <LinkButton
+            href="/login?mode=signup&from=scan-comparateurs"
+            variant="accent"
+            size="md"
+            className="whitespace-nowrap"
+            onClick={() => trackCta("trial", { present_count: report.presentCount })}
+          >
             Suivre ma visibilité dans 5 IA
           </LinkButton>
           <LinkButton
             href="/blog/etude-visibilite-ia-50-marques-francaises"
             variant="secondary"
             size="md"
+            className="whitespace-nowrap"
+            onClick={() => trackCta("etude")}
           >
             Lire l&apos;étude complète
           </LinkButton>

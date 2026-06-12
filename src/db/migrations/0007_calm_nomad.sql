@@ -1,0 +1,1 @@
+ALTER TABLE "comparator_scans" ADD COLUMN "location" text;

@@ -120,10 +120,11 @@ export async function runExpressScanAction(raw: ExpressScanInput): Promise<Expre
   const email = data.email.trim().toLowerCase();
   const brand = data.brandName.trim();
   const sector = data.sector.trim();
+  const location = data.location?.trim() || undefined;
   const websiteDomain = data.websiteDomain || undefined;
   const apiKey = env.MISTRAL_API_KEY;
 
-  const cacheKey = expressCacheKey(brand, sector);
+  const cacheKey = expressCacheKey(brand, sector, location);
   const cached = getCachedExpressReport(cacheKey);
 
   const startedAt = Date.now();
@@ -139,6 +140,7 @@ export async function runExpressScanAction(raw: ExpressScanInput): Promise<Expre
     result = await runExpressScan({
       brand,
       sector,
+      location,
       execute: (prompt) => client.execute({ prompt, language: "fr" }),
       extractBrands: (responseTexts) =>
         extractBrandsCited({ apiKey, targetBrand: brand, responseTexts }),
@@ -171,7 +173,7 @@ export async function runExpressScanAction(raw: ExpressScanInput): Promise<Expre
     await sendExpressScanLeadEmail({
       prospectEmail: email,
       brandName: brand,
-      sector,
+      sector: location ? `${sector} (${location})` : sector,
       citedCount: result.report.citedCount,
       totalPrompts: result.report.totalPrompts,
       websiteDomain,
@@ -191,6 +193,7 @@ export async function runExpressScanAction(raw: ExpressScanInput): Promise<Expre
     properties: {
       brand,
       sector,
+      has_location: Boolean(location),
       cited_count: result.report.citedCount,
       total_prompts: result.report.totalPrompts,
       cache_hit: Boolean(cached),

@@ -27,6 +27,8 @@ export interface ExpressExecuteResult {
 export interface ExpressScanParams {
   brand: string;
   sector: string;
+  /** Ville/zone pour les PME locales — localise les 3 questions. */
+  location?: string;
   /** Appel LLM (Le Chat / mistral-small en prod, fake en test). */
   execute: (prompt: string) => Promise<ExpressExecuteResult>;
   /** Extraction marques citées + jugement variante de nom (Mistral en prod, fake en test). */
@@ -44,7 +46,7 @@ function positionOf(firstIndex: number, textLength: number): ExpressPosition {
 
 export async function runExpressScan(params: ExpressScanParams): Promise<ExpressScanResult> {
   const brand = params.brand.trim();
-  const prompts = buildExpressPrompts(params.sector);
+  const prompts = buildExpressPrompts(params.sector, params.location);
 
   let texts: string[];
   try {
@@ -77,6 +79,7 @@ export async function runExpressScan(params: ExpressScanParams): Promise<Express
   const report: ExpressScanReport = {
     brand,
     sector: params.sector.trim(),
+    location: params.location?.trim() || undefined,
     llmLabel: params.llmLabel ?? "Le Chat (Mistral)",
     results,
     citedCount: results.filter((r) => r.cited).length,

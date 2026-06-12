@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { MarketingFooter } from "../_sections/marketing-footer";
 import { MarketingHeader } from "../_sections/marketing-header";
 import { PricingComparison } from "../_sections/pricing/pricing-comparison";
+import { PricingDoneForYou } from "../_sections/pricing/pricing-done-for-you";
 import { PricingFAQ } from "../_sections/pricing/pricing-faq";
 import { PricingPlans } from "../_sections/pricing/pricing-plans";
 
@@ -13,6 +14,7 @@ export const metadata: Metadata = {
 };
 
 // Page /pricing, assemble PricingPlans (toggle + 3 cards Solo/Starter/Pro) +
+// PricingDoneForYou (accompagnement fondateur, 2026-06-12) +
 // PricingComparison (tableau détaillé) + PricingFAQ (questions dédiées billing).
 // Agency / Enterprise sont sur devis (mailto hello@mamie-geo.fr).
 
@@ -21,6 +23,7 @@ export default function PricingPage() {
     <>
       <MarketingHeader />
       <PricingPlans />
+      <PricingDoneForYou />
       <PricingComparison />
       <PricingFAQ />
       <MarketingFooter />

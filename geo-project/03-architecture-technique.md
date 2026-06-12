@@ -247,7 +247,8 @@ Migrations versionnées : `0000_many_human_torch` (schéma initial),
 2026-05-17), `0003_giant_jean_grey` (`brands.paused_at`, 2026-06-08),
 `0004_salty_molten_man` (funnel sources, 2026-06-08),
 `0005_per_prompt_cadence` (`prompts.cadence`, 2026-06-08),
-`0006_slimy_xorn` (`comparator_scans`, 2026-06-12).
+`0006_slimy_xorn` (`comparator_scans`, 2026-06-12), `0007_calm_nomad`
+(`comparator_scans.location`, 2026-06-12).
 
 ### Tables Better Auth
 
@@ -440,6 +441,7 @@ CREATE TABLE comparator_scans (
   brand_name TEXT NOT NULL,
   sector TEXT NOT NULL,
   sector_normalized TEXT NOT NULL,
+  location TEXT,                -- ville/zone si visibilité locale (PME)
   website_domain TEXT,
   present_count INTEGER NOT NULL,
   total_checked INTEGER NOT NULL,

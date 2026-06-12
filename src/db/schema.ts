@@ -498,6 +498,8 @@ export const comparatorScans = pgTable(
     sector: text().notNull(),
     /** Secteur normalisé (minuscules, sans accents) — clé d'agrégation par niche. */
     sectorNormalized: text().notNull(),
+    /** Ville/zone si le prospect vise une visibilité locale (2026-06-12). */
+    location: text(),
     websiteDomain: text(),
     presentCount: integer().notNull(),
     totalChecked: integer().notNull(),

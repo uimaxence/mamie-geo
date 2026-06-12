@@ -15,6 +15,7 @@ const STATIC_ROUTES: { path: string; priority: number; changeFrequency: "weekly"
   { path: "/demo", priority: 0.9, changeFrequency: "weekly" },
   { path: "/pricing", priority: 0.9, changeFrequency: "weekly" },
   { path: "/blog", priority: 0.8, changeFrequency: "weekly" },
+  { path: "/contact", priority: 0.6, changeFrequency: "monthly" },
   { path: "/outils", priority: 0.7, changeFrequency: "monthly" },
   { path: "/outils/comparateurs", priority: 0.7, changeFrequency: "monthly" },
   { path: "/outils/test-visibilite-ia", priority: 0.7, changeFrequency: "monthly" },

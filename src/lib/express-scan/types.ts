@@ -18,6 +18,8 @@ export interface ExpressPromptResult {
 export interface ExpressScanReport {
   brand: string;
   sector: string;
+  /** Ville/zone si le prospect vise une visibilité locale. */
+  location?: string;
   /** LLM réellement interrogé (V0 : Le Chat via mistral-small). */
   llmLabel: string;
   results: ExpressPromptResult[];

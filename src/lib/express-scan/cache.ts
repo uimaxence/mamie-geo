@@ -42,8 +42,8 @@ interface CacheEntry {
 
 const resultCache = new Map<string, CacheEntry>();
 
-export function expressCacheKey(brand: string, sector: string): string {
-  return `${normalizeText(brand)}|${normalizeText(sector)}`;
+export function expressCacheKey(brand: string, sector: string, location?: string): string {
+  return `${normalizeText(brand)}|${normalizeText(sector)}|${normalizeText(location ?? "")}`;
 }
 
 export function getCachedExpressReport(key: string): ExpressScanReport | null {

@@ -23,7 +23,11 @@ const MAX_COMPARATORS = 8;
 const DISCOVERY_RESULT_COUNT = 10;
 const PRESENCE_RESULT_COUNT = 3;
 
-function discoveryQueries(sector: string): string[] {
+function discoveryQueries(sector: string, location?: string): string[] {
+  // Localisé quand la PME vise une zone : les annuaires/comparateurs
+  // locaux remontent (« meilleur plombier tours » → pagesjaunes, etc.).
+  const loc = location?.trim();
+  if (loc) return [`meilleur ${sector} ${loc}`, `${sector} ${loc} avis`];
   return [`meilleur ${sector}`, `${sector} comparatif avis`];
 }
 
@@ -39,6 +43,8 @@ function matchesDomain(resultDomain: string, domain: string): boolean {
 export interface ComparatorScanParams {
   brand: string;
   sector: string;
+  /** Ville/zone pour les PME locales — localise la découverte. */
+  location?: string;
   /** Domaine du site de la marque, exclu de la découverte. */
   websiteDomain?: string;
   search: SearchFn;
@@ -63,7 +69,9 @@ export async function runComparatorScan(
   }
 
   const discoveries = await Promise.allSettled(
-    discoveryQueries(sector).map((query) => params.search(query, DISCOVERY_RESULT_COUNT)),
+    discoveryQueries(sector, params.location).map((query) =>
+      params.search(query, DISCOVERY_RESULT_COUNT),
+    ),
   );
   // Sans découverte ET sans curaté on ne peut rien vérifier ; avec du
   // curaté on continue en mode dégradé.
@@ -127,6 +135,7 @@ export async function runComparatorScan(
   const report: ComparatorScanReport = {
     brand,
     sector,
+    location: params.location?.trim() || undefined,
     checks,
     presentCount,
     totalChecked: checks.length,

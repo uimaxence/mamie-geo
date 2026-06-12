@@ -25,6 +25,7 @@ export function ComparatorForm() {
   const [email, setEmail] = useState("");
   const [brandName, setBrandName] = useState("");
   const [sector, setSector] = useState("");
+  const [location, setLocation] = useState("");
   const [websiteDomain, setWebsiteDomain] = useState("");
   const [hpField, setHpField] = useState(""); // honeypot (nom non-sémantique, cf. schemas.ts)
   const [report, setReport] = useState<ComparatorScanReport | null>(null);
@@ -40,6 +41,7 @@ export function ComparatorForm() {
       sector: sector.trim().toLowerCase(),
       brand_name: brandName.trim(),
       has_website: websiteDomain.trim().length > 0,
+      has_location: location.trim().length > 0,
     });
     identify(email.trim().toLowerCase(), { email: email.trim().toLowerCase() });
 
@@ -48,6 +50,7 @@ export function ComparatorForm() {
         email: email.trim(),
         brandName: brandName.trim(),
         sector: sector.trim(),
+        location: location.trim() || "",
         websiteDomain: websiteDomain.trim().toLowerCase() || "",
         hpField,
       });
@@ -97,6 +100,15 @@ export function ComparatorForm() {
             onChange={(e) => setSector(e.target.value)}
             maxLength={80}
             required
+          />
+        </Field>
+        <Field label="Ta ville (optionnel)" hint="Si tes clients sont locaux">
+          <Input
+            type="text"
+            placeholder="Ex : Tours"
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            maxLength={80}
           />
         </Field>
         <Field label="Ton site (optionnel)" hint="Pour l'exclure des résultats">
