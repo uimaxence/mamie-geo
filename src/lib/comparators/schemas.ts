@@ -21,8 +21,10 @@ export const comparatorScanSchema = z.object({
       .optional()
       .or(z.literal("")),
   ),
-  // Honeypot anti-bot : champ caché qui doit rester vide.
-  company: z.string().optional(),
+  // Honeypot anti-bot : champ caché qui doit rester vide. Nom volontairement
+  // non-sémantique : « company » déclenchait l'autofill Chrome (organisation)
+  // → faux positifs sur de vrais prospects (constaté 2026-06-12).
+  hpField: z.string().optional(),
 });
 
 export type ComparatorScanInput = z.infer<typeof comparatorScanSchema>;

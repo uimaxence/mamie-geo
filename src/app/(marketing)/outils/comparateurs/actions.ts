@@ -44,8 +44,13 @@ export async function runComparatorScanAction(
   const data = parsed.data;
 
   // Honeypot rempli = bot. Réponse générique, sans dépenser de requête.
-  if (data.company) {
-    return { ok: false, code: "invalid_input", message: "Données invalides" };
+  if (data.hpField) {
+    logCronEvent({ level: "warn", event: "comparator_scan_honeypot" });
+    return {
+      ok: false,
+      code: "invalid_input",
+      message: "Impossible de valider le formulaire. Réessaye, ou écris-nous à hello@mamie-geo.fr.",
+    };
   }
 
   if (!env.BRAVE_SEARCH_API_KEY) {

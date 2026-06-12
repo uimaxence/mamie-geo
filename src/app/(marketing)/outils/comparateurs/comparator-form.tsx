@@ -26,7 +26,7 @@ export function ComparatorForm() {
   const [brandName, setBrandName] = useState("");
   const [sector, setSector] = useState("");
   const [websiteDomain, setWebsiteDomain] = useState("");
-  const [company, setCompany] = useState(""); // honeypot
+  const [hpField, setHpField] = useState(""); // honeypot (nom non-sémantique, cf. schemas.ts)
   const [report, setReport] = useState<ComparatorScanReport | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -49,7 +49,7 @@ export function ComparatorForm() {
         brandName: brandName.trim(),
         sector: sector.trim(),
         websiteDomain: websiteDomain.trim().toLowerCase() || "",
-        company,
+        hpField,
       });
       if (!result.ok) {
         setError(result.message);
@@ -121,17 +121,19 @@ export function ComparatorForm() {
         </Field>
       </div>
 
-      {/* Honeypot anti-bot : invisible pour les humains, rempli par les bots. */}
+      {/* Honeypot anti-bot : invisible pour les humains, rempli par les bots.
+       * Nom non-sémantique pour ne pas déclencher l'autofill navigateur
+       * (« company » était rempli par Chrome → faux positifs). */}
       <div aria-hidden className="absolute -left-[9999px] top-auto h-px w-px overflow-hidden">
         <label>
-          Entreprise
+          Ne pas remplir
           <input
             type="text"
-            name="company"
+            name="hp_field"
             tabIndex={-1}
             autoComplete="off"
-            value={company}
-            onChange={(e) => setCompany(e.target.value)}
+            value={hpField}
+            onChange={(e) => setHpField(e.target.value)}
           />
         </label>
       </div>
