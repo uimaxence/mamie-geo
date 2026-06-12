@@ -161,6 +161,19 @@ haut et l'entrée "2026-05-05 — Réponses aux 10 questions de bootstrap".
 
 ### Décisions enregistrées
 
+#### 2026-06-12 — Audit manuel 24 h supprimé : email de confirmation (essai/appel) + vente accompagnement partout
+
+**Contexte** : Max reçoit encore l'auto-reply « rapport sous 24 h ouvrées » (hérité du funnel d'origine) — promesse de travail humain gratuit qu'il ne veut plus tenir. Demande : un email de confirmation qui redirige « vers moi et/ou vers l'app », et la rareté des créneaux présentée en vente clean conforme DA.
+
+**Livré** :
+- **`sendAuditRequestEmails` + `submitAuditRequest` supprimés** (plus aucune promesse d'audit manuel gratuit nulle part : page, hub, upsell).
+- **`sendScanConfirmationEmail`** : email brandé au prospect après chaque scan (express ET comparateurs) — récap du résultat en objet (« {marque} : cité 2 fois sur 3 sur Le Chat »), CTA noir « Démarrer l'essai 14 jours » (`from=scan-email`) + encart bleu « Tu préfères déléguer ? » → /contact. Best effort, non bloquant.
+- **Vente clean des créneaux** : constantes centralisées dans `src/lib/done-for-you.ts` (`DFY_SLOTS_LEFT`/`DFY_SLOTS_PERIOD`, T3 2026 validé par Max) — affichées sur /pricing, en carte récap sur /contact (au-dessus du Cal), et en upsell sous les résultats des 2 scans (event `tool_cta_clicked` cta=call_max). Un seul fichier à éditer quand un créneau se vend.
+
+**Conséquence funnel** : chaque lead reçoit désormais systématiquement un artefact email avec les 2 portes (app / appel), au lieu de rien (scan seul) ou d'une dette de travail manuel (ex-audit 24 h).
+
+**À revisiter** : mesurer clics email (from=scan-email dans PostHog) vs upsell on-page ; si l'accompagnement se remplit, retirer les upsells ou afficher « complet pour T3 ».
+
 #### 2026-06-12 — Forms des scans réduits à site + email : profil (marque/secteur/zone de chalandise) détecté depuis la home
 
 **Contexte** : demande Max en fin de journée — « juste demander le site et le mail, le site s'assure de récupérer lui-même le secteur et la zone de chalandise (qui n'est parfois pas que la ville) ». Moins de friction = plus de scans ; et la zone de chalandise vit dans le CONTENU du site (« intervention dans tout le Maine-et-Loire »), pas seulement dans l'adresse du footer.

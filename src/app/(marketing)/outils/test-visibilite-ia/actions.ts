@@ -1,9 +1,8 @@
 "use server";
 
 import { headers } from "next/headers";
-import { z } from "zod";
 import { logCronEvent } from "@/lib/cron-logger";
-import { sendAuditRequestEmails, sendExpressScanLeadEmail } from "@/lib/email";
+import { sendExpressScanLeadEmail, sendScanConfirmationEmail } from "@/lib/email";
 import { env } from "@/lib/env";
 import {
   checkExpressRateLimit,
@@ -17,58 +16,12 @@ import { expressScanSchema, type ExpressScanInput } from "@/lib/express-scan/sch
 import type { ExpressScanResult } from "@/lib/express-scan/types";
 import { createMistralClient } from "@/lib/llm/mistral";
 import { captureServerEvent, identifyServerUser } from "@/lib/posthog-server";
-import { normalizeDomainInput } from "@/lib/utils";
 
-// Server actions /outils/test-visibilite-ia (funnel refondu 2026-06-12,
-// doc 09) :
-//   - runExpressScanAction : scan express live — 3 prompts templates ×
-//     Le Chat (mistral-small) → verdict immédiat, les 4 autres IA sont
-//     verrouillées → CTA trial.
-//   - submitAuditRequest : audit manuel 24 h, devenu l'upsell post-scan
-//     (analyse humaine complète).
-
-const auditRequestSchema = z.object({
-  prospectEmail: z.string().email("Email invalide").max(120),
-  brandName: z.string().min(1, "Nom de marque requis").max(80),
-  domain: z
-    .string()
-    .min(3)
-    .max(120)
-    .regex(/^[a-z0-9.-]+\.[a-z]{2,}$/i, "Domaine invalide (ex: monsite.fr)"),
-  notes: z.string().max(1000).optional(),
-});
-
-export type AuditRequestInput = z.infer<typeof auditRequestSchema>;
-
-export type AuditRequestResult = { ok: true } | { ok: false; error: string };
-
-// Ne jamais `throw` ici : en prod, Next.js masque le message des erreurs
-// jetées par une server action derrière un « Server Components render »
-// générique — le prospect ne voyait jamais la vraie raison (bug constaté
-// 2026-06-12 avec une URL collée dans le champ domaine).
-export async function submitAuditRequest(raw: AuditRequestInput): Promise<AuditRequestResult> {
-  const parsed = auditRequestSchema.safeParse({
-    ...raw,
-    domain: normalizeDomainInput(typeof raw.domain === "string" ? raw.domain : ""),
-  });
-  if (!parsed.success) {
-    return { ok: false, error: parsed.error.issues[0]?.message ?? "Données invalides" };
-  }
-  const data = parsed.data;
-
-  try {
-    await sendAuditRequestEmails({
-      prospectEmail: data.prospectEmail.trim(),
-      brandName: data.brandName.trim(),
-      domain: data.domain,
-      notes: data.notes?.trim() || undefined,
-    });
-  } catch {
-    return { ok: false, error: "Erreur d'envoi, réessaye dans quelques minutes." };
-  }
-
-  return { ok: true };
-}
+// Server action /outils/test-visibilite-ia (funnel refondu 2026-06-12,
+// doc 09) : scan express live — 3 prompts templates × Le Chat
+// (mistral-small) → verdict immédiat, les 4 autres IA verrouillées →
+// CTA trial + appel découverte. L'audit manuel 24 h est supprimé
+// (remplacé par l'email de confirmation + upsell accompagnement).
 
 async function getIp(): Promise<string> {
   const hdrs = await headers();
@@ -182,6 +135,22 @@ export async function runExpressScanAction(raw: ExpressScanInput): Promise<Expre
     logCronEvent({
       level: "error",
       event: "express_scan_lead_email_failed",
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
+
+  // Confirmation au prospect : récap + essai 14 j + appel découverte.
+  try {
+    await sendScanConfirmationEmail({
+      prospectEmail: email,
+      brandName: brand,
+      resultSummary: `cité ${result.report.citedCount} fois sur ${result.report.totalPrompts} sur Le Chat`,
+      toolLabel: "scan express visibilité IA",
+    });
+  } catch (error) {
+    logCronEvent({
+      level: "error",
+      event: "express_scan_confirmation_email_failed",
       error: error instanceof Error ? error.message : String(error),
     });
   }

@@ -50,7 +50,7 @@ const TOOLS: Tool[] = [
     bullets: [
       "Site + email, le reste est détecté automatiquement",
       "Verdict immédiat : cité ou pas, à quelle position",
-      "Option : audit complet 5 IA fait à la main, sous 24 h",
+      "Récap par email + appel découverte avec le fondateur si tu veux déléguer",
     ],
     meta: "~20 secondes · IA interrogée en direct",
   },

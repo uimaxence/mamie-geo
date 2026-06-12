@@ -2,15 +2,13 @@
 
 import { Check } from "lucide-react";
 import { Badge, LinkButton, Section } from "@/components/ui";
+import { DFY_SLOTS_BADGE, DFY_SLOTS_LEFT } from "@/lib/done-for-you";
 import { capture } from "@/lib/posthog-client";
 
 // Offre « accompagnement done-for-you » (2026-06-12, doc 09) : Max
-// s'occupe personnellement du SEO + GEO du client. Rareté réelle (le
-// temps fondateur ne scale pas) : nombre de créneaux par trimestre,
-// constantes à mettre à jour à la main quand un créneau se vend.
-
-const SLOTS_LEFT = 3;
-const SLOTS_PERIOD = "T3 2026";
+// s'occupe personnellement du SEO + GEO du client. Rareté centralisée
+// dans src/lib/done-for-you.ts (affichée aussi sur /contact et les
+// upsells des scans).
 
 const INCLUSIONS = [
   "Audit complet SEO + GEO de ton site et de ta présence dans les 5 IA",
@@ -26,7 +24,7 @@ export function PricingDoneForYou() {
       <div className="mx-auto max-w-4xl">
         <div className="relative rounded-[var(--radius-xl)] border-2 border-[color:var(--color-ink)] bg-white p-6 sm:p-10">
           <Badge tone="accent" className="absolute -top-3 left-6 px-2.5 py-1">
-            {SLOTS_LEFT} créneaux disponibles · {SLOTS_PERIOD}
+            {DFY_SLOTS_BADGE}
           </Badge>
 
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2 md:items-start">
@@ -39,7 +37,7 @@ export function PricingDoneForYou() {
                 l&apos;audit à l&apos;implémentation, jusqu&apos;à ce que les IA te citent.
               </p>
               <p className="type-meta mt-4">
-                Sur devis, engagement trimestriel. {SLOTS_LEFT} marques maximum par trimestre — je
+                Sur devis, engagement trimestriel. {DFY_SLOTS_LEFT} marques maximum par trimestre — je
                 fais le travail moi-même, pas une équipe offshore.
               </p>
               <LinkButton
@@ -48,7 +46,7 @@ export function PricingDoneForYou() {
                 size="lg"
                 className="mt-6"
                 onClick={() =>
-                  capture("pricing_done_for_you_cta_clicked", { slots_left: SLOTS_LEFT })
+                  capture("pricing_done_for_you_cta_clicked", { slots_left: DFY_SLOTS_LEFT })
                 }
               >
                 Réserver un appel découverte

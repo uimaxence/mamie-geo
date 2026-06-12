@@ -126,7 +126,11 @@ Cibles V1 : porter `vs Profound` en landing dédiée si traction ; `vs Goodie` (
 `/outils/test-visibilite-ia` (route `(marketing)`, moteur `src/lib/express-scan/`).
 Décision : doc 09 § 2026-06-12 (refonte funnel). Le n°1bis « scan
 express » est **tranché et fusionné ici** : le scan live est devenu le
-funnel principal, l'audit manuel 24 h est l'upsell post-scan.
+funnel principal. **L'audit manuel 24 h est supprimé** (2026-06-12 au
+soir) — remplacé par un email de confirmation au prospect
+(`sendScanConfirmationEmail`, récap + CTA essai 14 j + CTA appel
+découverte /contact) et un upsell accompagnement done-for-you sous les
+résultats des 2 scans.
 
 - **UX** (simplifiée 2026-06-12 au soir) : **site + email seulement** —
   marque, secteur et zone de chalandise sont détectés depuis la home
@@ -137,19 +141,20 @@ funnel principal, l'audit manuel 24 h est l'upsell post-scan.
   verdict immédiat par question (cité/absent, position, marques que
   l'IA recommande à la place) → bloc « les 4 autres IA » **verrouillé**
   (pas de fausses données floutées — argument variance ×8 de l'étude)
-  → CTA trial. Puis upsell « analyse humaine complète » : 1 champ
-  (site) → `submitAuditRequest` (audit manuel 24 h, inchangé côté ops).
+  → CTA trial. Puis upsell accompagnement done-for-you (3 créneaux/
+  trimestre, → /contact).
 - **Verdict cité/absent** : regex `detectMentions` (la même que le
   tracking) OU jugement de l'appel d'extraction Mistral — attrape les
   variantes de nom (« BoursoBank » vs « Boursorama Banque », faux
   négatif constaté au premier test réel).
 - **Coût** : 3 réponses mistral-small + 1 extraction ≈ 0,002 €/scan.
   Cap 50 scans/jour + 5/h/IP + cache 24 h marque×secteur (in-memory).
-- **Lead** : notification interne hello@ + events PostHog
-  (`public_express_scan_completed`, `tool_lead_form_submitted` modes
-  `express` / `manual-followup`).
-- Cible inchangée : conversion vers trial en premier, audit manuel
-  (10-20 % de conversion) en filet.
+- **Lead** : notification interne hello@ + **email de confirmation au
+  prospect** (récap + essai 14 j + appel découverte) + events PostHog
+  (`public_express_scan_completed`, `tool_lead_form_submitted`,
+  `tool_cta_clicked` dont `call_max`).
+- Conversion : trial en premier, accompagnement done-for-you en filet
+  haut de gamme.
 
 ### Lead magnet n°2 — « Audit technique site » (sans LLM)
 

@@ -4,7 +4,7 @@ import { headers } from "next/headers";
 import { db } from "@/db/client";
 import { comparatorScans } from "@/db/schema";
 import { logCronEvent } from "@/lib/cron-logger";
-import { sendComparatorLeadEmail } from "@/lib/email";
+import { sendComparatorLeadEmail, sendScanConfirmationEmail } from "@/lib/email";
 import { env } from "@/lib/env";
 import { createBraveSearch } from "@/lib/comparators/brave";
 import { enrichChecks } from "@/lib/comparators/enrich";
@@ -166,6 +166,22 @@ export async function runComparatorScanAction(
     logCronEvent({
       level: "error",
       event: "comparator_lead_email_failed",
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
+
+  // Confirmation au prospect : récap + essai 14 j + appel découverte.
+  try {
+    await sendScanConfirmationEmail({
+      prospectEmail: email,
+      brandName: brand,
+      resultSummary: `présent sur ${result.report.presentCount} des ${result.report.totalChecked} sites vérifiés`,
+      toolLabel: "scan comparateurs",
+    });
+  } catch (error) {
+    logCronEvent({
+      level: "error",
+      event: "comparator_scan_confirmation_email_failed",
       error: error instanceof Error ? error.message : String(error),
     });
   }

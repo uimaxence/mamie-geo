@@ -1,20 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useTransition } from "react";
 import { CheckCircle2, Lock, XCircle } from "lucide-react";
-import { Badge, Button, Field, Input, LinkButton, ScoreRing } from "@/components/ui";
+import { Badge, Button, LinkButton, ScoreRing } from "@/components/ui";
+import { DFY_SLOTS_BADGE } from "@/lib/done-for-you";
 import { capture } from "@/lib/posthog-client";
 import { normalizeText } from "@/lib/comparators/sectors";
 import type { ExpressPromptResult, ExpressScanReport } from "@/lib/express-scan/types";
-import { submitAuditRequest } from "./actions";
 
 // Écran de résultat du scan express : verdict par question sur Le Chat
 // (en clair, ScoreRing — même composant que le rapport d'audit de
 // l'app, cohérence DA), puis les 4 autres IA verrouillées et CLIQUABLES
 // vers le funnel signup (on ne floute pas de fausses données, on
 // verrouille avec l'argument variance ×8 de l'étude), puis upsell
-// audit manuel 24 h. Chaque CTA émet un event PostHog `tool_cta_clicked`.
+// accompagnement done-for-you (l'audit manuel 24 h est supprimé,
+// 2026-06-12 doc 09). Chaque CTA émet un event `tool_cta_clicked`.
 
 const LOCKED_LLMS = ["ChatGPT", "Claude", "Gemini", "Perplexity"];
 const SIGNUP_HREF = "/login?mode=signup&from=scan-express";
@@ -31,14 +31,10 @@ const POSITION_LABEL: Record<string, string> = {
 
 export function ExpressScanResults({
   report,
-  email,
-  websiteDomain,
   onReset,
   onEdit,
 }: {
   report: ExpressScanReport;
-  email: string;
-  websiteDomain: string;
   onReset: () => void;
   /** Repasse le form en mode manuel pré-rempli (corriger marque/secteur/zone détectés). */
   onEdit: () => void;
@@ -105,8 +101,8 @@ export function ExpressScanResults({
         </div>
       </div>
 
-      {/* Upsell audit manuel */}
-      <ManualAuditUpsell report={report} email={email} websiteDomain={websiteDomain} />
+      {/* Upsell accompagnement done-for-you */}
+      <AccompagnementUpsell />
 
       <div className="mt-6 flex items-center justify-center gap-2">
         <Button variant="ghost" size="sm" onClick={onEdit}>
@@ -167,86 +163,29 @@ function PromptCard({ result, brand }: { result: ExpressPromptResult; brand: str
   );
 }
 
-// Le rapport manuel 24 h (ex-funnel principal) devient l'upsell : un
-// clic si le domaine est déjà connu, sinon un seul champ à remplir.
-function ManualAuditUpsell({
-  report,
-  email,
-  websiteDomain,
-}: {
-  report: ExpressScanReport;
-  email: string;
-  websiteDomain: string;
-}) {
-  const [domain, setDomain] = useState(websiteDomain);
-  const [status, setStatus] = useState<"idle" | "sent" | "error">("idle");
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [pending, startTransition] = useTransition();
-
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setErrorMessage(null);
-    startTransition(async () => {
-      const result = await submitAuditRequest({
-        prospectEmail: email,
-        brandName: report.brand,
-        domain: domain.trim(),
-        notes: `Demande issue du scan express — secteur « ${report.sector} », cité ${report.citedCount}/${report.totalPrompts} sur Le Chat.`,
-      });
-      if (!result.ok) {
-        setStatus("error");
-        setErrorMessage(result.error);
-        return;
-      }
-      capture("tool_lead_form_submitted", {
-        tool: "test-visibilite-ia",
-        mode: "manual-followup",
-        brand_name: report.brand,
-      });
-      setStatus("sent");
-    });
-  }
-
-  if (status === "sent") {
-    return (
-      <div className="mt-6 rounded-[var(--radius-xl)] border border-[color:var(--color-success)]/20 bg-[color:var(--color-success-bg)] p-6 text-center">
-        <p className="type-h3 text-[color:var(--color-success)]">Audit demandé ✓</p>
-        <p className="mt-2 text-sm text-[color:var(--color-ink-soft)]">
-          Tu recevras l&apos;analyse complète des 5 IA, faite à la main, sous 24 h ouvrées à{" "}
-          <strong>{email}</strong>.
-        </p>
-      </div>
-    );
-  }
-
+// Upsell accompagnement : même offre que /pricing (vente clean, DA —
+// card bordure ink, rareté réelle, CTA secondaire vers /contact).
+function AccompagnementUpsell() {
   return (
     <div className="mt-6 rounded-[var(--radius-xl)] border border-[color:var(--color-border)] bg-[color:var(--color-gray-50)] p-6 sm:p-8">
-      <h3 className="type-h3">Tu préfères une analyse humaine complète ?</h3>
+      <div className="flex flex-wrap items-center gap-2">
+        <h3 className="type-h3">Tu préfères déléguer&nbsp;?</h3>
+        <Badge tone="accent">{DFY_SLOTS_BADGE}</Badge>
+      </div>
       <p className="type-body mt-2">
-        On lance le même test sur les 5 IA, à la main : 5 questions de ton secteur, comparatif
-        avec 3 concurrents, 3 actions concrètes. Gratuit, par email sous 24 h ouvrées.
+        Je m&apos;occupe personnellement du SEO + GEO de quelques marques par trimestre — de
+        l&apos;audit à l&apos;implémentation, jusqu&apos;à ce que les IA te citent. On en parle
+        30&nbsp;minutes, gratuitement, sans pitch commercial.
       </p>
-      <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end">
-        <Field label="Ton site" className="flex-1">
-          <Input
-            type="text"
-            inputMode="url"
-            placeholder="monsite.fr"
-            value={domain}
-            onChange={(e) => setDomain(e.target.value)}
-            maxLength={120}
-            required
-          />
-        </Field>
-        <Button type="submit" variant="secondary" size="md" disabled={pending}>
-          {pending ? "Envoi…" : "Recevoir l'audit complet"}
-        </Button>
-      </form>
-      {status === "error" && errorMessage && (
-        <p className="mt-3 rounded-[var(--radius-md)] bg-[color:var(--color-error-bg)] px-3 py-2 text-sm text-[color:var(--color-error)]">
-          {errorMessage}
-        </p>
-      )}
+      <LinkButton
+        href="/contact"
+        variant="secondary"
+        size="md"
+        className="mt-4 whitespace-nowrap"
+        onClick={() => trackCta("call_max")}
+      >
+        Réserver un appel découverte
+      </LinkButton>
     </div>
   );
 }

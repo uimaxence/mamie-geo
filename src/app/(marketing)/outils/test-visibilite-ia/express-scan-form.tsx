@@ -107,15 +107,7 @@ export function ExpressScanForm() {
   }
 
   if (report) {
-    return (
-      <ExpressScanResults
-        report={report}
-        email={email.trim()}
-        websiteDomain={websiteDomain.trim()}
-        onReset={handleReset}
-        onEdit={handleEdit}
-      />
-    );
+    return <ExpressScanResults report={report} onReset={handleReset} onEdit={handleEdit} />;
   }
 
   return (

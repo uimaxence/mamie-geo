@@ -33,7 +33,7 @@ const INCLUSIONS = [
   "3 questions de ton secteur posées à une IA, en direct",
   "Verdict immédiat : cité ou pas, à quelle position",
   "Les marques que l'IA recommande à ta place",
-  "Option : audit complet 5 IA fait à la main, sous 24 h",
+  "Récap par email + les deux suites possibles : app ou accompagnement",
   "Gratuit, sans carte bancaire",
 ];
 
@@ -101,9 +101,9 @@ export default function TestVisibiliteIAPage() {
           <h2 className="type-h1 mt-3">Pas de paywall, pas de carte bancaire.</h2>
           <p className="type-body-lg mt-6 max-w-prose">
             On veut que tu voies le niveau de qualité de Mamie GEO avant de t&apos;abonner. Le scan
-            express est limité à 1 par marque et par jour ; si tu veux l&apos;analyse complète des
-            5 IA, l&apos;audit manuel reste gratuit, et le suivi quotidien démarre à 9,99 €/mois —
-            essai 14 jours, garantie remboursement 14 jours.
+            express est limité à 1 par marque et par jour. Pour les 5 IA et le suivi quotidien,
+            l&apos;app démarre à 9,99 €/mois — essai 14 jours, garantie remboursement 14 jours. Et
+            si tu préfères déléguer, Max prend quelques marques par trimestre en accompagnement.
           </p>
         </div>
       </Section>

@@ -441,145 +441,89 @@ function escapeHtml(s: string): string {
     .replace(/'/g, "&#39;");
 }
 
-export async function sendAuditRequestEmails(params: {
+
+/**
+ * Email de confirmation au PROSPECT après un scan gratuit (express ou
+ * comparateurs) — remplace l'ancien auto-reply « audit manuel sous
+ * 24 h » (supprimé 2026-06-12, doc 09). Deux portes de sortie : l'app
+ * (essai 14 j) et l'appel découverte avec Max (/contact).
+ */
+export async function sendScanConfirmationEmail(params: {
   prospectEmail: string;
-  domain: string;
   brandName: string;
-  notes?: string;
+  /** Ex : « cité 2 fois sur 3 sur Le Chat » / « présent sur 5 des 8 sites vérifiés ». */
+  resultSummary: string;
+  /** Ex : « scan express visibilité IA » / « scan comparateurs ». */
+  toolLabel: string;
 }) {
-  const { prospectEmail, domain, brandName, notes } = params;
-  const backend = pickBackend();
-
-  // Email interne (notification à hello@) reste en plain text — pas de
-  // valeur de styling pour Max qui le lit en interne.
-  const internalSubject = `[Audit gratuit] ${brandName} (${domain})`;
-  const internalText = `Demande d'audit gratuit depuis /outils/test-visibilite-ia
-
-Prospect : ${prospectEmail}
-Marque   : ${brandName}
-Domaine  : ${domain}
-${notes ? `\nNotes du prospect :\n${notes}\n` : ""}
-À traiter sous 24h ouvrées. Envoyer le rapport directement à ${prospectEmail}.`;
-
-  // Email prospect : HTML inline branded + text fallback. Pattern
-  // aligné sur sendMagicLinkEmail (logo SVG inline, card blanche,
-  // gradient halo subtil). Corrections 2026-05-27 :
-  //   - Avant : "7 jours d'essai sans carte" (mensonger, on n'a pas
-  //     de trial auto) → Après : "garantie remboursement 14 jours"
-  //   - Avant : plain text seul → Après : HTML branded + fallback
-  //   - Lien direct vers /login?mode=signup (intention claire)
-  const replySubject = "On a bien reçu ta demande d'audit Mamie GEO";
+  const { prospectEmail, brandName, resultSummary, toolLabel } = params;
   const safeBrand = escapeHtml(brandName);
-  const safeDomain = escapeHtml(domain);
-  const replyText = `Salut,
+  const safeSummary = escapeHtml(resultSummary);
 
-Merci pour ta demande d'audit gratuit de visibilité IA pour ${brandName} (${domain}).
+  const subject = `${brandName} : ${resultSummary}`;
+  const text = `Salut,
 
-On te prépare un rapport personnalisé qui couvre :
-- Ta visibilité sur ChatGPT, Claude, Perplexity, Gemini et Le Chat
-- Les 5 prompts critiques sur lesquels mesurer
-- Tes 3 concurrents directs et leur score
-- Les 3 actions concrètes pour améliorer ton score
+Merci d'avoir testé le ${toolLabel} de Mamie GEO pour ${brandName}.
 
-Tu recevras le rapport sous 24h ouvrées dans cette boîte.
+Ton résultat : ${resultSummary}.
+
+Deux façons d'aller plus loin :
+
+1. Suivre ta visibilité dans les 5 IA (ChatGPT, Claude, Perplexity, Gemini, Le Chat), tous les jours, avec l'évolution de ton rang face à tes concurrents — essai 14 jours :
+https://mamie-geo.fr/login?mode=signup&from=scan-email
+
+2. Tu préfères déléguer ? Je m'occupe personnellement du SEO + GEO de quelques marques par trimestre, de l'audit à l'implémentation. On en parle 30 minutes, gratuitement :
+https://mamie-geo.fr/contact
 
 À très vite,
-— Max, Mamie GEO
+— Max, fondateur de Mamie GEO
 
-PS : si tu veux aller plus vite, tu peux créer un compte directement (garantie remboursement 14 jours, annulable en 1 clic) : https://mamie-geo.fr/login?mode=signup`;
+PS : une question sur ton résultat ? Réponds simplement à cet email.`;
 
-  const replyHtml = `<!doctype html>
+  const html = `<!doctype html>
 <html lang="fr">
   <body style="margin:0;padding:24px;background:#fafafa;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;color:#191919;">
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;margin:0 auto;background:#fff;border-radius:12px;border:1px solid #e6e6e6;">
       <tr><td style="padding:32px;">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:24px;">
+        <div style="margin-bottom:24px;">
           <svg width="32" height="32" viewBox="0 0 541 524" xmlns="http://www.w3.org/2000/svg" aria-label="Mamie GEO" role="img" style="display:inline-block;vertical-align:middle;">
             <path d="M507.944 18.6203L460.634 141.219C458.596 146.499 453.52 149.981 447.861 149.981H269.31C237.156 149.981 169.239 167.095 154.801 235.551C142.532 293.726 174.786 332.8 200.347 350.863C206.857 355.464 215.508 352.141 218.46 344.736L282.364 184.429C284.44 179.223 289.478 175.808 295.082 175.808H527.264C534.826 175.808 540.956 181.937 540.956 189.499V510.309C540.956 517.87 534.826 524 527.264 524H401.243C393.682 524 387.552 517.87 387.552 510.309V409.912C387.552 394.802 366.672 390.831 361.125 404.886L317.537 515.335C315.473 520.564 310.423 524 304.801 524H238.193C135.198 520.577 -35.9424 407.936 6.68714 196.656C44.0268 48.8527 181.146 1.24466 238.193 0H495.17C504.785 0 511.405 9.65028 507.944 18.6203Z" fill="#329CFF"/>
           </svg>
-          <span style="font-size:17px;font-weight:600;letter-spacing:-0.01em;vertical-align:middle;">Mamie GEO</span>
+          <span style="font-size:17px;font-weight:600;letter-spacing:-0.01em;vertical-align:middle;margin-left:10px;">Mamie GEO</span>
         </div>
 
-        <h1 style="margin:0 0 16px;font-size:22px;font-weight:700;letter-spacing:-0.01em;">Demande reçue&nbsp;✓</h1>
+        <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;letter-spacing:-0.01em;">Ton résultat pour ${safeBrand}</h1>
         <p style="margin:0 0 24px;font-size:15px;line-height:1.6;color:#404040;">
-          Merci pour ta demande d&apos;audit gratuit pour <strong>${safeBrand}</strong> (<span style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14px;color:#191919;">${safeDomain}</span>).
+          ${safeSummary} — c'est ce que tes prospects voient quand ils demandent une recommandation à une IA, aujourd'hui.
         </p>
 
-        <p style="margin:0 0 12px;font-size:14px;font-weight:600;color:#191919;">On te prépare un rapport personnalisé qui couvre&nbsp;:</p>
-        <ul style="margin:0 0 24px;padding-left:20px;font-size:14px;line-height:1.7;color:#404040;">
-          <li>Ta visibilité sur <strong>ChatGPT, Claude, Perplexity, Gemini et Le Chat</strong></li>
-          <li>Les <strong>5 prompts critiques</strong> sur lesquels mesurer</li>
-          <li>Tes <strong>3 concurrents directs</strong> et leur score</li>
-          <li>Les <strong>3 actions concrètes</strong> pour améliorer ton score</li>
-        </ul>
-
-        <div style="margin:24px 0;padding:16px 18px;background:#f8f8f8;border-left:3px solid #191919;border-radius:6px;">
-          <p style="margin:0;font-size:14px;line-height:1.55;color:#191919;">
-            ⏱️ <strong>Délai&nbsp;:</strong> tu recevras le rapport sous <strong>24h ouvrées</strong> directement dans cette boîte.
-          </p>
-        </div>
-
-        <p style="margin:32px 0 0;font-size:15px;line-height:1.6;color:#191919;">
-          À très vite,<br />
-          — Max, Mamie GEO
+        <p style="margin:0 0 12px;font-size:14px;font-weight:600;color:#191919;">La suite logique&nbsp;:</p>
+        <p style="margin:0 0 20px;font-size:14px;line-height:1.6;color:#404040;">
+          Suis ta visibilité dans les <strong>5 IA</strong> tous les jours — qui est cité, à quelle position, et ton rang face à tes concurrents.
+        </p>
+        <p style="margin:0 0 28px;">
+          <a href="https://mamie-geo.fr/login?mode=signup&from=scan-email" style="display:inline-block;background:#191919;color:#fff;text-decoration:none;padding:12px 22px;border-radius:9999px;font-weight:500;font-size:14px;">Démarrer l'essai 14 jours →</a>
         </p>
 
-        <!-- CTA secondaire : créer un compte tout de suite -->
-        <div style="margin:32px 0 0;padding:18px;background:linear-gradient(135deg,rgba(50,156,255,0.10) 0%,rgba(50,156,255,0.04) 100%);border-radius:10px;">
-          <p style="margin:0 0 4px;font-size:13px;font-weight:600;color:#191919;">Tu veux aller plus vite&nbsp;?</p>
+        <div style="padding:18px;background:linear-gradient(135deg,rgba(50,156,255,0.10) 0%,rgba(50,156,255,0.04) 100%);border-radius:10px;">
+          <p style="margin:0 0 4px;font-size:13px;font-weight:600;color:#191919;">Tu préfères déléguer&nbsp;?</p>
           <p style="margin:0 0 12px;font-size:13px;line-height:1.55;color:#525252;">
-            Crée ton compte maintenant. Premier rapport en moins de 10&nbsp;minutes, garantie remboursement 14&nbsp;jours, annulable en 1 clic.
+            Je m'occupe personnellement du SEO + GEO de quelques marques par trimestre, de l'audit à l'implémentation. On en parle 30&nbsp;minutes, gratuitement.
           </p>
           <p style="margin:0;">
-            <a href="https://mamie-geo.fr/login?mode=signup" style="display:inline-block;background:#191919;color:#fff;text-decoration:none;padding:10px 18px;border-radius:8px;font-weight:500;font-size:14px;">Créer mon compte →</a>
+            <a href="https://mamie-geo.fr/contact" style="display:inline-block;background:#fff;color:#191919;text-decoration:none;padding:10px 18px;border-radius:9999px;font-weight:500;font-size:13px;border:1px solid #d4d4d4;">Réserver un appel découverte →</a>
           </p>
         </div>
 
-        <p style="margin:32px 0 0;padding-top:20px;border-top:1px solid #efefef;font-size:12px;color:#737373;line-height:1.55;">
-          Une question&nbsp;? Réponds simplement à cet email, on regarde sous 24h.
+        <p style="margin:28px 0 0;padding-top:20px;border-top:1px solid #efefef;font-size:12px;color:#737373;line-height:1.55;">
+          Une question sur ton résultat&nbsp;? Réponds simplement à cet email.<br />— Max, fondateur de Mamie GEO
         </p>
       </td></tr>
     </table>
   </body>
 </html>`;
 
-  try {
-    if (backend === "rest") {
-      await sendViaRest({
-        to: [{ email: "hello@mamie-geo.fr" }],
-        replyTo: { email: prospectEmail },
-        subject: internalSubject,
-        textContent: internalText,
-      });
-      await sendViaRest({
-        to: [{ email: prospectEmail }],
-        subject: replySubject,
-        textContent: replyText,
-        htmlContent: replyHtml,
-      });
-    } else {
-      await sendViaSmtp({
-        to: "hello@mamie-geo.fr",
-        replyTo: prospectEmail,
-        subject: internalSubject,
-        text: internalText,
-      });
-      await sendViaSmtp({
-        to: prospectEmail,
-        subject: replySubject,
-        text: replyText,
-        html: replyHtml,
-      });
-    }
-    console.info(
-      `[email] audit request envoyé pour ${brandName} (${domain}) → ${prospectEmail} via ${backend.toUpperCase()}`,
-    );
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    console.error(`[email] échec envoi audit request pour ${prospectEmail} : ${message}`);
-    if (error instanceof Error && error.stack) console.error(error.stack);
-    throw new Error(`Envoi demande d'audit échoué : ${message}`);
-  }
+  await sendTransactional({ to: prospectEmail, subject, text, html });
 }
 
 /**

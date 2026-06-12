@@ -322,13 +322,16 @@ plan dans `src/lib/plans/quotas.ts`) :
 **Marketing/blog** : home, pricing, 4 pages légales, 3 lead magnets
 (`/outils/test-visibilite-ia` scan express live 2026-06-12 : 3 prompts
 × Le Chat mistral-small ~0,002 €/scan, verdict regex OU jugement LLM
-des variantes de nom, 4 autres IA verrouillées → CTA trial, audit
-manuel 24 h en upsell post-scan ; `/outils/audit-technique` 30+ checks
+des variantes de nom, 4 autres IA verrouillées → CTA trial, upsell
+accompagnement done-for-you (rareté centralisée
+`src/lib/done-for-you.ts`) ; `/outils/audit-technique` 30+ checks
 SEO/GEO + PSI, 0 € LLM, promu en home ;
 `/outils/comparateurs` scan présence comparateurs 2026-06-12 :
 vérification Brave Search API — `BRAVE_SEARCH_API_KEY` requise —,
 enrichissement Mistral Small ~0,0001 $/scan, scans persistés dans
-`comparator_scans`) + hub `/outils`
+`comparator_scans`. Chaque scan envoie au prospect un email de
+confirmation : essai 14 j + appel découverte ; l'audit manuel 24 h est
+supprimé) + hub `/outils`
 linké en nav « Outils gratuits » (pastille « Nouveau »). Blog MDX
 content-driven (`src/content/blog/*.mdx`, FAQPage JSON-LD, OG dynamique,
 related, TOC, sitemap auto) : 3 articles de fond + 3 comparatifs (Peec,
@@ -360,7 +363,8 @@ jour (opt-in implicite ePrivacy, sans banner).
 
 **Emails Brevo** : magic-link, welcome-paid, payment-failed, weekly
 recap (lundi 09:00 UTC), trial reminders/expired, audit-score-drop,
-newsletter blog.
+newsletter blog, confirmation scans publics (récap + essai 14 j +
+appel découverte ; l'auto-reply « audit 24 h » est supprimé).
 
 **Crons Vercel** (GET + POST, `Bearer CRON_SECRET`) : dispatch \*/5 min,
 schedule-runs 06:00, trial-emails 08:00, expire-past-due 03:00,

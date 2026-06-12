@@ -22,11 +22,16 @@ Blog `/blog`, newsletter, guides, études exclusives = freemium éditorial, grat
 
 ### Couche 2 — outil "Test ma visibilité IA" en one-shot gratuit
 
-`/outils/test-visibilite-ia` (livré) : email requis, domaine + 5 prompts, rapport score/position/concurrents/sources, CTA vers `/pricing`.
+`/outils/test-visibilite-ia` (refondu 2026-06-12, cf. doc 06 § n°1) :
+site + email → scan express live (3 prompts × Le Chat mistral-small,
+~0,002 €/scan, cap 50/jour) → verdict immédiat + 4 IA verrouillées →
+CTA trial + email de confirmation (essai 14 j / appel découverte).
+L'audit manuel 24 h est supprimé (2026-06-12) — pas de promesse de
+travail humain gratuit, l'humain est vendu via l'accompagnement
+done-for-you.
 
-- Coût : ~$0,20 par audit (5 prompts × 1 LLM, coût mesuré $0,04/run — l'estimation initiale $0,015 était pré-mesure). Cap 100/jour.
-- Conversion attendue : 5-10 % des audits → trial → 15-25 % en payant (~0,5-2,5 % audit → client).
-- C'est le pont média gratuit → SaaS payant.
+- Conversion attendue : 5-10 % des scans → trial → 15-25 % en payant.
+- C'est le pont média gratuit → SaaS payant (+ filet accompagnement).
 
 Second one-shot gratuit : `/outils/audit-technique` (30+ checks, 0 € LLM, cf. doc 06).
 
@@ -109,8 +114,9 @@ Pro inclus, point mensuel + rapport d'évolution du rang.
 
 - **Rareté réelle** : 3 créneaux max par trimestre (le temps fondateur
   ne scale pas) — affichée sur `/pricing` (section dédiée sous les
-  plans), constantes `SLOTS_LEFT` / `SLOTS_PERIOD` dans
-  `pricing-done-for-you.tsx` à décrémenter à la main à chaque vente.
+  plans), constantes `DFY_SLOTS_LEFT` / `DFY_SLOTS_PERIOD` centralisées dans
+  `src/lib/done-for-you.ts` (affichées sur /pricing, /contact et les
+  upsells des 2 scans) à décrémenter à la main à chaque vente.
 - **Funnel** : `/pricing` → `/contact` (Cal.com inline, appel
   découverte 30 min gratuit). Event PostHog
   `pricing_done_for_you_cta_clicked`.
