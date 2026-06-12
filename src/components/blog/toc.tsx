@@ -5,10 +5,13 @@ import { useEffect, useState } from "react";
 // Table of Contents sticky desktop, extraction des h2/h3 directement
 // depuis le DOM rendu (les ids sont posés par `rehype-slug`).
 //
-// Le scan DOM se fait via un useState lazy initializer (pas via useEffect)
-// pour respecter la règle `react-hooks/set-state-in-effect`. Comme c'est
-// "use client", le code tourne après hydration et le DOM est dispo.
-// useEffect ne fait QUE l'IntersectionObserver pour le highlight actif.
+// Le scan DOM se fait dans un useEffect APRÈS mount, pas dans un lazy
+// initializer useState : sinon le serveur rend `null` (pas de `document`)
+// pendant que le client trouve les headings, ce qui crée un mismatch
+// d'hydratation et React conserve la sortie serveur vide (TOC invisible).
+// Avec l'effet, le 1er render SSR et le 1er render client sont identiques
+// (vides), puis l'état se remplit. Le 2e effet gère l'IntersectionObserver
+// pour le highlight actif.
 
 interface Heading {
   id: string;
@@ -29,8 +32,18 @@ function parseHeadings(): Heading[] {
 }
 
 export function TOC() {
-  const [headings] = useState<Heading[]>(() => parseHeadings());
-  const [activeId, setActiveId] = useState<string | null>(() => parseHeadings()[0]?.id ?? null);
+  const [headings, setHeadings] = useState<Heading[]>([]);
+  const [activeId, setActiveId] = useState<string | null>(null);
+
+  // Parse le DOM après mount (le contenu MDX est déjà rendu côté serveur,
+  // donc présent dès le 1er render client). C'est un cas légitime de
+  // synchronisation depuis un système externe (le DOM), d'où le disable.
+  useEffect(() => {
+    const parsed = parseHeadings();
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- lecture DOM post-mount, voir commentaire d'en-tête
+    setHeadings(parsed);
+    setActiveId(parsed[0]?.id ?? null);
+  }, []);
 
   useEffect(() => {
     if (headings.length === 0) return;
