@@ -2,6 +2,7 @@
 
 import { Check } from "lucide-react";
 import { Badge, LinkButton, Section } from "@/components/ui";
+import { FounderPortrait } from "@/components/marketing/founder-portrait";
 import { DFY_SLOTS_BADGE, DFY_SLOTS_LEFT } from "@/lib/done-for-you";
 import { capture } from "@/lib/posthog-client";
 
@@ -31,10 +32,19 @@ export function PricingDoneForYou() {
             <div>
               <span className="type-eyebrow">Accompagnement</span>
               <h2 className="type-h1 mt-3">Tu préfères déléguer&nbsp;? Je m&apos;en occupe.</h2>
+              <div className="mt-5 flex items-center gap-4">
+                <FounderPortrait size={72} />
+                <div>
+                  <p className="text-sm font-semibold text-[color:var(--color-ink)]">
+                    Maxence Cailleau
+                  </p>
+                  <p className="type-meta">Fondateur de Mamie GEO</p>
+                </div>
+              </div>
               <p className="type-body mt-4">
-                Je suis Max, le fondateur de Mamie GEO. Pour quelques clients par trimestre, je
-                prends en main personnellement la visibilité SEO + GEO d&apos;une marque : de
-                l&apos;audit à l&apos;implémentation, jusqu&apos;à ce que les IA te citent.
+                Pour quelques clients par trimestre, je prends en main personnellement la
+                visibilité SEO + GEO d&apos;une marque : de l&apos;audit à l&apos;implémentation,
+                jusqu&apos;à ce que les IA te citent.
               </p>
               <p className="type-meta mt-4">
                 Sur devis, engagement trimestriel. {DFY_SLOTS_LEFT} marques maximum par trimestre — je

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { CheckCircle2, Lock, XCircle } from "lucide-react";
 import { Badge, Button, LinkButton, ScoreRing } from "@/components/ui";
+import { FounderPortrait } from "@/components/marketing/founder-portrait";
 import { DFY_SLOTS_BADGE } from "@/lib/done-for-you";
 import { capture } from "@/lib/posthog-client";
 import { normalizeText } from "@/lib/comparators/sectors";
@@ -168,12 +169,16 @@ function PromptCard({ result, brand }: { result: ExpressPromptResult; brand: str
 function AccompagnementUpsell() {
   return (
     <div className="mt-6 rounded-[var(--radius-xl)] border border-[color:var(--color-border)] bg-[color:var(--color-gray-50)] p-6 sm:p-8">
-      <div className="flex flex-wrap items-center gap-2">
-        <h3 className="type-h3">Tu préfères déléguer&nbsp;?</h3>
-        <Badge tone="accent">{DFY_SLOTS_BADGE}</Badge>
+      <div className="flex flex-wrap items-center gap-4">
+        <FounderPortrait size={56} />
+        <div className="flex flex-wrap items-center gap-2">
+          <h3 className="type-h3">Tu préfères déléguer&nbsp;?</h3>
+          <Badge tone="accent">{DFY_SLOTS_BADGE}</Badge>
+        </div>
       </div>
-      <p className="type-body mt-2">
-        Je m&apos;occupe personnellement du SEO + GEO de quelques marques par trimestre — de
+      <p className="type-body mt-3">
+        Moi c&apos;est Max, le fondateur. Je m&apos;occupe personnellement du SEO + GEO de
+        quelques marques par trimestre — de
         l&apos;audit à l&apos;implémentation, jusqu&apos;à ce que les IA te citent. On en parle
         30&nbsp;minutes, gratuitement, sans pitch commercial.
       </p>

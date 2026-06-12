@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Badge, Section } from "@/components/ui";
 import { DFY_SLOTS_BADGE } from "@/lib/done-for-you";
 import { CalContactEmbed } from "@/components/marketing/cal-contact-embed";
+import { FounderPortrait } from "@/components/marketing/founder-portrait";
 import { MarketingFooter } from "../_sections/marketing-footer";
 import { MarketingHeader } from "../_sections/marketing-header";
 
@@ -26,10 +27,19 @@ export default function ContactPage() {
             Accompagnement · appel découverte gratuit
           </Badge>
           <h1 className="type-display">Parlons de ta visibilité.</h1>
+          <div className="mt-8 flex flex-col items-center gap-3">
+            <FounderPortrait size={112} />
+            <p className="text-sm font-semibold text-[color:var(--color-ink)]">
+              Maxence Cailleau
+              <span className="font-normal text-[color:var(--color-ink-soft)]">
+                {" "}— fondateur de Mamie GEO
+              </span>
+            </p>
+          </div>
           <p className="type-body-lg mt-6">
-            30 minutes avec Max, le fondateur : on regarde ensemble où en est ta marque dans les
-            IA et dans Google, et si l&apos;accompagnement a du sens pour toi. Pas de pitch
-            commercial — si un de nos outils gratuits suffit, je te le dirai.
+            30 minutes ensemble : on regarde où en est ta marque dans les IA et dans Google, et si
+            l&apos;accompagnement a du sens pour toi. Pas de pitch commercial — si un de nos
+            outils gratuits suffit, je te le dirai.
           </p>
         </div>
 
