@@ -337,7 +337,9 @@ content-driven (`src/content/blog/*.mdx`, FAQPage JSON-LD, OG dynamique,
 related, TOC, sitemap auto) : 3 articles de fond + 3 comparatifs (Peec,
 Otterly, Rankscale). Newsletter Brevo prête (`BREVO_BLOG_LIST_ID`
 manquant). SEO : host canonique non-www, noindex `.vercel.app`,
-canonicals auto-référentes.
+canonicals auto-référentes, OG/Twitter cards site-wide (2026-06-12 :
+image statique `src/app/opengraph-image.tsx`, og:title hérité du title
+de chaque page via le root layout — le blog garde son OG dynamique).
 
 **Offre accompagnement done-for-you** (2026-06-12, doc 04) : section
 sur `/pricing` (3 créneaux/trimestre, constantes `SLOTS_LEFT`/

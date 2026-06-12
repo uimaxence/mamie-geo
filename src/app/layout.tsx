@@ -21,12 +21,23 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default: "Mamie GEO, Mesurer la visibilité de ta marque dans les IA",
+    default: "Mamie GEO, mesure la visibilité de ta marque dans les IA",
     template: "%s, Mamie GEO",
   },
   description:
-    "Le premier outil francophone de tracking et d'optimisation GEO. ChatGPT, Claude, Perplexity, Gemini et Le Chat. Hébergement EU, RGPD natif.",
+    "Sache si ChatGPT, Claude, Perplexity, Gemini et Le Chat citent ta marque, et comment progresser. Le premier outil GEO francophone, hébergé en Europe, RGPD natif.",
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "https://mamie-geo.fr"),
+  // Pas de title/description ici : Next les hérite du title/description
+  // résolus de chaque page (template inclus), donc chaque partage de lien
+  // affiche le titre de SA page — pas le H1 scrapé ni un titre global.
+  openGraph: {
+    type: "website",
+    siteName: "Mamie GEO",
+    locale: "fr_FR",
+  },
+  twitter: {
+    card: "summary_large_image",
+  },
 };
 
 // JSON-LD entité organisation + site, injecté côté <head>. Signal majeur
