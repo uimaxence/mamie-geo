@@ -70,6 +70,26 @@ export function ComparatorResults({
               IA reprennent l&apos;ordre et le vocabulaire de ces pages dans leurs réponses.
             </ActionStep>
           </ol>
+
+          {/* Conseils personnalisés (enrichissement Mistral, best effort). */}
+          {checks.some((c) => !c.present && c.inclusionHint) && (
+            <div className="mt-6 border-t border-[color:var(--color-border)] pt-5">
+              <p className="type-eyebrow">Site par site</p>
+              <ul className="mt-3 flex flex-col gap-2">
+                {checks
+                  .filter((c) => !c.present && c.inclusionHint)
+                  .map((c) => (
+                    <li
+                      key={c.domain}
+                      className="text-sm leading-relaxed text-[color:var(--color-ink-soft)]"
+                    >
+                      <strong className="text-[color:var(--color-ink)]">{c.label}</strong> —{" "}
+                      {c.inclusionHint}
+                    </li>
+                  ))}
+              </ul>
+            </div>
+          )}
         </div>
       )}
 
@@ -131,7 +151,10 @@ function CheckRow({ check }: { check: ComparatorCheck }) {
           <p className="truncate text-sm font-medium text-[color:var(--color-ink)]">
             {check.label}
           </p>
-          <p className="truncate text-xs text-[color:var(--color-faint)]">{check.domain}</p>
+          <p className="truncate text-xs text-[color:var(--color-faint)]">
+            {check.domain}
+            {check.siteType && ` · ${check.siteType}`}
+          </p>
         </div>
       </div>
       <div className="flex shrink-0 items-center gap-2">

@@ -161,6 +161,21 @@ haut et l'entrée "2026-05-05 — Réponses aux 10 questions de bootstrap".
 
 ### Décisions enregistrées
 
+#### 2026-06-12 — Scan comparateurs : enrichissement Mistral Small + persistance DB (DeepSeek refusé)
+
+**Contexte** : suite immédiate du lancement du scan comparateurs (entrée ci-dessous). Max propose d'utiliser un LLM « le moins cher » pour le free tool — y compris DeepSeek — et veut que les scans nourrissent notre base de données (niches, meilleurs sites, comment les cibles ressortent) pour améliorer le ranking long terme.
+
+**Options considérées** :
+- A : remplacer Brave par un LLM pour la vérification de présence — rejeté (hallucinations sans web search ; avec web search ≈ 0,04 $/req soit 8× Brave).
+- B : DeepSeek pour l'enrichissement — rejeté.
+- C : Mistral Small (`mistral-small-latest`, clé déjà en prod) pour classifier les sites + générer un conseil d'inclusion par site, et persister chaque scan en DB.
+
+**Choix** : C. **DeepSeek = anti-décision** : plus cher que Mistral Small (~0,27 $/M input vs ~0,10 $), provider supplémentaire à intégrer pour rien, et données de prospects FR sur serveurs chinois = contradiction frontale avec le positionnement « tout EU / RGPD » qui est un argument de vente (docs 00/01). Vaut pour tous les usages, free tools inclus.
+
+**Conséquences** : module `src/lib/comparators/enrich.ts` (JSON mode, ~0,0001 $/scan, best effort : tout échec → checks intacts) ; table `comparator_scans` (migration `0006_slimy_xorn`, doc 03) qui transforme chaque scan en donnée exploitable (agrégation par `sector_normalized` : niches demandées, sites dominants par secteur, taux de présence) — matière première de la typologie de sources (V1, doc 11) ; conseils « site par site » dans l'UI ; copy ajusté (« vérification par vraies recherches web », la vérification reste 0 LLM).
+
+**À revisiter** : exploiter `comparator_scans` (dashboard interne ou export) quand ≥ ~200 scans ; brancher la typologie accumulée dans l'onglet sources du SaaS (V1).
+
 #### 2026-06-12 — Lead magnet « Scan comparateurs » (/outils/comparateurs) + Brave Search API + nav « Outils gratuits »
 
 **Contexte** : priorité acquisition avant hard launch (demande Max : « il faut mettre le paquet sur l'acquisition »). L'enseignement n°1 de l'étude 50 marques (doc 11) — 32 % des sources citées par les IA sont des comparateurs, 1,7 % le site des marques — se prête à un free tool actionnable : « es-tu présent sur les sites que les IA citent ? ». Post LinkedIn de lancement prévu le jour même (article étude + tool). Cible PME/petites agences/freelances → secteur en champ libre, pas de jargon.

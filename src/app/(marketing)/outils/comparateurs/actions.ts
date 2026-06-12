@@ -1,10 +1,13 @@
 "use server";
 
 import { headers } from "next/headers";
+import { db } from "@/db/client";
+import { comparatorScans } from "@/db/schema";
 import { logCronEvent } from "@/lib/cron-logger";
 import { sendComparatorLeadEmail } from "@/lib/email";
 import { env } from "@/lib/env";
 import { createBraveSearch } from "@/lib/comparators/brave";
+import { enrichChecks } from "@/lib/comparators/enrich";
 import {
   checkScanRateLimit,
   getCachedScanReport,
@@ -13,6 +16,7 @@ import {
 } from "@/lib/comparators/cache";
 import { runComparatorScan } from "@/lib/comparators/scan";
 import { comparatorScanSchema, type ComparatorScanInput } from "@/lib/comparators/schemas";
+import { normalizeText } from "@/lib/comparators/sectors";
 import type { ComparatorScanResult } from "@/lib/comparators/types";
 import { captureServerEvent, identifyServerUser } from "@/lib/posthog-server";
 
@@ -82,7 +86,18 @@ export async function runComparatorScanAction(
       websiteDomain,
       search: createBraveSearch({ apiKey: env.BRAVE_SEARCH_API_KEY }),
     });
-    if (result.ok) storeScanReport(cacheKey, result.report);
+    if (result.ok) {
+      // Classification + conseils d'inclusion Mistral Small (~0,0001 $/scan),
+      // best effort : sans clé ou sur erreur, les checks restent intacts.
+      if (env.MISTRAL_API_KEY) {
+        result.report.checks = await enrichChecks({
+          apiKey: env.MISTRAL_API_KEY,
+          sector,
+          checks: result.report.checks,
+        });
+      }
+      storeScanReport(cacheKey, result.report);
+    }
   }
   const durationMs = Date.now() - startedAt;
 
@@ -106,6 +121,28 @@ export async function runComparatorScanAction(
     cacheHit: Boolean(cached),
     durationMs,
   });
+
+  // Persistance : chaque soumission alimente la base niches × sites ×
+  // présence (typologie de sources V1, intelligence par secteur) et
+  // sert de log de leads. Un échec DB ne bloque pas le résultat.
+  try {
+    await db.insert(comparatorScans).values({
+      email,
+      brandName: brand,
+      sector,
+      sectorNormalized: normalizeText(sector),
+      websiteDomain: websiteDomain ?? null,
+      presentCount: result.report.presentCount,
+      totalChecked: result.report.totalChecked,
+      checks: result.report.checks,
+    });
+  } catch (error) {
+    logCronEvent({
+      level: "error",
+      event: "comparator_scan_persist_failed",
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
 
   // Lead capturé : notification interne + identification PostHog. Un
   // échec d'email ne doit pas priver le prospect de son résultat.

@@ -238,7 +238,7 @@ provider actif si env var présente **et** `IMPLEMENTED_LLMS[llm] === true`.
 19 tables dans `src/db/schema.ts`, 3 groupes :
 
 1. **Auth** (Better Auth CLI) : `user`, `session`, `account`, `verification`
-2. **Métier** : `workspaces`, `workspace_members`, `brands`, `competitors`, `prompts`, `runs`, `citation_metrics_daily`, `prompt_cache`, `technical_audits`, `audit_counters`
+2. **Métier** : `workspaces`, `workspace_members`, `brands`, `competitors`, `prompts`, `runs`, `citation_metrics_daily`, `prompt_cache`, `technical_audits`, `audit_counters`, `comparator_scans`
 3. **Plomberie** : `queue_jobs`, `events`, `subscription_events`, `usage_counters`
 
 Migrations versionnées : `0000_many_human_torch` (schéma initial),
@@ -246,7 +246,8 @@ Migrations versionnées : `0000_many_human_torch` (schéma initial),
 (`technical_audits` + `audit_counters` + kind `audit_workspace_url`,
 2026-05-17), `0003_giant_jean_grey` (`brands.paused_at`, 2026-06-08),
 `0004_salty_molten_man` (funnel sources, 2026-06-08),
-`0005_per_prompt_cadence` (`prompts.cadence`, 2026-06-08).
+`0005_per_prompt_cadence` (`prompts.cadence`, 2026-06-08),
+`0006_slimy_xorn` (`comparator_scans`, 2026-06-12).
 
 ### Tables Better Auth
 
@@ -426,6 +427,28 @@ CREATE TABLE audit_counters (
   competitor_audits_count INTEGER NOT NULL DEFAULT 0,  -- quota séparé concurrents
   PRIMARY KEY (workspace_id, period_start)
 );
+
+-- Leads + données du free tool /outils/comparateurs (doc 06 § n°1ter).
+-- Pas de FK : table publique pré-signup. checks = ComparatorCheck[]
+-- (domaine, origine étude/recherche, présence, URL trouvée, type de
+-- site + conseil d'inclusion Mistral). Alimente la typologie de
+-- sources (V1) et l'intelligence par niche (agrégation par
+-- sector_normalized).
+CREATE TABLE comparator_scans (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email TEXT NOT NULL,
+  brand_name TEXT NOT NULL,
+  sector TEXT NOT NULL,
+  sector_normalized TEXT NOT NULL,
+  website_domain TEXT,
+  present_count INTEGER NOT NULL,
+  total_checked INTEGER NOT NULL,
+  checks JSONB NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX idx_comparator_scans_sector ON comparator_scans(sector_normalized);
+CREATE INDEX idx_comparator_scans_created ON comparator_scans(created_at);
+CREATE INDEX idx_comparator_scans_email ON comparator_scans(email);
 ```
 
 ### Tables plomberie

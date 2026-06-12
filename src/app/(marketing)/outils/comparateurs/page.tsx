@@ -20,7 +20,8 @@ export const maxDuration = 60;
 // l'enseignement n°1 de l'étude 50 marques (doc 11) : les IA citent
 // les comparateurs (32 % des sources), pas les sites de marque (1,7 %).
 // Cible PME / petites agences / freelances : verdict immédiat + plan
-// d'action, sans aucun appel LLM.
+// d'action. Vérification 100 % recherche web (déterministe) ; seuls la
+// classification des sites et les conseils passent par Mistral Small.
 
 export default function ComparateursPage() {
   return (

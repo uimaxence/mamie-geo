@@ -12,6 +12,9 @@ export interface WebSearchResult {
 /** Fonction de recherche web injectable (Brave en prod, fake en test). */
 export type SearchFn = (query: string, count?: number) => Promise<WebSearchResult[]>;
 
+export const SITE_TYPES = ["comparateur", "annuaire", "presse", "avis", "blog", "autre"] as const;
+export type SiteType = (typeof SITE_TYPES)[number];
+
 export interface ComparatorCheck {
   domain: string;
   label: string;
@@ -20,6 +23,10 @@ export interface ComparatorCheck {
   present: boolean;
   foundUrl?: string;
   foundTitle?: string;
+  /** Classification Mistral Small (cf. enrich.ts) — absente si l'enrichissement a échoué. */
+  siteType?: SiteType;
+  /** Conseil d'inclusion d'une phrase, personnalisé par site (Mistral Small). */
+  inclusionHint?: string;
 }
 
 export interface ComparatorScanReport {

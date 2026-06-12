@@ -151,13 +151,21 @@ marques. Cible PME / petites agences / freelances.
   (gate) + honeypot → scan live ~10-20 s → verdict présent/absent par
   comparateur avec lien de la page trouvée, plan d'action en 3 étapes
   pour les absences, chiffres étude, CTA trial + lien article étude.
-- **Moteur (0 LLM, déterministe)** : 2 temps via Brave Search API —
-  (1) découverte : recherches « meilleur {secteur} » / « {secteur}
-  comparatif avis » (les pages qui rankent = celles que les IA lisent),
-  fusionnées avec un mapping curaté de ~13 secteurs issu de l'étude ;
-  (2) présence : `site:{domaine} "{marque}"` par comparateur (max 8).
-  Appels parallélisés (rate limit Brave 50 req/s, retry unique sur 429),
-  scan complet en ~5-10 s.
+- **Moteur (vérification 0 LLM, déterministe)** : 2 temps via Brave
+  Search API — (1) découverte : recherches « meilleur {secteur} » /
+  « {secteur} comparatif avis » (les pages qui rankent = celles que les
+  IA lisent), fusionnées avec un mapping curaté de ~13 secteurs issu de
+  l'étude ; (2) présence : `site:{domaine} "{marque}"` par comparateur
+  (max 8). Appels parallélisés (rate limit Brave 50 req/s, retry unique
+  sur 429), scan complet en ~5-10 s.
+- **Enrichissement Mistral Small** (2026-06-12, doc 09) : classification
+  de chaque site (comparateur/annuaire/presse/avis/blog) + conseil
+  d'inclusion d'une phrase par site, ~0,0001 $/scan, best effort (échec
+  → checks intacts). DeepSeek refusé (anti-décision, doc 09).
+- **Data flywheel** : chaque soumission est persistée dans
+  `comparator_scans` (doc 03) — niches scannées, sites par secteur,
+  taux de présence, typologie. Alimente la typologie de sources (V1)
+  et sert de log de leads requêtable.
 - **Coût** : ~10 requêtes/scan. 5 $ de crédits Brave offerts/mois
   (≈ 1 000 req ≈ 100 scans gratuits), puis 5 $/1 000 req
   (≈ 0,05 $/scan, carte requise). Cap in-memory 150 scans/jour +

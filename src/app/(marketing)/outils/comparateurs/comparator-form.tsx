@@ -147,7 +147,7 @@ export function ComparatorForm() {
       )}
 
       <p className="type-meta mt-4 text-center">
-        ~10 secondes · gratuit · vraies recherches web, pas d&apos;IA générative
+        ~10 secondes · gratuit · vérification par vraies recherches web
       </p>
     </form>
   );

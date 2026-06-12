@@ -480,5 +480,38 @@ export const auditCounters = pgTable(
   (t) => [primaryKey({ columns: [t.workspaceId, t.periodStart] })],
 );
 
+// ──────────────────────────────────────────────────────────────────────
+// Comparator scans — leads + données du free tool /outils/comparateurs
+// Chaque scan persiste les sites découverts par secteur et la présence
+// de la marque : matière première de la typologie de sources (V1) et
+// de l'intelligence par niche. cf. doc 09 § 2026-06-12 (enrichissement)
+// ──────────────────────────────────────────────────────────────────────
+
+export const comparatorScans = pgTable(
+  "comparator_scans",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    /** Email du prospect (lead, pas de FK : table publique pré-signup). */
+    email: text().notNull(),
+    brandName: text().notNull(),
+    /** Secteur tel que saisi par le prospect. */
+    sector: text().notNull(),
+    /** Secteur normalisé (minuscules, sans accents) — clé d'agrégation par niche. */
+    sectorNormalized: text().notNull(),
+    websiteDomain: text(),
+    presentCount: integer().notNull(),
+    totalChecked: integer().notNull(),
+    /** ComparatorCheck[] complet (domaine, origine, présence, URL trouvée,
+     *  type de site + conseil d'inclusion Mistral). */
+    checks: jsonb().notNull(),
+    createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index("idx_comparator_scans_sector").on(t.sectorNormalized),
+    index("idx_comparator_scans_created").on(t.createdAt),
+    index("idx_comparator_scans_email").on(t.email),
+  ],
+);
+
 // Ré-exporter les tables Better Auth dans le schéma drizzle pour le client
 export const authTables = { user, session, account, verification };

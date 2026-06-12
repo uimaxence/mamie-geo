@@ -61,6 +61,9 @@ Architecture détaillée : `geo-project/03-architecture-technique.md`.
 - ❌ Clerk / Supabase Auth (on a tranché Better Auth)
 - ❌ Inngest en V0 (Postgres-queue jusqu'à 100K runs/mois)
 - ❌ OpenRouter pour le tracking
+- ❌ DeepSeek (même pour les free tools : données prospects hors EU =
+  contradiction avec le positionnement RGPD, et Mistral Small est moins
+  cher — cf. doc 09 § 2026-06-12)
 - ❌ Plan freemium permanent dans le SaaS
 
 ---
@@ -319,8 +322,10 @@ plan dans `src/lib/plans/quotas.ts`) :
 **Marketing/blog** : home, pricing, 4 pages légales, 3 lead magnets
 (`/outils/test-visibilite-ia` capture Brevo ; `/outils/audit-technique`
 30+ checks SEO/GEO + PSI, 0 € LLM, promu en home ;
-`/outils/comparateurs` scan présence comparateurs via Brave Search API,
-0 LLM, 2026-06-12 — `BRAVE_SEARCH_API_KEY` requise) + hub `/outils`
+`/outils/comparateurs` scan présence comparateurs 2026-06-12 :
+vérification Brave Search API — `BRAVE_SEARCH_API_KEY` requise —,
+enrichissement Mistral Small ~0,0001 $/scan, scans persistés dans
+`comparator_scans`) + hub `/outils`
 linké en nav « Outils gratuits » (pastille « Nouveau »). Blog MDX
 content-driven (`src/content/blog/*.mdx`, FAQPage JSON-LD, OG dynamique,
 related, TOC, sitemap auto) : 3 articles de fond + 3 comparatifs (Peec,
@@ -356,7 +361,7 @@ Grotesk/Caveat, crème + terracotta `#DD6B45`, brief
 `geo-project/linkedindesign.md`), rendus dans `/app/admin/visuals`.
 
 **Tests** : Vitest colocation (100+ tests) + 13 E2E Playwright flows
-publics. DB Neon : 18 tables + migrations 0001-0004.
+publics. DB Neon : 19 tables + migrations 0000-0006.
 
 ### Reste à faire (V0+ / pré-lancement)
 
