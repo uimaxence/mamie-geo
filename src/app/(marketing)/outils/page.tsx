@@ -33,26 +33,26 @@ const TOOLS: Tool[] = [
     isNew: true,
     title: "Scan comparateurs",
     description:
-      "32 % des sources citées par les IA sont des comparateurs. Vérifie en 10 secondes si ta marque est présente sur les sites que les IA lisent quand on leur parle de ton secteur.",
+      "32 % des sources citées par les IA sont des comparateurs. Donne ton site, on détecte ta marque, ton secteur et ta zone, et on vérifie ta présence sur les sites que les IA lisent.",
     bullets: [
-      "Vraies recherches web en direct",
+      "Site + email, le reste est détecté automatiquement",
       "Verdict présent/absent par site, avec la page trouvée",
       "Plan d'action pour être inclus là où tu manques",
     ],
-    meta: "~10 secondes · résultat immédiat",
+    meta: "~15 secondes · résultat immédiat",
   },
   {
     href: "/outils/test-visibilite-ia",
     Icon: Sparkles,
-    title: "Audit de visibilité IA",
+    title: "Test de visibilité IA",
     description:
-      "Un rapport personnalisé sur ta visibilité dans ChatGPT, Claude, Perplexity, Gemini et Le Chat : qui est cité à ta place, sur quels prompts, et quoi faire.",
+      "3 vraies questions de ton secteur posées à une IA en direct : tu vois si elle te cite ou si elle recommande tes concurrents à ta place.",
     bullets: [
-      "Les 5 IA passées au crible",
-      "Tes 3 concurrents directs et leur score",
-      "3 actions concrètes priorisées",
+      "Site + email, le reste est détecté automatiquement",
+      "Verdict immédiat : cité ou pas, à quelle position",
+      "Option : audit complet 5 IA fait à la main, sous 24 h",
     ],
-    meta: "Rapport sous 24 h ouvrées",
+    meta: "~20 secondes · IA interrogée en direct",
   },
   {
     href: "/outils/audit-technique",

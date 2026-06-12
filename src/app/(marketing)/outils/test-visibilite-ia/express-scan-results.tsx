@@ -34,11 +34,14 @@ export function ExpressScanResults({
   email,
   websiteDomain,
   onReset,
+  onEdit,
 }: {
   report: ExpressScanReport;
   email: string;
   websiteDomain: string;
   onReset: () => void;
+  /** Repasse le form en mode manuel pré-rempli (corriger marque/secteur/zone détectés). */
+  onEdit: () => void;
 }) {
   return (
     <div className="mx-auto max-w-3xl">
@@ -105,9 +108,12 @@ export function ExpressScanResults({
       {/* Upsell audit manuel */}
       <ManualAuditUpsell report={report} email={email} websiteDomain={websiteDomain} />
 
-      <div className="mt-6 text-center">
+      <div className="mt-6 flex items-center justify-center gap-2">
+        <Button variant="ghost" size="sm" onClick={onEdit}>
+          Corriger marque / secteur / zone
+        </Button>
         <Button variant="ghost" size="sm" onClick={onReset}>
-          Tester une autre marque
+          Tester un autre site
         </Button>
       </div>
     </div>

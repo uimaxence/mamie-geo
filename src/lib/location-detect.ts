@@ -49,12 +49,8 @@ function cleanCity(raw: string): string | null {
   return city;
 }
 
-/**
- * Détecte la ville principale d'un site depuis sa home page.
- * Retourne null si rien de fiable n'est trouvé (site national, SaaS,
- * page inaccessible…).
- */
-export async function detectSiteLocation(
+/** Récupère la home d'un domaine, null si inaccessible. */
+export async function fetchHomeHtml(
   domain: string,
   fetchImpl: typeof fetch = fetch,
 ): Promise<string | null> {
@@ -72,33 +68,49 @@ export async function detectSiteLocation(
       clearTimeout(timeout);
     }
     if (!response.ok) return null;
-    const html = await response.text();
-    const $ = cheerio.load(html);
-
-    // 1. JSON-LD — la source déclarative.
-    for (const el of $('script[type="application/ld+json"]').toArray()) {
-      try {
-        const data: unknown = JSON.parse($(el).text());
-        const locality = findAddressLocality(data);
-        if (locality) {
-          const city = cleanCity(locality);
-          if (city) return city;
-        }
-      } catch {
-        // JSON-LD malformé — fréquent, on passe au suivant.
-      }
-    }
-
-    // 2. Code postal + ville, footer d'abord (l'adresse y vit), page entière sinon.
-    for (const scope of [$("footer").text(), $("body").text()]) {
-      const match = POSTAL_CITY_REGEX.exec(scope);
-      if (match?.[1]) {
-        const city = cleanCity(match[1]);
-        if (city) return city;
-      }
-    }
-    return null;
+    return await response.text();
   } catch {
     return null;
   }
+}
+
+/** Signaux de localisation déterministes d'une home déjà parsée. */
+export function extractLocalityFromHtml($: cheerio.CheerioAPI): string | null {
+  // 1. JSON-LD — la source déclarative.
+  for (const el of $('script[type="application/ld+json"]').toArray()) {
+    try {
+      const data: unknown = JSON.parse($(el).text());
+      const locality = findAddressLocality(data);
+      if (locality) {
+        const city = cleanCity(locality);
+        if (city) return city;
+      }
+    } catch {
+      // JSON-LD malformé — fréquent, on passe au suivant.
+    }
+  }
+
+  // 2. Code postal + ville, footer d'abord (l'adresse y vit), page entière sinon.
+  for (const scope of [$("footer").text(), $("body").text()]) {
+    const match = POSTAL_CITY_REGEX.exec(scope);
+    if (match?.[1]) {
+      const city = cleanCity(match[1]);
+      if (city) return city;
+    }
+  }
+  return null;
+}
+
+/**
+ * Détecte la ville principale d'un site depuis sa home page.
+ * Retourne null si rien de fiable n'est trouvé (site national, SaaS,
+ * page inaccessible…).
+ */
+export async function detectSiteLocation(
+  domain: string,
+  fetchImpl: typeof fetch = fetch,
+): Promise<string | null> {
+  const html = await fetchHomeHtml(domain, fetchImpl);
+  if (!html) return null;
+  return extractLocalityFromHtml(cheerio.load(html));
 }

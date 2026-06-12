@@ -3,53 +3,47 @@
 import { useEffect, useState, useTransition } from "react";
 import { Button, Field, Input } from "@/components/ui";
 import { capture, identify } from "@/lib/posthog-client";
-import { detectLocationAction } from "../location-actions";
+import type { SiteProfile } from "@/lib/site-profile";
 import type { ComparatorScanReport } from "@/lib/comparators/types";
+import { detectSiteProfileAction } from "../location-actions";
 import { runComparatorScanAction } from "./actions";
 import { ComparatorResults } from "./comparator-results";
 
-// Form /outils/comparateurs : email gate + marque + secteur (+ site
-// optionnel) → scan live (~10-20 s, requêtes web séquentielles) →
-// résultats à l'écran. 3 états : idle / loading (étapes animées) /
-// results.
+// Form /outils/comparateurs, refondu 2026-06-12 (doc 09) : le prospect
+// ne saisit que SITE + EMAIL — marque, secteur et zone de chalandise
+// sont déduits de la home (detectSiteProfileAction). Mode manuel en
+// fallback (détection impossible) ou en correction depuis les résultats.
 
-const SECTOR_EXAMPLES = [
-  "agence seo",
-  "logiciel de caisse",
-  "assurance habitation",
-  "plombier",
-  "banque en ligne",
-  "crm",
-];
+const TOOL = "comparateurs";
 
 export function ComparatorForm() {
   const [email, setEmail] = useState("");
+  const [websiteDomain, setWebsiteDomain] = useState("");
+  const [mode, setMode] = useState<"auto" | "manual">("auto");
+  // Champs du mode manuel, pré-remplis par la détection quand elle existe.
   const [brandName, setBrandName] = useState("");
   const [sector, setSector] = useState("");
   const [location, setLocation] = useState("");
-  const [websiteDomain, setWebsiteDomain] = useState("");
-  const [detectingLocation, setDetectingLocation] = useState(false);
+  const [detected, setDetected] = useState<SiteProfile | null>(null);
   const [hpField, setHpField] = useState(""); // honeypot (nom non-sémantique, cf. schemas.ts)
   const [report, setReport] = useState<ComparatorScanReport | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
-
-  // Pré-remplit la ville depuis la home du site (JSON-LD/footer) quand
-  // le prospect renseigne son domaine — modifiable, jamais imposé.
-  async function handleWebsiteBlur() {
-    const domain = websiteDomain.trim();
-    if (!domain || location.trim() || detectingLocation) return;
-    setDetectingLocation(true);
-    try {
-      const city = await detectLocationAction(domain);
-      if (city) {
-        setLocation(city);
-        capture("tool_location_autodetected", { tool: "comparateurs", city });
-      }
-    } finally {
-      setDetectingLocation(false);
+  async function runScan(profile: { brandName: string; sector: string; zone: string | null }) {
+    const result = await runComparatorScanAction({
+      email: email.trim(),
+      brandName: profile.brandName,
+      sector: profile.sector,
+      location: profile.zone ?? "",
+      websiteDomain: websiteDomain.trim().toLowerCase(),
+      hpField,
+    });
+    if (!result.ok) {
+      setError(result.message);
+      return;
     }
+    setReport(result.report);
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -57,42 +51,63 @@ export function ComparatorForm() {
     setError(null);
 
     capture("tool_lead_form_submitted", {
-      tool: "comparateurs",
-      sector: sector.trim().toLowerCase(),
-      brand_name: brandName.trim(),
-      has_website: websiteDomain.trim().length > 0,
-      has_location: location.trim().length > 0,
+      tool: TOOL,
+      mode,
+      domain: websiteDomain.trim().toLowerCase(),
     });
     identify(email.trim().toLowerCase(), { email: email.trim().toLowerCase() });
 
     startTransition(async () => {
-      const result = await runComparatorScanAction({
-        email: email.trim(),
-        brandName: brandName.trim(),
-        sector: sector.trim(),
-        location: location.trim() || "",
-        websiteDomain: websiteDomain.trim().toLowerCase() || "",
-        hpField,
-      });
-      if (!result.ok) {
-        setError(result.message);
+      if (mode === "manual") {
+        await runScan({
+          brandName: brandName.trim(),
+          sector: sector.trim(),
+          zone: location.trim() || null,
+        });
         return;
       }
-      setReport(result.report);
+
+      const profile = await detectSiteProfileAction(websiteDomain.trim());
+      if (!profile) {
+        setMode("manual");
+        setError(
+          "On n'a pas réussi à analyser ton site automatiquement — complète ces 3 champs et relance.",
+        );
+        return;
+      }
+      setDetected(profile);
+      setBrandName(profile.brandName);
+      setSector(profile.sector);
+      setLocation(profile.zone ?? "");
+      capture("tool_profile_autodetected", {
+        tool: TOOL,
+        sector: profile.sector,
+        has_zone: Boolean(profile.zone),
+      });
+      await runScan(profile);
     });
+  }
+
+  // Correction depuis les résultats : mode manuel pré-rempli.
+  function handleEdit() {
+    setReport(null);
+    setMode("manual");
+    setError(null);
   }
 
   function handleReset() {
     setReport(null);
+    setDetected(null);
+    setMode("auto");
     setError(null);
   }
 
   if (pending) {
-    return <ScanProgress brandName={brandName} />;
+    return <ScanProgress domain={websiteDomain} detected={detected} />;
   }
 
   if (report) {
-    return <ComparatorResults report={report} onReset={handleReset} />;
+    return <ComparatorResults report={report} onReset={handleReset} onEdit={handleEdit} />;
   }
 
   return (
@@ -101,48 +116,16 @@ export function ComparatorForm() {
       className="relative mx-auto max-w-2xl rounded-[var(--radius-xl)] border border-[color:var(--color-border)] bg-white p-6 shadow-[var(--shadow-sm)] sm:p-8"
     >
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <Field label="Nom de ta marque">
-          <Input
-            type="text"
-            placeholder="Ex : Mamie GEO"
-            value={brandName}
-            onChange={(e) => setBrandName(e.target.value)}
-            maxLength={80}
-            required
-            autoFocus
-          />
-        </Field>
-        <Field label="Ton secteur" hint={`Ex : ${SECTOR_EXAMPLES.join(", ")}`}>
-          <Input
-            type="text"
-            placeholder="Ex : agence seo"
-            value={sector}
-            onChange={(e) => setSector(e.target.value)}
-            maxLength={80}
-            required
-          />
-        </Field>
-        <Field
-          label="Ta ville (optionnel)"
-          hint={detectingLocation ? "Détection depuis ton site…" : "Si tes clients sont locaux — détectée depuis ton site si possible"}
-        >
-          <Input
-            type="text"
-            placeholder="Ex : Tours"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            maxLength={80}
-          />
-        </Field>
-        <Field label="Ton site (optionnel)" hint="Pour l'exclure des résultats">
+        <Field label="Ton site">
           <Input
             type="text"
             inputMode="url"
             placeholder="monsite.fr"
             value={websiteDomain}
             onChange={(e) => setWebsiteDomain(e.target.value)}
-            onBlur={handleWebsiteBlur}
             maxLength={120}
+            required
+            autoFocus
           />
         </Field>
         <Field label="Ton email" hint="Pour t'envoyer les prochaines analyses">
@@ -156,6 +139,40 @@ export function ComparatorForm() {
           />
         </Field>
       </div>
+
+      {mode === "manual" && (
+        <div className="mt-4 grid grid-cols-1 gap-4 border-t border-[color:var(--color-border)] pt-4 sm:grid-cols-3">
+          <Field label="Nom de ta marque">
+            <Input
+              type="text"
+              placeholder="Ex : Mamie GEO"
+              value={brandName}
+              onChange={(e) => setBrandName(e.target.value)}
+              maxLength={80}
+              required
+            />
+          </Field>
+          <Field label="Ton secteur">
+            <Input
+              type="text"
+              placeholder="Ex : menuiserie"
+              value={sector}
+              onChange={(e) => setSector(e.target.value)}
+              maxLength={80}
+              required
+            />
+          </Field>
+          <Field label="Ta zone (optionnel)" hint="Ville si clients locaux">
+            <Input
+              type="text"
+              placeholder="Ex : Tours"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              maxLength={80}
+            />
+          </Field>
+        </div>
+      )}
 
       {/* Honeypot anti-bot : invisible pour les humains, rempli par les bots.
        * Nom non-sémantique pour ne pas déclencher l'autofill navigateur
@@ -185,22 +202,39 @@ export function ComparatorForm() {
       )}
 
       <p className="type-meta mt-4 text-center">
-        ~10 secondes · gratuit · vérification par vraies recherches web
+        ~15 secondes · gratuit · marque, secteur et zone détectés depuis ton site ·{" "}
+        {mode === "auto" ? (
+          <button
+            type="button"
+            onClick={() => setMode("manual")}
+            className="underline underline-offset-2 hover:text-[color:var(--color-ink)]"
+          >
+            renseigner manuellement
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setMode("auto")}
+            className="underline underline-offset-2 hover:text-[color:var(--color-ink)]"
+          >
+            revenir au mode automatique
+          </button>
+        )}
       </p>
     </form>
   );
 }
 
-// Étapes affichées pendant le scan, avancées au temps écoulé (le scan
-// fait ~10 requêtes web parallélisées, ~5-10 s au total).
+// Étapes affichées pendant détection + scan (analyse du site ~3-5 s,
+// puis ~10 requêtes web parallélisées ~5-10 s).
 const PROGRESS_STEPS = [
-  { atMs: 0, label: "Recherche des comparateurs et annuaires de ton secteur…" },
-  { atMs: 1500, label: "Identification des sites que les IA citent vraiment…" },
-  { atMs: 3000, label: "Vérification de ta présence, site par site…" },
-  { atMs: 6000, label: "Compilation du verdict…" },
+  { atMs: 0, label: "Analyse de ton site : marque, secteur, zone de chalandise…" },
+  { atMs: 4000, label: "Recherche des comparateurs et annuaires de ton secteur…" },
+  { atMs: 7000, label: "Vérification de ta présence, site par site…" },
+  { atMs: 11000, label: "Compilation du verdict…" },
 ];
 
-function ScanProgress({ brandName }: { brandName: string }) {
+function ScanProgress({ domain, detected }: { domain: string; detected: SiteProfile | null }) {
   const [elapsed, setElapsed] = useState(0);
   useEffect(() => {
     const interval = setInterval(() => setElapsed((e) => e + 500), 500);
@@ -214,7 +248,13 @@ function ScanProgress({ brandName }: { brandName: string }) {
 
   return (
     <div className="mx-auto max-w-2xl rounded-[var(--radius-xl)] border border-[color:var(--color-border)] bg-white p-8 text-center shadow-[var(--shadow-sm)]">
-      <p className="type-h3">Scan en cours pour {brandName}</p>
+      <p className="type-h3">Scan en cours pour {domain}</p>
+      {detected && (
+        <p className="type-meta mt-2">
+          Détecté : <strong>{detected.brandName}</strong> · {detected.sector}
+          {detected.zone ? ` · ${detected.zone}` : ""}
+        </p>
+      )}
       <div className="mx-auto mt-6 flex max-w-md flex-col gap-3 text-left">
         {PROGRESS_STEPS.map((step, i) => (
           <div key={step.atMs} className="flex items-center gap-3">
@@ -241,7 +281,7 @@ function ScanProgress({ brandName }: { brandName: string }) {
           </div>
         ))}
       </div>
-      <p className="type-meta mt-6">Quelques secondes — on interroge le web en direct.</p>
+      <p className="type-meta mt-6">~15 secondes — on analyse ton site puis le web en direct.</p>
     </div>
   );
 }

@@ -19,9 +19,12 @@ function trackCta(cta: string, extra?: Record<string, unknown>) {
 export function ComparatorResults({
   report,
   onReset,
+  onEdit,
 }: {
   report: ComparatorScanReport;
   onReset: () => void;
+  /** Repasse le form en mode manuel pré-rempli (corriger marque/secteur/zone détectés). */
+  onEdit: () => void;
 }) {
   const checks = sortChecksForDisplay(report.checks);
   const absent = report.totalChecked - report.presentCount;
@@ -132,9 +135,12 @@ export function ComparatorResults({
         </div>
       </div>
 
-      <div className="mt-6 text-center">
+      <div className="mt-6 flex items-center justify-center gap-2">
+        <Button variant="ghost" size="sm" onClick={onEdit}>
+          Corriger marque / secteur / zone
+        </Button>
         <Button variant="ghost" size="sm" onClick={onReset}>
-          Scanner une autre marque
+          Scanner un autre site
         </Button>
       </div>
     </div>

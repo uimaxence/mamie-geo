@@ -128,9 +128,11 @@ Décision : doc 09 § 2026-06-12 (refonte funnel). Le n°1bis « scan
 express » est **tranché et fusionné ici** : le scan live est devenu le
 funnel principal, l'audit manuel 24 h est l'upsell post-scan.
 
-- **UX** : marque + secteur + ville optionnelle (PME locales,
-  2026-06-12 : les 3 questions deviennent « … à {ville} ») + site
-  optionnel + email (gate) + honeypot → 3 prompts templates posés
+- **UX** (simplifiée 2026-06-12 au soir) : **site + email seulement** —
+  marque, secteur et zone de chalandise sont détectés depuis la home
+  (`src/lib/site-profile.ts`, scraping + Mistral Small ~0,0002 €), mode
+  manuel en fallback/correction. Les 3 questions deviennent « … à
+  {zone} » pour les PME locales. → 3 prompts templates posés
   **en live à Le Chat (mistral-small)** →
   verdict immédiat par question (cité/absent, position, marques que
   l'IA recommande à la place) → bloc « les 4 autres IA » **verrouillé**
@@ -167,9 +169,11 @@ Né de l'enseignement n°1 de l'étude 50 marques (doc 11) : 32 % des
 sources citées par les IA sont des comparateurs, 1,7 % le site des
 marques. Cible PME / petites agences / freelances.
 
-- **UX** : marque + secteur (champ libre) + ville optionnelle (PME
-  locales, 2026-06-12 : découverte « meilleur {secteur} {ville} ») +
-  site optionnel + email (gate) + honeypot → scan live ~10-20 s → verdict présent/absent par
+- **UX** (simplifiée 2026-06-12 au soir) : **site + email seulement** —
+  marque, secteur et zone de chalandise détectés depuis la home
+  (`src/lib/site-profile.ts`), mode manuel en fallback/correction.
+  Découverte localisée « meilleur {secteur} {zone} » pour les PME
+  locales. → scan live ~10-20 s → verdict présent/absent par
   comparateur avec lien de la page trouvée, plan d'action en 3 étapes
   pour les absences, chiffres étude, CTA trial + lien article étude.
 - **Moteur (vérification 0 LLM, déterministe)** : 2 temps via Brave

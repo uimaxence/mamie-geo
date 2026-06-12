@@ -161,6 +161,20 @@ haut et l'entrée "2026-05-05 — Réponses aux 10 questions de bootstrap".
 
 ### Décisions enregistrées
 
+#### 2026-06-12 — Forms des scans réduits à site + email : profil (marque/secteur/zone de chalandise) détecté depuis la home
+
+**Contexte** : demande Max en fin de journée — « juste demander le site et le mail, le site s'assure de récupérer lui-même le secteur et la zone de chalandise (qui n'est parfois pas que la ville) ». Moins de friction = plus de scans ; et la zone de chalandise vit dans le CONTENU du site (« intervention dans tout le Maine-et-Loire »), pas seulement dans l'adresse du footer.
+
+**Choix** : pipeline `src/lib/site-profile.ts` — fetch home (best effort 5 s) → extraction déterministe (title, og:site_name, meta description, h1/h2, footer, localité JSON-LD/code postal) → 1 appel Mistral Small JSON (~0,0002 €, ~2 s) qui synthétise {marque, secteur, zone}. La zone demandée est une ville/agglomération **utilisable dans une recherche** (si la zone est départementale, le LLM renvoie la ville principale) ; les zones nationales (« France », « en ligne ») sont neutralisées en post-traitement (constaté : le LLM renvoyait « France » au lieu de null pour mamie-geo.fr). Action partagée `detectSiteProfileAction`.
+
+**UX** : 2 champs (site + email) → progress « Analyse de ton site… » avec le profil détecté affiché → scan. **Jamais imposé** : détection impossible → bascule en mode manuel (3 champs pré-remplis) ; bouton « Corriger marque / secteur / zone » depuis les résultats ; lien « renseigner manuellement » sous le form. L'auto-détection onBlur de la veille (`detectLocationAction`) est supprimée — remplacée par ce pipeline complet.
+
+**Validé en réel** : fenetres-sur-loir.fr → {Fenêtres sur Loir, menuiserie extérieure sur mesure, Seiches-sur-le-Loir} en 1,8 s ; mamie-geo.fr → zone null après neutralisation.
+
+**Conséquences** : le site devient obligatoire (avant optionnel) — il alimente aussi l'exclusion du domaine (comparateurs) et l'upsell audit manuel (express). Events `tool_profile_autodetected` / `tool_profile_detection_failed`. Coût marginal par scan : +0,0002 € + 1 fetch.
+
+**À revisiter** : taux d'échec de détection (PostHog) — si > ~20 %, scraper aussi /contact ou /a-propos ; qualité du secteur détecté vs saisi (comparer les verdicts des scans en mode manuel-correction).
+
 #### 2026-06-12 — Offre accompagnement done-for-you + page /contact + localisation des scans + cohérence DA outils
 
 **Contexte** : Max veut (1) une offre où il booste personnellement le SEO + GEO du client, avec rareté affichée (« 3 créneaux ») et CTA vers son Cal ; (2) que les scans servent les PME locales (« meilleur plombier » ne citera jamais un artisan tourangeau, « meilleur plombier à Tours » si) ; (3) que les outils gratuits réutilisent les composants de l'app (DA cohérente) et que chaque clic prospect soit tracké.

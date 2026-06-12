@@ -3,43 +3,47 @@
 import { useEffect, useState, useTransition } from "react";
 import { Button, Field, Input } from "@/components/ui";
 import { capture, identify } from "@/lib/posthog-client";
-import { detectLocationAction } from "../location-actions";
+import type { SiteProfile } from "@/lib/site-profile";
 import type { ExpressScanReport } from "@/lib/express-scan/types";
+import { detectSiteProfileAction } from "../location-actions";
 import { runExpressScanAction } from "./actions";
 import { ExpressScanResults } from "./express-scan-results";
 
-// Form du scan express : marque + secteur + site optionnel + email →
-// 3 prompts posés en live à Le Chat (~10-20 s) → résultats + 4 IA
-// verrouillées. 3 états : idle / loading / results.
+// Form du scan express, refondu 2026-06-12 (doc 09) : le prospect ne
+// saisit que SITE + EMAIL — marque, secteur et zone de chalandise sont
+// déduits de la home (detectSiteProfileAction), puis 3 questions sont
+// posées en live à Le Chat. Mode manuel en fallback ou en correction.
+
+const TOOL = "test-visibilite-ia";
 
 export function ExpressScanForm() {
   const [email, setEmail] = useState("");
+  const [websiteDomain, setWebsiteDomain] = useState("");
+  const [mode, setMode] = useState<"auto" | "manual">("auto");
+  // Champs du mode manuel, pré-remplis par la détection quand elle existe.
   const [brandName, setBrandName] = useState("");
   const [sector, setSector] = useState("");
   const [location, setLocation] = useState("");
-  const [websiteDomain, setWebsiteDomain] = useState("");
-  const [detectingLocation, setDetectingLocation] = useState(false);
+  const [detected, setDetected] = useState<SiteProfile | null>(null);
   const [hpField, setHpField] = useState(""); // honeypot (nom non-sémantique)
   const [report, setReport] = useState<ExpressScanReport | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
-
-  // Pré-remplit la ville depuis la home du site (JSON-LD/footer) quand
-  // le prospect renseigne son domaine — modifiable, jamais imposé.
-  async function handleWebsiteBlur() {
-    const domain = websiteDomain.trim();
-    if (!domain || location.trim() || detectingLocation) return;
-    setDetectingLocation(true);
-    try {
-      const city = await detectLocationAction(domain);
-      if (city) {
-        setLocation(city);
-        capture("tool_location_autodetected", { tool: "test-visibilite-ia", city });
-      }
-    } finally {
-      setDetectingLocation(false);
+  async function runScan(profile: { brandName: string; sector: string; zone: string | null }) {
+    const result = await runExpressScanAction({
+      email: email.trim(),
+      brandName: profile.brandName,
+      sector: profile.sector,
+      location: profile.zone ?? "",
+      websiteDomain: websiteDomain.trim().toLowerCase(),
+      hpField,
+    });
+    if (!result.ok) {
+      setError(result.message);
+      return;
     }
+    setReport(result.report);
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -47,33 +51,59 @@ export function ExpressScanForm() {
     setError(null);
 
     capture("tool_lead_form_submitted", {
-      tool: "test-visibilite-ia",
-      mode: "express",
-      sector: sector.trim().toLowerCase(),
-      brand_name: brandName.trim(),
-      has_location: location.trim().length > 0,
+      tool: TOOL,
+      mode: mode === "auto" ? "express-auto" : "express-manual",
+      domain: websiteDomain.trim().toLowerCase(),
     });
     identify(email.trim().toLowerCase(), { email: email.trim().toLowerCase() });
 
     startTransition(async () => {
-      const result = await runExpressScanAction({
-        email: email.trim(),
-        brandName: brandName.trim(),
-        sector: sector.trim(),
-        location: location.trim() || "",
-        websiteDomain: websiteDomain.trim() || "",
-        hpField,
-      });
-      if (!result.ok) {
-        setError(result.message);
+      if (mode === "manual") {
+        await runScan({
+          brandName: brandName.trim(),
+          sector: sector.trim(),
+          zone: location.trim() || null,
+        });
         return;
       }
-      setReport(result.report);
+
+      const profile = await detectSiteProfileAction(websiteDomain.trim());
+      if (!profile) {
+        setMode("manual");
+        setError(
+          "On n'a pas réussi à analyser ton site automatiquement — complète ces 3 champs et relance.",
+        );
+        return;
+      }
+      setDetected(profile);
+      setBrandName(profile.brandName);
+      setSector(profile.sector);
+      setLocation(profile.zone ?? "");
+      capture("tool_profile_autodetected", {
+        tool: TOOL,
+        sector: profile.sector,
+        has_zone: Boolean(profile.zone),
+      });
+      await runScan(profile);
     });
   }
 
+  // Correction depuis les résultats : mode manuel pré-rempli.
+  function handleEdit() {
+    setReport(null);
+    setMode("manual");
+    setError(null);
+  }
+
+  function handleReset() {
+    setReport(null);
+    setDetected(null);
+    setMode("auto");
+    setError(null);
+  }
+
   if (pending) {
-    return <ScanProgress brandName={brandName} />;
+    return <ScanProgress domain={websiteDomain} detected={detected} />;
   }
 
   if (report) {
@@ -82,7 +112,8 @@ export function ExpressScanForm() {
         report={report}
         email={email.trim()}
         websiteDomain={websiteDomain.trim()}
-        onReset={() => setReport(null)}
+        onReset={handleReset}
+        onEdit={handleEdit}
       />
     );
   }
@@ -93,48 +124,16 @@ export function ExpressScanForm() {
       className="relative mx-auto max-w-2xl rounded-[var(--radius-xl)] border border-[color:var(--color-border)] bg-white p-6 shadow-[var(--shadow-sm)] sm:p-8"
     >
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <Field label="Nom de ta marque">
-          <Input
-            type="text"
-            placeholder="Ex : Mamie GEO"
-            value={brandName}
-            onChange={(e) => setBrandName(e.target.value)}
-            maxLength={80}
-            required
-            autoFocus
-          />
-        </Field>
-        <Field label="Ton secteur" hint="Ex : agence seo, menuiserie, crm, plombier">
-          <Input
-            type="text"
-            placeholder="Ex : agence seo"
-            value={sector}
-            onChange={(e) => setSector(e.target.value)}
-            maxLength={80}
-            required
-          />
-        </Field>
-        <Field
-          label="Ta ville (optionnel)"
-          hint={detectingLocation ? "Détection depuis ton site…" : "Si tes clients sont locaux — détectée depuis ton site si possible"}
-        >
-          <Input
-            type="text"
-            placeholder="Ex : Tours"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            maxLength={80}
-          />
-        </Field>
-        <Field label="Ton site (optionnel)" hint="Pour l'audit complet ensuite">
+        <Field label="Ton site">
           <Input
             type="text"
             inputMode="url"
             placeholder="monsite.fr"
             value={websiteDomain}
             onChange={(e) => setWebsiteDomain(e.target.value)}
-            onBlur={handleWebsiteBlur}
             maxLength={120}
+            required
+            autoFocus
           />
         </Field>
         <Field label="Ton email" hint="Pour t'envoyer les prochaines analyses">
@@ -148,6 +147,40 @@ export function ExpressScanForm() {
           />
         </Field>
       </div>
+
+      {mode === "manual" && (
+        <div className="mt-4 grid grid-cols-1 gap-4 border-t border-[color:var(--color-border)] pt-4 sm:grid-cols-3">
+          <Field label="Nom de ta marque">
+            <Input
+              type="text"
+              placeholder="Ex : Mamie GEO"
+              value={brandName}
+              onChange={(e) => setBrandName(e.target.value)}
+              maxLength={80}
+              required
+            />
+          </Field>
+          <Field label="Ton secteur">
+            <Input
+              type="text"
+              placeholder="Ex : menuiserie"
+              value={sector}
+              onChange={(e) => setSector(e.target.value)}
+              maxLength={80}
+              required
+            />
+          </Field>
+          <Field label="Ta zone (optionnel)" hint="Ville si clients locaux">
+            <Input
+              type="text"
+              placeholder="Ex : Tours"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              maxLength={80}
+            />
+          </Field>
+        </div>
+      )}
 
       {/* Honeypot anti-bot, invisible pour les humains. */}
       <div aria-hidden className="absolute -left-[9999px] top-auto h-px w-px overflow-hidden">
@@ -175,20 +208,38 @@ export function ExpressScanForm() {
       )}
 
       <p className="type-meta mt-4 text-center">
-        ~15 secondes · gratuit · 3 vraies questions posées à une IA en direct
+        ~20 secondes · gratuit · marque, secteur et zone détectés depuis ton site ·{" "}
+        {mode === "auto" ? (
+          <button
+            type="button"
+            onClick={() => setMode("manual")}
+            className="underline underline-offset-2 hover:text-[color:var(--color-ink)]"
+          >
+            renseigner manuellement
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setMode("auto")}
+            className="underline underline-offset-2 hover:text-[color:var(--color-ink)]"
+          >
+            revenir au mode automatique
+          </button>
+        )}
       </p>
     </form>
   );
 }
 
 const PROGRESS_STEPS = [
-  { atMs: 0, label: "Génération des 3 questions de ton secteur…" },
-  { atMs: 1500, label: "On interroge l'IA en direct…" },
-  { atMs: 6000, label: "Détection de ta marque et de tes concurrents…" },
-  { atMs: 11000, label: "Compilation du verdict…" },
+  { atMs: 0, label: "Analyse de ton site : marque, secteur, zone de chalandise…" },
+  { atMs: 4000, label: "Génération des 3 questions de ton secteur…" },
+  { atMs: 5500, label: "On interroge l'IA en direct…" },
+  { atMs: 11000, label: "Détection de ta marque et de tes concurrents…" },
+  { atMs: 16000, label: "Compilation du verdict…" },
 ];
 
-function ScanProgress({ brandName }: { brandName: string }) {
+function ScanProgress({ domain, detected }: { domain: string; detected: SiteProfile | null }) {
   const [elapsed, setElapsed] = useState(0);
   useEffect(() => {
     const interval = setInterval(() => setElapsed((e) => e + 500), 500);
@@ -202,7 +253,13 @@ function ScanProgress({ brandName }: { brandName: string }) {
 
   return (
     <div className="mx-auto max-w-2xl rounded-[var(--radius-xl)] border border-[color:var(--color-border)] bg-white p-8 text-center shadow-[var(--shadow-sm)]">
-      <p className="type-h3">Test en cours pour {brandName}</p>
+      <p className="type-h3">Test en cours pour {domain}</p>
+      {detected && (
+        <p className="type-meta mt-2">
+          Détecté : <strong>{detected.brandName}</strong> · {detected.sector}
+          {detected.zone ? ` · ${detected.zone}` : ""}
+        </p>
+      )}
       <div className="mx-auto mt-6 flex max-w-md flex-col gap-3 text-left">
         {PROGRESS_STEPS.map((step, i) => (
           <div key={step.atMs} className="flex items-center gap-3">
@@ -229,7 +286,7 @@ function ScanProgress({ brandName }: { brandName: string }) {
           </div>
         ))}
       </div>
-      <p className="type-meta mt-6">10 à 20 secondes — l&apos;IA rédige ses réponses en direct.</p>
+      <p className="type-meta mt-6">~20 secondes — on analyse ton site puis l&apos;IA répond en direct.</p>
     </div>
   );
 }
