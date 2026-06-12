@@ -52,7 +52,12 @@ export default function TestVisibiliteIAPage() {
           </h1>
           <p className="type-body-lg mt-6">
             On pose 3 vraies questions de ton secteur à une IA, sous tes yeux. En 15 secondes tu
-            sais si elle te cite — ou si elle recommande tes concurrents à ta place.
+            sais si elle te cite — ou si elle recommande tes concurrents à ta place. (Pour vérifier
+            ta présence sur les sites sources que les IA consultent, c&apos;est le{" "}
+            <a href="/outils/comparateurs" className="underline underline-offset-2">
+              scan comparateurs
+            </a>
+            .)
           </p>
 
           <div className="mt-8 flex flex-wrap items-center justify-center gap-2">

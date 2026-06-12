@@ -143,6 +143,7 @@ export async function runComparatorScanAction(
       presentCount: result.report.presentCount,
       totalChecked: result.report.totalChecked,
       checks: result.report.checks,
+      competitorsSpotted: result.report.competitorsSpotted,
     });
   } catch (error) {
     logCronEvent({

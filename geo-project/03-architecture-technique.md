@@ -248,7 +248,8 @@ Migrations versionnées : `0000_many_human_torch` (schéma initial),
 `0004_salty_molten_man` (funnel sources, 2026-06-08),
 `0005_per_prompt_cadence` (`prompts.cadence`, 2026-06-08),
 `0006_slimy_xorn` (`comparator_scans`, 2026-06-12), `0007_calm_nomad`
-(`comparator_scans.location`, 2026-06-12).
+(`comparator_scans.location`, 2026-06-12), `0008_complete_wild_child`
+(`comparator_scans.competitors_spotted`, 2026-06-12).
 
 ### Tables Better Auth
 
@@ -446,6 +447,7 @@ CREATE TABLE comparator_scans (
   present_count INTEGER NOT NULL,
   total_checked INTEGER NOT NULL,
   checks JSONB NOT NULL,
+  competitors_spotted JSONB,    -- CompetitorSpotted[] : sites concurrents qui rankent
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 CREATE INDEX idx_comparator_scans_sector ON comparator_scans(sector_normalized);

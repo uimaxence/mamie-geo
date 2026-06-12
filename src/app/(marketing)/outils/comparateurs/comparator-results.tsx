@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCircle2, ExternalLink, XCircle } from "lucide-react";
+import { CheckCircle2, ExternalLink, Users, XCircle } from "lucide-react";
 import { Badge, Button, LinkButton, ScoreRing } from "@/components/ui";
 import { DFY_SLOTS_BADGE } from "@/lib/done-for-you";
 import { capture } from "@/lib/posthog-client";
@@ -27,8 +27,25 @@ export function ComparatorResults({
   /** Repasse le form en mode manuel pré-rempli (corriger marque/secteur/zone détectés). */
   onEdit: () => void;
 }) {
-  const checks = sortChecksForDisplay(report.checks);
-  const absent = report.totalChecked - report.presentCount;
+  // Les sites classés "entreprise" par l'enrichissement (concurrents qui
+  // ont échappé au filtre de découverte) ne sont pas des endroits où
+  // demander l'inclusion — on les bascule dans le bloc concurrents et on
+  // recalcule le score sans eux.
+  const competitorChecks = report.checks.filter((c) => c.siteType === "entreprise" && !c.present);
+  const sourceChecks = report.checks.filter((c) => !(c.siteType === "entreprise" && !c.present));
+  const checks = sortChecksForDisplay(sourceChecks);
+  const presentCount = sourceChecks.filter((c) => c.present).length;
+  const totalChecked = sourceChecks.length;
+  const absent = totalChecked - presentCount;
+  const competitors = [
+    ...report.competitorsSpotted,
+    ...competitorChecks.map((c) => ({
+      domain: c.domain,
+      label: c.label,
+      url: c.foundUrl ?? `https://${c.domain}/`,
+      title: c.foundTitle ?? c.label,
+    })),
+  ];
 
   return (
     <div className="mx-auto max-w-3xl">
@@ -40,12 +57,10 @@ export function ComparatorResults({
             {report.location ? ` (${report.location})` : ""}
           </p>
           <ScoreRing
-            value={report.scorePct}
-            suffix={`présent ${report.presentCount}/${report.totalChecked}`}
+            value={totalChecked > 0 ? (presentCount / totalChecked) * 100 : 0}
+            suffix={`présent ${presentCount}/${totalChecked}`}
           />
-          <p className="type-body max-w-md">
-            {verdictText(report.presentCount, report.totalChecked)}
-          </p>
+          <p className="type-body max-w-md">{verdictText(presentCount, totalChecked)}</p>
         </div>
 
         <div className="mt-8 flex flex-col gap-2">
@@ -58,6 +73,18 @@ export function ComparatorResults({
           Vérification par recherche web en direct (requête «&nbsp;site:domaine
           &quot;{report.brand}&quot;&nbsp;»). Un site marqué absent peut aussi être mal indexé —
           c&apos;est un signal, pas un jugement définitif.
+        </p>
+        <p className="type-meta mt-2">
+          Ici on vérifie ta présence sur les <strong>sites sources</strong> que les IA
+          consultent — pas ce que les IA répondent. Pour ça :{" "}
+          <a
+            href="/outils/test-visibilite-ia"
+            className="font-medium text-[color:var(--color-ink)] underline-offset-2 hover:underline"
+            onClick={() => trackCta("cross_tool_express")}
+          >
+            teste ta visibilité IA en direct
+          </a>
+          .
         </p>
       </div>
 
@@ -102,6 +129,61 @@ export function ComparatorResults({
               </ul>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Concurrents repérés dans la découverte → CTA app */}
+      {competitors.length > 0 && (
+        <div className="mt-6 rounded-[var(--radius-xl)] border border-[color:var(--color-border)] bg-white p-6 sm:p-8">
+          <div className="flex items-center gap-3">
+            <span className="flex size-9 items-center justify-center rounded-[var(--radius-pill)] bg-[color:var(--color-orange-bg)] text-[color:var(--color-orange)] shadow-[var(--shadow-sm)]">
+              <Users size={16} strokeWidth={2} />
+            </span>
+            <h3 className="type-h3">
+              {competitors.length} concurrent{competitors.length > 1 ? "s" : ""} occupe
+              {competitors.length > 1 ? "nt" : ""} déjà le terrain
+            </h3>
+          </div>
+          <p className="type-body mt-3">
+            Ces sites d&apos;entreprises ressortent sur les mêmes recherches que les IA
+            consultent pour ton secteur — ce sont probablement tes concurrents directs.
+          </p>
+          <div className="mt-4 flex flex-col gap-2">
+            {competitors.map((c) => (
+              <a
+                key={c.domain}
+                href={c.url}
+                target="_blank"
+                rel="noopener noreferrer nofollow"
+                className="group flex items-center justify-between gap-3 rounded-[var(--radius-lg)] border border-[color:var(--color-border)] bg-[color:var(--color-gray-50)] px-4 py-3 transition hover:bg-white"
+              >
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium text-[color:var(--color-ink)]">
+                    {c.label}
+                  </p>
+                  <p className="truncate text-xs text-[color:var(--color-faint)]">{c.domain}</p>
+                </div>
+                <ExternalLink
+                  size={14}
+                  className="shrink-0 text-[color:var(--color-faint)] transition group-hover:text-[color:var(--color-ink)]"
+                />
+              </a>
+            ))}
+          </div>
+          <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <LinkButton
+              href="/login?mode=signup&from=scan-comparateurs-concurrents"
+              variant="accent"
+              size="md"
+              className="whitespace-nowrap"
+              onClick={() => trackCta("competitors", { count: competitors.length })}
+            >
+              Voir qui est cité à ma place dans 5 IA
+            </LinkButton>
+            <span className="type-meta">
+              L&apos;app suit chaque jour quelles marques les IA recommandent sur ton secteur.
+            </span>
+          </div>
         </div>
       )}
 

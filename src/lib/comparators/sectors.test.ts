@@ -3,6 +3,7 @@ import {
   findCuratedComparators,
   isBlockedDomain,
   labelFromDomain,
+  looksLikeListicle,
   normalizeText,
   sortChecksForDisplay,
 } from "./sectors";
@@ -42,6 +43,30 @@ describe("isBlockedDomain", () => {
   it("laisse passer les comparateurs", () => {
     expect(isBlockedDomain("lelynx.fr")).toBe(false);
     expect(isBlockedDomain("fr.trustpilot.com")).toBe(false);
+  });
+});
+
+describe("looksLikeListicle", () => {
+  it("matche les titres de pages de liste/comparatif", () => {
+    for (const title of [
+      "Les 10 meilleurs CRM en 2026",
+      "Top 5 des menuisiers à Tours",
+      "Comparatif assurance habitation",
+      "Annuaire des artisans d'Indre-et-Loire",
+      "Avis Acme : que vaut ce logiciel ?",
+      "Trouver un plombier près de chez vous",
+    ]) {
+      expect(looksLikeListicle(title)).toBe(true);
+    }
+  });
+  it("rejette les titres de sites d'entreprise", () => {
+    for (const title of [
+      "Menuiserie Dupont — fenêtres et portes à Tours",
+      "Acme Caisse | La caisse enregistreuse nouvelle génération",
+      "Bienvenue chez Atelier Bois",
+    ]) {
+      expect(looksLikeListicle(title)).toBe(false);
+    }
   });
 });
 

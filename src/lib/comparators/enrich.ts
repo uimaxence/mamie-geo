@@ -32,7 +32,7 @@ function buildPrompt(sector: string, checks: ComparatorCheck[]): string {
   return `Tu aides une PME française du secteur « ${sector} » à être citée par les IA (ChatGPT, Perplexity…), qui s'appuient sur les comparateurs et annuaires.
 
 Pour chaque site ci-dessous :
-1. classe-le : "comparateur", "annuaire", "presse", "avis", "blog" ou "autre" ;
+1. classe-le : "comparateur", "annuaire", "presse", "avis", "blog", "entreprise" (site vitrine d'une entreprise du secteur — un concurrent, pas un site qui référence des tiers) ou "autre" ;
 2. donne un conseil d'inclusion d'UNE phrase, concret et spécifique au site (ex : formulaire d'ajout d'établissement, contact rédaction, programme partenaire, fiche à revendiquer). Si la marque est déjà référencée, le conseil porte sur l'optimisation de sa fiche.
 
 Sites :

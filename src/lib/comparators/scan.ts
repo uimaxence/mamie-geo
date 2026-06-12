@@ -1,12 +1,15 @@
 import {
   findCuratedComparators,
   isBlockedDomain,
+  isKnownDirectoryDomain,
   labelFromDomain,
+  looksLikeListicle,
 } from "./sectors";
 import type {
   ComparatorCheck,
   ComparatorScanReport,
   ComparatorScanResult,
+  CompetitorSpotted,
   SearchFn,
 } from "./types";
 
@@ -20,6 +23,7 @@ import type {
 // 8 max). Aucun LLM — déterministe, coût = ~10 requêtes search/scan.
 
 const MAX_COMPARATORS = 8;
+const MAX_COMPETITORS_SPOTTED = 6;
 const DISCOVERY_RESULT_COUNT = 10;
 const PRESENCE_RESULT_COUNT = 3;
 
@@ -84,19 +88,33 @@ export async function runComparatorScan(
       message: `Recherche web indisponible: ${reason instanceof Error ? reason.message : String(reason)}`,
     };
   }
+  // Partition des résultats : pages de liste (comparateurs/annuaires —
+  // on y vérifie la présence) vs sites d'entreprise (concurrents
+  // probables — un concurrent ne cite pas la marque sur son site, on
+  // les remonte comme signal concurrentiel).
+  const competitors = new Map<string, CompetitorSpotted>();
   for (const discovery of discoveries) {
     if (discovery.status !== "fulfilled") continue;
     for (const result of discovery.value) {
-      if (candidates.size >= MAX_COMPARATORS) break;
-      if (candidates.has(result.domain)) continue;
+      if (candidates.has(result.domain) || competitors.has(result.domain)) continue;
       if (isBlockedDomain(result.domain)) continue;
       if (ownDomain && matchesDomain(result.domain, ownDomain)) continue;
-      candidates.set(result.domain, {
-        domain: result.domain,
-        label: labelFromDomain(result.domain),
-        origin: "recherche",
-        present: false,
-      });
+      if (looksLikeListicle(result.title) || isKnownDirectoryDomain(result.domain)) {
+        if (candidates.size >= MAX_COMPARATORS) continue;
+        candidates.set(result.domain, {
+          domain: result.domain,
+          label: labelFromDomain(result.domain),
+          origin: "recherche",
+          present: false,
+        });
+      } else if (competitors.size < MAX_COMPETITORS_SPOTTED) {
+        competitors.set(result.domain, {
+          domain: result.domain,
+          label: labelFromDomain(result.domain),
+          url: result.url,
+          title: result.title,
+        });
+      }
     }
   }
 
@@ -140,6 +158,7 @@ export async function runComparatorScan(
     presentCount,
     totalChecked: checks.length,
     scorePct: Math.round((presentCount / checks.length) * 100),
+    competitorsSpotted: [...competitors.values()],
     fetchedAt: new Date().toISOString(),
   };
   return { ok: true, report };

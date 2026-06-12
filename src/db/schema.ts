@@ -506,6 +506,9 @@ export const comparatorScans = pgTable(
     /** ComparatorCheck[] complet (domaine, origine, présence, URL trouvée,
      *  type de site + conseil d'inclusion Mistral). */
     checks: jsonb().notNull(),
+    /** CompetitorSpotted[] — sites d'entreprise (concurrents probables)
+     *  qui rankent sur les mêmes recherches (2026-06-12). */
+    competitorsSpotted: jsonb(),
     createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [

@@ -57,6 +57,13 @@
       "when": 1781269732318,
       "tag": "0007_calm_nomad",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1781272763110,
+      "tag": "0008_complete_wild_child",
+      "breakpoints": true
     }
   ]
 }

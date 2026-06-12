@@ -40,8 +40,13 @@ export default function ComparateursPage() {
           <p className="type-body-lg mt-6">
             Sur 722 sources citées par ChatGPT, Claude, Perplexity, Gemini et Le Chat dans notre
             étude, <strong>32&nbsp;% sont des comparateurs et annuaires</strong> — contre
-            1,7&nbsp;% seulement le site des marques. Vérifie en 10 secondes si tu es présent sur
-            les sites que les IA lisent quand on leur parle de ton secteur.
+            1,7&nbsp;% seulement le site des marques. Ce scan vérifie ta présence sur ces{" "}
+            <strong>sites sources</strong> — les pages que les IA lisent avant de répondre. (Pour
+            voir ce que les IA répondent, c&apos;est le{" "}
+            <a href="/outils/test-visibilite-ia" className="underline underline-offset-2">
+              test de visibilité IA
+            </a>
+            .)
           </p>
         </div>
 

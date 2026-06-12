@@ -12,7 +12,7 @@ export interface WebSearchResult {
 /** Fonction de recherche web injectable (Brave en prod, fake en test). */
 export type SearchFn = (query: string, count?: number) => Promise<WebSearchResult[]>;
 
-export const SITE_TYPES = ["comparateur", "annuaire", "presse", "avis", "blog", "autre"] as const;
+export const SITE_TYPES = ["comparateur", "annuaire", "presse", "avis", "blog", "entreprise", "autre"] as const;
 export type SiteType = (typeof SITE_TYPES)[number];
 
 export interface ComparatorCheck {
@@ -29,6 +29,16 @@ export interface ComparatorCheck {
   inclusionHint?: string;
 }
 
+/** Site d'entreprise (concurrent probable) repéré dans la découverte —
+ * exclu des checks de présence (un concurrent ne cite pas ta marque sur
+ * son site) mais affiché comme signal concurrentiel → CTA app. */
+export interface CompetitorSpotted {
+  domain: string;
+  label: string;
+  url: string;
+  title: string;
+}
+
 export interface ComparatorScanReport {
   brand: string;
   sector: string;
@@ -39,6 +49,8 @@ export interface ComparatorScanReport {
   totalChecked: number;
   /** presentCount / totalChecked en % entier. */
   scorePct: number;
+  /** Concurrents probables qui rankent sur les mêmes recherches. */
+  competitorsSpotted: CompetitorSpotted[];
   fetchedAt: string; // ISO
 }
 

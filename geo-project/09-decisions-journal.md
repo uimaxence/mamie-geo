@@ -161,6 +161,19 @@ haut et l'entrée "2026-05-05 — Réponses aux 10 questions de bootstrap".
 
 ### Décisions enregistrées
 
+#### 2026-06-12 — Scan comparateurs : concurrents séparés des sources + clarté « sources vs réponses IA »
+
+**Contexte** : retour Max après test réel (Fenêtres sur Loir) — (1) la découverte « meilleur menuiserie à X » fait ranker des sites de **concurrents**, qu'on listait comme « comparateurs où demander l'inclusion » (absurde : un concurrent ne cite pas ta marque sur son site) ; (2) confusion possible entre les 2 outils — le scan comparateurs cherche sur le **web** (présence sur les sources des IA), pas dans les **réponses** des LLM (ça, c'est le test de visibilité + l'app). Demande : peaufiner l'analyse, clarifier le wording, et faire des concurrents un CTA vers l'app.
+
+**Livré** :
+- **Partition à la découverte** (`looksLikeListicle()` sur le titre du résultat) : pages de liste/comparatif/annuaire → checks de présence ; sites d'entreprise → `competitorsSpotted` (max 6, persistés en DB, migration `0008`). Whitelist `isKnownDirectoryDomain()` pour les plateformes dont les pages locales ont des titres d'entreprise (allovoisins, meilleur-artisan… — constaté en réel). Seconde couche : l'enrichissement Mistral classe désormais aussi « entreprise », et l'UI bascule ces checks-là dans le bloc concurrents en recalculant le score.
+- **Nouveau bloc résultats « X concurrents occupent déjà le terrain »** : liste des sites concurrents trouvés + CTA accent « Voir qui est cité à ma place dans 5 IA » → `/login?mode=signup&from=scan-comparateurs-concurrents` (event `tool_cta_clicked` cta=competitors). L'idée de Max : le concurrent repéré devient l'argument de signup.
+- **Wording sources vs réponses** : hero comparateurs (« ce scan vérifie ta présence sur ces sites sources — pour voir ce que les IA répondent, c'est le test de visibilité IA »), ligne sous les résultats, cross-links croisés entre les 2 outils.
+
+**Validé en réel** (Fenêtres sur Loir, menuiserie, Seiches-sur-le-Loir) : 8 vrais annuaires/plateformes côté sources (pagesjaunes, petitfute, allovoisins, travaux.com…), 3 menuisiers concurrents correctement isolés (Art et Fenêtres Angers, Cadeau Patrick, Charly Trost).
+
+**À revisiter** : si la whitelist d'annuaires gonfle, la déplacer vers une classification systématique des concurrents par l'enrichissement Mistral ; exploiter `competitors_spotted` en DB (suggestion de concurrents à l'onboarding de l'app).
+
 #### 2026-06-12 — Audit manuel 24 h supprimé : email de confirmation (essai/appel) + vente accompagnement partout
 
 **Contexte** : Max reçoit encore l'auto-reply « rapport sous 24 h ouvrées » (hérité du funnel d'origine) — promesse de travail humain gratuit qu'il ne veut plus tenir. Demande : un email de confirmation qui redirige « vers moi et/ou vers l'app », et la rareté des créneaux présentée en vente clean conforme DA.

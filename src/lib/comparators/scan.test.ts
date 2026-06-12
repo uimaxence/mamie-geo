@@ -20,9 +20,9 @@ describe("runComparatorScan", () => {
   it("fusionne curaté + découverte et détecte la présence", async () => {
     const search = fakeSearch({
       "meilleur assurance": [
-        result("https://www.lelynx.fr/assurance-auto/"), // déjà curaté → dédupliqué
-        result("https://www.hyperassur.com/comparatif/"),
-        result("https://fr.wikipedia.org/wiki/Assurance"), // blocklist
+        result("https://www.lelynx.fr/assurance-auto/", "Comparatif assurance auto"), // déjà curaté → dédupliqué
+        result("https://www.hyperassur.com/comparatif/", "Top 10 des assurances 2026"),
+        result("https://fr.wikipedia.org/wiki/Assurance", "Assurance — Wikipédia"), // blocklist
       ],
       'site:lelynx.fr "Acme Assur"': [result("https://www.lelynx.fr/avis/acme-assur/", "Avis Acme")],
     });
@@ -57,8 +57,8 @@ describe("runComparatorScan", () => {
   it("exclut le domaine de la marque de la découverte", async () => {
     const search = fakeSearch({
       "meilleur logiciel de caisse": [
-        result("https://www.acme-caisse.fr/"),
-        result("https://comparatif-caisse.fr/top-10/"),
+        result("https://www.acme-caisse.fr/", "Acme Caisse — logiciel de caisse"),
+        result("https://comparatif-caisse.fr/top-10/", "Comparatif des logiciels de caisse"),
       ],
     });
     const scan = await runComparatorScan({
@@ -70,6 +70,28 @@ describe("runComparatorScan", () => {
     expect(scan.ok).toBe(true);
     if (!scan.ok) return;
     expect(scan.report.checks.map((c) => c.domain)).not.toContain("acme-caisse.fr");
+  });
+
+  it("classe les sites d'entreprise en concurrents, pas en comparateurs", async () => {
+    const search = fakeSearch({
+      "meilleur menuiserie": [
+        result("https://www.annuaire-menuisiers.fr/", "Annuaire des menuisiers de France"),
+        result("https://www.menuiserie-dupont.fr/", "Menuiserie Dupont — fenêtres et portes à Tours"),
+        result("https://www.atelier-bois.fr/", "Atelier Bois : votre menuisier sur mesure"),
+      ],
+    });
+    const scan = await runComparatorScan({ brand: "Acme", sector: "menuiserie", search });
+    expect(scan.ok).toBe(true);
+    if (!scan.ok) return;
+
+    const checkDomains = scan.report.checks.map((c) => c.domain);
+    expect(checkDomains).toContain("annuaire-menuisiers.fr");
+    expect(checkDomains).not.toContain("menuiserie-dupont.fr");
+    expect(checkDomains).not.toContain("atelier-bois.fr");
+
+    const competitorDomains = scan.report.competitorsSpotted.map((c) => c.domain);
+    expect(competitorDomains).toEqual(["menuiserie-dupont.fr", "atelier-bois.fr"]);
+    expect(scan.report.competitorsSpotted[0]?.url).toBe("https://www.menuiserie-dupont.fr/");
   });
 
   it("retourne no_comparators pour un secteur introuvable", async () => {

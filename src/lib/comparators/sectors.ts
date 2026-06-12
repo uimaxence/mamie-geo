@@ -185,6 +185,50 @@ export function findCuratedComparators(sector: string): CuratedComparator[] {
   return matches;
 }
 
+// Une page de comparateur/annuaire/presse ranke avec un titre de
+// "liste" (meilleur X, top 10, comparatif, annuaire…). Un site
+// d'entreprise ranke avec son propre nom + service — il ne citera
+// jamais la marque du prospect, on l'exclut des checks de présence
+// (bug constaté 2026-06-12 : des concurrents listés comme
+// « comparateurs où être inclus »).
+const LISTICLE_TITLE_REGEX =
+  /(meilleur|top\s?\d|comparatif|comparateur|classement|class[ée]|avis|guide|annuaire|s[ée]lection|que choisir|lequel|liste|trouver|trouvez|professionnels?|sp[ée]cialistes?|prestataires?|agences|entreprises de|devis)/i;
+
+/** Le titre du résultat ressemble-t-il à une page de liste/comparatif ? */
+export function looksLikeListicle(title: string): boolean {
+  return LISTICLE_TITLE_REGEX.test(title);
+}
+
+// Plateformes/annuaires connus dont les pages locales ont des titres de
+// site d'entreprise (« Menuisier à Seiches-sur-le-Loir - AlloVoisins »)
+// — ils bypassent l'heuristique de titre (constaté 2026-06-12 :
+// allovoisins et meilleur-artisan classés concurrents à tort).
+const EXTRA_DIRECTORY_DOMAINS = [
+  "allovoisins.com",
+  "meilleur-artisan.com",
+  "starofservice.com",
+  "needhelp.com",
+  "yelp.fr",
+  "hellopro.fr",
+  "europages.fr",
+  "kompass.com",
+  "societe.com",
+  "mappy.com",
+];
+
+const KNOWN_DIRECTORY_DOMAINS = new Set([
+  ...EXTRA_DIRECTORY_DOMAINS,
+  ...CURATED_SECTORS.flatMap((entry) => entry.comparators.map((c) => c.domain)),
+]);
+
+/** Domaine de plateforme/annuaire connu — toujours un candidat de présence. */
+export function isKnownDirectoryDomain(domain: string): boolean {
+  return (
+    KNOWN_DIRECTORY_DOMAINS.has(domain) ||
+    [...KNOWN_DIRECTORY_DOMAINS].some((d) => domain.endsWith(`.${d}`))
+  );
+}
+
 /** Label lisible pour un domaine découvert en live ("hello-watt.fr" → "Hello Watt"). */
 export function labelFromDomain(domain: string): string {
   const base = domain.split(".")[0] ?? domain;
