@@ -340,7 +340,9 @@ canonicals auto-référentes.
 sur `/pricing` (3 créneaux/trimestre, constantes `SLOTS_LEFT`/
 `SLOTS_PERIOD` à maintenir à la main) → `/contact` (Cal.com inline ;
 lien = event support en attendant l'event dédié). Les 2 scans publics
-ont un champ ville optionnel (PME locales) + `ScoreRing` + events
+ont un champ ville optionnel (PME locales, pré-rempli par scraping de
+la home du site — `src/lib/location-detect.ts`, JSON-LD puis code
+postal footer, jamais imposé) + `ScoreRing` + events
 `tool_cta_clicked` sur chaque CTA.
 
 **Billing Stripe** : checkout + portal + webhooks idempotents + Stripe

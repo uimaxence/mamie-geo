@@ -3,6 +3,7 @@
 import { useEffect, useState, useTransition } from "react";
 import { Button, Field, Input } from "@/components/ui";
 import { capture, identify } from "@/lib/posthog-client";
+import { detectLocationAction } from "../location-actions";
 import type { ExpressScanReport } from "@/lib/express-scan/types";
 import { runExpressScanAction } from "./actions";
 import { ExpressScanResults } from "./express-scan-results";
@@ -17,10 +18,29 @@ export function ExpressScanForm() {
   const [sector, setSector] = useState("");
   const [location, setLocation] = useState("");
   const [websiteDomain, setWebsiteDomain] = useState("");
+  const [detectingLocation, setDetectingLocation] = useState(false);
   const [hpField, setHpField] = useState(""); // honeypot (nom non-sémantique)
   const [report, setReport] = useState<ExpressScanReport | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+
+
+  // Pré-remplit la ville depuis la home du site (JSON-LD/footer) quand
+  // le prospect renseigne son domaine — modifiable, jamais imposé.
+  async function handleWebsiteBlur() {
+    const domain = websiteDomain.trim();
+    if (!domain || location.trim() || detectingLocation) return;
+    setDetectingLocation(true);
+    try {
+      const city = await detectLocationAction(domain);
+      if (city) {
+        setLocation(city);
+        capture("tool_location_autodetected", { tool: "test-visibilite-ia", city });
+      }
+    } finally {
+      setDetectingLocation(false);
+    }
+  }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -94,7 +114,10 @@ export function ExpressScanForm() {
             required
           />
         </Field>
-        <Field label="Ta ville (optionnel)" hint="Si tes clients sont locaux">
+        <Field
+          label="Ta ville (optionnel)"
+          hint={detectingLocation ? "Détection depuis ton site…" : "Si tes clients sont locaux — détectée depuis ton site si possible"}
+        >
           <Input
             type="text"
             placeholder="Ex : Tours"
@@ -110,6 +133,7 @@ export function ExpressScanForm() {
             placeholder="monsite.fr"
             value={websiteDomain}
             onChange={(e) => setWebsiteDomain(e.target.value)}
+            onBlur={handleWebsiteBlur}
             maxLength={120}
           />
         </Field>

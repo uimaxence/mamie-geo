@@ -170,6 +170,8 @@ haut et l'entrée "2026-05-05 — Réponses aux 10 questions de bootstrap".
 - **Localisation** : champ « Ta ville (optionnel) » sur les deux scans. Express : les 3 prompts deviennent « … à {ville} » ; comparateurs : découverte « meilleur {secteur} {ville} » (fait remonter les annuaires locaux). Colonne `comparator_scans.location` (migration `0007_calm_nomad`) pour l'agrégation par niche locale. Clés de cache incluent la ville.
 - **Cohérence DA + tracking** : les 2 écrans de résultats utilisent `ScoreRing` (le même que le rapport d'audit de l'app) ; lignes des 4 IA verrouillées **cliquables** → `/login?mode=signup&from=scan-express` ; fix CTA accent qui wrappait ; event `tool_cta_clicked` {tool, cta, …} sur chaque CTA (trial, locked_llm, etude) + `from=` dans les URLs signup pour l'attribution.
 
+**Complément (même jour) — auto-détection de la zone** : quand le prospect renseigne son site, `detectSiteLocation()` (`src/lib/location-detect.ts`) scrape la home et pré-remplit « Ta ville » : JSON-LD `addressLocality` (déclaratif, fiable) puis fallback regex code postal FR + ville (footer d'abord). Pré-remplissage **modifiable, jamais imposé** — un SaaS national localisé en silence donnerait un faux verdict ; mamie-geo.fr → null (validé), fenetres-sur-loir.fr → « Seiches-sur-le-Loir » (validé en réel). Action partagée `detectLocationAction` (les 2 forms, onBlur du champ site), event `tool_location_autodetected`.
+
 **À revisiter** : remplacer le lien Cal placeholder ; décrémenter `SLOTS_LEFT` à chaque vente ; cadrer le prix de l'accompagnement après les premiers appels (doc 04).
 
 #### 2026-06-12 — Funnel /outils/test-visibilite-ia refondu : scan express live + 4 IA verrouillées (n°1bis tranché)
