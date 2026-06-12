@@ -57,6 +57,24 @@ describe("extractSiteContext", () => {
     expect(ctx.metaDescription).toBe("Pitch de secours pour les pages sans meta description.");
   });
 
+  it("extrait le texte des payloads <script> quand le DOM est vide (site JS-rendered)", () => {
+    const payload = JSON.stringify({
+      hero: "Créez des liens optimisés pour la conversion et suivez chaque clic, lead et vente facilement.",
+      legal:
+        "Cette Politique de Confidentialité décrit la manière dont nous collectons vos informations personnelles.",
+      key: "shortValue",
+    });
+    const html = `<html><body><div id="app"></div><script>self.__data=${payload}</script></body></html>`;
+    const ctx = extractSiteContext("taap.it", html);
+    expect(ctx.embeddedText).toContain("suivez chaque clic");
+    expect(ctx.embeddedText).not.toContain("Politique de Confidentialité");
+  });
+
+  it("pas d'extraction des <script> quand la page a du vrai contenu", () => {
+    const ctx = extractSiteContext("fenetres-sur-loir.fr", HOME_HTML);
+    expect(ctx.embeddedText).toBe("");
+  });
+
   it("extrait les liens de nav (gamme produit) en excluant légal/auth/blog", () => {
     const html = `<html><body><nav>
       <a href="/conversion">Conversion Tracking</a>
@@ -144,6 +162,26 @@ describe("detectSiteProfile", () => {
       fetch: fakeFetchSequence([{ body: "", status: 503 }]),
     });
     expect(profile).toBeNull();
+  });
+
+  it("compresse un secteur-énumération en catégorie cherchable (2e appel)", async () => {
+    const profile = await detectSiteProfile({
+      domain: "taap.it",
+      apiKey: "test-key",
+      fetch: fakeFetchSequence([
+        { body: HOME_HTML },
+        {
+          body: mistralResponse({
+            proposition: "Outil de création et tracking de liens.",
+            marque: "Taap",
+            secteur: "outil de tracking et optimisation de liens",
+            zone: null,
+          }),
+        },
+        { body: mistralResponse({ secteur: "outil de tracking de liens" }) },
+      ]),
+    });
+    expect(profile?.sector).toBe("outil de tracking de liens");
   });
 
   it("null si le secteur est une énumération (bascule en saisie manuelle)", async () => {
