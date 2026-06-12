@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { normalizeDomainInput } from "@/lib/utils";
 
 // Schéma du formulaire /outils/comparateurs, partagé front + back.
 
@@ -9,12 +10,17 @@ export const comparatorScanSchema = z.object({
     .string()
     .min(3, "Décris ton secteur (ex: « agence seo », « plombier », « logiciel de caisse »)")
     .max(80),
-  websiteDomain: z
-    .string()
-    .max(120)
-    .regex(/^[a-z0-9.-]+\.[a-z]{2,}$/i, "Domaine invalide (ex: monsite.fr)")
-    .optional()
-    .or(z.literal("")),
+  // Accepte une URL collée telle quelle ("https://www.monsite.fr/page"),
+  // normalisée en domaine nu avant validation.
+  websiteDomain: z.preprocess(
+    (value) => (typeof value === "string" ? normalizeDomainInput(value) : value),
+    z
+      .string()
+      .max(120)
+      .regex(/^[a-z0-9.-]+\.[a-z]{2,}$/i, "Domaine invalide (ex: monsite.fr)")
+      .optional()
+      .or(z.literal("")),
+  ),
   // Honeypot anti-bot : champ caché qui doit rester vide.
   company: z.string().optional(),
 });

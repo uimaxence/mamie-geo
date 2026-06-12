@@ -1,5 +1,24 @@
 import { describe, expect, it } from "vitest";
-import { cn } from "./utils";
+import { cn, normalizeDomainInput } from "./utils";
+
+describe("normalizeDomainInput()", () => {
+  it("accepte une URL complète collée", () => {
+    expect(normalizeDomainInput("https://www.fenetres-sur-loir.fr/")).toBe("fenetres-sur-loir.fr");
+    expect(normalizeDomainInput("http://monsite.fr/page?utm=x#section")).toBe("monsite.fr");
+  });
+
+  it("laisse un domaine nu intact (hors casse/espaces)", () => {
+    expect(normalizeDomainInput("  Mamie-GEO.fr  ")).toBe("mamie-geo.fr");
+  });
+
+  it("strip www. et le point final", () => {
+    expect(normalizeDomainInput("www.monsite.fr.")).toBe("monsite.fr");
+  });
+
+  it("préserve les sous-domaines non-www", () => {
+    expect(normalizeDomainInput("https://blog.monsite.fr/article")).toBe("blog.monsite.fr");
+  });
+});
 
 describe("cn()", () => {
   it("concatène plusieurs classes string", () => {

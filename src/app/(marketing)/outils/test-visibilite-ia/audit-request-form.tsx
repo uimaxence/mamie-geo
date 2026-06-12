@@ -24,12 +24,17 @@ export function AuditRequestForm() {
     setErrorMessage(null);
     startTransition(async () => {
       try {
-        await submitAuditRequest({
+        const result = await submitAuditRequest({
           prospectEmail: email.trim(),
           brandName: brandName.trim(),
           domain: domain.trim().toLowerCase(),
           notes: notes.trim() || undefined,
         });
+        if (!result.ok) {
+          setStatus("error");
+          setErrorMessage(result.error);
+          return;
+        }
         identify(email.trim(), { email: email.trim() });
         capture("tool_lead_form_submitted", {
           tool: "test-visibilite-ia",
@@ -38,9 +43,9 @@ export function AuditRequestForm() {
           brand_name: brandName.trim(),
         });
         setStatus("sent");
-      } catch (error) {
+      } catch {
         setStatus("error");
-        setErrorMessage(error instanceof Error ? error.message : "Erreur inattendue");
+        setErrorMessage("Erreur inattendue, réessaye dans quelques minutes.");
       }
     });
   }
