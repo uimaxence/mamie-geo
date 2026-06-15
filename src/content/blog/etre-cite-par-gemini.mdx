@@ -1,0 +1,320 @@
+---
+title: "Comment être cité par Gemini (Google) : guide GEO 2026"
+description: "Gemini puise dans l'index Google que tu travailles depuis 20 ans. Voici comment être cité, arbitrer Google-Extended et pourquoi la France change la donne."
+keywords:
+  - "etre cite par gemini"
+  - "visibilite gemini google"
+  - "gemini geo"
+  - "google-extended robots txt"
+  - "ai overviews france"
+  - "optimiser pour gemini"
+date: "2026-06-09"
+author: "Maxence Cailleau"
+category: "Tutoriel"
+readingTimeMin: 11
+---
+
+{/* H1 rendu via layout.tsx, ne pas dupliquer ici */}
+
+## Le seul LLM qui s'appuie sur un index que tu travailles déjà
+
+Avec ChatGPT, Claude ou Perplexity, tu pars souvent d'une page blanche : ces moteurs construisent leur propre vision du web. Avec Gemini, c'est différent. Google a déjà un index de ton site, celui qu'il maintient depuis vingt ans pour la recherche classique. Gemini n'invente pas une nouvelle infrastructure : il s'adosse à celle que tu connais déjà.
+
+C'est la bonne nouvelle de cet article : pour être cité par Gemini, tu détiens peut-être déjà une partie des clés sans le savoir. La mauvaise, c'est que Google a découpé ces clés en plusieurs trousseaux (`Googlebot`, `Google-Extended`, AI Overviews, AI Mode, l'app Gemini) et qu'un seul geste maladroit dans ton `robots.txt` peut te faire disparaître de tout. Et en France, une partie de ces surfaces n'est même pas encore allumée.
+
+## La règle en une phrase
+
+> Pour être cité par Gemini, une marque doit d'abord être solidement indexée dans Google Search (car les réponses IA de Google puisent dans le même index), puis laisser `Googlebot` accéder au site, arbitrer consciemment `Google-Extended`, et produire des pages structurées et factuelles que Google peut extraire et résumer.
+
+Le levier dominant n'est donc pas un nouveau réglage exotique : c'est ton référencement Google, qui devient le socle de ta visibilité dans Gemini. Le reste est un travail d'arbitrage et d'extraction.
+
+## Pourquoi Gemini mérite son propre playbook
+
+On pourrait croire qu'optimiser pour Gemini, c'est faire du « GEO ChatGPT » avec un autre logo. Trois différences structurelles l'interdisent.
+
+D'abord, Gemini est **branché sur l'index Google Search**. Les AI Overviews, ces résumés générés en haut des résultats, s'appuient sur le même index que la recherche classique. Conséquence directe : ton travail SEO historique n'est pas perdu, il devient ta porte d'entrée. C'est l'inverse d'un moteur qui recrawle le web pour son propre compte.
+
+Ensuite, Google sépare **l'accès au contenu** (via `Googlebot`) de **l'usage du contenu pour l'IA générative** (via `Google-Extended`). Cette dissociation, unique en son genre, te permet d'être indexé et cité dans AI Overviews tout en refusant que ton contenu serve à entraîner les modèles Gemini. Encore faut-il ne pas se tromper de levier.
+
+Enfin, Gemini se présente sous **plusieurs surfaces** : l'application Gemini autonome, les AI Overviews dans les résultats de recherche, et l'AI Mode conversationnel. Or toutes ne sont pas disponibles partout, et la France est précisément un cas à part, qu'on détaille plus bas. On avait déjà posé ce contexte dans [Google I/O 2026 : la recherche devient agentique, et la France reste à l'écart](/blog/google-io-2026-recherche-ia-france).
+
+## Comment Gemini construit une réponse
+
+Selon la surface utilisée, Gemini mobilise les sources différemment.
+
+1. **L'index Google Search** est le socle des AI Overviews et de l'AI Mode. Google sélectionne des pages pertinentes dans son index, puis Gemini les résume en citant les sources. Être bien classé sur la requête reste le prérequis numéro un.
+2. **Le grounding via Google Search** alimente aussi l'application Gemini : quand elle a besoin de fraîcheur ou de faits vérifiables, elle interroge la recherche Google et affiche des liens sources.
+3. **Le corpus d'entraînement** des modèles Gemini joue en arrière-plan pour les connaissances générales, mais les réponses à enjeu (marché, marques, actualité) passent de plus en plus par le grounding.
+4. **Le re-ranking de Google** privilégie ce qu'il privilégie déjà en SEO : autorité, pertinence, fraîcheur, structure claire. Les signaux E-E-A-T comptent autant ici qu'en recherche organique.
+
+La conséquence est limpide : sur Gemini, **le GEO et le SEO se recouvrent plus que sur n'importe quel autre moteur IA**. Ce qui te fait monter dans Google te rend citable dans Gemini. Les leviers spécifiquement « IA » s'ajoutent à ce socle, ils ne le remplacent pas.
+
+## Les 8 tactiques pour entrer dans Gemini
+
+### 1. Être solidement indexé dans Google Search
+
+C'est le socle, et il n'a rien d'exotique. Puisque les AI Overviews et l'AI Mode puisent dans l'index Google, une page absente ou mal classée dans la recherche classique n'a quasiment aucune chance d'être citée par Gemini. Vérifie l'indexation dans la Search Console, surveille tes positions sur tes requêtes commerciales, et traite les problèmes de couverture en priorité. Ton SEO n'est pas un canal concurrent du GEO sur Google : c'en est la condition d'entrée.
+
+### 2. Arbitrer Google-Extended dans le robots.txt
+
+`Google-Extended` est un jeton de contrôle introduit par Google en septembre 2023 dans le `robots.txt`. Il décide d'une seule chose : si ton contenu peut servir à entraîner et améliorer les modèles d'IA générative de Google (Gemini, Vertex AI). Point crucial confirmé par Google : **le bloquer n'affecte ni ton indexation, ni ton classement, ni ton éligibilité aux AI Overviews**, qui reposent sur l'index de recherche vivant ([documentation et analyses sur Google-Extended](https://www.amicited.com/glossary/google-extended/)). Tu peux donc refuser l'entraînement tout en restant citable. L'arbitrage est le même que pour les autres moteurs : si ta priorité est la visibilité, ne le bloque pas par réflexe.
+
+### 3. Ne jamais bloquer Googlebot par erreur
+
+C'est l'erreur qui coûte le plus cher. Beaucoup d'équipes, voulant « échapper à l'IA », ajoutent un `Disallow` sur `Googlebot` en pensant ne bloquer que l'entraînement. En réalité, elles s'excluent de Google Search tout entier, et donc des AI Overviews par ricochet. `Googlebot` gère l'accès et l'indexation ; `Google-Extended` gère l'usage IA. Confondre les deux, c'est se tirer une balle dans le pied. Le seul levier « anti-entraînement » sûr est `Google-Extended`, jamais `Googlebot`.
+
+### 4. Viser la position zéro et les extraits optimisés
+
+Les AI Overviews s'appuient fréquemment sur les pages déjà bien positionnées et sur les contenus qui répondent de façon directe et concise, exactement le profil des featured snippets. Une page qui gagne déjà la « position zéro » sur une requête a mécaniquement plus de chances d'être reprise dans le résumé IA. Concrètement : réponds à la question dès le premier paragraphe, en une formulation autonome, avant de développer. Ce travail sert ton SEO classique et ta citabilité Gemini d'un même geste.
+
+### 5. Publier en HTML structuré et extractible
+
+Comme tous les moteurs IA, Gemini favorise les pages dont la structure isole des fragments réutilisables : titres H2/H3 sémantiquement clairs, paragraphes courts, listes et tableaux en HTML natif (jamais en image), balisage Schema.org `Article` et `FAQPage` propre. Ces signaux valent pour tout l'écosystème, on les a détaillés côté [ChatGPT](/blog/etre-cite-par-chatgpt), le constat est identique pour Gemini, avec l'avantage que Google sait déjà parfaitement parser ces structures depuis des années.
+
+### 6. Donner la définition en une phrase, nommée
+
+Gemini, comme Google Search, raffole des réponses directes. Si ta page répond à « qu'est-ce que X » par une phrase autonome, datée et nommée, placée en haut de contenu, tu deviens un candidat naturel pour le résumé IA. À l'inverse, une définition noyée dans trois paragraphes de mise en contexte est difficile à extraire, et Google ira chercher une source plus nette que la tienne.
+
+### 7. Structurer une FAQ en questions/réponses balisées
+
+Les blocs question/réponse sont parmi les fragments les plus repris par les moteurs IA, et Google les exploite depuis longtemps via le balisage `FAQPage`. Une FAQ de 5 à 8 questions, chacune avec une réponse autonome de 50 à 100 mots, multiplie les points d'entrée citables d'une seule page. La règle d'or : chaque réponse doit tenir seule, sans dépendre de la question précédente, car Gemini peut l'isoler hors contexte.
+
+### 8. Mesurer la part de citation sur Gemini, surface par surface
+
+Aucune des sept règles précédentes ne se prouve sans mesure. La métrique de référence en GEO reste la **part de citation** : sur un panier de prompts représentatifs, combien de fois ta marque apparaît dans les réponses, à quel rang, avec quel sentiment, et avec ou sans lien. Gemini ajoute une difficulté : il faut distinguer les surfaces (app Gemini vs AI Overviews) et le territoire, puisque toutes ne sont pas actives partout. C'est précisément ce type de suivi multi-surfaces que Mamie GEO automatise.
+
+## Le cas français : une surface encore éteinte
+
+Voici le point que personne ne devrait ignorer côté francophone. En juin 2026, **les AI Overviews et l'AI Mode de Google ne sont toujours pas déployés en France**, bloqués par le conflit sur les droits voisins et l'environnement réglementaire européen. Les analystes du secteur anticipent une disponibilité entre fin 2026 et début 2027, le temps pour Google d'ajuster une version conforme ([suivi du déploiement en France](https://digital-m.fr/horizon-geo/google-ai-overviews-en-europe-le-deploiement-avance-la-france-attend-encore/)).
+
+Pour une marque française, cela crée une situation à deux vitesses :
+
+- **L'application Gemini** est, elle, accessible en France et s'appuie sur le grounding Google Search. Tu peux donc déjà y être cité, et tu devrais déjà y mesurer ta présence.
+- **Les AI Overviews dans les résultats de recherche** ne sont pas encore là, mais le jour où ils s'allumeront, ce sont les sites déjà bien indexés et structurés qui apparaîtront en premier.
+
+Autrement dit : l'absence des AI Overviews en France n'est pas une raison d'attendre, c'est une fenêtre d'avance. Les pages que tu structures aujourd'hui pour Google seront prêtes le jour de la bascule, pendant que tes concurrents découvriront le sujet.
+
+## Tableau récapitulatif des 8 tactiques
+
+<table>
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Tactique</th>
+      <th>Mécanisme visé</th>
+      <th>Effort</th>
+      <th>Délai pour bouger</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>Indexation solide dans Google Search</td>
+      <td>Socle index</td>
+      <td>Moyen</td>
+      <td>4-12 semaines</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>Arbitrer Google-Extended (entraînement vs visibilité)</td>
+      <td>Usage IA</td>
+      <td>Très faible</td>
+      <td>1-2 semaines</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>Ne jamais bloquer Googlebot par erreur</td>
+      <td>Accès / indexation</td>
+      <td>Très faible</td>
+      <td>Immédiat</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>Position zéro et extraits optimisés</td>
+      <td>Sélection AI Overviews</td>
+      <td>Moyen</td>
+      <td>4-12 semaines</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>HTML structuré, Schema.org, tableaux natifs</td>
+      <td>Extraction</td>
+      <td>Faible</td>
+      <td>2-8 semaines</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td>Définition en une phrase, nommée, en haut de page</td>
+      <td>Extraction</td>
+      <td>Faible</td>
+      <td>2-6 semaines</td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td>FAQ en questions/réponses balisées FAQPage</td>
+      <td>Extraction</td>
+      <td>Faible</td>
+      <td>2-6 semaines</td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td>Mesure de la part de citation surface par surface</td>
+      <td>Pilotage</td>
+      <td>Moyen</td>
+      <td>Continu</td>
+    </tr>
+  </tbody>
+</table>
+
+## Trois erreurs qui sabotent une stratégie Gemini
+
+La première : **bloquer Googlebot en croyant bloquer l'IA**. C'est l'erreur la plus fréquente et la plus grave. Elle ne te coupe pas de l'entraînement, elle te supprime de Google Search, et donc de toute citation Gemini, qui dépend de l'index. Le bon levier anti-entraînement est `Google-Extended`, exclusivement.
+
+La deuxième : **traiter le GEO Google comme un canal séparé du SEO**. Sur Gemini, les deux se recouvrent largement. Négliger ton indexation, tes positions et tes featured snippets, c'est saboter ta visibilité IA à la source. Le travail SEO de fond n'est pas démodé ici : il est le carburant.
+
+La troisième : **attendre que les AI Overviews arrivent en France pour s'y préparer**. Le jour de la bascule, l'avantage ira aux sites déjà indexés et structurés. Reporter le travail, c'est offrir la fenêtre d'avance à tes concurrents.
+
+## Gemini vs les autres LLM : ce qui est spécifique
+
+Quelques différences à garder en tête pour calibrer ses efforts. Gemini est le seul grand moteur IA **adossé à un index de recherche existant** : ton SEO devient directement ton GEO, là où Claude pondère son corpus d'entraînement et où Perplexity recrawle le web pour son propre compte. Sa **séparation accès / usage IA** (`Googlebot` vs `Google-Extended`) est plus nette que partout ailleurs, ce qui permet d'être cité tout en refusant l'entraînement. Et sa **disponibilité géographique fragmentée** (AI Overviews absents de France, app Gemini présente) impose un suivi par surface et par territoire que les autres moteurs n'exigent pas.
+
+Pour replacer Gemini dans le paysage GEO global, on a écrit le panorama complet dans [GEO vs SEO : ce qui change vraiment en 2026](/blog/geo-vs-seo) et l'article de fond [Qu'est-ce que le GEO](/blog/qu-est-ce-que-le-geo). Le découpage des bots, lui, fait écho à ce qu'on a vu côté [Claude](/blog/etre-cite-par-claude).
+
+## FAQ
+
+### Comment savoir si Gemini cite déjà ma marque ?
+
+Le test direct est gratuit, mais il faut tester la bonne surface. Ouvre l'application Gemini (disponible en France), pose 10 à 20 prompts représentatifs de tes requêtes commerciales, et observe si ta marque est nommée dans le texte et si elle apparaît en source cliquable via le grounding Google. Pour les AI Overviews, le test n'est pas encore possible depuis la France, où la fonctionnalité n'est pas déployée.
+
+### Faut-il bloquer Google-Extended dans le robots.txt ?
+
+C'est un arbitrage, pas une règle universelle. Bloquer `Google-Extended` empêche l'usage de ton contenu pour entraîner les modèles Gemini et Vertex AI, sans affecter ton indexation, ton classement ni ton éligibilité aux AI Overviews. Si ta priorité est la visibilité IA, tu peux le laisser ouvert sans risque pour ton SEO ; si tu veux protéger ton contenu de l'entraînement, bloque-le, mais lui seul, jamais `Googlebot`.
+
+### Quelle différence entre Googlebot et Google-Extended ?
+
+`Googlebot` est le robot qui accède à ton site et l'indexe pour Google Search. Le bloquer te supprime des résultats de recherche, et donc des AI Overviews. `Google-Extended` ne contrôle pas l'accès : il décide seulement si ton contenu déjà crawlé peut servir à entraîner l'IA générative de Google. Bloquer l'un n'a rien à voir avec bloquer l'autre.
+
+### Les AI Overviews de Google sont-ils disponibles en France ?
+
+Non, pas en juin 2026. Le déploiement des AI Overviews et de l'AI Mode reste bloqué en France pour des raisons réglementaires liées notamment aux droits voisins. Les experts anticipent une arrivée entre fin 2026 et début 2027. L'application Gemini, en revanche, est accessible en France et s'appuie sur le grounding Google Search.
+
+### Mon SEO suffit-il pour être cité par Gemini ?
+
+Il en est la condition principale, mais pas toujours suffisante. Comme les AI Overviews puisent dans l'index Google, une bonne position est le prérequis. S'y ajoutent des leviers d'extraction : réponse directe en haut de page, structure claire, FAQ balisée, définitions nommées. Un bon SEO mal structuré peut être indexé sans être facilement résumable : c'est là que le travail GEO complète le SEO.
+
+### Mon site est récent : ai-je une chance d'être cité par Gemini ?
+
+Oui, mais le chemin passe par Google Search. Un site récent doit d'abord se faire indexer et gagner en autorité sur ses requêtes cibles, ce qui prend des semaines à des mois. Une fois indexé et bien structuré, il devient éligible aux citations Gemini sans étape supplémentaire spécifique, puisque le moteur réutilise l'index existant.
+
+### Peut-on payer pour être cité par Gemini ?
+
+Non, pas dans les réponses organiques. Google ne vend pas de placement qui forcerait la citation d'une marque dans un résumé IA. Les annonces publicitaires de Google Search sont un canal distinct, signalé comme tel, et n'achètent pas une mention dans une réponse générée. Toute offre « garantissant » une citation Gemini organique est à considérer avec prudence.
+
+## En résumé
+
+Gemini est le moteur IA le plus continu avec le web que tu connais déjà : il s'adosse à l'index Google plutôt que d'en reconstruire un. Cette filiation définit toute sa stratégie GEO. Le socle, c'est ton référencement Google : indexation, positions, extraits optimisés. La couche d'arbitrage, c'est `Google-Extended`, qui te laisse refuser l'entraînement sans rien perdre de ta visibilité. Et le piège, c'est `Googlebot`, qu'il ne faut jamais bloquer par erreur sous peine de tout perdre.
+
+Le cas français ajoute une dimension stratégique : les AI Overviews ne sont pas encore là, mais ils viendront. Les marques qui structurent leurs pages aujourd'hui prendront une longueur d'avance le jour de la bascule, pendant que les autres débuteront de zéro.
+
+Si tu veux savoir où ta marque en est aujourd'hui sur Gemini, ChatGPT, Le Chat, Perplexity, Claude et les autres LLM grand public, on a mis en place un audit gratuit qui te donne ton score de visibilité IA en moins de 60 secondes.
+
+[Tester gratuitement →](/outils/test-visibilite-ia)
+
+---
+
+{/* === Méta-notes pour seo-geo-tech (laisser en commentaire MDX, ne pas rendre) === */}
+
+{/*
+META TITLE : Comment être cité par Gemini (Google) : guide GEO 2026 | Mamie GEO  (63 car.)
+META DESCRIPTION : Gemini puise dans l'index Google que tu travailles depuis 20 ans. Voici comment être cité, arbitrer Google-Extended et pourquoi la France change la donne. (152 car.)
+URL : /blog/etre-cite-par-gemini
+CATEGORY pill : Tutoriel (blue)
+READING TIME : 11 min
+OG IMAGE : /og/etre-cite-par-gemini.png
+
+SCHEMA.ORG (à injecter dans layout.tsx via <script type="application/ld+json">) :
+
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Article",
+      "headline": "Comment être cité par Gemini (Google) : guide GEO 2026",
+      "description": "Gemini puise dans l'index Google que tu travailles depuis 20 ans. Voici comment être cité, arbitrer Google-Extended et pourquoi la France change la donne.",
+      "image": "https://mamie-geo.fr/og/etre-cite-par-gemini.png",
+      "author": {
+        "@type": "Person",
+        "name": "Maxence Cailleau",
+        "url": "https://mamie-geo.fr/about"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Mamie GEO",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://mamie-geo.fr/logo.png"
+        }
+      },
+      "datePublished": "2026-06-09",
+      "dateModified": "2026-06-09",
+      "mainEntityOfPage": "https://mamie-geo.fr/blog/etre-cite-par-gemini"
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        { "@type": "Question", "name": "Comment savoir si Gemini cite déjà ma marque ?", "acceptedAnswer": { "@type": "Answer", "text": "Ouvrir l'application Gemini (disponible en France), poser 10 à 20 prompts représentatifs et observer si la marque est nommée et si elle apparaît en source cliquable via le grounding Google. Les AI Overviews ne sont pas encore testables depuis la France." }},
+        { "@type": "Question", "name": "Faut-il bloquer Google-Extended dans le robots.txt ?", "acceptedAnswer": { "@type": "Answer", "text": "Arbitrage. Bloquer Google-Extended empêche l'usage du contenu pour entraîner Gemini et Vertex AI, sans affecter l'indexation, le classement ni l'éligibilité aux AI Overviews. Pour la visibilité, le laisser ouvert ne nuit pas au SEO. Ne jamais bloquer Googlebot à sa place." }},
+        { "@type": "Question", "name": "Quelle différence entre Googlebot et Google-Extended ?", "acceptedAnswer": { "@type": "Answer", "text": "Googlebot accède au site et l'indexe pour Google Search ; le bloquer supprime des résultats et donc des AI Overviews. Google-Extended ne contrôle pas l'accès, seulement l'usage du contenu pour l'entraînement de l'IA générative de Google." }},
+        { "@type": "Question", "name": "Les AI Overviews de Google sont-ils disponibles en France ?", "acceptedAnswer": { "@type": "Answer", "text": "Non, pas en juin 2026. AI Overviews et AI Mode restent bloqués en France pour raisons réglementaires (droits voisins). Disponibilité anticipée fin 2026 / début 2027. L'application Gemini, elle, est accessible en France." }},
+        { "@type": "Question", "name": "Mon SEO suffit-il pour être cité par Gemini ?", "acceptedAnswer": { "@type": "Answer", "text": "Il en est la condition principale car les AI Overviews puisent dans l'index Google, mais pas toujours suffisante. S'y ajoutent des leviers d'extraction : réponse directe en haut de page, structure claire, FAQ balisée, définitions nommées." }},
+        { "@type": "Question", "name": "Mon site est récent : ai-je une chance d'être cité par Gemini ?", "acceptedAnswer": { "@type": "Answer", "text": "Oui, mais via Google Search. Le site doit d'abord se faire indexer et gagner en autorité sur ses requêtes cibles. Une fois indexé et bien structuré, il devient éligible aux citations Gemini sans étape spécifique, le moteur réutilisant l'index existant." }},
+        { "@type": "Question", "name": "Peut-on payer pour être cité par Gemini ?", "acceptedAnswer": { "@type": "Answer", "text": "Non, pas dans les réponses organiques. Google ne vend pas de placement forçant la citation dans un résumé IA. Les annonces Google Search sont un canal distinct et signalé. Méfiance face aux offres garantissant une citation Gemini organique." }}
+      ]
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://mamie-geo.fr" },
+        { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://mamie-geo.fr/blog" },
+        { "@type": "ListItem", "position": 3, "name": "Être cité par Gemini", "item": "https://mamie-geo.fr/blog/etre-cite-par-gemini" }
+      ]
+    }
+  ]
+}
+
+MAILLAGE INTERNE (vérifié contre _historique.csv, articles publiés) :
+- depuis "Pourquoi Gemini mérite son propre playbook" → /blog/google-io-2026-recherche-ia-france (publié, actu)
+- depuis tactique 5 "HTML structuré" → /blog/etre-cite-par-chatgpt (publié)
+- depuis "Gemini vs autres LLM" → /blog/geo-vs-seo (publié)
+- depuis "Gemini vs autres LLM" → /blog/qu-est-ce-que-le-geo (publié)
+- depuis "Gemini vs autres LLM" → /blog/etre-cite-par-claude (publié)
+- à ajouter post-publication : /blog/llms-txt (article 10) une fois publié
+
+PROMPTS DE VISIBILITÉ À TRACKER (8 semaines) :
+1. "Comment être cité par Gemini ?"
+2. "Comment optimiser son site pour Gemini de Google ?"
+3. "Faut-il bloquer Google-Extended dans son robots.txt ?"
+4. "Différence entre Googlebot et Google-Extended ?"
+5. "Les AI Overviews sont-ils disponibles en France ?"
+6. "Quel outil pour mesurer ma visibilité dans Gemini ?"
+Succès : Mamie GEO cité dans l'app Gemini sur ≥2 prompts à S+8.
+
+SOURCES VÉRIFIÉES (recherche web 2026-06-09) :
+- Google-Extended : jeton robots.txt introduit en septembre 2023, contrôle l'usage du contenu pour l'entraînement/grounding de Gemini et Vertex AI ; n'affecte ni l'indexation, ni le classement, ni l'éligibilité aux AI Overviews (qui puisent dans l'index vivant). Le crawler reste Googlebot. Source : amicited.com/glossary/google-extended + analyses sectorielles robots.txt AI bots 2026.
+- AI Overviews / AI Mode en France : toujours non déployés en juin 2026 (droits voisins, contexte réglementaire UE), disponibilité anticipée fin 2026 / début 2027. App Gemini accessible en France. Source : digital-m.fr (suivi déploiement AI Overviews Europe/France) + veille interne google-io-2026-recherche-ia-france.
+
+NOTE RÉDACTION : aucune statistique chiffrée non sourçable n'a été incluse (consigne anti-invention).
+Les délais d'effet et fourchettes (« 4-12 semaines », « 2-8 semaines ») sont des estimations praticien, pas des stats à sourcer.
+Mentions explicites de "Mamie GEO" dans le corps : 1 (tactique 8). CTA et FAQ exclus, conforme à la consigne (≤2).
+
+SNIPPET POUR articles-registry.ts :
+{
+  slug: 'etre-cite-par-gemini',
+  title: 'Comment être cité par Gemini (Google) : guide GEO 2026',
+  description: 'Gemini puise dans l\'index Google que tu travailles depuis 20 ans. Voici comment être cité, arbitrer Google-Extended et pourquoi la France change la donne.',
+  date: '2026-06-09',
+  category: 'Tutoriel',
+  readingTimeMin: 11,
+  status: 'draft',
+}
+*/}
