@@ -80,7 +80,10 @@ function WorkspacePill({ workspace }: { workspace: SidebarData["workspace"] }) {
       <span className="hidden min-w-0 truncate text-sm font-medium text-[color:var(--color-ink)] sm:block">
         {workspace.name}
       </span>
-      <Badge tone={workspace.plan === "trialing" ? "accent" : "neutral"} className="shrink-0">
+      <Badge
+        tone={workspace.plan === "trialing" || workspace.plan === "beta" ? "accent" : "neutral"}
+        className="shrink-0"
+      >
         {workspace.plan}
       </Badge>
     </Link>

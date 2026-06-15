@@ -49,6 +49,7 @@ Second one-shot gratuit : `/outils/audit-technique` (30+ checks, 0 € LLM, cf. 
 - **Garantie remboursement 14 j conservée** (coexiste avec le trial) : refund manuel via portal Stripe sur email à `hello@mamie-geo.fr`. Pas de self-service V0.
 - **Compte sans subscription** : `plan: "trialing"` sans checkout = `quotasFor() = { prompts: 0, competitors: 0, cadence: "weekly" }` → zéro run, zéro coût infra. UI explorable à vide.
 - **Free taster** : `/outils/test-visibilite-ia` (couche 2).
+- **Plan `beta` (accès gratuit offert, ajouté 2026-06-15, doc 09)** : pas un tier public, **octroi manuel** par l'admin (`/app/admin/beta`) à des beta-testeurs choisis (programme « 10 accès 3 mois contre feedback »). Quotas volontairement bridés pour le coût LLM : weekly, 15 prompts, tous LLMs → ~10 $/mois/testeur (~100 $ pour 10). Jamais facturé Stripe ; expire seul à `comp_expires_at` (cron `expire-comp` → `expired` + email de conversion essai 14 j). Conversion = checkout Stripe normal (le webhook écrase le plan). Ce n'est **pas** un retour au freemium permanent (anti-décision ci-dessous) : c'est un canal d'acquisition/discovery borné dans le temps.
 
 ### Pas de couche freemium permanente dans le SaaS
 

@@ -29,6 +29,7 @@ import {
 } from "@/components/ui";
 import { Logo } from "@/components/marketing/logo";
 import { SidebarSubscribeCard } from "@/components/app/sidebar-subscribe-card";
+import { FeedbackDialog } from "@/components/app/feedback-dialog";
 import {
   CAL_SUPPORT_CONFIG,
   CAL_SUPPORT_LINK,
@@ -119,8 +120,9 @@ function SidebarInner({ data, onNavigate }: { data: SidebarData; onNavigate?: ()
         trialEndsAt={data.workspace.trialEndsAt?.toISOString() ?? null}
       />
 
-      {/* Bottom, user menu */}
+      {/* Bottom, feedback + user menu */}
       <div className="border-t border-[color:var(--color-border)] p-3">
+        <FeedbackDialog />
         <UserMenu email={data.user.email} plan={data.workspace.plan} />
       </div>
     </div>

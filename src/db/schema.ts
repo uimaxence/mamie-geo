@@ -89,6 +89,7 @@ export const verification = pgTable("verification", {
 
 export const PLAN_VALUES = [
   "trialing",
+  "beta", // accès gratuit offert (beta-testeurs), octroi manuel admin, jamais facturé Stripe
   "solo",
   "starter",
   "pro",
@@ -114,13 +115,16 @@ export const workspaces = pgTable(
     currentPeriodStart: timestamp({ withTimezone: true }),
     currentPeriodEnd: timestamp({ withTimezone: true }),
     hardCapHitAt: timestamp({ withTimezone: true }),
+    // Fin de l'accès gratuit offert (plan "beta"). NULL pour les plans payants.
+    // Le cron expire-comp repasse le workspace en "expired" passé cette date.
+    compExpiresAt: timestamp({ withTimezone: true }),
     createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [
     check(
       "plan_check",
-      sql`${t.plan} IN ('trialing','solo','starter','pro','agency','enterprise','past_due','expired','canceled')`,
+      sql`${t.plan} IN ('trialing','beta','solo','starter','pro','agency','enterprise','past_due','expired','canceled')`,
     ),
   ],
 );
@@ -417,6 +421,34 @@ export const usageCounters = pgTable(
     hardcapHitAt: timestamp({ withTimezone: true }),
   },
   (t) => [primaryKey({ columns: [t.workspaceId, t.periodStart] })],
+);
+
+// ──────────────────────────────────────────────────────────────────────
+// Recharges de crédits LLM (saisie manuelle admin) — cf. doc 09 § 2026-06-15
+// Les API LLM n'exposent pas le solde prépayé restant. On enregistre donc
+// les recharges manuellement : le panneau admin calcule « dépensé depuis »
+// (SUM runs.cost_usd par provider) → solde estimé restant. `provider` =
+// clé LLM_VALUES (claude=Anthropic, chatgpt=OpenAI, lechat=Mistral...).
+// ──────────────────────────────────────────────────────────────────────
+
+export const llmCreditTopups = pgTable(
+  "llm_credit_topups",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    provider: text().notNull(),
+    amountUsd: decimal({ precision: 10, scale: 2 }).notNull(),
+    toppedUpAt: timestamp({ withTimezone: true }).notNull(),
+    note: text(),
+    createdBy: text(),
+    createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index("idx_llm_credit_topups_provider").on(t.provider, t.toppedUpAt),
+    check(
+      "llm_credit_provider_check",
+      sql`${t.provider} IN ('chatgpt','claude','perplexity','gemini','lechat')`,
+    ),
+  ],
 );
 
 // ──────────────────────────────────────────────────────────────────────

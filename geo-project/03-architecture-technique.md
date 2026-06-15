@@ -239,7 +239,7 @@ provider actif si env var présente **et** `IMPLEMENTED_LLMS[llm] === true`.
 
 1. **Auth** (Better Auth CLI) : `user`, `session`, `account`, `verification`
 2. **Métier** : `workspaces`, `workspace_members`, `brands`, `competitors`, `prompts`, `runs`, `citation_metrics_daily`, `prompt_cache`, `technical_audits`, `audit_counters`, `comparator_scans`
-3. **Plomberie** : `queue_jobs`, `events`, `subscription_events`, `usage_counters`
+3. **Plomberie** : `queue_jobs`, `events`, `subscription_events`, `usage_counters`, `llm_credit_topups` (recharges crédits LLM saisies à la main, cf. doc 09 § 2026-06-15 — panneau `/app/admin/llm-credits`)
 
 Migrations versionnées : `0000_many_human_torch` (schéma initial),
 `0001_thick_husk` (enum plan + `solo`, 2026-05-14), `0002_classy_joshua_kane`
@@ -271,6 +271,10 @@ Pas de table `users` applicative parallèle : tout référence `user.id` Better 
 --                  Depuis 2026-06-08 : trial Stripe 14 j AVEC carte requise
 --                  (subscription.status='trialing', trial_ends_at rempli) —
 --                  remplace « pas de trial auto » (2026-05-14), cf. doc 09.
+--   'beta'       = accès gratuit offert (beta-testeurs), octroi manuel admin,
+--                  jamais facturé Stripe. Plan ACTIF (génère des runs) :
+--                  weekly, 15 prompts, tous LLMs. Expire via comp_expires_at
+--                  (cron expire-comp → 'expired'). cf. doc 09 § 2026-06-15.
 --   'solo' | 'starter' | 'pro' | 'agency' | 'enterprise' = abonnement actif
 --   'past_due'   = paiement échoué, accès complet 7 j de relance Stripe
 --   'expired'    = past_due > 7 j ou trial annulé → lecture seule, suppression J+30
@@ -280,13 +284,14 @@ CREATE TABLE workspaces (
   name TEXT NOT NULL,
   slug TEXT UNIQUE NOT NULL,
   plan TEXT NOT NULL DEFAULT 'trialing'
-    CHECK (plan IN ('trialing','solo','starter','pro','agency','enterprise','past_due','expired','canceled')),
+    CHECK (plan IN ('trialing','beta','solo','starter','pro','agency','enterprise','past_due','expired','canceled')),
   stripe_customer_id TEXT UNIQUE,
   stripe_subscription_id TEXT UNIQUE,
   trial_ends_at TIMESTAMPTZ,
   current_period_start TIMESTAMPTZ,  -- aligné facturation Stripe
   current_period_end   TIMESTAMPTZ,
   hard_cap_hit_at TIMESTAMPTZ,       -- posé si quota 200% LLM atteint (block actif)
+  comp_expires_at TIMESTAMPTZ,       -- fin d'accès gratuit 'beta' (NULL si payant), cf. cron expire-comp
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

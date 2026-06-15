@@ -66,10 +66,10 @@ function QuotaReachedContent({
   currentBrandsCount: number;
   max: number;
 }) {
-  // Quel plan upgrade proposer ? Solo/Starter → Pro (3 brands).
+  // Quel plan upgrade proposer ? Beta/Solo/Starter → Pro (3 brands).
   // Pro → Agency (10 brands). Agency → Enterprise (illimité).
   const upgradeLabel =
-    plan === "solo" || plan === "starter"
+    plan === "beta" || plan === "solo" || plan === "starter"
       ? "Pro"
       : plan === "pro"
         ? "Agency"

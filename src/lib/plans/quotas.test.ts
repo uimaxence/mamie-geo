@@ -9,6 +9,14 @@ describe("quotasFor", () => {
     expect(q.cadence).toBe("weekly");
   });
 
+  it("retourne 15/5/weekly pour beta (accès gratuit offert)", () => {
+    const q = quotasFor("beta");
+    expect(q.prompts).toBe(15);
+    expect(q.competitors).toBe(5);
+    expect(q.cadence).toBe("weekly");
+    expect(q.brands).toBe(1);
+  });
+
   it("retourne 5/3/weekly pour solo", () => {
     const q = quotasFor("solo");
     expect(q.prompts).toBe(5);
@@ -59,11 +67,12 @@ describe("quotasFor", () => {
 });
 
 describe("ACTIVE_PLANS / isActivePlan", () => {
-  it("contient solo/starter/pro/agency/enterprise mais ni trialing ni les dégradés", () => {
-    expect(ACTIVE_PLANS).toEqual(["solo", "starter", "pro", "agency", "enterprise"]);
+  it("contient beta/solo/starter/pro/agency/enterprise mais ni trialing ni les dégradés", () => {
+    expect(ACTIVE_PLANS).toEqual(["beta", "solo", "starter", "pro", "agency", "enterprise"]);
   });
 
-  it("isActivePlan retourne true pour solo, false pour trialing/past_due/expired", () => {
+  it("isActivePlan retourne true pour beta/solo, false pour trialing/past_due/expired", () => {
+    expect(isActivePlan("beta")).toBe(true);
     expect(isActivePlan("solo")).toBe(true);
     expect(isActivePlan("starter")).toBe(true);
     expect(isActivePlan("trialing")).toBe(false);

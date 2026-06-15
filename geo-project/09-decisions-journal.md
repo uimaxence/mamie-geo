@@ -161,6 +161,79 @@ haut et l'entrée "2026-05-05 — Réponses aux 10 questions de bootstrap".
 
 ### Décisions enregistrées
 
+#### 2026-06-15 — Programme beta-testeurs : plan `beta` gratuit + observabilité (Sentry) + widget feedback
+
+**Contexte** : cold outreach Max proposant 10 accès gratuits 3 mois contre
+feedback (pas de carte, débrief 30 min). Des prospects répondent → besoin
+d'un dispositif pour (1) donner l'accès sans Stripe, (2) ne pas cramer de
+tokens LLM, (3) capter bugs + feedback, (4) ne pas griller des clients.
+État constaté : aucun mécanisme « comp/override » de plan ; le plan vit
+dans `workspaces.plan` et n'est écrasé que par les webhooks Stripe — un
+compte sans abonnement n'est jamais touché. Aucun gating LLM par plan en
+code (« Le Chat dès Starter » = marketing). Sentry : env présent mais SDK
+non installé / non initialisé. PostHog client : `posthog-js` installé mais
+jamais `.init()` → zéro event/replay navigateur.
+
+**Options considérées** :
+- A : octroi manuel SQL `plan='starter'` par testeur (zéro code, mais
+  cadence daily = ~120 $/mois/testeur, révocation/suivi 100 % manuels).
+- B : plan applicatif `beta` dédié (weekly, prompts plafonnés) + octroi
+  admin + auto-expiration cron.
+- C : refactor d'un résolveur de plan central avec champ `compPlan`
+  (touche les 20+ lectures directes de `ws.plan` → risqué).
+
+**Choix** : **B**. Nouveau plan `beta` ajouté à `PLAN_VALUES` (schema) et
+`QUOTAS` (`brands 1, prompts 15, competitors 5, cadence weekly, audits 5,
+comparisonCompetitors 3`), inclus dans `ACTIVE_PLANS`. Coût maîtrisé :
+weekly + 15 prompts ≈ 10 $/mois/testeur (~100 $ pour 10) ; hard-cap fini
+hérité automatiquement (théorique 300, cap 600). Colonne
+`workspaces.compExpiresAt` (nullable) = fin d'accès. Octroi/révocation via
+`/app/admin/beta` (guard email partagé extrait dans `src/lib/admin/guard.ts`)
+→ actions `grantBeta`/`revokeBeta`. Cron quotidien `expire-comp` (04:00 UTC,
+`vercel.json`) : `beta` expiré → `expired` + email de conversion
+(`sendBetaExpiredEmail`). Conversion naturelle : le webhook
+`checkout.session.completed` écrase déjà le plan et lève `compExpiresAt`.
+Migration `0009_nappy_rage.sql`. Un plan actif (≠ trialing) masque déjà
+PlanPickerModal + subscribe card → UX beta propre sans nag Stripe.
+
+**Observabilité + feedback** (gaps comblés) :
+- **Nouvelle dépendance `@sentry/nextjs` (10.57.0)** — justifiée ici :
+  capter les bugs des beta-testeurs en prod (front + serveur). `src/
+  instrumentation.ts` (register + onRequestError) et `src/
+  instrumentation-client.ts` (Sentry.init + replay sur erreur). Source maps
+  / `withSentryConfig` : reportés.
+- **PostHog client init** dans `instrumentation-client.ts` (api_host
+  `/ingest`, replay masqué `data-private`, `person_profiles:
+  identified_only`) → la façade `posthog-client.ts` et `PostHogUserIdentify`
+  émettent enfin côté navigateur.
+- **Widget feedback in-app** : `FeedbackDialog` (sidebar) → action
+  `submitFeedback` → email `hello@` (`sendFeedbackEmail`, replyTo user) +
+  event `user_feedback_submitted`.
+
+**Suivi crédits LLM** (même PR) : panneau `/app/admin/llm-credits`. Les API
+LLM n'exposent pas le solde prépayé restant (OpenAI a retiré
+`credit_grants` ; Anthropic/Mistral/Perplexity sans endpoint ; Gemini =
+pay-as-you-go GCP). On enregistre donc les recharges à la main (table
+`llm_credit_topups`, migration `0010_zippy_lord_hawal.sql`) et on calcule
+solde estimé = Σ recharges − Σ `runs.cost_usd` du provider depuis la 1ʳᵉ
+recharge. Alerte « recharge » sous 10 $. Limite assumée : `runs.cost_usd`
+ne couvre que le tracking (le scoring Anthropic ~+7 % n'est pas ventilé) →
+disclosure dans l'UI.
+
+**Conséquences attendues** : pipeline d'onboarding beta sans Stripe ;
+budget LLM borné et surveillé (page admin affiche runs + coût LLM/mois par
+compte beta, et solde estimé par provider API) ; bugs visibles (Sentry) et
+funnels/replay beta (PostHog) ; canal feedback à faible friction. Tests : quotas + hard-cap `beta` couverts
+(Vitest). Les actions/cron (db+auth+email) ne sont pas testés en unitaire —
+pas de harness de mock db/auth dans le repo (convention = intégration Neon).
+
+**À revisiter** : après 1-2 semaines de beta, vérifier le coût LLM réel
+(`usage_counters.llmCostUsd` filtré `plan='beta'`) et le taux de conversion
+beta→payant ; ré-aligner `NEXT_PUBLIC_POSTHOG_KEY` (.env.example) vs
+`NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN` (code) qui divergent.
+
+---
+
 #### 2026-06-12 — Détection de profil site : compréhension renforcée + Mistral Medium ; concurrents filtrés par pertinence
 
 **Contexte** : test réel Max sur taap.it (SaaS multi-produits : link in bio, deeplinks, QR codes, analytics). Trois défauts en chaîne : (1) le secteur détecté était une énumération de fonctionnalités (« outil de gestion de liens et qr codes ») → requêtes de découverte inutilisables ; (2) la liste « concurrents » était le bac à restes des résultats non-listicle, sans jugement (Canva remonté en concurrent) ; (3) la racine taap.it est en anglais, la home FR vit sur /fr — path jeté par la normalisation.
@@ -1164,6 +1237,28 @@ Cause : `web_search_20250305` injecte les résultats (~5 ko/search) en input tok
 
 - Mouvement significatif : Peec AI continue d'accélérer mais pas encore localisé FR
 - Action : aucune urgence, fenêtre temporelle confirmée
+
+### Snapshot Juin 2026 (veille du 2026-06-12)
+
+#### SE Ranking — SE Visible (standalone GEO)
+
+- Prix : $189/mois (450 prompts) → $355 (1 000 prompts, 10 marques) → $519 (1 500 prompts, 15 marques) ; add-on suite SEO à $89/mois
+- Couverture : ChatGPT + Google AI Mode uniquement ; Perplexity, Gemini, Claude « coming soon ». Pas de Le Chat. Anglais-first
+- Lecture : confirme l'accélération des suites SEO sur le GEO (tendance déjà identifiée doc 01), mais hors segment SMB FR 9,99-49 €
+
+#### Acteurs FR émergents — ⚠️ changement majeur
+
+Le « Aucun concurrent FR direct » de mai n'est plus vrai. Identifiés via comparatifs FR (digitiz.fr, tool-advisor.fr, alambic.org) :
+
+- **Qwairy** (qwairy.co) : 59 €/mois Starter → 199 € Pro. Présenté comme la suite GEO de référence FR dans plusieurs comparatifs. Concurrent FR direct n°1
+- **Botrank.ai** : 75 €/mois Starter → 245 € Business. Support FR, **tracke Mistral** via scraping UI, audit GEO technique, agent IA « Bob »
+- **Meteoria** : scraping UI (réponses fidèles à ce que voit l'utilisateur) plutôt qu'APIs
+- **Are You Mention** : tracking mentions LLM, gratuit pour l'instant
+
+#### Verdict du mois
+
+- Mouvement significatif : **Oui** — le trou FR se referme plus vite que la fenêtre 12-18 mois estimée. Le différenciateur n'est plus « seul outil GEO FR » mais : entrée à 9,99 € (vs 59 € Qwairy, 75 € Botrank), RGPD/EU natif, Le Chat dès Starter via API native (vs scraping), tone humain, marque blanche
+- Action : hard launch + distribution = priorité absolue. Surveiller Qwairy (pricing, features) au snapshot de juillet
 
 ---
 

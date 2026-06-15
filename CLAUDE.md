@@ -267,7 +267,7 @@ la doc devient un cimetière.
 
 ---
 
-## 9. État du projet (snapshot — 2026-06-12)
+## 9. État du projet (snapshot — 2026-06-15)
 
 > Ce snapshot décrit l'état **courant** uniquement. L'historique détaillé
 > de chaque évolution (le « comment on en est arrivé là ») vit dans
@@ -276,11 +276,14 @@ la doc devient un cimetière.
 
 ### Phase actuelle
 
-**Phases A, B et C livrées. V0+ (polish + pré-lancement) en cours.**
+**Phases A, B et C livrées. Site EN PROD ET EN LIGNE (2026-06).
+Phase courante = DISTRIBUTION / acquisition.**
 Phasage acté 2026-05-07 (doc 09) : A = moteur Haiku cheap, B = design
 system + UI + marketing + blog, C = multi-LLM + Stripe + weekly email.
 Tous les items « V0+ veille concurrence » du doc 02 sont livrés
-(2026-06-08).
+(2026-06-08). Stripe LIVE, DNS Brevo, Prices annuels et clé Brave : OK.
+Seul ops résiduel : crédit Perplexity. Le produit est complet — le
+goulot est désormais l'acquisition, pas le code.
 
 ### Livré — vue d'ensemble
 
@@ -365,7 +368,17 @@ Subscribe card (4 variants), relances email J-4/J-1 + expired (cron
 **Analytics PostHog** (EU) : autocapture + pageviews + session replay
 (masquage PII, convention `data-private`), ~75 events business, groups
 workspace, helpers serveur (`captureServerEvent`...). Privacy policy à
-jour (opt-in implicite ePrivacy, sans banner).
+jour (opt-in implicite ePrivacy, sans banner). **Client init dans
+`src/instrumentation-client.ts`** (2026-06-15) — avant, `posthog-js`
+n'était jamais `.init()` → zéro event navigateur.
+
+**Sentry** (2026-06-15) : `@sentry/nextjs` initialisé via
+`src/instrumentation.ts` (serveur/edge + `onRequestError`) et
+`src/instrumentation-client.ts` (front + replay sur erreur). No-op sans
+DSN. Source maps / `withSentryConfig` reportés.
+
+**Feedback in-app** (2026-06-15) : `FeedbackDialog` (sidebar) → action
+`submitFeedback` → email `hello@` + event `user_feedback_submitted`.
 
 **Emails Brevo** : magic-link, welcome-paid, payment-failed, weekly
 recap (lundi 09:00 UTC), trial reminders/expired, audit-score-drop,
@@ -374,6 +387,7 @@ appel découverte ; l'auto-reply « audit 24 h » est supprimé).
 
 **Crons Vercel** (GET + POST, `Bearer CRON_SECRET`) : dispatch \*/5 min,
 schedule-runs 06:00, trial-emails 08:00, expire-past-due 03:00,
+expire-comp 04:00 (fin d'accès beta → expired + email conversion),
 schedule-audits lundi 05:00, schedule-weekly-emails lundi 09:00.
 
 **DA duale** (cf. doc 10) : app + marketing = Airbnb-like minimaliste
@@ -383,30 +397,45 @@ visuels externes = persona « Mamie » chaude (Fraunces/Hanken
 Grotesk/Caveat, crème + terracotta `#DD6B45`, brief
 `geo-project/linkedindesign.md`), rendus dans `/app/admin/visuals`.
 
-**Tests** : Vitest colocation (100+ tests) + 13 E2E Playwright flows
-publics. DB Neon : 19 tables + migrations 0000-0007.
+**Programme beta-testeurs** (2026-06-15, doc 09 + doc 04) : plan `beta`
+gratuit (weekly, 15 prompts, tous LLMs, ~10 $/mois/testeur), octroi/
+révocation manuels via `/app/admin/beta` (guard email partagé
+`src/lib/admin/guard.ts`), colonne `workspaces.comp_expires_at`, cron
+`expire-comp`. Jamais facturé Stripe ; conversion = checkout normal
+(webhook lève `comp_expires_at`).
 
-### Reste à faire (V0+ / pré-lancement)
+**Suivi crédits LLM** (2026-06-15) : `/app/admin/llm-credits`. Les API
+LLM n'exposent pas le solde prépayé → saisie manuelle des recharges
+(table `llm_credit_topups`), solde estimé = rechargé − dépensé depuis
+(SUM `runs.cost_usd` par `llm`). Gemini = pay-as-you-go (pas de solde).
+Scoring Anthropic non ventilé par run (disclosure dans l'UI).
+
+**Tests** : Vitest colocation (100+ tests, dont quotas/hard-cap `beta`)
++ 13 E2E Playwright flows publics. DB Neon : 20 tables + migrations
+0000-0010.
+
+### Reste à faire (post-lancement — site EN PROD ET EN LIGNE depuis 2026-06)
+
+> Brevo blog list, 3 Prices annuels Stripe et clé Brave Search : **faits**.
+> Le site est public. **Seul l'ops technique résiduel** = crédit
+> Perplexity. La priorité n'est plus le pré-lancement mais la
+> **distribution** (cf. doc 05 + doc 11). Concurrents FR émergents
+> (Qwairy, Botrank) → la fenêtre se referme, exécuter maintenant.
 
 1. **Crédit Perplexity** ($50 min) + `PERPLEXITY_API_KEY` en prod →
-   5e provider auto-activé, pas de redeploy.
-2. **`BREVO_BLOG_LIST_ID`** : créer la liste Brevo → newsletter active.
-3. **3 Prices annuels Stripe** à créer dans le Dashboard + env vars
-   (95,90 / 470 / 1 430 € HT/an).
-4. **Hard launch public** : communication LinkedIn + communautés FR
-   (DNS Brevo + Stripe LIVE déjà OK).
-4bis. **Clé Brave Search** (`BRAVE_SEARCH_API_KEY`, brave.com/search/api,
-   5 $ de crédits offerts/mois ≈ 100 scans, carte requise) en prod →
-   active `/outils/comparateurs` sans redeploy. À faire AVANT le post
-   LinkedIn qui promeut le tool.
-5. **Drip d'éducation post-signup**.
-6. **Gamification suite** (doc 02 § Gamification) : rang dans le weekly
+   5e provider auto-activé, pas de redeploy. **Seul item ops restant.**
+2. **DISTRIBUTION (priorité n°1)** : posts LinkedIn réguliers + étude 50
+   marques (doc 11 § 3.4 : 3 posts restants, 2 articles, 1 carrousel DA
+   Mamie) + outreach direct communautés FR (SEO Camp, Slack/Discord SEO
+   FR, WebRankInfo). Les posts seuls ne convertissent pas : coupler aux
+   lead magnets + DM. Benchmark réaliste : premiers payants mois 3-6
+   post-lancement.
+3. **Drip d'éducation post-signup**.
+4. **Gamification suite** (doc 02 § Gamification) : rang dans le weekly
    email, badges de statut N°1/Top 3 (dashboard + BrandSwitcher),
    événements de rang (V1). Surveiller le coût scoring systématique
    (`usage_counters.llmCostUsd`) après 2 semaines de prod.
-7. **Contenu étude 50 marques** : pipeline dérivé doc 11 § 3.4 (3 posts
-   LinkedIn restants, 2 articles, 1 carrousel DA Mamie).
-8. **Suivi conversion lead magnets** (~4 semaines post-lancement) :
+5. **Suivi conversion lead magnets** (~4 semaines post-lancement) :
    express vs ex-funnel manuel, scans comparateurs → trial (PostHog) ;
    retirer la pastille « Nouveau » de la nav.
 

@@ -64,6 +64,20 @@
       "when": 1781272763110,
       "tag": "0008_complete_wild_child",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1781515367831,
+      "tag": "0009_nappy_rage",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1781519980237,
+      "tag": "0010_zippy_lord_hawal",
+      "breakpoints": true
     }
   ]
 }

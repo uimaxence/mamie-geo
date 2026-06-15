@@ -11,6 +11,7 @@
 
 export type PlanKey =
   | "trialing"
+  | "beta"
   | "solo"
   | "starter"
   | "pro"
@@ -49,6 +50,17 @@ const QUOTAS: Record<PlanKey, PlanQuotas> = {
     cadence: "weekly",
     audits: 0,
     comparisonCompetitors: 0,
+  },
+  // Accès gratuit offert aux beta-testeurs (octroi manuel admin, durée 3 mois).
+  // Cadence weekly + prompts plafonnés pour maîtriser le coût LLM
+  // (~10 $/mois/testeur). Tous les LLMs configurés sont accessibles.
+  beta: {
+    brands: 1,
+    prompts: 15,
+    competitors: 5,
+    cadence: "weekly",
+    audits: 5,
+    comparisonCompetitors: 3,
   },
   // Plan d'entrée 9,99 € — 1 run par semaine sur 5 LLMs, marge ~75 % en Phase A
   solo: {
@@ -125,6 +137,7 @@ export function quotasFor(plan: string): PlanQuotas {
 
 /** Plans considérés comme actifs (peuvent générer des runs et accéder à l'app). */
 export const ACTIVE_PLANS: readonly PlanKey[] = [
+  "beta",
   "solo",
   "starter",
   "pro",

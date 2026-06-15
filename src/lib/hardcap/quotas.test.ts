@@ -7,6 +7,10 @@ import {
 } from "./quotas";
 
 describe("getMonthlyTheoreticalRuns", () => {
+  it("beta : 15 prompts × 5 LLMs × 4 weeks = 300 runs/mois (weekly), fini", () => {
+    expect(getMonthlyTheoreticalRuns("beta")).toBe(300);
+  });
+
   it("solo : 5 prompts × 5 LLMs × 4 weeks = 100 runs/mois", () => {
     expect(getMonthlyTheoreticalRuns("solo")).toBe(100);
   });
@@ -47,6 +51,11 @@ describe("getHardCapThreshold", () => {
 });
 
 describe("isPlanWithHardcap", () => {
+  it("beta a un hard-cap fini (backstop = 600 runs)", () => {
+    expect(isPlanWithHardcap("beta")).toBe(true);
+    expect(getHardCapThreshold("beta")).toBe(600);
+  });
+
   it("solo/starter/pro/agency ont un hard-cap", () => {
     expect(isPlanWithHardcap("solo")).toBe(true);
     expect(isPlanWithHardcap("starter")).toBe(true);

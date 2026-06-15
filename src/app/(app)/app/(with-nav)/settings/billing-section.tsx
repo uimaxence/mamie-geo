@@ -2,11 +2,13 @@
 
 import { useState, useTransition } from "react";
 import { Badge, Banner, Button, toast } from "@/components/ui";
+import { isActivePlan } from "@/lib/plans/quotas";
 import { PLAN_PRICE_EUR, type PurchasablePlan } from "@/lib/stripe/plan-catalog";
 import { openCheckout, openPortal } from "./billing-actions";
 
 // Section Facturation dans /app/settings.
-// - Plan actif → affiche le plan + prochaine facturation + bouton portal
+// - Plan beta (accès gratuit offert) → encart d'accès + invitation à choisir un plan
+// - Plan actif payant → affiche le plan + prochaine facturation + bouton portal
 // - Plan non actif (trialing / expired / canceled) → encart "Choisis ton plan"
 //   avec 3 cards Solo / Starter / Pro → bouton checkout
 // - past_due → bannière "Paiement échoué" + portal
@@ -14,6 +16,7 @@ import { openCheckout, openPortal } from "./billing-actions";
 interface BillingSectionProps {
   plan: string;
   currentPeriodEnd: Date | null;
+  compExpiresAt: Date | null;
   hasSubscription: boolean;
 }
 
@@ -32,8 +35,16 @@ const PLAN_DETAILS: Record<PurchasablePlan, { label: string; bullets: string[] }
   },
 };
 
-export function BillingSection({ plan, currentPeriodEnd, hasSubscription }: BillingSectionProps) {
-  const isActive = ["solo", "starter", "pro", "agency", "enterprise"].includes(plan);
+export function BillingSection({
+  plan,
+  currentPeriodEnd,
+  compExpiresAt,
+  hasSubscription,
+}: BillingSectionProps) {
+  const isBeta = plan === "beta";
+  // Plan beta = accès gratuit offert (pas de Stripe) : on ne montre ni la
+  // carte de facturation payante, ni la grille d'achat — un encart dédié.
+  const isActive = isActivePlan(plan) && !isBeta;
   const isPastDue = plan === "past_due";
 
   return (
@@ -45,9 +56,54 @@ export function BillingSection({ plan, currentPeriodEnd, hasSubscription }: Bill
         </Banner>
       )}
 
+      {isBeta && <BetaAccessCard compExpiresAt={compExpiresAt} hasSubscription={hasSubscription} />}
+
       {isActive && <ActiveBillingCard plan={plan} currentPeriodEnd={currentPeriodEnd} />}
 
-      {!isActive && <ChoosePlanGrid hasSubscription={hasSubscription} />}
+      {!isActive && !isBeta && <ChoosePlanGrid hasSubscription={hasSubscription} />}
+    </div>
+  );
+}
+
+function BetaAccessCard({
+  compExpiresAt,
+  hasSubscription,
+}: {
+  compExpiresAt: Date | null;
+  hasSubscription: boolean;
+}) {
+  const expiry = compExpiresAt
+    ? new Date(compExpiresAt).toLocaleDateString("fr-FR", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      })
+    : null;
+
+  return (
+    <div className="flex flex-col gap-5">
+      <div className="rounded-[var(--radius-lg)] border border-[color:var(--color-border)] bg-white p-5">
+        <div className="flex items-center gap-2">
+          <Badge tone="accent">Accès beta</Badge>
+          <span className="text-sm font-semibold text-[color:var(--color-ink)]">Gratuit</span>
+        </div>
+        <p className="mt-3 text-sm text-[color:var(--color-muted)]">
+          Tu fais partie des beta-testeurs Mamie GEO — merci&nbsp;! Tu as accès au tracking des 5 IA,
+          gratuitement
+          {expiry ? (
+            <>
+              {" "}
+              jusqu&apos;au <strong className="text-[color:var(--color-ink)]">{expiry}</strong>
+            </>
+          ) : null}
+          . Aucune carte requise, aucun prélèvement.
+        </p>
+        <p className="mt-2 text-sm text-[color:var(--color-muted)]">
+          Tu veux continuer au-delà&nbsp;? Choisis un plan quand tu veux — tes données sont
+          conservées.
+        </p>
+      </div>
+      <ChoosePlanGrid hasSubscription={hasSubscription} />
     </div>
   );
 }

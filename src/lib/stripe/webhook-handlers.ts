@@ -142,6 +142,9 @@ export async function handleCheckoutCompleted(
       currentPeriodEnd: periodEnd,
       trialEndsAt,
       hardCapHitAt: null,
+      // Conversion d'un beta-testeur en payant : on lève la date d'expiration
+      // beta pour que le cron expire-comp ne le repasse jamais en "expired".
+      compExpiresAt: null,
       updatedAt: new Date(),
     })
     .where(eq(workspaces.id, ws.id));

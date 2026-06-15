@@ -583,3 +583,92 @@ Résultat  : cité ${citedCount}/${totalPrompts} fois sur Le Chat (mistral-small
 Relance possible : audit manuel 5 IA complet, ou trial 14 j.`,
   });
 }
+
+/**
+ * Email envoyé à un beta-testeur quand son accès gratuit arrive à terme
+ * (cron expire-comp). Propose la bascule payante (essai 14 j) sans coupure
+ * brutale de relation. HTML branded, même DA que la confirmation de scan.
+ */
+export async function sendBetaExpiredEmail(params: { to: string; workspaceName: string }) {
+  const { to, workspaceName } = params;
+  const safeName = escapeHtml(workspaceName);
+  const subject = "Ton accès beta Mamie GEO arrive à échéance";
+  const signupUrl = "https://mamie-geo.fr/login?mode=signup&from=beta-expired";
+  const text = `Salut,
+
+Merci d'avoir testé Mamie GEO pour ${workspaceName} pendant la phase beta — ton retour a compté.
+
+Ton accès gratuit vient d'arriver à échéance. Pour continuer à suivre ta visibilité dans les 5 IA (ChatGPT, Claude, Perplexity, Gemini, Le Chat), tu peux démarrer un essai 14 jours et choisir ton plan :
+${signupUrl}
+
+Tes données (marques, prompts, historique) sont conservées — tu repars exactement d'où tu t'es arrêté.
+
+Une question, un avis, une envie de plan sur-mesure ? Réponds simplement à cet email.
+
+À très vite,
+— Max, fondateur de Mamie GEO`;
+
+  const html = `<!doctype html>
+<html lang="fr">
+  <body style="margin:0;padding:24px;background:#fafafa;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;color:#191919;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;margin:0 auto;background:#fff;border-radius:12px;border:1px solid #e6e6e6;">
+      <tr><td style="padding:32px;">
+        <div style="margin-bottom:24px;">
+          <svg width="32" height="32" viewBox="0 0 541 524" xmlns="http://www.w3.org/2000/svg" aria-label="Mamie GEO" role="img" style="display:inline-block;vertical-align:middle;">
+            <path d="M507.944 18.6203L460.634 141.219C458.596 146.499 453.52 149.981 447.861 149.981H269.31C237.156 149.981 169.239 167.095 154.801 235.551C142.532 293.726 174.786 332.8 200.347 350.863C206.857 355.464 215.508 352.141 218.46 344.736L282.364 184.429C284.44 179.223 289.478 175.808 295.082 175.808H527.264C534.826 175.808 540.956 181.937 540.956 189.499V510.309C540.956 517.87 534.826 524 527.264 524H401.243C393.682 524 387.552 517.87 387.552 510.309V409.912C387.552 394.802 366.672 390.831 361.125 404.886L317.537 515.335C315.473 520.564 310.423 524 304.801 524H238.193C135.198 520.577 -35.9424 407.936 6.68714 196.656C44.0268 48.8527 181.146 1.24466 238.193 0H495.17C504.785 0 511.405 9.65028 507.944 18.6203Z" fill="#329CFF"/>
+          </svg>
+          <span style="font-size:17px;font-weight:600;letter-spacing:-0.01em;vertical-align:middle;margin-left:10px;">Mamie GEO</span>
+        </div>
+
+        <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;letter-spacing:-0.01em;">Ton accès beta arrive à échéance</h1>
+        <p style="margin:0 0 24px;font-size:15px;line-height:1.6;color:#404040;">
+          Merci d'avoir testé Mamie GEO pour <strong>${safeName}</strong> pendant la beta — ton retour a compté.
+        </p>
+        <p style="margin:0 0 20px;font-size:14px;line-height:1.6;color:#404040;">
+          Pour continuer à suivre ta visibilité dans les <strong>5 IA</strong>, démarre un essai 14 jours et choisis ton plan. Tes données sont conservées : tu repars d'où tu t'es arrêté.
+        </p>
+        <p style="margin:0 0 28px;">
+          <a href="${signupUrl}" style="display:inline-block;background:#191919;color:#fff;text-decoration:none;padding:12px 22px;border-radius:9999px;font-weight:500;font-size:14px;">Continuer avec un essai 14 jours →</a>
+        </p>
+
+        <p style="margin:28px 0 0;padding-top:20px;border-top:1px solid #efefef;font-size:12px;color:#737373;line-height:1.55;">
+          Une question, un avis, un plan sur-mesure&nbsp;? Réponds simplement à cet email.<br />— Max, fondateur de Mamie GEO
+        </p>
+      </td></tr>
+    </table>
+  </body>
+</html>`;
+
+  await sendTransactional({ to, subject, text, html });
+}
+
+/**
+ * Notification interne (hello@) quand un utilisateur soumet un feedback
+ * depuis le widget in-app. Plain text, replyTo = email du user pour
+ * répondre directement. Lu en interne uniquement.
+ */
+export async function sendFeedbackEmail(params: {
+  userEmail: string;
+  category: string;
+  message: string;
+  workspaceName?: string;
+  plan?: string;
+  pageUrl?: string;
+}) {
+  const { userEmail, category, message, workspaceName, plan, pageUrl } = params;
+  await sendTransactional({
+    to: "hello@mamie-geo.fr",
+    replyTo: userEmail,
+    subject: `[Feedback ${category}] ${workspaceName ?? userEmail}`,
+    text: `Feedback in-app
+
+De        : ${userEmail}
+Workspace : ${workspaceName ?? "—"}
+Plan      : ${plan ?? "—"}
+Catégorie : ${category}
+Page      : ${pageUrl ?? "—"}
+
+Message :
+${message}`,
+  });
+}

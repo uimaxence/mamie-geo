@@ -43,6 +43,7 @@ export default async function SettingsPage({ searchParams }: PageProps) {
     .select({
       slug: workspaces.slug,
       currentPeriodEnd: workspaces.currentPeriodEnd,
+      compExpiresAt: workspaces.compExpiresAt,
       stripeSubscriptionId: workspaces.stripeSubscriptionId,
     })
     .from(workspaces)
@@ -168,6 +169,7 @@ export default async function SettingsPage({ searchParams }: PageProps) {
             <BillingSection
               plan={data.workspace.plan}
               currentPeriodEnd={wsRow[0]?.currentPeriodEnd ?? null}
+              compExpiresAt={wsRow[0]?.compExpiresAt ?? null}
               hasSubscription={Boolean(wsRow[0]?.stripeSubscriptionId)}
             />
           </SectionCard>

@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import Link from "next/link";
 import { Fraunces, Hanken_Grotesk, Caveat } from "next/font/google";
 import { auth } from "@/lib/auth";
+import { isAdminEmail } from "@/lib/admin/guard";
 
 // Fonts carrousels Mamie (cf. linkedindesign.md § 3 Typographie). Chargés
 // UNIQUEMENT pour les routes /app/admin/* — l'app et le site marketing
@@ -48,24 +49,10 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false, noarchive: true, nosnippet: true },
 };
 
-// Founder toujours admin ; emails supplémentaires (dev local, autres
-// admins) via env `ADMIN_EMAILS` (séparés par virgules). Permet
-// d'autoriser un compte seedé local (hello@/demo@mamie-geo.fr) sans
-// modifier le code.
-const ADMIN_EMAILS = new Set(
-  [
-    "maxencecailleau.pro@gmail.com",
-    ...(process.env.ADMIN_EMAILS?.split(",") ?? []),
-  ]
-    .map((e) => e.trim().toLowerCase())
-    .filter(Boolean),
-);
-
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) redirect("/login");
-  const email = session.user.email?.toLowerCase() ?? "";
-  if (!ADMIN_EMAILS.has(email)) redirect("/app/dashboard");
+  if (!isAdminEmail(session.user.email)) redirect("/app/dashboard");
 
   return (
     <div
@@ -82,12 +69,32 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             </span>
             <span>Visuels marketing</span>
           </Link>
-          <Link
-            href="/app/dashboard"
-            className="text-sm text-[color:var(--color-muted)] hover:text-[color:var(--color-ink)]"
-          >
-            ← Retour au dashboard
-          </Link>
+          <div className="flex items-center gap-5">
+            <Link
+              href="/app/admin/visuals"
+              className="text-sm text-[color:var(--color-muted)] hover:text-[color:var(--color-ink)]"
+            >
+              Visuels
+            </Link>
+            <Link
+              href="/app/admin/beta"
+              className="text-sm text-[color:var(--color-muted)] hover:text-[color:var(--color-ink)]"
+            >
+              Beta-testeurs
+            </Link>
+            <Link
+              href="/app/admin/llm-credits"
+              className="text-sm text-[color:var(--color-muted)] hover:text-[color:var(--color-ink)]"
+            >
+              Crédits LLM
+            </Link>
+            <Link
+              href="/app/dashboard"
+              className="text-sm text-[color:var(--color-muted)] hover:text-[color:var(--color-ink)]"
+            >
+              ← Dashboard
+            </Link>
+          </div>
         </div>
       </header>
       <main className="mx-auto max-w-[1400px] px-6 py-8">{children}</main>
