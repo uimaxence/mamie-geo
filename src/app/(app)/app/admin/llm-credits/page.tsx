@@ -8,10 +8,6 @@ export const dynamic = "force-dynamic";
 export default async function LlmCreditsPage() {
   const providers = await getLlmCreditOverview();
 
-  // Aujourd'hui au format YYYY-MM-DD (UTC) pour pré-remplir l'input date.
-  const now = new Date();
-  const todayIso = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}-${String(now.getUTCDate()).padStart(2, "0")}`;
-
   return (
     <div className="space-y-8 font-sans">
       <div>
@@ -19,18 +15,18 @@ export default async function LlmCreditsPage() {
           Crédits LLM
         </h1>
         <p className="mt-1 max-w-2xl text-sm text-[color:var(--color-muted)]">
-          Les API LLM n&apos;exposent pas le solde restant. Saisis tes recharges&nbsp;: le solde
-          estimé = rechargé − dépensé depuis (calculé sur nos runs). Mets à jour à chaque recharge.
+          Les API LLM n&apos;exposent pas le solde restant. Saisis le <strong>solde actuel</strong>{" "}
+          de chaque compte&nbsp;: le solde estimé = montant saisi − dépensé depuis (calculé sur nos
+          runs). Reviens le mettre à jour quand tu recharges ou vérifies.
         </p>
       </div>
 
-      <LlmCreditsClient providers={providers} today={todayIso} />
+      <LlmCreditsClient providers={providers} />
 
       <p className="max-w-2xl text-xs text-[color:var(--color-muted)]">
         Note&nbsp;: les dépenses affichées couvrent le coût de <em>tracking</em>. Le scoring
         (toujours Anthropic Haiku) n&apos;est pas ventilé par run → la dépense réelle Anthropic est
-        légèrement supérieure (~+7&nbsp;%). Le solde estimé part de ta 1ʳᵉ recharge enregistrée pour
-        chaque provider&nbsp;: pour initialiser, saisis ton solde actuel comme 1ʳᵉ recharge.
+        légèrement supérieure (~+7&nbsp;%).
       </p>
     </div>
   );

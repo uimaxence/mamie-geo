@@ -424,11 +424,12 @@ export const usageCounters = pgTable(
 );
 
 // ──────────────────────────────────────────────────────────────────────
-// Recharges de crédits LLM (saisie manuelle admin) — cf. doc 09 § 2026-06-15
-// Les API LLM n'exposent pas le solde prépayé restant. On enregistre donc
-// les recharges manuellement : le panneau admin calcule « dépensé depuis »
-// (SUM runs.cost_usd par provider) → solde estimé restant. `provider` =
-// clé LLM_VALUES (claude=Anthropic, chatgpt=OpenAI, lechat=Mistral...).
+// Soldes de crédits LLM saisis à la main (admin) — cf. doc 09 § 2026-06-15
+// Les API LLM n'exposent pas le solde prépayé restant. Chaque ligne = un
+// solde constaté (`amount_usd`) à une date (`topped_up_at`). Le panneau
+// admin prend le plus récent et soustrait la dépense depuis (SUM
+// runs.cost_usd par provider) → solde estimé. `provider` = clé LLM_VALUES
+// (claude=Anthropic, chatgpt=OpenAI, lechat=Mistral...).
 // ──────────────────────────────────────────────────────────────────────
 
 export const llmCreditTopups = pgTable(

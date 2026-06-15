@@ -54,22 +54,25 @@ export const PROVIDER_META: Record<LLMValue, ProviderMeta> = {
   },
 };
 
-export interface TopupRow {
+/** Une saisie de solde : « le compte avait X $ à la date D ». */
+export interface BalanceSnapshot {
   id: string;
   amountUsd: number;
-  toppedUpAt: string;
+  atIso: string;
   note: string | null;
 }
 
 export interface ProviderCredit {
   meta: ProviderMeta;
-  topups: TopupRow[];
-  totalToppedUp: number;
-  /** Date de la 1ère recharge enregistrée (baseline du calcul de dépense). */
-  baselineDate: string | null;
-  /** Dépensé (tracking) depuis la baseline. 0 si aucune recharge. */
-  spentSinceBaseline: number;
-  /** Solde estimé = rechargé − dépensé depuis baseline. null si pas prépayé/pas de recharge. */
+  /** Historique des soldes saisis (le plus récent en premier). */
+  snapshots: BalanceSnapshot[];
+  /** Dernier solde saisi à la main. null si jamais renseigné. */
+  lastBalanceUsd: number | null;
+  /** Date du dernier solde saisi. */
+  lastBalanceAt: string | null;
+  /** Dépensé (tracking) depuis le dernier solde saisi. */
+  spentSinceLast: number;
+  /** Solde estimé = dernier solde saisi − dépensé depuis. null si pas prépayé/pas de saisie. */
   remaining: number | null;
   spent30d: number;
   spentAllTime: number;
@@ -90,7 +93,8 @@ function sumSpend(provider: string, since?: Date): Promise<number> {
 
 /** Charge l'état des crédits LLM par provider pour le panneau admin. */
 export async function getLlmCreditOverview(): Promise<ProviderCredit[]> {
-  const allTopups = await db
+  // Chaque ligne = un solde saisi à une date. Le plus récent fait foi.
+  const allSnapshots = await db
     .select()
     .from(llmCreditTopups)
     .orderBy(desc(llmCreditTopups.toppedUpAt));
@@ -100,34 +104,34 @@ export async function getLlmCreditOverview(): Promise<ProviderCredit[]> {
   const result: ProviderCredit[] = [];
   for (const key of LLM_VALUES) {
     const meta = PROVIDER_META[key];
-    const topups = allTopups
-      .filter((t) => t.provider === key)
-      .map((t) => ({
-        id: t.id,
-        amountUsd: Number(t.amountUsd),
-        toppedUpAt: t.toppedUpAt.toISOString(),
-        note: t.note,
-      }));
+    // allSnapshots est déjà trié par date décroissante → snaps[0] = le plus récent.
+    const snaps = allSnapshots.filter((t) => t.provider === key);
+    const snapshots = snaps.map((t) => ({
+      id: t.id,
+      amountUsd: Number(t.amountUsd),
+      atIso: t.toppedUpAt.toISOString(),
+      note: t.note,
+    }));
 
-    const totalToppedUp = topups.reduce((s, t) => s + t.amountUsd, 0);
-    const baseline = topups.length
-      ? topups.reduce((min, t) => (t.toppedUpAt < min ? t.toppedUpAt : min), topups[0]!.toppedUpAt)
-      : null;
+    const last = snaps[0] ?? null;
+    const lastBalanceUsd = last ? Number(last.amountUsd) : null;
+    const lastBalanceAt = last ? last.toppedUpAt.toISOString() : null;
 
-    const [spentSinceBaseline, spent30d, spentAllTime] = await Promise.all([
-      baseline ? sumSpend(key, new Date(baseline)) : Promise.resolve(0),
+    const [spentSinceLast, spent30d, spentAllTime] = await Promise.all([
+      last ? sumSpend(key, last.toppedUpAt) : Promise.resolve(0),
       sumSpend(key, thirtyDaysAgo),
       sumSpend(key),
     ]);
 
-    const remaining = meta.prepaid && baseline ? totalToppedUp - spentSinceBaseline : null;
+    const remaining =
+      meta.prepaid && lastBalanceUsd !== null ? lastBalanceUsd - spentSinceLast : null;
 
     result.push({
       meta,
-      topups,
-      totalToppedUp,
-      baselineDate: baseline,
-      spentSinceBaseline,
+      snapshots,
+      lastBalanceUsd,
+      lastBalanceAt,
+      spentSinceLast,
       remaining,
       spent30d,
       spentAllTime,
