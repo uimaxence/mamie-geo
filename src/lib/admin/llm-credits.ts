@@ -12,12 +12,20 @@ import type { LLMValue } from "@/lib/llm/types";
 // n'est pas ventilé par run → la dépense réelle Anthropic est légèrement
 // supérieure à ce qui est affiché ici (~+7 %). Disclosure dans l'UI.
 
+// Deux modèles de facturation :
+//   - "prepaid"        : crédit prépayé qui s'épuise (on recharge). Solde
+//                        estimé = dernier solde saisi − dépensé depuis.
+//   - "monthly_limit"  : plafond de dépense mensuel qui se réinitialise. On
+//                        suit dépensé ce mois vs limite.
+export type ProviderKind = "prepaid" | "monthly_limit";
+
 export interface ProviderMeta {
   /** Clé LLM_VALUES (= runs.llm). */
   key: LLMValue;
   label: string;
-  /** Compte prépayé (solde qui s'épuise) vs pay-as-you-go facturé a posteriori. */
-  prepaid: boolean;
+  kind: ProviderKind;
+  /** Devise affichée pour le montant saisi (notre tracking de dépense reste en USD). */
+  currency: "$" | "€";
   billingUrl: string;
 }
 
@@ -25,36 +33,41 @@ export const PROVIDER_META: Record<LLMValue, ProviderMeta> = {
   claude: {
     key: "claude",
     label: "Anthropic (Claude)",
-    prepaid: true,
+    kind: "prepaid",
+    currency: "$",
     billingUrl: "https://console.anthropic.com/settings/billing",
   },
   chatgpt: {
     key: "chatgpt",
     label: "OpenAI (ChatGPT)",
-    prepaid: true,
+    kind: "prepaid",
+    currency: "$",
     billingUrl: "https://platform.openai.com/settings/organization/billing/overview",
-  },
-  lechat: {
-    key: "lechat",
-    label: "Mistral (Le Chat)",
-    prepaid: true,
-    billingUrl: "https://console.mistral.ai/billing",
   },
   perplexity: {
     key: "perplexity",
     label: "Perplexity",
-    prepaid: true,
+    kind: "prepaid",
+    currency: "$",
     billingUrl: "https://www.perplexity.ai/settings/api",
+  },
+  lechat: {
+    key: "lechat",
+    label: "Mistral (Le Chat)",
+    kind: "monthly_limit",
+    currency: "€",
+    billingUrl: "https://console.mistral.ai/billing",
   },
   gemini: {
     key: "gemini",
     label: "Google (Gemini)",
-    prepaid: false, // facturation GCP à l'usage : pas de solde prépayé
+    kind: "monthly_limit",
+    currency: "€",
     billingUrl: "https://console.cloud.google.com/billing",
   },
 };
 
-/** Une saisie de solde : « le compte avait X $ à la date D ». */
+/** Une saisie : solde prépayé OU plafond mensuel, constaté à une date. */
 export interface BalanceSnapshot {
   id: string;
   amountUsd: number;
@@ -64,15 +77,17 @@ export interface BalanceSnapshot {
 
 export interface ProviderCredit {
   meta: ProviderMeta;
-  /** Historique des soldes saisis (le plus récent en premier). */
+  /** Historique des montants saisis (le plus récent en premier). */
   snapshots: BalanceSnapshot[];
-  /** Dernier solde saisi à la main. null si jamais renseigné. */
-  lastBalanceUsd: number | null;
-  /** Date du dernier solde saisi. */
-  lastBalanceAt: string | null;
-  /** Dépensé (tracking) depuis le dernier solde saisi. */
+  /** Dernier montant saisi : solde (prepaid) ou plafond mensuel (monthly_limit). null si jamais saisi. */
+  configuredAmount: number | null;
+  /** Date de la dernière saisie. */
+  configuredAt: string | null;
+  /** Dépensé (tracking) depuis la dernière saisie — pertinent en mode prepaid. */
   spentSinceLast: number;
-  /** Solde estimé = dernier solde saisi − dépensé depuis. null si pas prépayé/pas de saisie. */
+  /** Dépensé (tracking) sur le mois calendaire en cours — pertinent en mode monthly_limit. */
+  spentThisMonth: number;
+  /** Restant estimé : prepaid = solde − dépensé depuis ; monthly_limit = plafond − dépensé ce mois. null si non saisi. */
   remaining: number | null;
   spent30d: number;
   spentAllTime: number;
@@ -93,13 +108,15 @@ function sumSpend(provider: string, since?: Date): Promise<number> {
 
 /** Charge l'état des crédits LLM par provider pour le panneau admin. */
 export async function getLlmCreditOverview(): Promise<ProviderCredit[]> {
-  // Chaque ligne = un solde saisi à une date. Le plus récent fait foi.
+  // Chaque ligne = un montant saisi à une date. Le plus récent fait foi.
   const allSnapshots = await db
     .select()
     .from(llmCreditTopups)
     .orderBy(desc(llmCreditTopups.toppedUpAt));
 
-  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  const now = new Date();
+  const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+  const startOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
 
   const result: ProviderCredit[] = [];
   for (const key of LLM_VALUES) {
@@ -114,24 +131,30 @@ export async function getLlmCreditOverview(): Promise<ProviderCredit[]> {
     }));
 
     const last = snaps[0] ?? null;
-    const lastBalanceUsd = last ? Number(last.amountUsd) : null;
-    const lastBalanceAt = last ? last.toppedUpAt.toISOString() : null;
+    const configuredAmount = last ? Number(last.amountUsd) : null;
+    const configuredAt = last ? last.toppedUpAt.toISOString() : null;
 
-    const [spentSinceLast, spent30d, spentAllTime] = await Promise.all([
+    const [spentSinceLast, spentThisMonth, spent30d, spentAllTime] = await Promise.all([
       last ? sumSpend(key, last.toppedUpAt) : Promise.resolve(0),
+      sumSpend(key, startOfMonth),
       sumSpend(key, thirtyDaysAgo),
       sumSpend(key),
     ]);
 
     const remaining =
-      meta.prepaid && lastBalanceUsd !== null ? lastBalanceUsd - spentSinceLast : null;
+      configuredAmount === null
+        ? null
+        : meta.kind === "prepaid"
+          ? configuredAmount - spentSinceLast
+          : configuredAmount - spentThisMonth;
 
     result.push({
       meta,
       snapshots,
-      lastBalanceUsd,
-      lastBalanceAt,
+      configuredAmount,
+      configuredAt,
       spentSinceLast,
+      spentThisMonth,
       remaining,
       spent30d,
       spentAllTime,

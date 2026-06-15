@@ -15,9 +15,10 @@ export default async function LlmCreditsPage() {
           Crédits LLM
         </h1>
         <p className="mt-1 max-w-2xl text-sm text-[color:var(--color-muted)]">
-          Les API LLM n&apos;exposent pas le solde restant. Saisis le <strong>solde actuel</strong>{" "}
-          de chaque compte&nbsp;: le solde estimé = montant saisi − dépensé depuis (calculé sur nos
-          runs). Reviens le mettre à jour quand tu recharges ou vérifies.
+          Les API LLM n&apos;exposent pas le solde restant. Deux cas&nbsp;:{" "}
+          <strong>crédit prépayé</strong> (Claude, GPT, Perplexity) → saisis le solde actuel, estimé
+          = solde − dépensé depuis ; <strong>plafond mensuel</strong> (Mistral, Gemini) → saisis ta
+          limite, on suit dépensé ce mois / plafond. Calcul sur nos runs (USD).
         </p>
       </div>
 

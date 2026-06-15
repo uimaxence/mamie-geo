@@ -6,8 +6,8 @@ import { Input } from "@/components/ui/input";
 import type { ProviderCredit } from "@/lib/admin/llm-credits";
 import { deleteTopup, setBalance } from "@/lib/admin/llm-credits-actions";
 
-function usd(n: number): string {
-  return `$${n.toFixed(2)}`;
+function money(n: number, currency: string): string {
+  return `${currency}${n.toFixed(2)}`;
 }
 
 function formatDate(iso: string | null): string {
@@ -19,8 +19,9 @@ function formatDate(iso: string | null): string {
   });
 }
 
-// Seuil d'alerte « bientôt à sec » sur le solde estimé.
-const LOW_BALANCE_USD = 10;
+// Seuils d'alerte.
+const LOW_BALANCE_USD = 10; // prepaid : recharge si solde estimé sous ce seuil
+const LIMIT_WARN_RATIO = 0.8; // monthly_limit : alerte si dépensé ≥ 80 % du plafond
 
 export function LlmCreditsClient({ providers }: { providers: ProviderCredit[] }) {
   return (
@@ -37,7 +38,16 @@ function ProviderCard({ p }: { p: ProviderCredit }) {
   const [message, setMessage] = useState<{ tone: "ok" | "err"; text: string } | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  const low = p.remaining !== null && p.remaining <= LOW_BALANCE_USD;
+  const cur = p.meta.currency;
+  const isPrepaid = p.meta.kind === "prepaid";
+  // Alerte : prepaid sous seuil bas, ou monthly_limit au-delà de 80 % du plafond.
+  const low =
+    p.remaining !== null &&
+    (isPrepaid
+      ? p.remaining <= LOW_BALANCE_USD
+      : p.configuredAmount !== null &&
+        p.configuredAmount > 0 &&
+        p.spentThisMonth / p.configuredAmount >= LIMIT_WARN_RATIO);
 
   function onSet(e: React.FormEvent) {
     e.preventDefault();
@@ -45,7 +55,7 @@ function ProviderCard({ p }: { p: ProviderCredit }) {
     startTransition(async () => {
       const res = await setBalance({ provider: p.meta.key, balanceUsd: Number(value) });
       if (res.ok) {
-        setMessage({ tone: "ok", text: "Solde mis à jour." });
+        setMessage({ tone: "ok", text: isPrepaid ? "Solde mis à jour." : "Plafond mis à jour." });
         setValue("");
       } else {
         setMessage({
@@ -57,7 +67,7 @@ function ProviderCard({ p }: { p: ProviderCredit }) {
   }
 
   function onDelete(id: string) {
-    if (!confirm("Supprimer cette saisie de solde ?")) return;
+    if (!confirm("Supprimer cette saisie ?")) return;
     startTransition(async () => {
       await deleteTopup({ id });
     });
@@ -77,54 +87,75 @@ function ProviderCard({ p }: { p: ProviderCredit }) {
         </a>
       </div>
 
-      {/* Solde estimé (prépayé) ou mention pay-as-you-go */}
-      {p.meta.prepaid ? (
-        p.remaining !== null ? (
-          <div className="mt-3">
-            <p
-              className={`text-2xl font-bold tabular-nums ${low ? "text-red-600" : "text-[color:var(--color-ink)]"}`}
-            >
-              {usd(p.remaining)}
-              {low && <span className="ml-2 align-middle text-xs font-medium">⚠️ recharge</span>}
-            </p>
-            <p className="text-xs text-[color:var(--color-muted)]">
-              solde estimé · {usd(p.lastBalanceUsd ?? 0)} saisi le {formatDate(p.lastBalanceAt)} −{" "}
-              {usd(p.spentSinceLast)} dépensés depuis
-            </p>
-          </div>
-        ) : (
-          <p className="mt-3 text-sm text-[color:var(--color-muted)]">
-            Solde inconnu — saisis le montant actuel ci-dessous.
-          </p>
-        )
-      ) : (
+      {/* Bloc état : solde estimé (prepaid) ou dépensé/plafond (monthly_limit) */}
+      {p.configuredAmount === null ? (
         <p className="mt-3 text-sm text-[color:var(--color-muted)]">
-          Pay-as-you-go (GCP) — pas de solde prépayé.
+          {isPrepaid
+            ? "Solde inconnu — saisis le montant actuel ci-dessous."
+            : "Plafond non renseigné — saisis ta limite mensuelle ci-dessous."}
         </p>
+      ) : isPrepaid ? (
+        <div className="mt-3">
+          <p
+            className={`text-2xl font-bold tabular-nums ${low ? "text-red-600" : "text-[color:var(--color-ink)]"}`}
+          >
+            {money(p.remaining ?? 0, cur)}
+            {low && <span className="ml-2 align-middle text-xs font-medium">⚠️ recharge</span>}
+          </p>
+          <p className="text-xs text-[color:var(--color-muted)]">
+            solde estimé · {money(p.configuredAmount, cur)} saisi le {formatDate(p.configuredAt)} −{" "}
+            {money(p.spentSinceLast, "$")} dépensés depuis
+          </p>
+        </div>
+      ) : (
+        <div className="mt-3">
+          <p
+            className={`text-2xl font-bold tabular-nums ${low ? "text-red-600" : "text-[color:var(--color-ink)]"}`}
+          >
+            {money(p.spentThisMonth, "$")}
+            <span className="text-base font-normal text-[color:var(--color-muted)]">
+              {" "}
+              / {money(p.configuredAmount, cur)} ce mois
+            </span>
+            {low && (
+              <span className="ml-2 align-middle text-xs font-medium">⚠️ proche du plafond</span>
+            )}
+          </p>
+          {/* Jauge dépensé/plafond (approx : dépense USD vs plafond provider) */}
+          <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-[color:var(--color-gray-100)]">
+            <div
+              className={`h-full ${low ? "bg-red-500" : "bg-[color:var(--color-ink)]"}`}
+              style={{
+                width: `${Math.min(100, (p.spentThisMonth / p.configuredAmount) * 100).toFixed(1)}%`,
+              }}
+            />
+          </div>
+          <p className="mt-1 text-xs text-[color:var(--color-muted)]">
+            plafond mensuel · se réinitialise chaque mois
+          </p>
+        </div>
       )}
 
-      {/* Champ « solde actuel » (uniquement pour les comptes prépayés) */}
-      {p.meta.prepaid && (
-        <form onSubmit={onSet} className="mt-4 flex items-end gap-2">
-          <label className="flex-1">
-            <span className="mb-1 block text-xs font-medium text-[color:var(--color-muted)]">
-              Solde actuel sur le compte ($)
-            </span>
-            <Input
-              type="number"
-              step="0.01"
-              min="0"
-              required
-              placeholder="ex: 42.50"
-              value={value}
-              onChange={(e) => setValue(e.target.value)}
-            />
-          </label>
-          <Button type="submit" size="sm" disabled={isPending}>
-            {isPending ? "…" : "Mettre à jour"}
-          </Button>
-        </form>
-      )}
+      {/* Champ de saisie : solde actuel (prepaid) ou limite mensuelle (monthly_limit) */}
+      <form onSubmit={onSet} className="mt-4 flex items-end gap-2">
+        <label className="flex-1">
+          <span className="mb-1 block text-xs font-medium text-[color:var(--color-muted)]">
+            {isPrepaid ? `Solde actuel (${cur})` : `Limite mensuelle (${cur})`}
+          </span>
+          <Input
+            type="number"
+            step="0.01"
+            min="0"
+            required
+            placeholder={isPrepaid ? "ex: 3.79" : "ex: 150"}
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+          />
+        </label>
+        <Button type="submit" size="sm" disabled={isPending}>
+          {isPending ? "…" : "Mettre à jour"}
+        </Button>
+      </form>
       {message && (
         <p
           className={`mt-2 text-xs ${message.tone === "ok" ? "text-emerald-600" : "text-red-600"}`}
@@ -133,19 +164,21 @@ function ProviderCard({ p }: { p: ProviderCredit }) {
         </p>
       )}
 
-      {/* Dépenses */}
+      {/* Dépenses (notre tracking, USD) */}
       <dl className="mt-4 grid grid-cols-2 gap-2 border-t border-[color:var(--color-border)] pt-3 text-sm">
         <div>
           <dt className="text-xs text-[color:var(--color-muted)]">Dépensé 30 j</dt>
-          <dd className="tabular-nums text-[color:var(--color-ink)]">{usd(p.spent30d)}</dd>
+          <dd className="tabular-nums text-[color:var(--color-ink)]">{money(p.spent30d, "$")}</dd>
         </div>
         <div>
           <dt className="text-xs text-[color:var(--color-muted)]">Dépensé total</dt>
-          <dd className="tabular-nums text-[color:var(--color-ink)]">{usd(p.spentAllTime)}</dd>
+          <dd className="tabular-nums text-[color:var(--color-ink)]">
+            {money(p.spentAllTime, "$")}
+          </dd>
         </div>
       </dl>
 
-      {/* Historique des soldes saisis */}
+      {/* Historique des saisies */}
       {p.snapshots.length > 0 && (
         <ul className="mt-4 space-y-1 border-t border-[color:var(--color-border)] pt-3">
           {p.snapshots.map((s) => (
@@ -154,7 +187,7 @@ function ProviderCard({ p }: { p: ProviderCredit }) {
               className="flex items-center justify-between text-xs text-[color:var(--color-muted)]"
             >
               <span>
-                {usd(s.amountUsd)} · {formatDate(s.atIso)}
+                {money(s.amountUsd, cur)} · {formatDate(s.atIso)}
                 {s.note ? ` · ${s.note}` : ""}
               </span>
               <button
