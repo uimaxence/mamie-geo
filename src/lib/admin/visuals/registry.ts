@@ -14,6 +14,7 @@ import { SourcesSlide as EtudeSourcesSlide } from "@/components/admin/visuals/et
 import { VarianceSlide as EtudeVarianceSlide } from "@/components/admin/visuals/etude-50-marques/variance-slide";
 import { CtaSlide as EtudeCtaSlide } from "@/components/admin/visuals/etude-50-marques/cta-slide";
 import { ArticleCover as EtudeArticleCover } from "@/components/admin/visuals/etude-50-marques/article-cover";
+import { QuoteSlide as CritiquesTrackersQuoteSlide } from "@/components/admin/visuals/critiques-prompt-trackers/quote-slide";
 
 // Registry des visuels marketing (LinkedIn carousels, OG images, blog
 // covers). Source de vérité pour /app/admin/visuals.
@@ -108,6 +109,15 @@ export const VISUALS: VisualMeta[] = [
       "Image de couverture 1920×1080 (16:9) pour l'article LinkedIn long format de l'étude (texte : geo-project/linkedin-article-etude-50-marques.md). DA Mamie v2 : fond blanc, surligneur miel sur « 5 IA », pills de stats bleu brand.",
     format: FORMATS.linkedinArticleCover,
     slides: [{ key: "cover", label: "Cover article 16:9", Component: EtudeArticleCover }],
+  },
+  {
+    slug: "critiques-prompt-trackers",
+    title: "Critiques des prompt trackers — Image quote",
+    description:
+      "Image quote mono-slide (post 2026-06-16) d'amplification de l'article « limites des prompt trackers ». DA bleu nuit partagée (hors persona chaude Mamie) : « Les critiques ont raison » (blanc) + « on assume nos marges d'erreur » (vert) + bande basse complémentarité « Analytics référent → voit le clic » + « Prompt tracker → voit la citation » (un « + », pas un « ou »).",
+    format: FORMATS.linkedinPortrait,
+    postedOn: "2026-06-16",
+    slides: [{ key: "quote", label: "Image quote", Component: CritiquesTrackersQuoteSlide }],
   },
 ];
 
