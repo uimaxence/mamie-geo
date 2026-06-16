@@ -243,19 +243,24 @@ export function PromptsList({ initialPrompts, plan, planCadence, maxPrompts }: P
       )}
 
       {initialPrompts.length === 0 ? (
-        <div className="mt-10">
-          <EmptyState
-            icon={MessageSquareQuote}
-            title="Aucun prompt pour l'instant"
-            description="Ajoute ton premier prompt manuellement, ou demande à Claude Haiku d'en suggérer 5 pour toi."
-            action={
-              <Button variant="primary" onClick={handleSuggest} disabled={suggesting}>
-                <Sparkles size={14} strokeWidth={2} />
-                {suggesting ? "Génération…" : "Suggérer 5 prompts via IA"}
-              </Button>
-            }
-          />
-        </div>
+        // Empty state masqué quand le panneau de suggestions est déjà
+        // ouvert : sinon on répète un 2e CTA « Suggérer 5 prompts » juste
+        // en dessous des suggestions affichées (UX confuse).
+        !suggestions && (
+          <div className="mt-10">
+            <EmptyState
+              icon={MessageSquareQuote}
+              title="Aucun prompt pour l'instant"
+              description="Ajoute ton premier prompt manuellement, ou demande à Claude Haiku d'en suggérer 5 pour toi."
+              action={
+                <Button variant="primary" onClick={handleSuggest} disabled={suggesting}>
+                  <Sparkles size={14} strokeWidth={2} />
+                  {suggesting ? "Génération…" : "Suggérer 5 prompts via IA"}
+                </Button>
+              }
+            />
+          </div>
+        )
       ) : (
         <>
           <div className="mt-10 flex items-center justify-between gap-4">
