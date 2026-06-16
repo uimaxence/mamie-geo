@@ -6,7 +6,8 @@ import { UpgradeBannerLink } from "./upgrade-banner-link";
 // /app/settings#billing.
 //
 // Cas :
-//   trialing : compte sans paiement → "Choisis un plan pour démarrer"
+//   trialing : essai gratuit 14 j en cours → invite à choisir un plan pour
+//              continuer après l'essai (le tracking tourne déjà, cf. 2026-06-16)
 //   past_due : carte refusée → "Mets à jour ta carte"
 //   expired / canceled : abonnement terminé → "Réactive ton abonnement"
 //   hardcap : usage anormal détecté (priorité sur le plan)
@@ -27,7 +28,7 @@ interface BannerCopy {
 
 const COPY: Record<string, BannerCopy> = {
   trialing: {
-    message: "Configure ton tracking en choisissant un plan.",
+    message: "Essai gratuit en cours — choisis un plan pour continuer après tes 14 jours.",
     cta: "Choisir un plan",
     tone: "neutral",
     variant: "trialing",

@@ -16,8 +16,10 @@ PME marketing, agences SEO/marketing FR.
 
 Pricing public : **Solo 9,99 € / Starter 49 € / Pro 149 €**. Plan Agency
 (300 prompts) retiré de la grille publique 2026-05-14, reste sur devis.
-Enterprise sur devis. Trial 14 jours **avec carte requise** (acté
-2026-06-08) + garantie remboursement 14 jours.
+Enterprise sur devis. **Essai gratuit 14 jours par défaut sur Solo, SANS
+carte** (acté 2026-06-16, remplace « carte requise » du 2026-06-08) — le
+compte est utilisable dès le signup, la carte n'est demandée que pour
+continuer après l'essai. Garantie remboursement 14 jours.
 
 Détail : `geo-project/00-vision-strategie.md` et `01-marche-concurrence.md`.
 
@@ -372,11 +374,19 @@ events `tool_cta_clicked` / `tool_profile_autodetected` sur chaque
 Mistral Small : géants généralistes/médias écartés).
 
 **Billing Stripe** : checkout + portal + webhooks idempotents + Stripe
-Tax + cron expire-past-due. **Trial 14 j avec carte requise**
-(2026-06-08) : PlanPickerModal post-onboarding (3 variants), sidebar
-Subscribe card (4 variants), relances email J-4/J-1 + expired (cron
-`trial-emails` 08:00 UTC). Prices annuels -20 % via
-`STRIPE_PRICE_*_ANNUAL` (fallback mensuel gracieux).
+Tax. **Essai gratuit 14 j par défaut sur Solo, SANS carte** (2026-06-16,
+cf. doc 09 — remplace « carte requise ») : `trialing` a les quotas Solo
+et est **schedulable** (`SCHEDULABLE_PLANS` = `ACTIVE_PLANS` + `trialing`,
+mais `trialing` reste hors `ACTIVE_PLANS` au sens facturation → pas de
+portail). `trialEndsAt = now+14j` posé à l'onboarding ; le cron
+`expire-past-due` passe en `expired` les essais sans carte
+(`stripeSubscriptionId` null) arrivés à terme. PlanPickerModal (3
+variants — ne s'auto-ouvre plus juste après l'onboarding, réapparaît en
+« urgent » à J-2), `TrialExplainerModal` à la fermeture, sidebar Subscribe
+card (4 variants), relances email J-4/J-1 + expired (cron `trial-emails`
+08:00 UTC). Labels plan en FR partout via `planLabel()` (« trialing » →
+« Essai gratuit »). Prices annuels -20 % via `STRIPE_PRICE_*_ANNUAL`
+(fallback mensuel gracieux).
 
 **Analytics PostHog** (EU) : autocapture + pageviews + session replay
 (masquage PII, convention `data-private`), ~75 events business, groups
@@ -471,8 +481,10 @@ tables + migrations 0000-0011.
   (pivot 2026-06-03, ex-terracotta), CTA noir, pas d'italique.
 - Domaine `mamie-geo.fr` + 301 défensif depuis `mamie-seo.fr`.
 - Magic-link Brevo **REST API** (SMTP bloqué par IP whitelist Free).
-- **Trial 14 j avec carte requise** (2026-06-08, remplace « pas de
-  trial » du 2026-05-14). Stripe Tax. Garantie remboursement 14 j.
+- **Essai gratuit 14 j par défaut sur Solo, SANS carte** (2026-06-16,
+  remplace « carte requise » du 2026-06-08, lui-même ex-« pas de trial »).
+  `trialing` = quotas Solo + schedulable, expiration à J+14 sans carte.
+  Stripe Tax. Garantie remboursement 14 j.
 - Le Chat dès Starter, sans condition.
 - Statut juridique : EI, bascule SAS/EURL mois 6-9 (plafond micro
   ~77 700 €/an).

@@ -264,9 +264,7 @@ export async function sendWeeklyRecapEmail(params: {
  * Échoue avec un message lisible si la clé API ou le list ID manquent —
  * le caller (server action) traduit en message UX-friendly.
  */
-export async function subscribeContactToBlogList(
-  email: string,
-): Promise<{ created: boolean }> {
+export async function subscribeContactToBlogList(email: string): Promise<{ created: boolean }> {
   if (!env.BREVO_API_KEY) {
     throw new Error("BREVO_API_KEY manquant — inscription newsletter indisponible");
   }
@@ -309,7 +307,9 @@ export async function subscribeContactToBlogList(
     throw new Error(`Brevo contacts → ${json.code ?? "error"}: ${json.message ?? "HTTP 400"}`);
   }
   const text = await response.text().catch(() => "");
-  throw new Error(`Brevo contacts → HTTP ${response.status}${text ? ` — ${text.slice(0, 200)}` : ""}`);
+  throw new Error(
+    `Brevo contacts → HTTP ${response.status}${text ? ` — ${text.slice(0, 200)}` : ""}`,
+  );
 }
 
 /**
@@ -373,16 +373,13 @@ export async function sendNewArticleNewsletter(article: {
   const created = (await createRes.json()) as { id: number };
 
   // 2. Send now
-  const sendRes = await fetch(
-    `https://api.brevo.com/v3/emailCampaigns/${created.id}/sendNow`,
-    {
-      method: "POST",
-      headers: {
-        "api-key": env.BREVO_API_KEY,
-        Accept: "application/json",
-      },
+  const sendRes = await fetch(`https://api.brevo.com/v3/emailCampaigns/${created.id}/sendNow`, {
+    method: "POST",
+    headers: {
+      "api-key": env.BREVO_API_KEY,
+      Accept: "application/json",
     },
-  );
+  });
   if (!sendRes.ok) {
     const text = await sendRes.text().catch(() => "");
     throw new Error(
@@ -390,9 +387,7 @@ export async function sendNewArticleNewsletter(article: {
     );
   }
 
-  console.info(
-    `[email] blog newsletter envoyée — campaignId=${created.id} slug=${article.slug}`,
-  );
+  console.info(`[email] blog newsletter envoyée — campaignId=${created.id} slug=${article.slug}`);
   return { campaignId: created.id };
 }
 
@@ -440,7 +435,6 @@ function escapeHtml(s: string): string {
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
 }
-
 
 /**
  * Email de confirmation au PROSPECT après un scan gratuit (express ou

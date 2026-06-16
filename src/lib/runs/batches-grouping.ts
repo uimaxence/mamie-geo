@@ -179,9 +179,7 @@ export function groupRunsIntoBatches(rawRuns: RawRunRow[], limit: number): RunBa
   }
 
   for (const batch of batchesMap.values()) {
-    const durations = batch.runs
-      .map((r) => r.durationMs)
-      .filter((d): d is number => d !== null);
+    const durations = batch.runs.map((r) => r.durationMs).filter((d): d is number => d !== null);
     batch.summary.durationAvgMs =
       durations.length > 0
         ? Math.round(durations.reduce((a, b) => a + b, 0) / durations.length)
@@ -189,9 +187,7 @@ export function groupRunsIntoBatches(rawRuns: RawRunRow[], limit: number): RunBa
 
     batch.summary.dominantBrandSentiment = computeDominantSentiment(batch.runs);
 
-    batch.runs.sort(
-      (a, b) => (LLM_ORDER_INDEX[a.llm] ?? 999) - (LLM_ORDER_INDEX[b.llm] ?? 999),
-    );
+    batch.runs.sort((a, b) => (LLM_ORDER_INDEX[a.llm] ?? 999) - (LLM_ORDER_INDEX[b.llm] ?? 999));
   }
 
   return Array.from(batchesMap.values())
@@ -221,9 +217,7 @@ function computeDominantSentiment(runs: RunBatchEntry[]): BatchDominantSentiment
 
   // Vérifie qu'il y a au moins un scoring abouti (cité ou non) pour
   // distinguer "absent" (scored, pas cité) de null (aucun scoring).
-  const hasAnyScoring = runs.some(
-    (r) => r.brandMentioned === true || r.brandMentioned === false,
-  );
+  const hasAnyScoring = runs.some((r) => r.brandMentioned === true || r.brandMentioned === false);
   if (!hasAnyScoring) return null;
 
   if (scoredSentiments.length === 0) return "absent";

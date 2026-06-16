@@ -24,7 +24,9 @@ describe("runComparatorScan", () => {
         result("https://www.hyperassur.com/comparatif/", "Top 10 des assurances 2026"),
         result("https://fr.wikipedia.org/wiki/Assurance", "Assurance — Wikipédia"), // blocklist
       ],
-      'site:lelynx.fr "Acme Assur"': [result("https://www.lelynx.fr/avis/acme-assur/", "Avis Acme")],
+      'site:lelynx.fr "Acme Assur"': [
+        result("https://www.lelynx.fr/avis/acme-assur/", "Avis Acme"),
+      ],
     });
 
     const scan = await runComparatorScan({ brand: "Acme Assur", sector: "assurance auto", search });
@@ -49,9 +51,7 @@ describe("runComparatorScan", () => {
 
     expect(scan.report.presentCount).toBe(1);
     expect(scan.report.totalChecked).toBe(scan.report.checks.length);
-    expect(scan.report.scorePct).toBe(
-      Math.round((1 / scan.report.checks.length) * 100),
-    );
+    expect(scan.report.scorePct).toBe(Math.round((1 / scan.report.checks.length) * 100));
   });
 
   it("exclut le domaine de la marque de la découverte", async () => {
@@ -76,7 +76,10 @@ describe("runComparatorScan", () => {
     const search = fakeSearch({
       "meilleur menuiserie": [
         result("https://www.annuaire-menuisiers.fr/", "Annuaire des menuisiers de France"),
-        result("https://www.menuiserie-dupont.fr/", "Menuiserie Dupont — fenêtres et portes à Tours"),
+        result(
+          "https://www.menuiserie-dupont.fr/",
+          "Menuiserie Dupont — fenêtres et portes à Tours",
+        ),
         result("https://www.atelier-bois.fr/", "Atelier Bois : votre menuisier sur mesure"),
       ],
     });
@@ -124,9 +127,7 @@ describe("runComparatorScan", () => {
     const search: SearchFn = async (query: string) => {
       calls += 1;
       if (!query.startsWith("site:")) throw new Error("HTTP 429");
-      return query.includes("lelynx.fr")
-        ? [result("https://www.lelynx.fr/avis/acme/")]
-        : [];
+      return query.includes("lelynx.fr") ? [result("https://www.lelynx.fr/avis/acme/")] : [];
     };
     const scan = await runComparatorScan({ brand: "Acme", sector: "assurance", search });
     expect(scan.ok).toBe(true);

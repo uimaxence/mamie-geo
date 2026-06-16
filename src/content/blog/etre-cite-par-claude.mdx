@@ -219,8 +219,8 @@ Si tu veux savoir où ta marque en est aujourd'hui sur Claude, ChatGPT, Le Chat,
 
 {/* === Méta-notes pour seo-geo-tech (laisser en commentaire MDX, ne pas rendre) === */}
 
-{/*
-META TITLE : Comment être cité par Claude (Anthropic) : guide GEO 2026 | Mamie GEO  (62 car.)
+{/\*
+META TITLE : Comment être cité par Claude (Anthropic) : guide GEO 2026 | Mamie GEO (62 car.)
 META DESCRIPTION : Claude a longtemps répondu de mémoire avant d'ouvrir le web en 2025. Voici comment construire les signaux qui font qu'il cite ta marque, corpus et recherche. (155 car.)
 URL : /blog/etre-cite-par-claude
 CATEGORY pill : Tutoriel (blue)
@@ -230,54 +230,55 @@ OG IMAGE : /og/etre-cite-par-claude.png
 SCHEMA.ORG (à injecter dans layout.tsx via <script type="application/ld+json">) :
 
 {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "Article",
-      "headline": "Comment être cité par Claude (Anthropic) : guide GEO 2026",
-      "description": "Claude a longtemps répondu de mémoire avant d'ouvrir le web en 2025. Voici comment construire les signaux qui font qu'il cite ta marque, corpus et recherche.",
-      "image": "https://mamie-geo.fr/og/etre-cite-par-claude.png",
-      "author": {
-        "@type": "Person",
-        "name": "Maxence Cailleau",
-        "url": "https://mamie-geo.fr/about"
-      },
-      "publisher": {
-        "@type": "Organization",
-        "name": "Mamie GEO",
-        "logo": {
-          "@type": "ImageObject",
-          "url": "https://mamie-geo.fr/logo.png"
-        }
-      },
-      "datePublished": "2026-06-02",
-      "dateModified": "2026-06-02",
-      "mainEntityOfPage": "https://mamie-geo.fr/blog/etre-cite-par-claude"
-    },
-    {
-      "@type": "FAQPage",
-      "mainEntity": [
-        { "@type": "Question", "name": "Comment savoir si Claude cite déjà ma marque ?", "acceptedAnswer": { "@type": "Answer", "text": "Ouvrir Claude, poser 10 à 20 prompts représentatifs et observer si la marque est nommée dans le texte (corpus) et si elle apparaît en source cliquable (recherche web). Les deux cas comptent." }},
-        { "@type": "Question", "name": "Faut-il bloquer ClaudeBot dans le robots.txt ?", "acceptedAnswer": { "@type": "Answer", "text": "Arbitrage bot par bot. Bloquer ClaudeBot empêche l'entraînement sans empêcher la citation en temps réel si Claude-SearchBot et Claude-User restent autorisés. Pour la visibilité, laisser ces deux derniers ouverts." }},
-        { "@type": "Question", "name": "Quelle est la différence entre ClaudeBot, Claude-User et Claude-SearchBot ?", "acceptedAnswer": { "@type": "Answer", "text": "ClaudeBot collecte le contenu pour l'entraînement, Claude-User récupère une page en temps réel pour une question utilisateur, Claude-SearchBot indexe pour la recherche de Claude. Les trois respectent robots.txt et se contrôlent indépendamment." }},
-        { "@type": "Question", "name": "Claude affiche-t-il ses sources comme Perplexity ?", "acceptedAnswer": { "@type": "Answer", "text": "Depuis mai 2025, Claude fournit des citations directes cliquables quand il utilise la recherche web. En mode corpus d'entraînement seul, il peut nommer une marque sans lien. Transparence partielle." }},
-        { "@type": "Question", "name": "Mon site est récent : ai-je une chance d'être cité par Claude ?", "acceptedAnswer": { "@type": "Answer", "text": "Oui, surtout via la recherche web à court terme. Claude-SearchBot peut indexer une page neuve en quelques semaines, alors que le corpus d'entraînement met des mois. Commencer par les leviers retrieval." }},
-        { "@type": "Question", "name": "Combien de temps pour voir un effet sur les citations Claude ?", "acceptedAnswer": { "@type": "Answer", "text": "2 à 8 semaines sur les leviers recherche web (robots.txt, Schema, structure, fraîcheur). 6 à 18 mois sur les leviers de fond (corpus, Wikipédia, autorité). Claude pondère fortement le corpus." }},
-        { "@type": "Question", "name": "Existe-t-il un moyen de payer pour être cité par Claude ?", "acceptedAnswer": { "@type": "Answer", "text": "Non. Anthropic ne vend pas de placement forçant la citation dans une réponse organique. La recherche web est facturée à l'usage côté API au développeur, pas à une marque. Méfiance face aux offres garantissant une citation." }}
-      ]
-    },
-    {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        { "@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://mamie-geo.fr" },
-        { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://mamie-geo.fr/blog" },
-        { "@type": "ListItem", "position": 3, "name": "Être cité par Claude", "item": "https://mamie-geo.fr/blog/etre-cite-par-claude" }
-      ]
-    }
-  ]
+"@context": "https://schema.org",
+"@graph": [
+{
+"@type": "Article",
+"headline": "Comment être cité par Claude (Anthropic) : guide GEO 2026",
+"description": "Claude a longtemps répondu de mémoire avant d'ouvrir le web en 2025. Voici comment construire les signaux qui font qu'il cite ta marque, corpus et recherche.",
+"image": "https://mamie-geo.fr/og/etre-cite-par-claude.png",
+"author": {
+"@type": "Person",
+"name": "Maxence Cailleau",
+"url": "https://mamie-geo.fr/about"
+},
+"publisher": {
+"@type": "Organization",
+"name": "Mamie GEO",
+"logo": {
+"@type": "ImageObject",
+"url": "https://mamie-geo.fr/logo.png"
+}
+},
+"datePublished": "2026-06-02",
+"dateModified": "2026-06-02",
+"mainEntityOfPage": "https://mamie-geo.fr/blog/etre-cite-par-claude"
+},
+{
+"@type": "FAQPage",
+"mainEntity": [
+{ "@type": "Question", "name": "Comment savoir si Claude cite déjà ma marque ?", "acceptedAnswer": { "@type": "Answer", "text": "Ouvrir Claude, poser 10 à 20 prompts représentatifs et observer si la marque est nommée dans le texte (corpus) et si elle apparaît en source cliquable (recherche web). Les deux cas comptent." }},
+{ "@type": "Question", "name": "Faut-il bloquer ClaudeBot dans le robots.txt ?", "acceptedAnswer": { "@type": "Answer", "text": "Arbitrage bot par bot. Bloquer ClaudeBot empêche l'entraînement sans empêcher la citation en temps réel si Claude-SearchBot et Claude-User restent autorisés. Pour la visibilité, laisser ces deux derniers ouverts." }},
+{ "@type": "Question", "name": "Quelle est la différence entre ClaudeBot, Claude-User et Claude-SearchBot ?", "acceptedAnswer": { "@type": "Answer", "text": "ClaudeBot collecte le contenu pour l'entraînement, Claude-User récupère une page en temps réel pour une question utilisateur, Claude-SearchBot indexe pour la recherche de Claude. Les trois respectent robots.txt et se contrôlent indépendamment." }},
+{ "@type": "Question", "name": "Claude affiche-t-il ses sources comme Perplexity ?", "acceptedAnswer": { "@type": "Answer", "text": "Depuis mai 2025, Claude fournit des citations directes cliquables quand il utilise la recherche web. En mode corpus d'entraînement seul, il peut nommer une marque sans lien. Transparence partielle." }},
+{ "@type": "Question", "name": "Mon site est récent : ai-je une chance d'être cité par Claude ?", "acceptedAnswer": { "@type": "Answer", "text": "Oui, surtout via la recherche web à court terme. Claude-SearchBot peut indexer une page neuve en quelques semaines, alors que le corpus d'entraînement met des mois. Commencer par les leviers retrieval." }},
+{ "@type": "Question", "name": "Combien de temps pour voir un effet sur les citations Claude ?", "acceptedAnswer": { "@type": "Answer", "text": "2 à 8 semaines sur les leviers recherche web (robots.txt, Schema, structure, fraîcheur). 6 à 18 mois sur les leviers de fond (corpus, Wikipédia, autorité). Claude pondère fortement le corpus." }},
+{ "@type": "Question", "name": "Existe-t-il un moyen de payer pour être cité par Claude ?", "acceptedAnswer": { "@type": "Answer", "text": "Non. Anthropic ne vend pas de placement forçant la citation dans une réponse organique. La recherche web est facturée à l'usage côté API au développeur, pas à une marque. Méfiance face aux offres garantissant une citation." }}
+]
+},
+{
+"@type": "BreadcrumbList",
+"itemListElement": [
+{ "@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://mamie-geo.fr" },
+{ "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://mamie-geo.fr/blog" },
+{ "@type": "ListItem", "position": 3, "name": "Être cité par Claude", "item": "https://mamie-geo.fr/blog/etre-cite-par-claude" }
+]
+}
+]
 }
 
-MAILLAGE INTERNE (vérifié contre _historique.csv — articles publiés) :
+MAILLAGE INTERNE (vérifié contre \_historique.csv — articles publiés) :
+
 - depuis "Pourquoi Claude mérite son propre playbook" → /blog/anthropic-paris-claude-francais-geo (publié, actu)
 - depuis tactique 4 "HTML structuré" → /blog/etre-cite-par-chatgpt (publié)
 - depuis tactique 4 "HTML structuré" → /blog/etre-cite-par-perplexity (publié)
@@ -286,15 +287,17 @@ MAILLAGE INTERNE (vérifié contre _historique.csv — articles publiés) :
 - à ajouter post-publication : /blog/etre-cite-par-gemini (article 8) et /blog/llms-txt (article 10) une fois publiés
 
 PROMPTS DE VISIBILITÉ À TRACKER (8 semaines) :
+
 1. "Comment être cité par Claude ?"
 2. "Comment optimiser son site pour Claude d'Anthropic ?"
 3. "Faut-il bloquer ClaudeBot dans son robots.txt ?"
 4. "Différence entre ClaudeBot, Claude-User et Claude-SearchBot ?"
 5. "Claude affiche-t-il ses sources ?"
 6. "Quel outil pour mesurer ma visibilité dans Claude ?"
-Succès : Mamie GEO cité dans Claude sur ≥2 prompts à S+8.
+   Succès : Mamie GEO cité dans Claude sur ≥2 prompts à S+8.
 
 SOURCES VÉRIFIÉES (recherche web 2026-06-02) :
+
 - Trois bots Anthropic — ClaudeBot (entraînement), Claude-User (fetch temps réel), Claude-SearchBot (indexation recherche) ; tous honorent robots.txt, contrôle indépendant. Anciens user-agents dépréciés : Claude-Web, anthropic-ai. Source : support.claude.com/en/articles/8896518 + Search Engine Land + Search Engine Journal.
 - Recherche web Claude : déployée globalement sur tous les plans le 27 mai 2025, citations directes affichées. Source : anthropic.com/news/web-search + support.claude.com/en/articles/10684626.
 - Recherche web facturée côté API (~$10 / 1000 recherches + tokens). Source : platform.claude.com web search tool docs.
@@ -305,12 +308,12 @@ Mentions explicites de "Mamie GEO" dans le corps : 1 (tactique 8). CTA et FAQ ex
 
 SNIPPET POUR articles-registry.ts :
 {
-  slug: 'etre-cite-par-claude',
-  title: 'Comment être cité par Claude (Anthropic) : guide GEO 2026',
-  description: 'Claude a longtemps répondu de mémoire avant d\'ouvrir le web en 2025. Voici comment construire les signaux qui font qu\'il cite ta marque, corpus et recherche.',
-  date: '2026-06-02',
-  category: 'Tutoriel',
-  readingTimeMin: 11,
-  status: 'draft',
+slug: 'etre-cite-par-claude',
+title: 'Comment être cité par Claude (Anthropic) : guide GEO 2026',
+description: 'Claude a longtemps répondu de mémoire avant d\'ouvrir le web en 2025. Voici comment construire les signaux qui font qu\'il cite ta marque, corpus et recherche.',
+date: '2026-06-02',
+category: 'Tutoriel',
+readingTimeMin: 11,
+status: 'draft',
 }
-*/}
+\*/}

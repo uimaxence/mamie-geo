@@ -21,10 +21,22 @@ import { CornerFrame, Section } from "@/components/ui";
 // empilées. À droite : grande capture dashboard avec CornerFrame.
 
 const SCREENSHOTS = {
-  dashboard: { src: "/marketing/dashboard/dashboard.webp", alt: "Dashboard Mamie GEO : score visibilité, évolution 30 jours, breakdown par LLM" },
-  prompts: { src: "/marketing/dashboard/prompts.webp", alt: "Liste des prompts trackés avec statut par LLM" },
-  competitors: { src: "/marketing/dashboard/competitors.webp", alt: "Page concurrents avec part de voix comparative" },
-  runDetail: { src: "/marketing/dashboard/run-detail.webp", alt: "Détail d'un run : réponse LLM, citations détectées, sentiment" },
+  dashboard: {
+    src: "/marketing/dashboard/dashboard.webp",
+    alt: "Dashboard Mamie GEO : score visibilité, évolution 30 jours, breakdown par LLM",
+  },
+  prompts: {
+    src: "/marketing/dashboard/prompts.webp",
+    alt: "Liste des prompts trackés avec statut par LLM",
+  },
+  competitors: {
+    src: "/marketing/dashboard/competitors.webp",
+    alt: "Page concurrents avec part de voix comparative",
+  },
+  runDetail: {
+    src: "/marketing/dashboard/run-detail.webp",
+    alt: "Détail d'un run : réponse LLM, citations détectées, sentiment",
+  },
 } as const;
 
 export function ProductTour() {

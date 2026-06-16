@@ -1,13 +1,7 @@
 {
   "meta": {
     "date_snapshot": "2026-06-10",
-    "plateformes": [
-      "chatgpt",
-      "lechat",
-      "perplexity",
-      "gemini",
-      "claude"
-    ],
+    "plateformes": ["chatgpt", "lechat", "perplexity", "gemini", "claude"],
     "n_marques": 50,
     "n_prompts": 40,
     "n_runs_collectes": 200,

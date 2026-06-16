@@ -121,7 +121,12 @@ export async function enrichScanReport(options: EnrichScanOptions): Promise<Enri
         messages: [
           {
             role: "user",
-            content: buildPrompt(options.sector, options.brand, options.checks, options.competitors),
+            content: buildPrompt(
+              options.sector,
+              options.brand,
+              options.checks,
+              options.competitors,
+            ),
           },
         ],
       }),

@@ -39,7 +39,10 @@ export function SegmentBar({ segments, height = 10, className }: SegmentBarProps
   if (total === 0) {
     return (
       <div
-        className={cn("w-full rounded-[var(--radius-pill)] bg-[color:var(--color-gray-200)]", className)}
+        className={cn(
+          "w-full rounded-[var(--radius-pill)] bg-[color:var(--color-gray-200)]",
+          className,
+        )}
         style={{ height }}
       />
     );

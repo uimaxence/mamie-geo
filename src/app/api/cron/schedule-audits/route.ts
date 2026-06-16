@@ -5,7 +5,7 @@ import { brands, workspaces } from "@/db/schema";
 import { incrementAuditCounter } from "@/lib/audits/counters";
 import { logCronEvent } from "@/lib/cron-logger";
 import { env } from "@/lib/env";
-import { ACTIVE_PLANS } from "@/lib/plans/quotas";
+import { SCHEDULABLE_PLANS } from "@/lib/plans/quotas";
 import { enqueue } from "@/lib/queue";
 
 // Cron hebdo (lundi 05:00 UTC, cf. vercel.json) : enqueue 1 audit
@@ -43,7 +43,7 @@ async function handle(request: NextRequest): Promise<NextResponse> {
       hardCapHitAt: workspaces.hardCapHitAt,
     })
     .from(workspaces)
-    .where(inArray(workspaces.plan, ACTIVE_PLANS as readonly string[]));
+    .where(inArray(workspaces.plan, SCHEDULABLE_PLANS as readonly string[]));
 
   // On exclut les hard-capés (l'audit ne consomme pas de LLM mais on
   // applique la même logique de gel pour cohérence, review possible).

@@ -1,11 +1,7 @@
 import { and, desc, eq } from "drizzle-orm";
 import { db } from "@/db/client";
 import { brands, prompts, runs } from "@/db/schema";
-import {
-  groupRunsIntoBatches,
-  type RawRunRow,
-  type RunBatch,
-} from "./batches-grouping";
+import { groupRunsIntoBatches, type RawRunRow, type RunBatch } from "./batches-grouping";
 
 // Aggrégation runs en « batches » (prompt × jour). 1 batch = 1 exécution
 // du prompt sur tous les LLMs configurés pour le workspace (typiquement

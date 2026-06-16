@@ -59,6 +59,15 @@ export interface OnboardingResult {
   workspaceId: string;
 }
 
+// Essai gratuit par défaut : 14 jours sur le plan Solo, sans carte
+// (2026-06-16, cf. doc 09). Le compte est utilisable dès l'onboarding ;
+// `trialEndsAt` borne l'essai et pilote relances + expiration.
+const TRIAL_DAYS = 14;
+
+function trialEndsAtFromNow(): Date {
+  return new Date(Date.now() + TRIAL_DAYS * 24 * 60 * 60 * 1000);
+}
+
 function slugify(input: string): string {
   return input
     .toLowerCase()
@@ -103,6 +112,7 @@ export async function submitOnboarding(raw: OnboardingInput): Promise<Onboarding
     name: data.workspaceName,
     slug,
     plan: "trialing",
+    trialEndsAt: trialEndsAtFromNow(),
   });
 
   await db.insert(workspaceMembers).values({
@@ -154,11 +164,11 @@ export async function submitOnboarding(raw: OnboardingInput): Promise<Onboarding
     )
     .returning({ id: prompts.id });
 
-  // 5. One-shot run gratuit post-onboarding, premier wow moment.
+  // 5. One-shot run gratuit post-onboarding, premier wow moment immédiat.
   //    Coût : ~$0,04 par signup (1 prompt × Claude Haiku). Cf. doc 09
-  //    § 2026-05-16 « premier wow moment ». Le scheduler ne touche pas
-  //    les workspaces trialing donc ce run reste unique jusqu'au
-  //    paiement Stripe (qui déclenche scheduleRunsForWorkspace en plein).
+  //    § 2026-05-16. Depuis 2026-06-16 les workspaces `trialing` sont
+  //    schedulables (essai Solo) : le scheduler weekly prend ensuite le
+  //    relais. Ce one-shot reste utile pour ne pas attendre le lundi.
   const firstPrompt = createdPrompts[0];
   if (firstPrompt) {
     const runId = randomUUID();
@@ -232,6 +242,7 @@ export async function quickSetup(raw: QuickSetupInput): Promise<OnboardingResult
     name: data.workspaceName,
     slug,
     plan: "trialing",
+    trialEndsAt: trialEndsAtFromNow(),
   });
 
   await db.insert(workspaceMembers).values({
@@ -338,7 +349,9 @@ export async function suggestPrompts(raw: SuggestPromptsInput): Promise<SuggestP
 
 export type OnboardingProfile = SiteProfile;
 
-export async function detectOnboardingProfile(rawDomain: string): Promise<OnboardingProfile | null> {
+export async function detectOnboardingProfile(
+  rawDomain: string,
+): Promise<OnboardingProfile | null> {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) throw new Error("Non authentifié");
 

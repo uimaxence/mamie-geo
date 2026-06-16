@@ -66,14 +66,15 @@ function skippedPayload() {
 
 describe("groupRunsIntoBatches", () => {
   it("groupe les 5 runs d'un même batch (prompt × jour) en 1 ligne", () => {
-    const runs: RawRunRow[] = (["chatgpt", "claude", "perplexity", "gemini", "lechat"] as const).map(
-      (llm, i) =>
-        makeRun({
-          id: `run-${i}`,
-          llm,
-          scheduledAt: new Date(`2026-05-18T06:0${i}:00Z`),
-          parsedBrands: citedPayload(i % 2 === 0),
-        }),
+    const runs: RawRunRow[] = (
+      ["chatgpt", "claude", "perplexity", "gemini", "lechat"] as const
+    ).map((llm, i) =>
+      makeRun({
+        id: `run-${i}`,
+        llm,
+        scheduledAt: new Date(`2026-05-18T06:0${i}:00Z`),
+        parsedBrands: citedPayload(i % 2 === 0),
+      }),
     );
 
     const batches = groupRunsIntoBatches(runs, 10);
@@ -300,7 +301,11 @@ describe("groupRunsIntoBatches", () => {
     const runs: RawRunRow[] = [
       makeRun({ id: "r1", llm: "chatgpt", parsedBrands: payloadWithSentiment(true, "positive") }),
       makeRun({ id: "r2", llm: "claude", parsedBrands: payloadWithSentiment(true, "positive") }),
-      makeRun({ id: "r3", llm: "perplexity", parsedBrands: payloadWithSentiment(true, "positive") }),
+      makeRun({
+        id: "r3",
+        llm: "perplexity",
+        parsedBrands: payloadWithSentiment(true, "positive"),
+      }),
       makeRun({ id: "r4", llm: "gemini", parsedBrands: payloadWithSentiment(true, "neutral") }),
     ];
 
@@ -312,7 +317,11 @@ describe("groupRunsIntoBatches", () => {
     const runs: RawRunRow[] = [
       makeRun({ id: "r1", llm: "chatgpt", parsedBrands: payloadWithSentiment(true, "positive") }),
       makeRun({ id: "r2", llm: "claude", parsedBrands: payloadWithSentiment(true, "positive") }),
-      makeRun({ id: "r3", llm: "perplexity", parsedBrands: payloadWithSentiment(true, "negative") }),
+      makeRun({
+        id: "r3",
+        llm: "perplexity",
+        parsedBrands: payloadWithSentiment(true, "negative"),
+      }),
       makeRun({ id: "r4", llm: "gemini", parsedBrands: payloadWithSentiment(true, "negative") }),
     ];
 
@@ -344,7 +353,11 @@ describe("groupRunsIntoBatches", () => {
     const runs: RawRunRow[] = [
       makeRun({ id: "r1", llm: "chatgpt", parsedBrands: payloadWithSentiment(true, "negative") }),
       makeRun({ id: "r2", llm: "claude", parsedBrands: payloadWithSentiment(true, "negative") }),
-      makeRun({ id: "r3", llm: "perplexity", parsedBrands: payloadWithSentiment(true, "positive") }),
+      makeRun({
+        id: "r3",
+        llm: "perplexity",
+        parsedBrands: payloadWithSentiment(true, "positive"),
+      }),
     ];
 
     const batches = groupRunsIntoBatches(runs, 10);

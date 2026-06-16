@@ -57,7 +57,11 @@ function SnippetBlock({ snippet }: { snippet: string }) {
           aria-label="Copier le script"
           className="inline-flex shrink-0 items-center gap-1.5 rounded-[var(--radius-md)] border border-[color:var(--color-border)] bg-white px-3 py-2 text-sm font-medium text-[color:var(--color-ink)] transition hover:bg-[color:var(--color-gray-50)]"
         >
-          {copied === "snippet" ? <Check size={15} strokeWidth={2.4} /> : <Copy size={15} strokeWidth={2.2} />}
+          {copied === "snippet" ? (
+            <Check size={15} strokeWidth={2.4} />
+          ) : (
+            <Copy size={15} strokeWidth={2.2} />
+          )}
           {copied === "snippet" ? "Copié" : "Copier"}
         </button>
       </div>
@@ -219,9 +223,9 @@ export function AiPixelInstall({
           <div className="border-t border-[color:var(--color-border)] px-6 py-4">
             <SnippetBlock snippet={snippet} />
             <p className="type-meta mt-2 text-xs text-[color:var(--color-muted)]">
-              À garder sur toutes les pages de <span className="font-medium">{boundDomain}</span> (la
-              clé est liée à ce domaine). Cookieless &amp; RGPD-friendly : aucun cookie, aucune IP
-              stockée.
+              À garder sur toutes les pages de <span className="font-medium">{boundDomain}</span>{" "}
+              (la clé est liée à ce domaine). Cookieless &amp; RGPD-friendly : aucun cookie, aucune
+              IP stockée.
             </p>
           </div>
         )}
@@ -266,8 +270,8 @@ export function AiPixelInstall({
             <p className="type-meta mt-1 max-w-prose">
               On va chercher le script sur ta page d&apos;accueil — pas besoin d&apos;attendre une
               visite IA. Tu peux aussi tester en direct avec{" "}
-              <code className="type-tabular">?utm_source=chatgpt.com</code> à la fin d&apos;une de tes
-              URLs.
+              <code className="type-tabular">?utm_source=chatgpt.com</code> à la fin d&apos;une de
+              tes URLs.
             </p>
             <div className="mt-3">
               <button
@@ -305,9 +309,9 @@ function CheckFeedback({ check }: { check: CheckPixelResult }) {
   if (check.ok && check.status === "installed") {
     return (
       <Feedback tone="success" icon={CheckCircle2}>
-        Script détecté sur <span className="type-tabular">{check.url}</span>. L&apos;installation est
-        bonne — il ne reste qu&apos;à recevoir une visite venant d&apos;une IA pour les premières
-        données.
+        Script détecté sur <span className="type-tabular">{check.url}</span>. L&apos;installation
+        est bonne — il ne reste qu&apos;à recevoir une visite venant d&apos;une IA pour les
+        premières données.
       </Feedback>
     );
   }
@@ -339,12 +343,17 @@ function Feedback({
   children: React.ReactNode;
 }) {
   const styles = {
-    success: "border-[color:var(--color-success)]/25 bg-[color:var(--color-success-bg)] text-[color:var(--color-success)]",
-    warning: "border-[color:var(--color-warning)]/25 bg-[color:var(--color-warning-bg)] text-[color:var(--color-warning)]",
-    neutral: "border-[color:var(--color-border)] bg-[color:var(--color-gray-50)] text-[color:var(--color-ink-soft)]",
+    success:
+      "border-[color:var(--color-success)]/25 bg-[color:var(--color-success-bg)] text-[color:var(--color-success)]",
+    warning:
+      "border-[color:var(--color-warning)]/25 bg-[color:var(--color-warning-bg)] text-[color:var(--color-warning)]",
+    neutral:
+      "border-[color:var(--color-border)] bg-[color:var(--color-gray-50)] text-[color:var(--color-ink-soft)]",
   }[tone];
   return (
-    <div className={`mt-3 flex items-start gap-2 rounded-[var(--radius-md)] border px-3 py-2.5 ${styles}`}>
+    <div
+      className={`mt-3 flex items-start gap-2 rounded-[var(--radius-md)] border px-3 py-2.5 ${styles}`}
+    >
       <Icon size={15} strokeWidth={2.2} className="mt-0.5 shrink-0" />
       <p className="type-meta text-xs leading-relaxed">{children}</p>
     </div>

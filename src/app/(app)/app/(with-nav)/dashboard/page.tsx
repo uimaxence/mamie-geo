@@ -5,11 +5,7 @@ import { Activity, Eye, Flame, Home, Layers, PieChart, Quote, Users } from "luci
 import { db } from "@/db/client";
 import { prompts } from "@/db/schema";
 import { auth } from "@/lib/auth";
-import {
-  computeDelta,
-  getDashboardData,
-  getVisibilityTrend,
-} from "@/lib/dashboard/queries";
+import { computeDelta, getDashboardData, getVisibilityTrend } from "@/lib/dashboard/queries";
 import { Card, PageContainer, PageHeader, Stat } from "@/components/ui";
 import { BreakdownBars } from "@/components/charts/breakdown-bars";
 import { DownloadableChart } from "@/components/charts/downloadable-chart";
@@ -149,9 +145,7 @@ export default async function DashboardPage() {
             icon={Users}
             iconTone="purple"
             hint={
-              agg.topCompetitor
-                ? `${agg.topCompetitor.citationCount} mention(s)`
-                : "aucune mention"
+              agg.topCompetitor ? `${agg.topCompetitor.citationCount} mention(s)` : "aucune mention"
             }
           />
         </Card>
@@ -230,7 +224,6 @@ export default async function DashboardPage() {
           }}
         />
       </section>
-
     </PageContainer>
   );
 }

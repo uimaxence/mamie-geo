@@ -12,7 +12,15 @@ export interface WebSearchResult {
 /** Fonction de recherche web injectable (Brave en prod, fake en test). */
 export type SearchFn = (query: string, count?: number) => Promise<WebSearchResult[]>;
 
-export const SITE_TYPES = ["comparateur", "annuaire", "presse", "avis", "blog", "entreprise", "autre"] as const;
+export const SITE_TYPES = [
+  "comparateur",
+  "annuaire",
+  "presse",
+  "avis",
+  "blog",
+  "entreprise",
+  "autre",
+] as const;
 export type SiteType = (typeof SITE_TYPES)[number];
 
 export interface ComparatorCheck {

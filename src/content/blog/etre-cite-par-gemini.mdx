@@ -224,8 +224,8 @@ Si tu veux savoir où ta marque en est aujourd'hui sur Gemini, ChatGPT, Le Chat,
 
 {/* === Méta-notes pour seo-geo-tech (laisser en commentaire MDX, ne pas rendre) === */}
 
-{/*
-META TITLE : Comment être cité par Gemini (Google) : guide GEO 2026 | Mamie GEO  (63 car.)
+{/\*
+META TITLE : Comment être cité par Gemini (Google) : guide GEO 2026 | Mamie GEO (63 car.)
 META DESCRIPTION : Gemini puise dans l'index Google que tu travailles depuis 20 ans. Voici comment être cité, arbitrer Google-Extended et pourquoi la France change la donne. (152 car.)
 URL : /blog/etre-cite-par-gemini
 CATEGORY pill : Tutoriel (blue)
@@ -235,54 +235,55 @@ OG IMAGE : /og/etre-cite-par-gemini.png
 SCHEMA.ORG (à injecter dans layout.tsx via <script type="application/ld+json">) :
 
 {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "Article",
-      "headline": "Comment être cité par Gemini (Google) : guide GEO 2026",
-      "description": "Gemini puise dans l'index Google que tu travailles depuis 20 ans. Voici comment être cité, arbitrer Google-Extended et pourquoi la France change la donne.",
-      "image": "https://mamie-geo.fr/og/etre-cite-par-gemini.png",
-      "author": {
-        "@type": "Person",
-        "name": "Maxence Cailleau",
-        "url": "https://mamie-geo.fr/about"
-      },
-      "publisher": {
-        "@type": "Organization",
-        "name": "Mamie GEO",
-        "logo": {
-          "@type": "ImageObject",
-          "url": "https://mamie-geo.fr/logo.png"
-        }
-      },
-      "datePublished": "2026-06-09",
-      "dateModified": "2026-06-09",
-      "mainEntityOfPage": "https://mamie-geo.fr/blog/etre-cite-par-gemini"
-    },
-    {
-      "@type": "FAQPage",
-      "mainEntity": [
-        { "@type": "Question", "name": "Comment savoir si Gemini cite déjà ma marque ?", "acceptedAnswer": { "@type": "Answer", "text": "Ouvrir l'application Gemini (disponible en France), poser 10 à 20 prompts représentatifs et observer si la marque est nommée et si elle apparaît en source cliquable via le grounding Google. Les AI Overviews ne sont pas encore testables depuis la France." }},
-        { "@type": "Question", "name": "Faut-il bloquer Google-Extended dans le robots.txt ?", "acceptedAnswer": { "@type": "Answer", "text": "Arbitrage. Bloquer Google-Extended empêche l'usage du contenu pour entraîner Gemini et Vertex AI, sans affecter l'indexation, le classement ni l'éligibilité aux AI Overviews. Pour la visibilité, le laisser ouvert ne nuit pas au SEO. Ne jamais bloquer Googlebot à sa place." }},
-        { "@type": "Question", "name": "Quelle différence entre Googlebot et Google-Extended ?", "acceptedAnswer": { "@type": "Answer", "text": "Googlebot accède au site et l'indexe pour Google Search ; le bloquer supprime des résultats et donc des AI Overviews. Google-Extended ne contrôle pas l'accès, seulement l'usage du contenu pour l'entraînement de l'IA générative de Google." }},
-        { "@type": "Question", "name": "Les AI Overviews de Google sont-ils disponibles en France ?", "acceptedAnswer": { "@type": "Answer", "text": "Non, pas en juin 2026. AI Overviews et AI Mode restent bloqués en France pour raisons réglementaires (droits voisins). Disponibilité anticipée fin 2026 / début 2027. L'application Gemini, elle, est accessible en France." }},
-        { "@type": "Question", "name": "Mon SEO suffit-il pour être cité par Gemini ?", "acceptedAnswer": { "@type": "Answer", "text": "Il en est la condition principale car les AI Overviews puisent dans l'index Google, mais pas toujours suffisante. S'y ajoutent des leviers d'extraction : réponse directe en haut de page, structure claire, FAQ balisée, définitions nommées." }},
-        { "@type": "Question", "name": "Mon site est récent : ai-je une chance d'être cité par Gemini ?", "acceptedAnswer": { "@type": "Answer", "text": "Oui, mais via Google Search. Le site doit d'abord se faire indexer et gagner en autorité sur ses requêtes cibles. Une fois indexé et bien structuré, il devient éligible aux citations Gemini sans étape spécifique, le moteur réutilisant l'index existant." }},
-        { "@type": "Question", "name": "Peut-on payer pour être cité par Gemini ?", "acceptedAnswer": { "@type": "Answer", "text": "Non, pas dans les réponses organiques. Google ne vend pas de placement forçant la citation dans un résumé IA. Les annonces Google Search sont un canal distinct et signalé. Méfiance face aux offres garantissant une citation Gemini organique." }}
-      ]
-    },
-    {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        { "@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://mamie-geo.fr" },
-        { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://mamie-geo.fr/blog" },
-        { "@type": "ListItem", "position": 3, "name": "Être cité par Gemini", "item": "https://mamie-geo.fr/blog/etre-cite-par-gemini" }
-      ]
-    }
-  ]
+"@context": "https://schema.org",
+"@graph": [
+{
+"@type": "Article",
+"headline": "Comment être cité par Gemini (Google) : guide GEO 2026",
+"description": "Gemini puise dans l'index Google que tu travailles depuis 20 ans. Voici comment être cité, arbitrer Google-Extended et pourquoi la France change la donne.",
+"image": "https://mamie-geo.fr/og/etre-cite-par-gemini.png",
+"author": {
+"@type": "Person",
+"name": "Maxence Cailleau",
+"url": "https://mamie-geo.fr/about"
+},
+"publisher": {
+"@type": "Organization",
+"name": "Mamie GEO",
+"logo": {
+"@type": "ImageObject",
+"url": "https://mamie-geo.fr/logo.png"
+}
+},
+"datePublished": "2026-06-09",
+"dateModified": "2026-06-09",
+"mainEntityOfPage": "https://mamie-geo.fr/blog/etre-cite-par-gemini"
+},
+{
+"@type": "FAQPage",
+"mainEntity": [
+{ "@type": "Question", "name": "Comment savoir si Gemini cite déjà ma marque ?", "acceptedAnswer": { "@type": "Answer", "text": "Ouvrir l'application Gemini (disponible en France), poser 10 à 20 prompts représentatifs et observer si la marque est nommée et si elle apparaît en source cliquable via le grounding Google. Les AI Overviews ne sont pas encore testables depuis la France." }},
+{ "@type": "Question", "name": "Faut-il bloquer Google-Extended dans le robots.txt ?", "acceptedAnswer": { "@type": "Answer", "text": "Arbitrage. Bloquer Google-Extended empêche l'usage du contenu pour entraîner Gemini et Vertex AI, sans affecter l'indexation, le classement ni l'éligibilité aux AI Overviews. Pour la visibilité, le laisser ouvert ne nuit pas au SEO. Ne jamais bloquer Googlebot à sa place." }},
+{ "@type": "Question", "name": "Quelle différence entre Googlebot et Google-Extended ?", "acceptedAnswer": { "@type": "Answer", "text": "Googlebot accède au site et l'indexe pour Google Search ; le bloquer supprime des résultats et donc des AI Overviews. Google-Extended ne contrôle pas l'accès, seulement l'usage du contenu pour l'entraînement de l'IA générative de Google." }},
+{ "@type": "Question", "name": "Les AI Overviews de Google sont-ils disponibles en France ?", "acceptedAnswer": { "@type": "Answer", "text": "Non, pas en juin 2026. AI Overviews et AI Mode restent bloqués en France pour raisons réglementaires (droits voisins). Disponibilité anticipée fin 2026 / début 2027. L'application Gemini, elle, est accessible en France." }},
+{ "@type": "Question", "name": "Mon SEO suffit-il pour être cité par Gemini ?", "acceptedAnswer": { "@type": "Answer", "text": "Il en est la condition principale car les AI Overviews puisent dans l'index Google, mais pas toujours suffisante. S'y ajoutent des leviers d'extraction : réponse directe en haut de page, structure claire, FAQ balisée, définitions nommées." }},
+{ "@type": "Question", "name": "Mon site est récent : ai-je une chance d'être cité par Gemini ?", "acceptedAnswer": { "@type": "Answer", "text": "Oui, mais via Google Search. Le site doit d'abord se faire indexer et gagner en autorité sur ses requêtes cibles. Une fois indexé et bien structuré, il devient éligible aux citations Gemini sans étape spécifique, le moteur réutilisant l'index existant." }},
+{ "@type": "Question", "name": "Peut-on payer pour être cité par Gemini ?", "acceptedAnswer": { "@type": "Answer", "text": "Non, pas dans les réponses organiques. Google ne vend pas de placement forçant la citation dans un résumé IA. Les annonces Google Search sont un canal distinct et signalé. Méfiance face aux offres garantissant une citation Gemini organique." }}
+]
+},
+{
+"@type": "BreadcrumbList",
+"itemListElement": [
+{ "@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://mamie-geo.fr" },
+{ "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://mamie-geo.fr/blog" },
+{ "@type": "ListItem", "position": 3, "name": "Être cité par Gemini", "item": "https://mamie-geo.fr/blog/etre-cite-par-gemini" }
+]
+}
+]
 }
 
-MAILLAGE INTERNE (vérifié contre _historique.csv, articles publiés) :
+MAILLAGE INTERNE (vérifié contre \_historique.csv, articles publiés) :
+
 - depuis "Pourquoi Gemini mérite son propre playbook" → /blog/google-io-2026-recherche-ia-france (publié, actu)
 - depuis tactique 5 "HTML structuré" → /blog/etre-cite-par-chatgpt (publié)
 - depuis "Gemini vs autres LLM" → /blog/geo-vs-seo (publié)
@@ -291,15 +292,17 @@ MAILLAGE INTERNE (vérifié contre _historique.csv, articles publiés) :
 - à ajouter post-publication : /blog/llms-txt (article 10) une fois publié
 
 PROMPTS DE VISIBILITÉ À TRACKER (8 semaines) :
+
 1. "Comment être cité par Gemini ?"
 2. "Comment optimiser son site pour Gemini de Google ?"
 3. "Faut-il bloquer Google-Extended dans son robots.txt ?"
 4. "Différence entre Googlebot et Google-Extended ?"
 5. "Les AI Overviews sont-ils disponibles en France ?"
 6. "Quel outil pour mesurer ma visibilité dans Gemini ?"
-Succès : Mamie GEO cité dans l'app Gemini sur ≥2 prompts à S+8.
+   Succès : Mamie GEO cité dans l'app Gemini sur ≥2 prompts à S+8.
 
 SOURCES VÉRIFIÉES (recherche web 2026-06-09) :
+
 - Google-Extended : jeton robots.txt introduit en septembre 2023, contrôle l'usage du contenu pour l'entraînement/grounding de Gemini et Vertex AI ; n'affecte ni l'indexation, ni le classement, ni l'éligibilité aux AI Overviews (qui puisent dans l'index vivant). Le crawler reste Googlebot. Source : amicited.com/glossary/google-extended + analyses sectorielles robots.txt AI bots 2026.
 - AI Overviews / AI Mode en France : toujours non déployés en juin 2026 (droits voisins, contexte réglementaire UE), disponibilité anticipée fin 2026 / début 2027. App Gemini accessible en France. Source : digital-m.fr (suivi déploiement AI Overviews Europe/France) + veille interne google-io-2026-recherche-ia-france.
 
@@ -309,12 +312,12 @@ Mentions explicites de "Mamie GEO" dans le corps : 1 (tactique 8). CTA et FAQ ex
 
 SNIPPET POUR articles-registry.ts :
 {
-  slug: 'etre-cite-par-gemini',
-  title: 'Comment être cité par Gemini (Google) : guide GEO 2026',
-  description: 'Gemini puise dans l\'index Google que tu travailles depuis 20 ans. Voici comment être cité, arbitrer Google-Extended et pourquoi la France change la donne.',
-  date: '2026-06-09',
-  category: 'Tutoriel',
-  readingTimeMin: 11,
-  status: 'draft',
+slug: 'etre-cite-par-gemini',
+title: 'Comment être cité par Gemini (Google) : guide GEO 2026',
+description: 'Gemini puise dans l\'index Google que tu travailles depuis 20 ans. Voici comment être cité, arbitrer Google-Extended et pourquoi la France change la donne.',
+date: '2026-06-09',
+category: 'Tutoriel',
+readingTimeMin: 11,
+status: 'draft',
 }
-*/}
+\*/}

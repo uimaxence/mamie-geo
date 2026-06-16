@@ -69,8 +69,7 @@ export function SourcesSlide({ index, total }: Props) {
             lineHeight: 1.35,
           }}
         >
-          Qui les IA citent-elles vraiment quand elles recommandent une
-          marque&nbsp;?
+          Qui les IA citent-elles vraiment quand elles recommandent une marque&nbsp;?
         </p>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 28, marginTop: 48 }}>
@@ -139,8 +138,8 @@ export function SourcesSlide({ index, total }: Props) {
             maxWidth: 880,
           }}
         >
-          Votre SEO on-site ne suffit plus. La visibilité IA se gagne chez
-          les comparateurs et la presse de votre secteur.
+          Votre SEO on-site ne suffit plus. La visibilité IA se gagne chez les comparateurs et la
+          presse de votre secteur.
         </p>
       </div>
     </SlideShell>

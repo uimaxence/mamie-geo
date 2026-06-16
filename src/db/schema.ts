@@ -224,10 +224,7 @@ export const prompts = pgTable(
   },
   (t) => [
     index("idx_prompts_brand_active").on(t.brandId),
-    check(
-      "prompt_cadence_check",
-      sql`${t.cadence} IN ('inherit','daily','weekly','monthly')`,
-    ),
+    check("prompt_cadence_check", sql`${t.cadence} IN ('inherit','daily','weekly','monthly')`),
   ],
 );
 

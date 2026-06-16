@@ -10,9 +10,7 @@ import { LLMError } from "./types";
 // le SDK @google/genai n'expose pas d'injection fetch propre comme
 // Anthropic/OpenAI, donc on teste séparément la couche de transformation.
 
-const FIXTURES_DIR = fileURLToPath(
-  new URL("../../../tests/fixtures/llm/gemini/", import.meta.url),
-);
+const FIXTURES_DIR = fileURLToPath(new URL("../../../tests/fixtures/llm/gemini/", import.meta.url));
 
 async function loadCassette(name: string): Promise<GenerateContentResponse> {
   const raw = await readFile(`${FIXTURES_DIR}${name}.json`, "utf-8");

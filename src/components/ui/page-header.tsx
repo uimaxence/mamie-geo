@@ -43,10 +43,7 @@ export function PageHeader({ icon: Icon, title, summary, right, className }: Pag
           </h1>
           {summary && (
             <>
-              <span
-                aria-hidden
-                className="text-[color:var(--color-faint)] text-base leading-none"
-              >
+              <span aria-hidden className="text-[color:var(--color-faint)] text-base leading-none">
                 ·
               </span>
               <p className="text-[0.9375rem] leading-snug text-[color:var(--color-muted)]">

@@ -6,39 +6,28 @@
       "id": "M01",
       "nom": "BNP Paribas",
       "secteur": "Banque",
-      "aliases": [
-        "BNP"
-      ],
+      "aliases": ["BNP"],
       "domaine": "bnpparibas.fr"
     },
     {
       "id": "M02",
       "nom": "Crédit Agricole",
       "secteur": "Banque",
-      "aliases": [
-        "CA"
-      ],
+      "aliases": ["CA"],
       "domaine": "credit-agricole.fr"
     },
     {
       "id": "M03",
       "nom": "Société Générale",
       "secteur": "Banque",
-      "aliases": [
-        "SG",
-        "SocGen"
-      ],
+      "aliases": ["SG", "SocGen"],
       "domaine": "societegenerale.fr"
     },
     {
       "id": "M04",
       "nom": "BoursoBank",
       "secteur": "Banque",
-      "aliases": [
-        "Boursorama",
-        "Boursorama Banque",
-        "Bourso"
-      ],
+      "aliases": ["Boursorama", "Boursorama Banque", "Bourso"],
       "domaine": "boursobank.com"
     },
     {
@@ -52,28 +41,21 @@
       "id": "M06",
       "nom": "Hello bank!",
       "secteur": "Banque",
-      "aliases": [
-        "Hello Bank",
-        "Hello bank"
-      ],
+      "aliases": ["Hello Bank", "Hello bank"],
       "domaine": "hellobank.fr"
     },
     {
       "id": "M07",
       "nom": "La Banque Postale",
       "secteur": "Banque",
-      "aliases": [
-        "Banque Postale"
-      ],
+      "aliases": ["Banque Postale"],
       "domaine": "labanquepostale.fr"
     },
     {
       "id": "M08",
       "nom": "Crédit Mutuel",
       "secteur": "Banque",
-      "aliases": [
-        "CM"
-      ],
+      "aliases": ["CM"],
       "domaine": "creditmutuel.fr"
     },
     {
@@ -143,9 +125,7 @@
       "id": "M18",
       "nom": "Direct Assurance",
       "secteur": "Assurance",
-      "aliases": [
-        "Direct Assur"
-      ],
+      "aliases": ["Direct Assur"],
       "domaine": "direct-assurance.fr"
     },
     {
@@ -159,9 +139,7 @@
       "id": "M20",
       "nom": "Leocare",
       "secteur": "Assurance",
-      "aliases": [
-        "Le ocare"
-      ],
+      "aliases": ["Le ocare"],
       "domaine": "leocare.eu"
     },
     {
@@ -175,10 +153,7 @@
       "id": "M22",
       "nom": "Free",
       "secteur": "Telecom & énergie",
-      "aliases": [
-        "Free Mobile",
-        "Freebox"
-      ],
+      "aliases": ["Free Mobile", "Freebox"],
       "domaine": "free.fr"
     },
     {
@@ -192,9 +167,7 @@
       "id": "M24",
       "nom": "Bouygues Telecom",
       "secteur": "Telecom & énergie",
-      "aliases": [
-        "Bouygues"
-      ],
+      "aliases": ["Bouygues"],
       "domaine": "bouyguestelecom.fr"
     },
     {
@@ -208,9 +181,7 @@
       "id": "M26",
       "nom": "RED by SFR",
       "secteur": "Telecom & énergie",
-      "aliases": [
-        "RED"
-      ],
+      "aliases": ["RED"],
       "domaine": "red-by-sfr.fr"
     },
     {
@@ -231,29 +202,21 @@
       "id": "M29",
       "nom": "TotalEnergies",
       "secteur": "Telecom & énergie",
-      "aliases": [
-        "Total Energies",
-        "Total Énergies"
-      ],
+      "aliases": ["Total Energies", "Total Énergies"],
       "domaine": "totalenergies.fr"
     },
     {
       "id": "M30",
       "nom": "Mint Énergie",
       "secteur": "Telecom & énergie",
-      "aliases": [
-        "Mint Energie",
-        "Mint"
-      ],
+      "aliases": ["Mint Energie", "Mint"],
       "domaine": "mint-energie.com"
     },
     {
       "id": "M31",
       "nom": "E.Leclerc",
       "secteur": "Retail & e-commerce",
-      "aliases": [
-        "Leclerc"
-      ],
+      "aliases": ["Leclerc"],
       "domaine": "e.leclerc"
     },
     {
@@ -288,9 +251,7 @@
       "id": "M36",
       "nom": "Leroy Merlin",
       "secteur": "Retail & e-commerce",
-      "aliases": [
-        "LeroyMerlin"
-      ],
+      "aliases": ["LeroyMerlin"],
       "domaine": "leroymerlin.fr"
     },
     {
@@ -311,18 +272,14 @@
       "id": "M39",
       "nom": "Back Market",
       "secteur": "Retail & e-commerce",
-      "aliases": [
-        "Backmarket"
-      ],
+      "aliases": ["Backmarket"],
       "domaine": "backmarket.fr"
     },
     {
       "id": "M40",
       "nom": "ManoMano",
       "secteur": "Retail & e-commerce",
-      "aliases": [
-        "Mano Mano"
-      ],
+      "aliases": ["Mano Mano"],
       "domaine": "manomano.fr"
     },
     {
@@ -336,20 +293,14 @@
       "id": "M42",
       "nom": "BlaBlaCar",
       "secteur": "Tech & services FR",
-      "aliases": [
-        "Blablacar",
-        "Bla Bla Car"
-      ],
+      "aliases": ["Blablacar", "Bla Bla Car"],
       "domaine": "blablacar.fr"
     },
     {
       "id": "M43",
       "nom": "Leboncoin",
       "secteur": "Tech & services FR",
-      "aliases": [
-        "Le Bon Coin",
-        "Le boncoin"
-      ],
+      "aliases": ["Le Bon Coin", "Le boncoin"],
       "domaine": "leboncoin.fr"
     },
     {
@@ -363,18 +314,14 @@
       "id": "M45",
       "nom": "OVHcloud",
       "secteur": "Tech & services FR",
-      "aliases": [
-        "OVH"
-      ],
+      "aliases": ["OVH"],
       "domaine": "ovhcloud.com"
     },
     {
       "id": "M46",
       "nom": "PayFit",
       "secteur": "Tech & services FR",
-      "aliases": [
-        "Payfit"
-      ],
+      "aliases": ["Payfit"],
       "domaine": "payfit.com"
     },
     {
@@ -395,19 +342,14 @@
       "id": "M49",
       "nom": "Sumeria",
       "secteur": "Tech & services FR",
-      "aliases": [
-        "Lydia"
-      ],
+      "aliases": ["Lydia"],
       "domaine": "sumeria.fr"
     },
     {
       "id": "M50",
       "nom": "Mistral AI",
       "secteur": "Tech & services FR",
-      "aliases": [
-        "Mistral",
-        "Le Chat"
-      ],
+      "aliases": ["Mistral", "Le Chat"],
       "domaine": "mistral.ai"
     }
   ]

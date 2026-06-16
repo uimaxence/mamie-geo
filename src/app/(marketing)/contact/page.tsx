@@ -32,14 +32,15 @@ export default function ContactPage() {
             <p className="text-sm font-semibold text-[color:var(--color-ink)]">
               Maxence Cailleau
               <span className="font-normal text-[color:var(--color-ink-soft)]">
-                {" "}— fondateur de Mamie GEO
+                {" "}
+                — fondateur de Mamie GEO
               </span>
             </p>
           </div>
           <p className="type-body-lg mt-6">
             30 minutes ensemble : on regarde où en est ta marque dans les IA et dans Google, et si
-            l&apos;accompagnement a du sens pour toi. Pas de pitch commercial — si un de nos
-            outils gratuits suffit, je te le dirai.
+            l&apos;accompagnement a du sens pour toi. Pas de pitch commercial — si un de nos outils
+            gratuits suffit, je te le dirai.
           </p>
         </div>
 

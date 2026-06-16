@@ -255,9 +255,8 @@ export async function handleSubscriptionUpdated(
   const isStillTrialing = subscription.status === "trialing";
   const planToSet = isStillTrialing ? "trialing" : plan;
   const trialJustEnded = ws.plan === "trialing" && subscription.status === "active";
-  const trialEndsAt = isStillTrialing && subscription.trial_end
-    ? new Date(subscription.trial_end * 1000)
-    : null;
+  const trialEndsAt =
+    isStillTrialing && subscription.trial_end ? new Date(subscription.trial_end * 1000) : null;
 
   await db
     .update(workspaces)

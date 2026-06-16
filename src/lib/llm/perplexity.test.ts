@@ -83,9 +83,9 @@ describe("createPerplexityClient", () => {
   });
 
   it("rejette un modèle sans tarif", () => {
-    expect(() =>
-      createPerplexityClient({ apiKey: "test-key", model: "sonar-fictif" }),
-    ).toThrow(/Tarif inconnu/);
+    expect(() => createPerplexityClient({ apiKey: "test-key", model: "sonar-fictif" })).toThrow(
+      /Tarif inconnu/,
+    );
   });
 
   it("mappe HTTP 401 vers code 'auth'", async () => {

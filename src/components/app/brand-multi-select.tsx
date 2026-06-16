@@ -96,9 +96,7 @@ export function BrandMultiSelect({ brands, paramName = "brands" }: BrandMultiSel
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger
-        className="inline-flex items-center gap-2 rounded-[var(--radius-pill)] border border-[color:var(--color-border)] bg-white px-3 py-1.5 text-sm font-medium text-[color:var(--color-ink)] transition hover:bg-[color:var(--color-gray-50)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-ink)]"
-      >
+      <DropdownMenuTrigger className="inline-flex items-center gap-2 rounded-[var(--radius-pill)] border border-[color:var(--color-border)] bg-white px-3 py-1.5 text-sm font-medium text-[color:var(--color-ink)] transition hover:bg-[color:var(--color-gray-50)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-ink)]">
         <Layers size={14} strokeWidth={2} className="text-[color:var(--color-muted)]" />
         {triggerLabel}
         <ChevronDown size={14} strokeWidth={2} className="text-[color:var(--color-muted)]" />

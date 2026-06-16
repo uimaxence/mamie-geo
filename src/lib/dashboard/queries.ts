@@ -417,7 +417,14 @@ export async function getAiTrafficData(
   days = 30,
 ): Promise<AiTrafficData> {
   if (!aiPixelKey) {
-    return { hasPixel: false, totalVisits: 0, deltaPct: null, topSource: null, bySource: [], proof: [] };
+    return {
+      hasPixel: false,
+      totalVisits: 0,
+      deltaPct: null,
+      topSource: null,
+      bySource: [],
+      proof: [],
+    };
   }
 
   const end = new Date();

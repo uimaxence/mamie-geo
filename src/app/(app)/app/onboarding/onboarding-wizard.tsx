@@ -563,14 +563,13 @@ function AnalysisPanel({
       </div>
 
       <ul className="mt-4 flex flex-col gap-2.5">
-        <ChecklistRow status={step1} label="Lecture de ta page d'accueil et de tes pages internes" />
+        <ChecklistRow
+          status={step1}
+          label="Lecture de ta page d'accueil et de tes pages internes"
+        />
         <ChecklistRow
           status={step2}
-          label={
-            sector
-              ? `Activité détectée : ${sector}`
-              : "Compréhension de ton activité"
-          }
+          label={sector ? `Activité détectée : ${sector}` : "Compréhension de ton activité"}
         />
         <ChecklistRow status={step3} label="Génération de prompts pertinents pour ton secteur" />
       </ul>
@@ -580,13 +579,13 @@ function AnalysisPanel({
         <div className="mt-4 rounded-[var(--radius-md)] bg-[color:var(--color-gray-50)] px-4 py-3 text-sm">
           {proposition && (
             <p className="text-[color:var(--color-ink-soft)]">
-              <span className="font-medium text-[color:var(--color-ink)]">Ce qu&apos;on a compris :</span>{" "}
+              <span className="font-medium text-[color:var(--color-ink)]">
+                Ce qu&apos;on a compris :
+              </span>{" "}
               {proposition}
             </p>
           )}
-          {zone && (
-            <p className="mt-1 text-[color:var(--color-muted)]">Zone : {zone}</p>
-          )}
+          {zone && <p className="mt-1 text-[color:var(--color-muted)]">Zone : {zone}</p>}
         </div>
       )}
 

@@ -66,8 +66,7 @@ export function CtaSlide({ index, total }: Props) {
             lineHeight: 1.4,
           }}
         >
-          Gratuit, sans CB, et tu vois direct si ChatGPT, Claude ou Perplexity
-          parlent de toi.
+          Gratuit, sans CB, et tu vois direct si ChatGPT, Claude ou Perplexity parlent de toi.
         </p>
 
         {/* Sticker manuscrit Caveat — clin d'œil mamie, max 1 par slide */}
@@ -164,7 +163,11 @@ export function CtaSlide({ index, total }: Props) {
               borderTop: "1px solid rgba(251, 244, 233, 0.22)",
             }}
           >
-            <CtaPerk title="5" subtitle="IA testées" detail="ChatGPT · Claude · Perplexity · Gemini · Le Chat" />
+            <CtaPerk
+              title="5"
+              subtitle="IA testées"
+              detail="ChatGPT · Claude · Perplexity · Gemini · Le Chat"
+            />
             <CtaPerk title="60s" subtitle="Express" detail="Rapport dans ta boîte" />
             <CtaPerk title="0 €" subtitle="Sans CB" detail="Garantie 14 j si client" />
           </div>

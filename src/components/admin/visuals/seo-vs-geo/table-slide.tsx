@@ -52,11 +52,8 @@ export function TableSlide({ index, total }: Props) {
             maxWidth: 760,
           }}
         >
-          SEO et{" "}
-          <span style={{ color: COLORS.brandBlue }}>GEO</span>{" "}
-          <span style={{ fontStyle: "italic", fontWeight: 700 }}>
-            ne se font pas la guerre.
-          </span>
+          SEO et <span style={{ color: COLORS.brandBlue }}>GEO</span>{" "}
+          <span style={{ fontStyle: "italic", fontWeight: 700 }}>ne se font pas la guerre.</span>
         </h1>
 
         <p

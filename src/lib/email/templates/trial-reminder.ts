@@ -29,9 +29,7 @@ export function renderTrialReminder(data: TrialReminderData): RenderedEmail {
     ? "Demain, ton abonnement Mamie GEO démarre"
     : "Plus que 4 jours d'essai sur Mamie GEO";
 
-  const headline = isFinal
-    ? "Demain, ton abonnement démarre"
-    : "Plus que 4 jours pour décider";
+  const headline = isFinal ? "Demain, ton abonnement démarre" : "Plus que 4 jours pour décider";
 
   const body = isFinal
     ? `Demain (${formatDate(data.trialEndsOn)}), ton abonnement Mamie GEO ${escapeHtml(data.plan)} démarre automatiquement. Tu peux toujours annuler en 1 clic depuis ton compte (sans frais).`

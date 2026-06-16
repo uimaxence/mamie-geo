@@ -63,32 +63,28 @@ export function SidebarSubscribeCard({ plan, trialEndsAt }: Props) {
     { gradient: string; iconBg: string; title: string; subtitle: string; cta: string }
   > = {
     default: {
-      gradient:
-        "from-[color:var(--color-accent)]/12 to-[color:var(--color-accent)]/4",
+      gradient: "from-[color:var(--color-accent)]/12 to-[color:var(--color-accent)]/4",
       iconBg: "bg-[color:var(--color-accent)]",
       title: "Débloque toutes les features",
       subtitle: "5 IA · tracking quotidien · scoring",
       cta: "S'abonner",
     },
     trial: {
-      gradient:
-        "from-[color:var(--color-accent)]/12 to-[color:var(--color-accent)]/4",
+      gradient: "from-[color:var(--color-accent)]/12 to-[color:var(--color-accent)]/4",
       iconBg: "bg-[color:var(--color-accent)]",
       title: `Plus que ${daysLeft} j d'essai`,
       subtitle: "Choisis ton plan définitif",
       cta: "Voir mon plan",
     },
     urgent: {
-      gradient:
-        "from-[color:var(--color-warning-bg)] to-[color:var(--color-warning-bg)]/40",
+      gradient: "from-[color:var(--color-warning-bg)] to-[color:var(--color-warning-bg)]/40",
       iconBg: "bg-[color:var(--color-warning)]",
       title: `Plus que ${daysLeft} j d'essai`,
       subtitle: "Active ton abonnement maintenant",
       cta: "Voir mon plan",
     },
     expired: {
-      gradient:
-        "from-[color:var(--color-error-bg)] to-[color:var(--color-error-bg)]/40",
+      gradient: "from-[color:var(--color-error-bg)] to-[color:var(--color-error-bg)]/40",
       iconBg: "bg-[color:var(--color-error)]",
       title: "Tracking suspendu",
       subtitle: "Réactive ton plan en 1 clic",
@@ -114,9 +110,7 @@ export function SidebarSubscribeCard({ plan, trialEndsAt }: Props) {
             <p className="truncate text-xs font-semibold text-[color:var(--color-ink)]">
               {v.title}
             </p>
-            <p className="truncate text-[11px] text-[color:var(--color-ink-soft)]">
-              {v.subtitle}
-            </p>
+            <p className="truncate text-[11px] text-[color:var(--color-ink-soft)]">{v.subtitle}</p>
           </div>
         </div>
         <button

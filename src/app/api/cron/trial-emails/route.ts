@@ -81,12 +81,7 @@ async function handle(request: NextRequest): Promise<NextResponse> {
     const already = await db
       .select({ n: count() })
       .from(events)
-      .where(
-        and(
-          eq(events.workspaceId, ws.id),
-          eq(events.kind, "trial_email_sent"),
-        ),
-      );
+      .where(and(eq(events.workspaceId, ws.id), eq(events.kind, "trial_email_sent")));
     // Le n compte tous les "trial_email_sent" du workspace toutes variantes.
     // Pour distinguer par variant on raffine la check via une 2e query
     // ciblée sur le payload — on garde simple : check existence par variant.

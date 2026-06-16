@@ -70,8 +70,16 @@ const COMPARISON: Group[] = [
       { feature: "Plan d'entrée", profound: "500 $/mois", mamieGeo: "9,99 €/mois" },
       { feature: "Plan Pro / standard", profound: "~1 200 $/mois", mamieGeo: "149 €/mois" },
       { feature: "Plan Enterprise", profound: "Jusqu'à 2 000 $/mois", mamieGeo: "Sur devis" },
-      { feature: "Essai gratuit ou garantie", profound: "Démo commerciale obligatoire", mamieGeo: "Garantie remboursement 14j" },
-      { feature: "Outil gratuit sans inscription", profound: false, mamieGeo: "Audit technique 30+ checks" },
+      {
+        feature: "Essai gratuit ou garantie",
+        profound: "Démo commerciale obligatoire",
+        mamieGeo: "Garantie remboursement 14j",
+      },
+      {
+        feature: "Outil gratuit sans inscription",
+        profound: false,
+        mamieGeo: "Audit technique 30+ checks",
+      },
     ],
   },
   {
@@ -90,7 +98,11 @@ const COMPARISON: Group[] = [
     rows: [
       { feature: "Hébergement", profound: "AWS US", mamieGeo: "Vercel EU + Neon Frankfurt" },
       { feature: "RGPD natif", profound: "Via SCC", mamieGeo: true },
-      { feature: "DPA disponible", profound: "Négociation Enterprise", mamieGeo: "Sur demande, tous plans" },
+      {
+        feature: "DPA disponible",
+        profound: "Négociation Enterprise",
+        mamieGeo: "Sur demande, tous plans",
+      },
       { feature: "SOC 2 Type II", profound: true, mamieGeo: false },
     ],
   },
@@ -264,8 +276,8 @@ export default function VsProfoundPage() {
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="type-h1">Prêt à voir ce que les IA disent de toi ?</h2>
           <p className="type-body mt-4">
-            Commence avec le plan Solo à 9,99&nbsp;€/mois. Garantie remboursement 14 jours, annulable
-            en 1 clic.
+            Commence avec le plan Solo à 9,99&nbsp;€/mois. Garantie remboursement 14 jours,
+            annulable en 1 clic.
           </p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
             <LinkButton href="/pricing" variant="primary" size="lg">
@@ -348,14 +360,15 @@ function ChoiceCard({
       <h3 className="type-h3">{title}</h3>
       <ul className="mt-5 flex flex-col gap-2.5">
         {points.map((p) => (
-          <li key={p} className="flex items-start gap-2.5 text-sm text-[color:var(--color-ink-soft)]">
+          <li
+            key={p}
+            className="flex items-start gap-2.5 text-sm text-[color:var(--color-ink-soft)]"
+          >
             <Check
               size={16}
               strokeWidth={2.2}
               className={`mt-0.5 shrink-0 ${
-                highlighted
-                  ? "text-[color:var(--color-accent)]"
-                  : "text-[color:var(--color-ink)]"
+                highlighted ? "text-[color:var(--color-accent)]" : "text-[color:var(--color-ink)]"
               }`}
             />
             <span>{p}</span>
@@ -370,10 +383,7 @@ function ComparisonGroup({ group }: { group: Group }) {
   return (
     <>
       <tr>
-        <td
-          colSpan={3}
-          className="type-eyebrow pt-8 pb-3 text-[color:var(--color-ink)]"
-        >
+        <td colSpan={3} className="type-eyebrow pt-8 pb-3 text-[color:var(--color-ink)]">
           {group.title}
         </td>
       </tr>

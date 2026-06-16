@@ -256,12 +256,14 @@ function buildPrompt(ctx: SiteContext): string {
     ctx.ogSiteName && `Nom du site (og:site_name) : ${ctx.ogSiteName}`,
     ctx.title && `Title : ${ctx.title}`,
     ctx.metaDescription && `Meta description : ${ctx.metaDescription}`,
-    ctx.headings.length > 0 && `Titres de la page :\n${ctx.headings.map((h) => `- ${h}`).join("\n")}`,
+    ctx.headings.length > 0 &&
+      `Titres de la page :\n${ctx.headings.map((h) => `- ${h}`).join("\n")}`,
     ctx.navLinks.length > 0 &&
       `Navigation du site (gamme de produits/services) : ${ctx.navLinks.join(" · ")}`,
     ctx.bodyExcerpt && `Texte de la page : ${ctx.bodyExcerpt}`,
     ctx.embeddedText && `Texte de la page (application JavaScript) : ${ctx.embeddedText}`,
-    ctx.extraPagesText && `Texte de pages internes (à propos / produits / services) : ${ctx.extraPagesText}`,
+    ctx.extraPagesText &&
+      `Texte de pages internes (à propos / produits / services) : ${ctx.extraPagesText}`,
     ctx.footerExcerpt && `Footer : ${ctx.footerExcerpt}`,
     ctx.localityHint && `Localité détectée dans l'adresse : ${ctx.localityHint}`,
   ].filter(Boolean);
@@ -392,7 +394,10 @@ export async function detectSiteProfile(
   options: DetectSiteProfileOptions,
 ): Promise<SiteProfile | null> {
   const fetchImpl = options.fetch ?? fetch;
-  const html = await fetchPageHtml(`https://${options.domain}${options.pagePath || "/"}`, fetchImpl);
+  const html = await fetchPageHtml(
+    `https://${options.domain}${options.pagePath || "/"}`,
+    fetchImpl,
+  );
   if (!html) return null;
   const ctx = extractSiteContext(options.domain, html);
 
@@ -400,7 +405,12 @@ export async function detectSiteProfile(
   // avant l'appel LLM (la home seule est souvent un slogan).
   if (options.extraPages && options.extraPages > 0) {
     const $home = cheerio.load(html);
-    ctx.extraPagesText = await crawlExtraPages($home, options.domain, options.extraPages, fetchImpl);
+    ctx.extraPagesText = await crawlExtraPages(
+      $home,
+      options.domain,
+      options.extraPages,
+      fetchImpl,
+    );
   }
 
   try {

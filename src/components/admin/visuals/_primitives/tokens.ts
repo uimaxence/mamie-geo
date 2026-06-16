@@ -45,8 +45,7 @@ export const COLORS = {
 // composants slide via `var(--font-fraunces)`.
 export const FONTS = {
   fraunces: "var(--font-fraunces), Georgia, serif",
-  hanken:
-    "var(--font-hanken), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+  hanken: "var(--font-hanken), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
   caveat: "var(--font-caveat), 'Brush Script MT', cursive",
 } as const;
 

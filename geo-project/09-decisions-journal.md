@@ -161,6 +161,62 @@ haut et l'entrée "2026-05-05 — Réponses aux 10 questions de bootstrap".
 
 ### Décisions enregistrées
 
+#### 2026-06-16 — Essai gratuit 14 j par défaut sur Solo, SANS carte (revient sur « carte requise » du 2026-06-08)
+
+**Contexte** : test « comme un prospect ». Le compte créé est en `plan=trialing`
+avec quotas **0/0** → impossible d'ajouter le moindre prompt (« j'ai voulu
+ajouter les 5 suggérés, ça n'a pas fonctionné »). Pire : en fermant le
+PlanPicker, une modale annonce « essai 14 jours activé »… alors qu'aucun essai
+réel n'existe (0 quota, pas de `trialEndsAt`, pas d'expiration). Incohérence
+totale entre le discours et le produit. Le `trialing` 0/0 était un reliquat de
+l'ancien modèle « trial 7 j sans carte » (pivot 2026-05-14), jamais nettoyé
+quand on est passé au « trial 14 j avec carte » (2026-06-08).
+
+**Constat aggravant** : même les utilisateurs en essai Stripe AVEC carte
+restent `plan=trialing` pendant les 14 j (le webhook garde « trialing » jusqu'à
+conversion) → eux aussi étaient à 0 quota pendant tout leur essai. L'essai ne
+délivrait donc AUCUNE valeur, dans les deux cas.
+
+**Options considérées** :
+- A : garder le gating (0 prompt) + juste mieux expliquer « choisis un plan ».
+- B : **essai gratuit 14 j par défaut, calé sur le plan Solo, sans carte** —
+  le compte est utilisable immédiatement, la carte n'est demandée que pour
+  continuer après l'essai.
+
+**Choix** : B (décision Max).
+- `trialing` prend les **quotas Solo** (5 prompts, 3 concurrents, 5 audits,
+  cadence weekly, trafic IA) — `quotasFor("trialing")`.
+- Nouveau concept **`SCHEDULABLE_PLANS`** = `ACTIVE_PLANS` + `trialing` : les
+  schedulers (runs + audits) tournent pour les essais. `ACTIVE_PLANS` reste
+  **inchangé** (facturation) — `trialing` n'a pas d'abonnement Stripe, donc pas
+  de carte « Gérer mon abonnement » / portail. La séparation évite d'envoyer un
+  essai sans carte vers le portail Stripe.
+- `trialEndsAt = now + 14 j` posé à l'onboarding (`submitOnboarding` +
+  `quickSetup`).
+- **Expiration** : le cron `expire-past-due` (03:00) passe en `expired` les
+  `trialing` **sans `stripeSubscriptionId`** dont `trialEndsAt` est dépassé.
+  Les essais Stripe (avec carte) restent pilotés par les webhooks — non touchés.
+- `trialing` a désormais un **hard-cap** (essai = Solo → 100 runs/mois
+  théoriques → backstop 200 %), aligné sur le reste.
+- Effet de bord assumé : `deriveVariant` rend `null` pour un `trialing` à
+  `trialEndsAt` lointain → **le PlanPicker ne s'auto-ouvre plus juste après
+  l'onboarding** (réapparaît en « urgent » à J-2). On laisse l'utilisateur
+  profiter de son essai ; la `TrialExplainerModal` reste branchée sur la
+  fermeture manuelle du picker.
+
+**Justification** : un essai inutilisable ne convertit pas. Le coût LLM d'un
+essai Solo (~1-2 $ sur 14 j, hard-cap en garde-fou) est négligeable vs un
+signup perdu. Modèle SaaS standard : on essaie, puis on paie pour continuer.
+
+**Conséquences attendues** : l'app est utilisable dès le signup, le message
+« essai gratuit » devient vrai, meilleure activation. Risque : abus (multi-
+comptes) borné par le hard-cap et l'expiration à 14 j.
+
+**À revisiter** : 2026-07-15 — (1) backfill `trialEndsAt` des `trialing`
+existants en prod (créés avant ce changement, `trialEndsAt` null → n'expirent
+jamais) ; (2) mesurer conversion essai→payant ; (3) décider si on redemande la
+carte plus tôt si l'abus apparaît. Met à jour le doc 04 (modèle d'essai).
+
 #### 2026-06-16 — Activation : scraping du site à l'onboarding + guides in-app + clarté de l'essai
 
 **Contexte** : test « comme un prospect » sur la base de prod migrée. Trois

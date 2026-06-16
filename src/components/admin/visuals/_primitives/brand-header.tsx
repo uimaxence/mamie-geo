@@ -19,10 +19,7 @@ interface BrandHeaderProps {
   textColor?: string;
 }
 
-export function BrandHeader({
-  tint = COLORS.brandBlue,
-  textColor = COLORS.ink,
-}: BrandHeaderProps) {
+export function BrandHeader({ tint = COLORS.brandBlue, textColor = COLORS.ink }: BrandHeaderProps) {
   return (
     <div style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
       <Logo size={36} color={tint} />

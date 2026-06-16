@@ -1,11 +1,11 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { logCronEvent } from "@/lib/cron-logger";
 import { env } from "@/lib/env";
-import { ACTIVE_PLANS } from "@/lib/plans/quotas";
+import { SCHEDULABLE_PLANS } from "@/lib/plans/quotas";
 import { getTrackedLLMs, scheduleRunsForEligiblePlans } from "@/lib/scheduler/schedule-runs";
 
 // Cron quotidien (cf. vercel.json) : pour chaque prompt actif d'un
-// workspace en plan ACTIVE_PLANS et non hard-capé, enqueue 1 job
+// workspace en plan SCHEDULABLE_PLANS et non hard-capé, enqueue 1 job
 // execute_prompt × LLM tracké (Phase A : seul "claude").
 //
 // V0+ per-prompt cadence (cf. doc 02 § V0+) : le cron tourne CHAQUE JOUR
@@ -42,10 +42,10 @@ async function handle(request: NextRequest): Promise<NextResponse> {
     trackedLlms: getTrackedLLMs(),
     dayOfWeek: now.getUTCDay(),
     dayOfMonth: now.getUTCDate(),
-    eligiblePlans: ACTIVE_PLANS,
+    eligiblePlans: SCHEDULABLE_PLANS,
   });
 
-  const summary = await scheduleRunsForEligiblePlans(ACTIVE_PLANS as readonly string[], now);
+  const summary = await scheduleRunsForEligiblePlans(SCHEDULABLE_PLANS as readonly string[], now);
 
   logCronEvent({
     event: "schedule_runs_end",

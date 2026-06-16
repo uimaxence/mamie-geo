@@ -162,8 +162,8 @@ export function PlanPickerModal({
           {/* Microcopy de réassurance + lien "plus tard" si pas urgent */}
           <p className="mt-6 text-center text-xs text-[color:var(--color-muted)]">
             <Sparkles size={12} className="mr-1 inline" aria-hidden />
-            Pendant l&apos;essai, ton tracking quotidien tourne déjà sur les 5 IA. Tu peux annuler
-            à tout moment depuis ton compte.
+            Pendant l&apos;essai, ton tracking quotidien tourne déjà sur les 5 IA. Tu peux annuler à
+            tout moment depuis ton compte.
           </p>
 
           {variant === "expired" && (
@@ -246,9 +246,7 @@ function PlanPickerCard({
     : "border border-[color:var(--color-border)]";
 
   return (
-    <div
-      className={`flex flex-col rounded-[var(--radius-lg)] bg-white p-5 ${cardClass}`}
-    >
+    <div className={`flex flex-col rounded-[var(--radius-lg)] bg-white p-5 ${cardClass}`}>
       {isPopular && (
         <Badge tone="accent" className="absolute -top-3 left-5 px-2.5 py-1">
           Le plus populaire

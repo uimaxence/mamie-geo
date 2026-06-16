@@ -62,14 +62,14 @@ Le traitement repose sur :
 
 Toutes les données sont hébergées en Europe :
 
-| Sous-traitant | Rôle                                | Localisation |
-| ------------- | ----------------------------------- | ------------ |
-| Vercel        | Hébergement de l'application web    | Paris (cdg1) |
-| Neon          | Base de données PostgreSQL          | Francfort    |
-| Cloudflare R2 | Stockage de fichiers (rapports PDF) | EU           |
-| Brevo         | Envoi d'emails transactionnels      | France       |
-| Stripe        | Traitement des paiements            | Irlande      |
-| Anthropic     | Appels API LLM (Claude Haiku 4.5)   | États-Unis   |
+| Sous-traitant | Rôle                                | Localisation         |
+| ------------- | ----------------------------------- | -------------------- |
+| Vercel        | Hébergement de l'application web    | Paris (cdg1)         |
+| Neon          | Base de données PostgreSQL          | Francfort            |
+| Cloudflare R2 | Stockage de fichiers (rapports PDF) | EU                   |
+| Brevo         | Envoi d'emails transactionnels      | France               |
+| Stripe        | Traitement des paiements            | Irlande              |
+| Anthropic     | Appels API LLM (Claude Haiku 4.5)   | États-Unis           |
 | PostHog       | Analytics produit et session replay | Francfort (EU Cloud) |
 
 Concernant Anthropic (États-Unis) : les prompts envoyés sont ceux configurés par l'utilisateur (questions publiques, pas de données personnelles). Anthropic ne conserve pas les requêtes API au-delà de 30 jours et ne les utilise pas pour entraîner ses modèles, conformément à leur DPA. Un transfert hors UE est encadré par les Clauses Contractuelles Types (CCT) de la Commission Européenne.

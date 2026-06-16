@@ -236,8 +236,18 @@ describe("computeRankHistory", () => {
     ).toEqual([]);
 
     const rows = [
-      row({ date: "2026-06-09", llm: "claude", brandCitedCount: 2, competitorsData: [comp("Profound", 5)] }),
-      row({ date: "2026-06-09", llm: "chatgpt", brandCitedCount: 9, competitorsData: [comp("Profound", 1)] }),
+      row({
+        date: "2026-06-09",
+        llm: "claude",
+        brandCitedCount: 2,
+        competitorsData: [comp("Profound", 5)],
+      }),
+      row({
+        date: "2026-06-09",
+        llm: "chatgpt",
+        brandCitedCount: 9,
+        competitorsData: [comp("Profound", 1)],
+      }),
     ];
     const claudeOnly = computeRankHistory({
       rows,

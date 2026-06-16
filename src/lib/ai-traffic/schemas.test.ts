@@ -18,9 +18,9 @@ describe("collectPayloadSchema", () => {
 
   it("rejette une clé malformée", () => {
     expect(collectPayloadSchema.safeParse({ k: "nope", s: "chatgpt" }).success).toBe(false);
-    expect(
-      collectPayloadSchema.safeParse({ k: "mgpx_TOOSHORT", s: "chatgpt" }).success,
-    ).toBe(false);
+    expect(collectPayloadSchema.safeParse({ k: "mgpx_TOOSHORT", s: "chatgpt" }).success).toBe(
+      false,
+    );
     // Majuscules interdites par la regex
     expect(
       collectPayloadSchema.safeParse({ k: "mgpx_ABCDEF0123456789abcdef01", s: "chatgpt" }).success,
@@ -29,7 +29,9 @@ describe("collectPayloadSchema", () => {
     // pour ne PAS déclencher les secret scanners (ce n'est pas un vrai secret,
     // juste une valeur de forme `sk_live_*` qu'on veut voir rejetée).
     const oldStripeLikeKey = "sk_" + "live_" + "abcdef0123456789abcdef01";
-    expect(collectPayloadSchema.safeParse({ k: oldStripeLikeKey, s: "chatgpt" }).success).toBe(false);
+    expect(collectPayloadSchema.safeParse({ k: oldStripeLikeKey, s: "chatgpt" }).success).toBe(
+      false,
+    );
   });
 
   it("rejette une source hors LLM_VALUES", () => {

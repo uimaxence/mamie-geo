@@ -188,7 +188,7 @@ function buildSystemPrompt(language: "fr" | "en", count: number): string {
     `- ${ratio.branded} BRANDED question${ratio.branded > 1 ? "s" : ""}: explicitly name(s) the target brand (e.g. \"Is <Brand> any good for…?\", \"<Brand> vs <Competitor>?\", \"How does <Brand> work?\"). Goal: measure sentiment and positioning when the brand is in context.`,
     "",
     "All must be: natural (no marketing jargon), concrete (clear usage context), varied (different stages of the buying journey), phrased from the prospect's perspective (what, how, for whom, how much).",
-    "Avoid overly generic questions (\"what is X\").",
+    'Avoid overly generic questions ("what is X").',
   ].join("\n");
 }
 
@@ -361,9 +361,7 @@ export function createMistralPromptGenerator(
 
       if (!response.ok) {
         const body = await response.text().catch(() => "<unreadable>");
-        throw new Error(
-          `Mistral prompt-generator HTTP ${response.status}: ${body.slice(0, 500)}`,
-        );
+        throw new Error(`Mistral prompt-generator HTTP ${response.status}: ${body.slice(0, 500)}`);
       }
 
       const data = (await response.json()) as MistralChatCompletionResponse;

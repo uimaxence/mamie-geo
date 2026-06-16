@@ -90,9 +90,8 @@ export function SentimentSlide({ index, total }: Props) {
               margin: 0,
             }}
           >
-            Les IA ne disent <strong>jamais</strong> de mal d&apos;une marque.
-            Elles font pire&nbsp;:{" "}
-            <strong style={{ color: COLORS.terracotta }}>elles l&apos;oublient.</strong>
+            Les IA ne disent <strong>jamais</strong> de mal d&apos;une marque. Elles font
+            pire&nbsp;: <strong style={{ color: COLORS.terracotta }}>elles l&apos;oublient.</strong>
           </p>
         </div>
 
@@ -107,8 +106,8 @@ export function SentimentSlide({ index, total }: Props) {
             lineHeight: 1.35,
           }}
         >
-          Le risque n&apos;est pas le bad buzz. C&apos;est l&apos;omission
-          silencieuse — et aucun analytics ne la mesure.
+          Le risque n&apos;est pas le bad buzz. C&apos;est l&apos;omission silencieuse — et aucun
+          analytics ne la mesure.
         </p>
       </div>
     </SlideShell>

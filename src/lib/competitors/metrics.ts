@@ -80,8 +80,7 @@ export function computeCompetitorMetrics(
     if (!scoring || "skipped" in scoring) continue;
     if (scoring.competitorsMentioned.length === 0) continue;
 
-    const executedDate =
-      run.executedAt instanceof Date ? run.executedAt : new Date(run.executedAt);
+    const executedDate = run.executedAt instanceof Date ? run.executedAt : new Date(run.executedAt);
 
     // Set des concurrents déjà comptés POUR CE RUN. Un concurrent
     // mentionné plusieurs fois dans la même réponse compte pour 1 run.
@@ -182,8 +181,7 @@ export function aggregateSuggestedCompetitors(
     if (!scoring || "skipped" in scoring) continue;
     if (scoring.competitorsMentioned.length === 0) continue;
 
-    const executedDate =
-      run.executedAt instanceof Date ? run.executedAt : new Date(run.executedAt);
+    const executedDate = run.executedAt instanceof Date ? run.executedAt : new Date(run.executedAt);
 
     // Un token compté 1× par run même mentionné plusieurs fois.
     const countedInThisRun = new Set<string>();
@@ -195,7 +193,12 @@ export function aggregateSuggestedCompetitors(
 
       let accum = byToken.get(token);
       if (!accum) {
-        accum = { citationsCount: 0, perLlm: new Map(), lastCitedAt: null, surfaceForms: new Map() };
+        accum = {
+          citationsCount: 0,
+          perLlm: new Map(),
+          lastCitedAt: null,
+          surfaceForms: new Map(),
+        };
         byToken.set(token, accum);
       }
 

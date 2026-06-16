@@ -3,8 +3,7 @@ import { detectSiteLocation } from "./location-detect";
 
 function fakeFetch(html: string, status = 200): typeof fetch {
   return vi.fn(
-    async () =>
-      new Response(html, { status, headers: { "content-type": "text/html" } }),
+    async () => new Response(html, { status, headers: { "content-type": "text/html" } }),
   ) as unknown as typeof fetch;
 }
 

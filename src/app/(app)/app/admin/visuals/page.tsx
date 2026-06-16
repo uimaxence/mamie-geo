@@ -13,8 +13,8 @@ export default function VisualsIndexPage() {
       <div className="flex flex-col gap-2">
         <h1 className="type-h1">Visuels marketing</h1>
         <p className="type-body max-w-2xl">
-          Tableaux comparatifs, mockups stats, OG images. Chaque visuel est
-          rendu à sa taille native et téléchargeable en PNG retina (×2).
+          Tableaux comparatifs, mockups stats, OG images. Chaque visuel est rendu à sa taille native
+          et téléchargeable en PNG retina (×2).
         </p>
       </div>
 

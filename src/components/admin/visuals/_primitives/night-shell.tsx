@@ -40,7 +40,13 @@ interface NightShellProps {
   eyebrow?: string;
 }
 
-export function NightShell({ index, total, children, brandLockup = "header", eyebrow }: NightShellProps) {
+export function NightShell({
+  index,
+  total,
+  children,
+  brandLockup = "header",
+  eyebrow,
+}: NightShellProps) {
   return (
     <div
       style={{

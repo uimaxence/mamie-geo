@@ -46,9 +46,7 @@ export function priceIdForPlan(plan: PurchasablePlan, cycle: BillingCycle = "mon
  *  si le picker affiche le toggle annuel/mensuel ou cache le toggle. */
 export function annualBillingAvailable(): boolean {
   return Boolean(
-    env.STRIPE_PRICE_SOLO_ANNUAL &&
-      env.STRIPE_PRICE_STARTER_ANNUAL &&
-      env.STRIPE_PRICE_PRO_ANNUAL,
+    env.STRIPE_PRICE_SOLO_ANNUAL && env.STRIPE_PRICE_STARTER_ANNUAL && env.STRIPE_PRICE_PRO_ANNUAL,
   );
 }
 

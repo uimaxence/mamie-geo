@@ -95,7 +95,11 @@ export const VISUALS: VisualMeta[] = [
     format: FORMATS.linkedinPortrait,
     slides: [
       { key: "cover", label: "Cover hook (50 × 5)", Component: EtudeCoverSlide },
-      { key: "invisibles", label: "Résultat 1 — géants invisibles", Component: EtudeInvisiblesSlide },
+      {
+        key: "invisibles",
+        label: "Résultat 1 — géants invisibles",
+        Component: EtudeInvisiblesSlide,
+      },
       { key: "sentiment", label: "Résultat 2 — 0 % négatif", Component: EtudeSentimentSlide },
       { key: "sources", label: "Résultat 3 — 2,3 % site de marque", Component: EtudeSourcesSlide },
       { key: "variance", label: "Bonus — variance inter-LLM", Component: EtudeVarianceSlide },

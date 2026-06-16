@@ -123,16 +123,13 @@ async function countCriticalIssues(workspaceId: string): Promise<number> {
     })
     .from(technicalAudits)
     .where(
-      and(
-        eq(technicalAudits.workspaceId, workspaceId),
-        eq(technicalAudits.isCompetitor, false),
-      ),
+      and(eq(technicalAudits.workspaceId, workspaceId), eq(technicalAudits.isCompetitor, false)),
     )
     .orderBy(desc(technicalAudits.createdAt))
     .limit(50);
 
   // Dédup par URL : on garde le premier (le plus récent grâce au ORDER BY).
-  const latestByUrl = new Map<string, typeof audits[number]>();
+  const latestByUrl = new Map<string, (typeof audits)[number]>();
   for (const audit of audits) {
     if (!latestByUrl.has(audit.url)) latestByUrl.set(audit.url, audit);
   }

@@ -46,8 +46,7 @@ export function CoverSlide({ index, total }: Props) {
             maxWidth: 880,
           }}
         >
-          Être cité par{" "}
-          <span style={{ color: NIGHT.brandBlue }}>Gemini</span>
+          Être cité par <span style={{ color: NIGHT.brandBlue }}>Gemini</span>
         </h1>
 
         <p

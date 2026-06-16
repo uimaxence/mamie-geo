@@ -67,9 +67,10 @@ export function ExpressScanResults({
       <div className="mt-6 rounded-[var(--radius-xl)] border-2 border-[color:var(--color-ink)] bg-white p-6 sm:p-8">
         <h3 className="type-h3">Et sur les 4 autres IA ?</h3>
         <p className="type-body mt-2">
-          C&apos;est là que ça se joue : dans notre étude 50 marques, les scores varient jusqu&apos;à{" "}
-          <strong>×8 d&apos;une IA à l&apos;autre</strong> — Société Générale est invisible sur
-          ChatGPT et n°2 sur Claude. Être cité sur une IA ne dit rien des quatre autres.
+          C&apos;est là que ça se joue : dans notre étude 50 marques, les scores varient
+          jusqu&apos;à <strong>×8 d&apos;une IA à l&apos;autre</strong> — Société Générale est
+          invisible sur ChatGPT et n°2 sur Claude. Être cité sur une IA ne dit rien des quatre
+          autres.
         </p>
         <div className="mt-5 flex flex-col gap-2">
           {LOCKED_LLMS.map((llm) => (
@@ -131,7 +132,9 @@ function PromptCard({ result, brand }: { result: ExpressPromptResult; brand: str
   const brandNormalized = normalizeText(brand);
   return (
     <div className="rounded-[var(--radius-lg)] border border-[color:var(--color-border)] bg-white p-4">
-      <p className="text-sm italic text-[color:var(--color-ink-soft)]">«&nbsp;{result.prompt}&nbsp;»</p>
+      <p className="text-sm italic text-[color:var(--color-ink-soft)]">
+        «&nbsp;{result.prompt}&nbsp;»
+      </p>
       <div className="mt-3 flex items-center gap-2">
         {result.cited ? (
           <>
@@ -151,10 +154,7 @@ function PromptCard({ result, brand }: { result: ExpressPromptResult; brand: str
         <div className="mt-3 flex flex-wrap items-center gap-1.5">
           <span className="type-meta mr-1">L&apos;IA cite :</span>
           {result.brandsCited.map((name) => (
-            <Badge
-              key={name}
-              tone={normalizeText(name) === brandNormalized ? "accent" : "neutral"}
-            >
+            <Badge key={name} tone={normalizeText(name) === brandNormalized ? "accent" : "neutral"}>
               {name}
             </Badge>
           ))}
@@ -177,10 +177,9 @@ function AccompagnementUpsell() {
         </div>
       </div>
       <p className="type-body mt-3">
-        Moi c&apos;est Max, le fondateur. Je m&apos;occupe personnellement du SEO + GEO de
-        quelques marques par trimestre — de
-        l&apos;audit à l&apos;implémentation, jusqu&apos;à ce que les IA te citent. On en parle
-        30&nbsp;minutes, gratuitement, sans pitch commercial.
+        Moi c&apos;est Max, le fondateur. Je m&apos;occupe personnellement du SEO + GEO de quelques
+        marques par trimestre — de l&apos;audit à l&apos;implémentation, jusqu&apos;à ce que les IA
+        te citent. On en parle 30&nbsp;minutes, gratuitement, sans pitch commercial.
       </p>
       <LinkButton
         href="/contact"

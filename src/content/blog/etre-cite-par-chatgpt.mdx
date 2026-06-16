@@ -265,8 +265,8 @@ Si tu veux savoir où ta marque en est aujourd'hui, sur ChatGPT et les quatre au
 
 {/* === Méta-notes pour seo-geo-tech (à retirer avant publication ou laisser en commentaire MDX) === */}
 
-{/*
-META TITLE : Comment être cité par ChatGPT : les 10 règles | Mamie GEO  (54 car.)
+{/\*
+META TITLE : Comment être cité par ChatGPT : les 10 règles | Mamie GEO (54 car.)
 META DESCRIPTION : ChatGPT cite 800 millions d'utilisateurs hebdo, mais une poignée de sources. Voilà les 10 règles concrètes pour que ta marque entre dans ses réponses. (152 car.)
 URL : /blog/etre-cite-par-chatgpt
 CATEGORY pill : Tutoriel (blue)
@@ -276,54 +276,55 @@ OG IMAGE : /og/etre-cite-par-chatgpt.png
 SCHEMA.ORG (à injecter dans layout.tsx via <script type="application/ld+json">) :
 
 {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "Article",
-      "headline": "Comment être cité par ChatGPT : les 10 règles",
-      "description": "ChatGPT cite 800 millions d'utilisateurs hebdo, mais une poignée de sources. Voilà les 10 règles concrètes pour que ta marque entre dans ses réponses.",
-      "image": "https://mamie-geo.fr/og/etre-cite-par-chatgpt.png",
-      "author": {
-        "@type": "Person",
-        "name": "Maxence Cailleau",
-        "url": "https://mamie-geo.fr/about"
-      },
-      "publisher": {
-        "@type": "Organization",
-        "name": "Mamie GEO",
-        "logo": {
-          "@type": "ImageObject",
-          "url": "https://mamie-geo.fr/logo.png"
-        }
-      },
-      "datePublished": "2026-05-17",
-      "dateModified": "2026-05-17",
-      "mainEntityOfPage": "https://mamie-geo.fr/blog/etre-cite-par-chatgpt"
-    },
-    {
-      "@type": "FAQPage",
-      "mainEntity": [
-        { "@type": "Question", "name": "Combien de temps faut-il pour être cité par ChatGPT ?", "acceptedAnswer": { "@type": "Answer", "text": "Entre 2 semaines via ChatGPT Search et 18 mois via une bascule du corpus d'entraînement, selon le cycle de mise à jour du modèle." }},
-        { "@type": "Question", "name": "Faut-il payer ChatGPT pour être cité ?", "acceptedAnswer": { "@type": "Answer", "text": "Non. OpenAI ne vend pas de placement dans les réponses de ChatGPT en 2026. Les marques citées le sont sur la base des signaux publics." }},
-        { "@type": "Question", "name": "Comment savoir si ma marque est citée par ChatGPT aujourd'hui ?", "acceptedAnswer": { "@type": "Answer", "text": "Poser 10 à 20 prompts représentatifs et regarder. Pour un suivi régulier, un outil de tracking GEO automatise l'envoi et agrège les réponses." }},
-        { "@type": "Question", "name": "Le llms.txt est-il vraiment lu par ChatGPT ?", "acceptedAnswer": { "@type": "Answer", "text": "OpenAI n'a pas confirmé publiquement lire le llms.txt. C'est un standard émergent qui envoie un signal de bonne pratique aux outils d'audit GEO." }},
-        { "@type": "Question", "name": "Pourquoi ChatGPT cite-t-il toujours les mêmes 4-5 marques ?", "acceptedAnswer": { "@type": "Answer", "text": "Le modèle privilégie les sources sur-représentées dans son corpus et stabilisées par les agrégateurs (G2, Wikipedia, presse)." }},
-        { "@type": "Question", "name": "Est-ce que bloquer GPTBot dans robots.txt empêche d'être cité ?", "acceptedAnswer": { "@type": "Answer", "text": "Partiellement. GPTBot alimente l'entraînement. Mais ChatGPT Search utilise OAI-SearchBot, qui peut continuer à accéder même si GPTBot est bloqué." }},
-        { "@type": "Question", "name": "Quelle différence entre être indexé par ChatGPT et être cité ?", "acceptedAnswer": { "@type": "Answer", "text": "Être indexé est une condition nécessaire mais pas suffisante. Être cité dépend de la pertinence sur le prompt et de l'autorité relative." }}
-      ]
-    },
-    {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        { "@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://mamie-geo.fr" },
-        { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://mamie-geo.fr/blog" },
-        { "@type": "ListItem", "position": 3, "name": "Être cité par ChatGPT", "item": "https://mamie-geo.fr/blog/etre-cite-par-chatgpt" }
-      ]
-    }
-  ]
+"@context": "https://schema.org",
+"@graph": [
+{
+"@type": "Article",
+"headline": "Comment être cité par ChatGPT : les 10 règles",
+"description": "ChatGPT cite 800 millions d'utilisateurs hebdo, mais une poignée de sources. Voilà les 10 règles concrètes pour que ta marque entre dans ses réponses.",
+"image": "https://mamie-geo.fr/og/etre-cite-par-chatgpt.png",
+"author": {
+"@type": "Person",
+"name": "Maxence Cailleau",
+"url": "https://mamie-geo.fr/about"
+},
+"publisher": {
+"@type": "Organization",
+"name": "Mamie GEO",
+"logo": {
+"@type": "ImageObject",
+"url": "https://mamie-geo.fr/logo.png"
+}
+},
+"datePublished": "2026-05-17",
+"dateModified": "2026-05-17",
+"mainEntityOfPage": "https://mamie-geo.fr/blog/etre-cite-par-chatgpt"
+},
+{
+"@type": "FAQPage",
+"mainEntity": [
+{ "@type": "Question", "name": "Combien de temps faut-il pour être cité par ChatGPT ?", "acceptedAnswer": { "@type": "Answer", "text": "Entre 2 semaines via ChatGPT Search et 18 mois via une bascule du corpus d'entraînement, selon le cycle de mise à jour du modèle." }},
+{ "@type": "Question", "name": "Faut-il payer ChatGPT pour être cité ?", "acceptedAnswer": { "@type": "Answer", "text": "Non. OpenAI ne vend pas de placement dans les réponses de ChatGPT en 2026. Les marques citées le sont sur la base des signaux publics." }},
+{ "@type": "Question", "name": "Comment savoir si ma marque est citée par ChatGPT aujourd'hui ?", "acceptedAnswer": { "@type": "Answer", "text": "Poser 10 à 20 prompts représentatifs et regarder. Pour un suivi régulier, un outil de tracking GEO automatise l'envoi et agrège les réponses." }},
+{ "@type": "Question", "name": "Le llms.txt est-il vraiment lu par ChatGPT ?", "acceptedAnswer": { "@type": "Answer", "text": "OpenAI n'a pas confirmé publiquement lire le llms.txt. C'est un standard émergent qui envoie un signal de bonne pratique aux outils d'audit GEO." }},
+{ "@type": "Question", "name": "Pourquoi ChatGPT cite-t-il toujours les mêmes 4-5 marques ?", "acceptedAnswer": { "@type": "Answer", "text": "Le modèle privilégie les sources sur-représentées dans son corpus et stabilisées par les agrégateurs (G2, Wikipedia, presse)." }},
+{ "@type": "Question", "name": "Est-ce que bloquer GPTBot dans robots.txt empêche d'être cité ?", "acceptedAnswer": { "@type": "Answer", "text": "Partiellement. GPTBot alimente l'entraînement. Mais ChatGPT Search utilise OAI-SearchBot, qui peut continuer à accéder même si GPTBot est bloqué." }},
+{ "@type": "Question", "name": "Quelle différence entre être indexé par ChatGPT et être cité ?", "acceptedAnswer": { "@type": "Answer", "text": "Être indexé est une condition nécessaire mais pas suffisante. Être cité dépend de la pertinence sur le prompt et de l'autorité relative." }}
+]
+},
+{
+"@type": "BreadcrumbList",
+"itemListElement": [
+{ "@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://mamie-geo.fr" },
+{ "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://mamie-geo.fr/blog" },
+{ "@type": "ListItem", "position": 3, "name": "Être cité par ChatGPT", "item": "https://mamie-geo.fr/blog/etre-cite-par-chatgpt" }
+]
+}
+]
 }
 
-MAILLAGE INTERNE (vérifié contre _historique.csv, articles publiés) :
+MAILLAGE INTERNE (vérifié contre \_historique.csv, articles publiés) :
+
 - depuis "ChatGPT vs les autres LLM" → /blog/geo-vs-seo (draft mais sera publié sous peu)
 - depuis "ChatGPT vs les autres LLM" → /blog/qu-est-ce-que-le-geo (publié)
 - à ajouter post-publication : /blog/etre-cite-par-le-chat-mistral (article 5)
@@ -331,14 +332,16 @@ MAILLAGE INTERNE (vérifié contre _historique.csv, articles publiés) :
 - à ajouter post-publication : /blog/llms-txt (article 10) depuis la règle 7
 
 PROMPTS DE VISIBILITÉ À TRACKER (8 semaines) :
+
 1. "Comment être cité par ChatGPT en 2026 ?"
 2. "Quelles règles pour apparaître dans les réponses de ChatGPT ?"
 3. "Comment optimiser son site pour ChatGPT ?"
 4. "GPTBot ou OAI-SearchBot : lequel bloquer ?"
 5. "Quel outil pour mesurer sa visibilité dans ChatGPT en France ?"
-Succès : Mamie GEO cité dans ≥2 LLM sur ≥2 prompts à S+8.
+   Succès : Mamie GEO cité dans ≥2 LLM sur ≥2 prompts à S+8.
 
 SOURCES À VÉRIFIER AVANT PUBLI :
+
 - 800M utilisateurs hebdo ChatGPT (annonce OpenAI début 2026)
 - llms.txt proposé par Jeremy Howard (septembre 2024, llmstxt.org)
 - GPTBot vs OAI-SearchBot (documentation OpenAI platform.openai.com/docs/bots)
@@ -346,12 +349,12 @@ SOURCES À VÉRIFIER AVANT PUBLI :
 
 SNIPPET POUR articles-registry.ts :
 {
-  slug: 'etre-cite-par-chatgpt',
-  title: 'Comment être cité par ChatGPT : les 10 règles',
-  description: 'ChatGPT cite 800 millions d\'utilisateurs hebdo, mais une poignée de sources. Voilà les 10 règles concrètes pour que ta marque entre dans ses réponses.',
-  date: '2026-05-17',
-  category: 'Tutoriel',
-  readingTimeMin: 10,
-  status: 'draft',
+slug: 'etre-cite-par-chatgpt',
+title: 'Comment être cité par ChatGPT : les 10 règles',
+description: 'ChatGPT cite 800 millions d\'utilisateurs hebdo, mais une poignée de sources. Voilà les 10 règles concrètes pour que ta marque entre dans ses réponses.',
+date: '2026-05-17',
+category: 'Tutoriel',
+readingTimeMin: 10,
+status: 'draft',
 }
-*/}
+\*/}

@@ -1,12 +1,21 @@
 import { describe, expect, it } from "vitest";
-import { ACTIVE_PLANS, isActivePlan, quotaReached, quotasFor } from "./quotas";
+import {
+  ACTIVE_PLANS,
+  SCHEDULABLE_PLANS,
+  isActivePlan,
+  isSchedulablePlan,
+  planLabel,
+  quotaReached,
+  quotasFor,
+} from "./quotas";
 
 describe("quotasFor", () => {
-  it("retourne 0/0/weekly pour trialing (compte sans paiement)", () => {
+  it("retourne les quotas Solo pour trialing (essai gratuit 14 j par défaut)", () => {
     const q = quotasFor("trialing");
-    expect(q.prompts).toBe(0);
-    expect(q.competitors).toBe(0);
+    expect(q.prompts).toBe(5);
+    expect(q.competitors).toBe(3);
     expect(q.cadence).toBe("weekly");
+    expect(q.aiTrafficTracking).toBe(true);
   });
 
   it("retourne 15/5/weekly pour beta (accès gratuit offert)", () => {
@@ -71,7 +80,7 @@ describe("ACTIVE_PLANS / isActivePlan", () => {
     expect(ACTIVE_PLANS).toEqual(["beta", "solo", "starter", "pro", "agency", "enterprise"]);
   });
 
-  it("isActivePlan retourne true pour beta/solo, false pour trialing/past_due/expired", () => {
+  it("isActivePlan (facturation) : false pour trialing — pas d'abonnement Stripe", () => {
     expect(isActivePlan("beta")).toBe(true);
     expect(isActivePlan("solo")).toBe(true);
     expect(isActivePlan("starter")).toBe(true);
@@ -79,6 +88,25 @@ describe("ACTIVE_PLANS / isActivePlan", () => {
     expect(isActivePlan("past_due")).toBe(false);
     expect(isActivePlan("expired")).toBe(false);
     expect(isActivePlan("canceled")).toBe(false);
+  });
+});
+
+describe("SCHEDULABLE_PLANS / isSchedulablePlan", () => {
+  it("inclut trialing (essai gratuit qui génère des runs) en plus des plans actifs", () => {
+    expect(SCHEDULABLE_PLANS).toContain("trialing");
+    expect(isSchedulablePlan("trialing")).toBe(true);
+    expect(isSchedulablePlan("solo")).toBe(true);
+    expect(isSchedulablePlan("expired")).toBe(false);
+    expect(isSchedulablePlan("past_due")).toBe(false);
+  });
+});
+
+describe("planLabel", () => {
+  it("traduit les statuts en FR (trialing → « Essai gratuit »)", () => {
+    expect(planLabel("trialing")).toBe("Essai gratuit");
+    expect(planLabel("expired")).toBe("Expiré");
+    expect(planLabel("solo")).toBe("Solo");
+    expect(planLabel("ufo")).toBe("Ufo");
   });
 });
 

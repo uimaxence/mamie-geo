@@ -6,7 +6,11 @@ import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { getUserContext } from "@/lib/auth/user-context";
 import { db } from "@/db/client";
-import { brands as brandsTable, competitors as competitorsTable, workspaceMembers } from "@/db/schema";
+import {
+  brands as brandsTable,
+  competitors as competitorsTable,
+  workspaceMembers,
+} from "@/db/schema";
 import { Badge, Card, EntityTypeBadge, Stat } from "@/components/ui";
 import { LLM_LABELS } from "@/components/charts/llm-colors";
 import { decodeSourceSlug, getSourceRuns } from "@/lib/sources/queries";
@@ -209,7 +213,9 @@ function WhyItMatters({ type }: { type: EntityType }) {
         className="mt-0.5 shrink-0 text-[color:var(--color-accent)]"
         aria-hidden
       />
-      <p className="text-[0.8125rem] leading-relaxed text-[color:var(--color-ink-soft)]">{message}</p>
+      <p className="text-[0.8125rem] leading-relaxed text-[color:var(--color-ink-soft)]">
+        {message}
+      </p>
     </div>
   );
 }

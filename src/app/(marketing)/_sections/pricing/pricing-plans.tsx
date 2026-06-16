@@ -36,7 +36,11 @@ export function PricingPlans() {
           role="tablist"
           className="mt-10 inline-flex items-center rounded-[var(--radius-pill)] border border-[color:var(--color-border)] bg-white p-1"
         >
-          <PeriodTab active={period === "monthly"} onClick={() => togglePeriod("monthly")} label="Mensuel" />
+          <PeriodTab
+            active={period === "monthly"}
+            onClick={() => togglePeriod("monthly")}
+            label="Mensuel"
+          />
           <PeriodTab
             active={period === "annual"}
             onClick={() => togglePeriod("annual")}

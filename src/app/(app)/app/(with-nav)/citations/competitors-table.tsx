@@ -25,6 +25,7 @@ import { LLM_LABELS } from "@/components/charts/llm-colors";
 import { createCompetitor, deleteCompetitor, updateCompetitor } from "./actions";
 import { CompetitorFormDialog } from "./competitor-form-dialog";
 import { cn } from "@/lib/utils";
+import { planLabel } from "@/lib/plans/quotas";
 import type { CompetitorRow, CompetitorRowWithMetrics } from "@/lib/competitors/queries";
 import type { BrandSelfMetrics, SuggestedCompetitor } from "@/lib/competitors/metrics";
 
@@ -81,7 +82,9 @@ export function CompetitorsTable({
 
   function handleAddSuggestion(name: string) {
     if (atQuota) {
-      toast.error(`Quota atteint (${maxCompetitors}). Passe à un plan supérieur pour suivre plus de concurrents.`);
+      toast.error(
+        `Quota atteint (${maxCompetitors}). Passe à un plan supérieur pour suivre plus de concurrents.`,
+      );
       return;
     }
     setAddingName(name);
@@ -115,7 +118,7 @@ export function CompetitorsTable({
     <>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-[0.8125rem] text-[color:var(--color-muted)]">
-          Plan {plan} · {quotaText} · métriques sur {windowDays} jours ({totalRuns} run
+          Plan {planLabel(plan)} · {quotaText} · métriques sur {windowDays} jours ({totalRuns} run
           {totalRuns > 1 ? "s" : ""})
         </p>
         <Button variant="primary" size="sm" onClick={() => setCreateOpen(true)}>
@@ -386,8 +389,8 @@ function SuggestionsCard({
             Détectés par les IA, pas encore suivis
           </p>
           <p className="mt-0.5 text-[0.8125rem] text-[color:var(--color-muted)]">
-            Ces marques sont citées sur ton marché dans les réponses IA. Ajoute-les pour les
-            suivre face à toi, sans coût supplémentaire.
+            Ces marques sont citées sur ton marché dans les réponses IA. Ajoute-les pour les suivre
+            face à toi, sans coût supplémentaire.
           </p>
         </div>
       </div>
@@ -407,7 +410,10 @@ function SuggestionsCard({
               </span>
               <span className="inline-flex size-5 items-center justify-center rounded-full bg-[color:var(--color-gray-100)] text-[color:var(--color-ink-soft)] group-hover:bg-[color:var(--color-accent)] group-hover:text-white">
                 {addingName === s.name ? (
-                  <span className="size-2.5 animate-pulse rounded-full bg-current" aria-label="Ajout…" />
+                  <span
+                    className="size-2.5 animate-pulse rounded-full bg-current"
+                    aria-label="Ajout…"
+                  />
                 ) : (
                   <Plus size={13} strokeWidth={2.4} />
                 )}
@@ -448,11 +454,7 @@ function VsYou({ delta }: { delta: number }) {
   );
 }
 
-function Th({
-  children,
-  className,
-  ...props
-}: React.ThHTMLAttributes<HTMLTableCellElement>) {
+function Th({ children, className, ...props }: React.ThHTMLAttributes<HTMLTableCellElement>) {
   return (
     <th
       className={`px-4 py-2.5 text-left text-[0.75rem] font-medium text-[color:var(--color-muted)] ${className ?? ""}`}
@@ -463,13 +465,7 @@ function Th({
   );
 }
 
-function Td({
-  children,
-  className,
-}: {
-  children?: React.ReactNode;
-  className?: string;
-}) {
+function Td({ children, className }: { children?: React.ReactNode; className?: string }) {
   return <td className={`px-4 py-3 align-middle ${className ?? ""}`}>{children}</td>;
 }
 

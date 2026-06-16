@@ -29,8 +29,8 @@ const IMPLEMENTED_LLMS: Record<LLMValue, boolean> = {
   chatgpt: true, // PR3
   gemini: true, // PR4
   perplexity: true, // PR5 — ce commit. Activation auto via getConfiguredLLMs
-                   // dès que PERPLEXITY_API_KEY est setté en env (cf. doc 09
-                   // § 2026-05-18 — crédit minimum $50 attendu).
+  // dès que PERPLEXITY_API_KEY est setté en env (cf. doc 09
+  // § 2026-05-18 — crédit minimum $50 attendu).
 };
 
 /**
@@ -44,9 +44,7 @@ const IMPLEMENTED_LLMS: Record<LLMValue, boolean> = {
 export function getLLMClient(llm: LLMValue): LLMClient {
   const apiKey = env[LLM_TO_ENV_KEY[llm]];
   if (!apiKey) {
-    throw new Error(
-      `${LLM_TO_ENV_KEY[llm]} manquant — provider ${llm} indisponible`,
-    );
+    throw new Error(`${LLM_TO_ENV_KEY[llm]} manquant — provider ${llm} indisponible`);
   }
   if (!IMPLEMENTED_LLMS[llm]) {
     throw new Error(`Provider ${llm} pas encore implémenté (PR3-5 multi-LLM en cours)`);

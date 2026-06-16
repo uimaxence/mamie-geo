@@ -93,10 +93,7 @@ export async function GET() {
           .where(inArray(citationMetricsDaily.brandId, brandIds))
       : Promise.resolve([]),
     workspaceIds.length > 0
-      ? db
-          .select()
-          .from(technicalAudits)
-          .where(inArray(technicalAudits.workspaceId, workspaceIds))
+      ? db.select().from(technicalAudits).where(inArray(technicalAudits.workspaceId, workspaceIds))
       : Promise.resolve([]),
   ]);
 

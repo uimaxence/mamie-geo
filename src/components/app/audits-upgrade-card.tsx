@@ -35,8 +35,8 @@ export function AuditsUpgradeCard({ plan }: { plan: string }) {
               Besoin de plus d&apos;audits ?
             </h3>
             <p className="type-meta mt-1 max-w-xl">
-              Passe à un plan supérieur pour lancer plus d&apos;audits chaque mois,
-              suivre plusieurs URLs et comparer tes concurrents.
+              Passe à un plan supérieur pour lancer plus d&apos;audits chaque mois, suivre plusieurs
+              URLs et comparer tes concurrents.
             </p>
           </div>
         </div>

@@ -39,8 +39,8 @@ export default function ComparateursPage() {
           </h1>
           <p className="type-body-lg mt-6">
             Sur 722 sources citées par ChatGPT, Claude, Perplexity, Gemini et Le Chat dans notre
-            étude, <strong>32&nbsp;% sont des comparateurs et annuaires</strong> — contre
-            1,7&nbsp;% seulement le site des marques. Ce scan vérifie ta présence sur ces{" "}
+            étude, <strong>32&nbsp;% sont des comparateurs et annuaires</strong> — contre 1,7&nbsp;%
+            seulement le site des marques. Ce scan vérifie ta présence sur ces{" "}
             <strong>sites sources</strong> — les pages que les IA lisent avant de répondre. (Pour
             voir ce que les IA répondent, c&apos;est le{" "}
             <a href="/outils/test-visibilite-ia" className="underline underline-offset-2">
@@ -96,10 +96,12 @@ export default function ComparateursPage() {
             la marque dans 1,7&nbsp;% seulement.
           </p>
           <p className="type-body-lg mt-4 max-w-prose">
-            Autrement dit : <strong>être premier chez les comparateurs, c&apos;est être premier
-            dans les réponses des IA</strong>. Et l&apos;inverse est brutal — les IA ne disent
-            jamais de mal d&apos;une marque absente. Elles font pire&nbsp;: elles la remplacent par
-            un concurrent.
+            Autrement dit :{" "}
+            <strong>
+              être premier chez les comparateurs, c&apos;est être premier dans les réponses des IA
+            </strong>
+            . Et l&apos;inverse est brutal — les IA ne disent jamais de mal d&apos;une marque
+            absente. Elles font pire&nbsp;: elles la remplacent par un concurrent.
           </p>
           <p className="type-body-lg mt-4 max-w-prose">
             Ce scan est la version express de ce qu&apos;on mesure en continu dans Mamie GEO&nbsp;:

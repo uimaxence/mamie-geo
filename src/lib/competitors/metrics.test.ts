@@ -58,7 +58,9 @@ describe("computeCompetitorMetrics", () => {
 
   it("matche les aliases case-insensitive", () => {
     const runs: RunForMetrics[] = [
-      makeRun("chatgpt", "2026-06-01T10:00:00Z", [{ name: "PROFOUND INC.", sentiment: "positive" }]),
+      makeRun("chatgpt", "2026-06-01T10:00:00Z", [
+        { name: "PROFOUND INC.", sentiment: "positive" },
+      ]),
       makeRun("claude", "2026-06-02T10:00:00Z", [{ name: "profound.so", sentiment: "positive" }]),
       makeRun("gemini", "2026-06-03T10:00:00Z", [{ name: "Peec", sentiment: "positive" }]),
     ];

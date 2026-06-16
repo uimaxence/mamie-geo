@@ -43,6 +43,7 @@ import {
   updatePrompt,
 } from "./actions";
 import { PromptFormDialog } from "./prompt-form-dialog";
+import { planLabel } from "@/lib/plans/quotas";
 import type { PromptRow } from "@/lib/prompts/queries";
 
 // Liste interactive des prompts : filtre par statut + pagination
@@ -66,12 +67,7 @@ interface PromptsListProps {
   maxPrompts: number;
 }
 
-export function PromptsList({
-  initialPrompts,
-  plan,
-  planCadence,
-  maxPrompts,
-}: PromptsListProps) {
+export function PromptsList({ initialPrompts, plan, planCadence, maxPrompts }: PromptsListProps) {
   const router = useRouter();
   const [filter, setFilter] = useState<FilterMode>("all");
   const [page, setPage] = useState(1);
@@ -160,7 +156,7 @@ export function PromptsList({
         }
         if (result.quotaReached) {
           toast.error(
-            `Quota ${result.quotaReached.max} prompts atteint sur le plan ${result.quotaReached.plan}.`,
+            `Quota ${result.quotaReached.max} prompts atteint sur le plan ${planLabel(result.quotaReached.plan)}.`,
           );
         }
         setSuggestions(null);
@@ -176,7 +172,7 @@ export function PromptsList({
       <PageHeader
         icon={ListChecks}
         title="Prompts trackés"
-        summary={`Plan ${plan} · ${quotaText}`}
+        summary={`Plan ${planLabel(plan)} · ${quotaText}`}
         right={
           <>
             <Button variant="secondary" onClick={handleSuggest} disabled={suggesting}>

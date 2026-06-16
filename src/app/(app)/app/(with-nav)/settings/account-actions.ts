@@ -30,9 +30,7 @@ import { getStripe } from "@/lib/stripe/client";
 // En V0 = 1 user → 1 workspace (cf. CLAUDE.md). Donc cas simple :
 // 1 subscription à annuler + 1 workspace à supprimer + user à supprimer.
 
-export type DeleteAccountResult =
-  | { ok: true; redirectTo: "/" }
-  | { ok: false; error: string };
+export type DeleteAccountResult = { ok: true; redirectTo: "/" } | { ok: false; error: string };
 
 export async function deleteAccount(confirmation: string): Promise<DeleteAccountResult> {
   // Garde-fou contre les déclenchements accidentels. Le user DOIT taper

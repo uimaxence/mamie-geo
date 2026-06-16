@@ -17,6 +17,7 @@ import {
 } from "@/components/ui";
 import { BrandFavicon } from "@/components/app/brand-favicon";
 import { cn } from "@/lib/utils";
+import { planLabel } from "@/lib/plans/quotas";
 import { AddBrandDialog } from "./add-brand-dialog";
 import { AppSidebar } from "./app-sidebar";
 import type { SidebarData } from "./app-sidebar-data";
@@ -84,7 +85,7 @@ function WorkspacePill({ workspace }: { workspace: SidebarData["workspace"] }) {
         tone={workspace.plan === "trialing" || workspace.plan === "beta" ? "accent" : "neutral"}
         className="shrink-0"
       >
-        {workspace.plan}
+        {planLabel(workspace.plan)}
       </Badge>
     </Link>
   );

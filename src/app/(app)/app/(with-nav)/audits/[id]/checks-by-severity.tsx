@@ -1,12 +1,7 @@
 "use client";
 
 import { CheckCircle2, ChevronRight, OctagonAlert, TriangleAlert } from "lucide-react";
-import {
-  Badge,
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui";
+import { Badge, Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui";
 import { getRecommendation } from "@/lib/audit/recommendations";
 import type { CheckResult } from "@/lib/audit/types";
 import { cn } from "@/lib/utils";
@@ -116,9 +111,7 @@ function Section({ tone, label, description, checks, defaultOpen, emptyState }: 
         />
         <h2 className="type-h3 flex-1 text-base">{label}</h2>
         <span className="type-meta hidden sm:inline">{description}</span>
-        <Badge
-          tone={tone === "critical" ? "error" : tone === "warning" ? "warning" : "neutral"}
-        >
+        <Badge tone={tone === "critical" ? "error" : tone === "warning" ? "warning" : "neutral"}>
           {checks.length}
         </Badge>
       </CollapsibleTrigger>
@@ -130,7 +123,7 @@ function Section({ tone, label, description, checks, defaultOpen, emptyState }: 
                 key={check.id}
                 check={check}
                 last={i === checks.length - 1}
-                lastInRow={i === checks.length - 1 || (i % 2 === 1)}
+                lastInRow={i === checks.length - 1 || i % 2 === 1}
               />
             ))}
           </ul>
@@ -180,8 +173,7 @@ function InfoChip({
 function CheckItem({ check }: { check: CheckResult }) {
   const reco = getRecommendation(check.id);
   const Icon = check.severity === "critical" ? OctagonAlert : TriangleAlert;
-  const iconColor =
-    check.severity === "critical" ? "var(--color-error)" : "var(--color-warning)";
+  const iconColor = check.severity === "critical" ? "var(--color-error)" : "var(--color-warning)";
 
   return (
     <li className="px-5 py-5">

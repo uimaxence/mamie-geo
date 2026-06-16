@@ -1,9 +1,5 @@
 import type { LLMValue } from "@/lib/llm";
-import type {
-  DashboardData,
-  MetricsPerLLM,
-  VisibilityTrendPoint,
-} from "@/lib/dashboard/queries";
+import type { DashboardData, MetricsPerLLM, VisibilityTrendPoint } from "@/lib/dashboard/queries";
 import type { RunBatch, RunBatchEntry } from "@/lib/runs/batches-grouping";
 
 // Données factices pour la page /demo. Aucun appel LLM, aucune
@@ -141,7 +137,9 @@ function buildMetricsToday(today: Date): MetricsPerLLM[] {
     // Top concurrents tirés des baselines + bruit
     const topCompetitors = DEMO_COMPETITORS.map((c) => ({
       name: c.name,
-      citationCount: Math.round(c.weight * (totalRuns - brandCitedCount + 1) * (0.7 + rand() * 0.6)),
+      citationCount: Math.round(
+        c.weight * (totalRuns - brandCitedCount + 1) * (0.7 + rand() * 0.6),
+      ),
     }))
       .sort((a, b) => b.citationCount - a.citationCount)
       .slice(0, 3);
@@ -168,9 +166,8 @@ function aggregateMetrics(metricsToday: MetricsPerLLM[]) {
   const visibilityScore =
     llmsCount === 0
       ? 0
-      : Math.round(
-          (metricsToday.reduce((sum, m) => sum + m.visibilityScore, 0) / llmsCount) * 10,
-        ) / 10;
+      : Math.round((metricsToday.reduce((sum, m) => sum + m.visibilityScore, 0) / llmsCount) * 10) /
+        10;
   const brandCitedCount = metricsToday.reduce((sum, m) => sum + m.brandCitedCount, 0);
   const totalRuns = metricsToday.reduce((sum, m) => sum + m.totalRuns, 0);
 
@@ -184,10 +181,7 @@ function aggregateMetrics(metricsToday: MetricsPerLLM[]) {
   const sorted = Array.from(competitorMap.entries()).sort((a, b) => b[1] - a[1]);
   const topCompetitor = sorted[0] ? { name: sorted[0][0], citationCount: sorted[0][1] } : null;
 
-  const totalCompetitorCitations = Array.from(competitorMap.values()).reduce(
-    (a, b) => a + b,
-    0,
-  );
+  const totalCompetitorCitations = Array.from(competitorMap.values()).reduce((a, b) => a + b, 0);
   const partDeVoixDenom = brandCitedCount + totalCompetitorCitations;
   const partDeVoix =
     partDeVoixDenom === 0 ? 0 : Math.round((brandCitedCount / partDeVoixDenom) * 1000) / 10;
@@ -245,10 +239,12 @@ function buildRecentBatches(today: Date): RunBatch[] {
 
       const citedRuns = runs.filter((r) => r.brandMentioned === true);
       const citedCount = citedRuns.length;
-      const sentiments = citedRuns.map((r) => r.brandSentiment).filter(
-        (s): s is "positive" | "neutral" | "negative" =>
-          s === "positive" || s === "neutral" || s === "negative",
-      );
+      const sentiments = citedRuns
+        .map((r) => r.brandSentiment)
+        .filter(
+          (s): s is "positive" | "neutral" | "negative" =>
+            s === "positive" || s === "neutral" || s === "negative",
+        );
       const sentimentCounts = sentiments.reduce<Record<string, number>>(
         (acc, s) => ({ ...acc, [s]: (acc[s] ?? 0) + 1 }),
         {},
@@ -290,9 +286,7 @@ function buildRecentBatches(today: Date): RunBatch[] {
       });
     }
   }
-  return batches.sort(
-    (a, b) => b.latestScheduledAt.getTime() - a.latestScheduledAt.getTime(),
-  );
+  return batches.sort((a, b) => b.latestScheduledAt.getTime() - a.latestScheduledAt.getTime());
 }
 
 export interface DemoBundle {

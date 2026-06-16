@@ -42,7 +42,12 @@ export default async function TrafficPage() {
       <PageHeader
         icon={Radar}
         title="Trafic IA"
-        summary={buildSummary({ eligible, hasKey: Boolean(data.brand.aiPixelKey), detected, totalVisits: aiTraffic.totalVisits })}
+        summary={buildSummary({
+          eligible,
+          hasKey: Boolean(data.brand.aiPixelKey),
+          detected,
+          totalVisits: aiTraffic.totalVisits,
+        })}
       />
 
       {detected ? (

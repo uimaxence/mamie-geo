@@ -4,7 +4,15 @@ import { notFound, redirect } from "next/navigation";
 import { ArrowLeft, ExternalLink } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { getRunDetail, type RunDetail } from "@/lib/dashboard/queries";
-import { Badge, Banner, PageContainer, Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui";
+import {
+  Badge,
+  Banner,
+  PageContainer,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui";
 import { RunStatusBadge } from "@/components/app/run-status-badge";
 
 // Page détail d'un run /app/runs/[id], réponse brute, citations

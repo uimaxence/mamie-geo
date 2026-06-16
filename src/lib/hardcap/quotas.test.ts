@@ -31,8 +31,12 @@ describe("getMonthlyTheoreticalRuns", () => {
     expect(getMonthlyTheoreticalRuns("enterprise")).toBe(Number.POSITIVE_INFINITY);
   });
 
-  it("trialing : 0 prompts → 0 runs", () => {
-    expect(getMonthlyTheoreticalRuns("trialing")).toBe(0);
+  it("trialing : calé sur Solo (5 × 5 × 4 weekly = 100 runs/mois)", () => {
+    expect(getMonthlyTheoreticalRuns("trialing")).toBe(100);
+  });
+
+  it("expired : 0 prompts → 0 runs (lecture seule)", () => {
+    expect(getMonthlyTheoreticalRuns("expired")).toBe(0);
   });
 });
 
@@ -67,8 +71,11 @@ describe("isPlanWithHardcap", () => {
     expect(isPlanWithHardcap("enterprise")).toBe(false);
   });
 
-  it("trialing/expired n'ont pas de hard-cap (0 théorique)", () => {
-    expect(isPlanWithHardcap("trialing")).toBe(false);
+  it("trialing a un hard-cap (essai Solo → 100 théorique, backstop anti-abus)", () => {
+    expect(isPlanWithHardcap("trialing")).toBe(true);
+  });
+
+  it("expired/past_due n'ont pas de hard-cap (0 théorique, lecture seule)", () => {
     expect(isPlanWithHardcap("expired")).toBe(false);
     expect(isPlanWithHardcap("past_due")).toBe(false);
   });

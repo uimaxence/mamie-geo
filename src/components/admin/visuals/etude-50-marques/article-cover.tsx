@@ -37,9 +37,7 @@ export function ArticleCover(_props: Props) {
         flexDirection: "column",
       }}
     >
-      <header
-        style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
-      >
+      <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <BrandHeader tint={COLORS.brandBlue} textColor={COLORS.ink} />
         <span
           style={{

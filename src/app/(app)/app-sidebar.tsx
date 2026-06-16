@@ -38,6 +38,7 @@ import {
   CAL_SUPPORT_NAMESPACE,
 } from "@/components/app/cal-support-embed";
 import { capture } from "@/lib/posthog-client";
+import { planLabel } from "@/lib/plans/quotas";
 import type { SidebarData } from "./app-sidebar-data";
 
 // Sidebar app : logo Mamie GEO (top), nav sections (middle), user menu
@@ -243,23 +244,6 @@ function SidebarNav({
   );
 }
 
-// Libellé FR du statut/plan affiché dans la sidebar. "trialing" brut était
-// incompréhensible pour les prospects (« trailing ? », demande 2026-06-16).
-function planBadgeLabel(plan: string): string {
-  switch (plan) {
-    case "trialing":
-      return "Essai gratuit";
-    case "past_due":
-      return "Paiement en retard";
-    case "expired":
-      return "Essai terminé";
-    case "canceled":
-      return "Annulé";
-    default:
-      return plan.charAt(0).toUpperCase() + plan.slice(1);
-  }
-}
-
 function UserMenu({ email, plan }: { email: string; plan: string }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
@@ -279,7 +263,7 @@ function UserMenu({ email, plan }: { email: string; plan: string }) {
         <div className="flex-1 min-w-0 text-left">
           <p className="truncate text-sm font-medium text-[color:var(--color-ink)]">{email}</p>
           <p className="type-meta">
-            <Badge tone={plan === "trialing" ? "accent" : "neutral"}>{planBadgeLabel(plan)}</Badge>
+            <Badge tone={plan === "trialing" ? "accent" : "neutral"}>{planLabel(plan)}</Badge>
           </p>
         </div>
       </DropdownMenuTrigger>

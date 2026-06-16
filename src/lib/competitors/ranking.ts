@@ -198,10 +198,22 @@ function aggregateWindow(
   // Ta marque et les concurrents trackés sont toujours présents, même à
   // zéro mention — un classement qui fait disparaître les absents masque
   // l'info la plus importante (« tu n'es pas cité »).
-  entities.set("you", { key: "you", name: brand.name, type: "you", domain: brand.domain, mentions: 0 });
+  entities.set("you", {
+    key: "you",
+    name: brand.name,
+    type: "you",
+    domain: brand.domain,
+    mentions: 0,
+  });
   const competitorKeyByToken = new Map<string, string>();
   for (const c of competitors) {
-    entities.set(c.id, { key: c.id, name: c.name, type: "competitor", domain: c.domain, mentions: 0 });
+    entities.set(c.id, {
+      key: c.id,
+      name: c.name,
+      type: "competitor",
+      domain: c.domain,
+      mentions: 0,
+    });
     for (const token of [c.name, ...c.aliases].map(normalizeBrandToken)) {
       if (token) competitorKeyByToken.set(token, c.id);
     }

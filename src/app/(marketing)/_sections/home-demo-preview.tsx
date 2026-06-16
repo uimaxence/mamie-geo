@@ -71,8 +71,7 @@ export function HomeDemoPreview() {
         <span className="type-eyebrow">Aperçu en direct</span>
         <h2 className="type-h1 mt-3">Voilà ce que tu regardes chaque matin.</h2>
         <p className="type-body-lg mt-4 text-[color:var(--color-ink-soft)]">
-          Une marque française de cosmétiques bio, trackée sur les 5 IA
-          grand public.
+          Une marque française de cosmétiques bio, trackée sur les 5 IA grand public.
         </p>
       </div>
 
@@ -138,11 +137,7 @@ export function HomeDemoPreview() {
           </div>
 
           {/* Visibilité par LLM, interactif (today / 7j / 30j) */}
-          <HomeDemoPreviewBars
-            today={todaySegments}
-            avg7d={segments7d}
-            avg30d={segments30d}
-          />
+          <HomeDemoPreviewBars today={todaySegments} avg7d={segments7d} avg30d={segments30d} />
         </div>
       </div>
 

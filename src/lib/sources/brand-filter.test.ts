@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  parseBrandIdsFromSearchParam,
-  serializeBrandIdsToSearchParam,
-} from "./brand-filter";
+import { parseBrandIdsFromSearchParam, serializeBrandIdsToSearchParam } from "./brand-filter";
 
 describe("parseBrandIdsFromSearchParam", () => {
   const available = ["a", "b", "c"];

@@ -72,11 +72,7 @@ export function MetricBadge({
         className,
       )}
     >
-      <span
-        aria-hidden
-        className={cn("shrink-0", tones.bar)}
-        style={{ width: `${barWidth}px` }}
-      />
+      <span aria-hidden className={cn("shrink-0", tones.bar)} style={{ width: `${barWidth}px` }} />
       <span className="px-2 py-0.5 font-semibold">{value}</span>
     </span>
   );

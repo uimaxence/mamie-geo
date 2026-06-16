@@ -5,10 +5,7 @@ import type { ParsedBrandsPayload } from "@/lib/citation/types";
 // Tests sur la formule glossaire :
 //   percentage = brand / (brand + Σ competitor) × 100
 
-function runScored(opts: {
-  brandMentioned: boolean;
-  competitors?: string[];
-}): RunWithScoring {
+function runScored(opts: { brandMentioned: boolean; competitors?: string[] }): RunWithScoring {
   const parsedBrands: ParsedBrandsPayload = {
     detection: [],
     scoring: {
@@ -84,10 +81,7 @@ describe("computePartDeVoix", () => {
   });
 
   it("ignore les runs sans parsedBrands (pending)", () => {
-    const result = computePartDeVoix([
-      runScored({ brandMentioned: true }),
-      { parsedBrands: null },
-    ]);
+    const result = computePartDeVoix([runScored({ brandMentioned: true }), { parsedBrands: null }]);
     expect(result.brandCitations).toBe(1);
     expect(result.competitorCitations).toBe(0);
     expect(result.percentage).toBe(100);

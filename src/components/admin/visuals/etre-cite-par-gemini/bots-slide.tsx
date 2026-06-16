@@ -83,10 +83,7 @@ export function BotsSlide({ index, total }: Props) {
           }}
         >
           Les confondre, c&apos;est se{" "}
-          <span style={{ color: NIGHT.red, fontWeight: 700 }}>
-            supprimer de Google en entier
-          </span>
-          .
+          <span style={{ color: NIGHT.red, fontWeight: 700 }}>supprimer de Google en entier</span>.
         </p>
       </div>
     </NightShell>

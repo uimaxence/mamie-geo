@@ -80,11 +80,12 @@ export default function OutilsPage() {
             Gratuit · sans carte bancaire
           </Badge>
           <h1 className="type-display">
-            Trois outils gratuits pour <strong className="font-bold">mesurer ta visibilité IA</strong>.
+            Trois outils gratuits pour{" "}
+            <strong className="font-bold">mesurer ta visibilité IA</strong>.
           </h1>
           <p className="type-body-lg mt-6">
-            Les IA recommandent déjà des marques à tes clients. Ces outils te montrent où tu en es
-            — avant de décider si tu veux suivre ça tous les jours.
+            Les IA recommandent déjà des marques à tes clients. Ces outils te montrent où tu en es —
+            avant de décider si tu veux suivre ça tous les jours.
           </p>
         </div>
 

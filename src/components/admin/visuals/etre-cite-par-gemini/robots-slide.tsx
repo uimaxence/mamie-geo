@@ -39,8 +39,8 @@ export function RobotsSlide({ index, total }: Props) {
             maxWidth: 820,
           }}
         >
-          Ne bloque <span style={{ color: NIGHT.red }}>jamais</span> Googlebot
-          pour « échapper à l&apos;IA ».
+          Ne bloque <span style={{ color: NIGHT.red }}>jamais</span> Googlebot pour « échapper à
+          l&apos;IA ».
         </h2>
 
         <div
@@ -87,8 +87,7 @@ export function RobotsSlide({ index, total }: Props) {
                 display: "inline-block",
               }}
             >
-              User-agent: Googlebot{"\n"}Disallow: /
-              {/* barre rouge en travers du bloc bloqué */}
+              User-agent: Googlebot{"\n"}Disallow: /{/* barre rouge en travers du bloc bloqué */}
               <span
                 style={{
                   position: "absolute",

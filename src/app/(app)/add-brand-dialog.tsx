@@ -16,7 +16,7 @@ import {
   LinkButton,
 } from "@/components/ui";
 import { createBrand, type CreateBrandResult } from "@/lib/brands/actions";
-import { quotasFor, type PlanKey } from "@/lib/plans/quotas";
+import { planLabel, quotasFor, type PlanKey } from "@/lib/plans/quotas";
 
 // Dialog d'ajout d'une nouvelle marque (brand) depuis le BrandSwitcher
 // de la top bar app. 2 modes selon quota :
@@ -82,8 +82,8 @@ function QuotaReachedContent({
       <DialogHeader>
         <DialogTitle>Quota de marques atteint</DialogTitle>
         <DialogDescription>
-          Ton plan{" "}
-          <strong className="text-[color:var(--color-ink)]">{plan}</strong> autorise{" "}
+          Ton plan <strong className="text-[color:var(--color-ink)]">{planLabel(plan)}</strong>{" "}
+          autorise{" "}
           <strong className="text-[color:var(--color-ink)]">
             {max === Number.POSITIVE_INFINITY ? "illimité" : max}
           </strong>{" "}

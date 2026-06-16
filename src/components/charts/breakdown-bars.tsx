@@ -55,9 +55,7 @@ export function BreakdownBars({
 }: Props) {
   const sumValues = segments.reduce((acc, s) => acc + s.value, 0);
   const denom =
-    mode === "share"
-      ? sumValues
-      : (maxValue ?? Math.max(...segments.map((s) => s.value), 1));
+    mode === "share" ? sumValues : (maxValue ?? Math.max(...segments.map((s) => s.value), 1));
 
   return (
     <div className={cn("flex flex-col gap-5", className)}>

@@ -28,7 +28,11 @@ const LATER_24H_KEY = "mamie:plan-picker:later-until";
 const POST_ONBOARDED_SESSION_KEY = "mamie:plan-picker:post-onboarded-handled";
 const TRIAL_EXPLAINER_SESSION_KEY = "mamie:trial-explainer:shown";
 
-function deriveVariant(plan: string, trialEndsAt: string | null, now: number): PlanPickerVariant | null {
+function deriveVariant(
+  plan: string,
+  trialEndsAt: string | null,
+  now: number,
+): PlanPickerVariant | null {
   if (plan === "expired" || plan === "canceled") return "expired";
   if (plan === "trialing") {
     if (!trialEndsAt) return "default";
@@ -70,8 +74,7 @@ export function PlanPickerModalTrigger({ plan, trialEndsAt }: Props) {
     }
 
     const isPostOnboarded =
-      params.get("onboarded") === "1" &&
-      !sessionStorage.getItem(POST_ONBOARDED_SESSION_KEY);
+      params.get("onboarded") === "1" && !sessionStorage.getItem(POST_ONBOARDED_SESSION_KEY);
 
     const nextTrigger: TriggerSource = isPostOnboarded ? "post_onboarding" : "auto_re_prompt";
 

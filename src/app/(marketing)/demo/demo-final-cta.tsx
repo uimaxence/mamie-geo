@@ -10,8 +10,8 @@ export function DemoFinalCta() {
         <span className="type-eyebrow">C&apos;est tout ce que tu as vu, mais avec ta marque</span>
         <h2 className="type-h1 mt-4">Tu peux avoir le même rapport pour ta propre marque.</h2>
         <p className="type-body-lg mt-6 max-w-xl mx-auto">
-          Setup en 3 minutes (nom + domaine + concurrents). Premier batch de runs disponible sous
-          24 h. Garantie remboursement 14 jours.
+          Setup en 3 minutes (nom + domaine + concurrents). Premier batch de runs disponible sous 24
+          h. Garantie remboursement 14 jours.
         </p>
         <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
           <TrackedLinkButton

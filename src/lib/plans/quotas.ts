@@ -6,8 +6,15 @@
 // `Infinity` représente l'illimité (Agency = prompts illimités).
 // `cadence` : "daily" lance les runs chaque jour (Starter+),
 //             "weekly" lance les runs uniquement le lundi (Solo).
-// Les plans inactifs (trialing, past_due, expired, canceled) sont en
-// cadence weekly avec quotas 0 → ne génèrent aucun run.
+//
+// `trialing` = essai gratuit 14 jours par défaut SUR LE PLAN SOLO, SANS
+// carte (revirement 2026-06-16, cf. doc 09 — remplace l'ancien trialing
+// 0/0 qui rendait l'app inutilisable pendant l'essai). Il a donc les
+// quotas Solo et est « schedulable » (génère des runs, cf.
+// SCHEDULABLE_PLANS), mais n'est PAS dans ACTIVE_PLANS au sens
+// facturation (pas d'abonnement Stripe → pas de portail). À l'expiration
+// des 14 j → `expired`.
+// past_due/expired/canceled restent en quotas 0 (lecture seule).
 
 export type PlanKey =
   | "trialing"
@@ -45,16 +52,17 @@ export interface PlanQuotas {
 }
 
 const QUOTAS: Record<PlanKey, PlanQuotas> = {
-  // Compte créé sans paiement — aucun run lancé tant que pas de subscription.
-  // Pivot 2026-05-14 : remplace l'ancien "trial 7j sans carte" (cf. doc 09).
+  // Essai gratuit 14 j par défaut, calé sur Solo (2026-06-16, cf. doc 09).
+  // Mêmes quotas que Solo pour que l'essai soit réellement utilisable (avant :
+  // 0/0 → l'utilisateur ne pouvait même pas ajouter de prompt).
   trialing: {
     brands: 1,
-    prompts: 0,
-    competitors: 0,
+    prompts: 5,
+    competitors: 3,
     cadence: "weekly",
-    audits: 0,
+    audits: 5,
     comparisonCompetitors: 0,
-    aiTrafficTracking: false,
+    aiTrafficTracking: true,
   },
   // Accès gratuit offert aux beta-testeurs (octroi manuel admin, durée 3 mois).
   // Cadence weekly + prompts plafonnés pour maîtriser le coût LLM
@@ -149,7 +157,10 @@ export function quotasFor(plan: string): PlanQuotas {
   return QUOTAS[key] ?? QUOTAS.starter;
 }
 
-/** Plans considérés comme actifs (peuvent générer des runs et accéder à l'app). */
+/** Plans « actifs » au sens FACTURATION : abonnement Stripe en cours ou accès
+ *  beta offert. Pilote la section facturation (carte « Gérer mon abonnement »
+ *  → portail Stripe). `trialing` n'en fait PAS partie : essai sans carte, pas
+ *  d'abonnement à gérer. */
 export const ACTIVE_PLANS: readonly PlanKey[] = [
   "beta",
   "solo",
@@ -161,6 +172,34 @@ export const ACTIVE_PLANS: readonly PlanKey[] = [
 
 export function isActivePlan(plan: string): boolean {
   return (ACTIVE_PLANS as readonly string[]).includes(plan);
+}
+
+/** Plans qui GÉNÈRENT des runs/audits (scheduler). = plans actifs + l'essai
+ *  gratuit `trialing` (calé sur Solo depuis 2026-06-16). Distinct de
+ *  ACTIVE_PLANS car l'essai tourne sans abonnement Stripe. */
+export const SCHEDULABLE_PLANS: readonly PlanKey[] = [...ACTIVE_PLANS, "trialing"] as const;
+
+export function isSchedulablePlan(plan: string): boolean {
+  return (SCHEDULABLE_PLANS as readonly string[]).includes(plan);
+}
+
+/** Libellé FR d'un plan/statut, pour tout affichage utilisateur. « trialing »
+ *  brut était incompréhensible (« trailing ? ») — uniformisé 2026-06-16. */
+const PLAN_LABELS: Record<string, string> = {
+  trialing: "Essai gratuit",
+  beta: "Bêta",
+  solo: "Solo",
+  starter: "Starter",
+  pro: "Pro",
+  agency: "Agency",
+  enterprise: "Enterprise",
+  past_due: "Paiement en retard",
+  expired: "Expiré",
+  canceled: "Annulé",
+};
+
+export function planLabel(plan: string): string {
+  return PLAN_LABELS[plan] ?? plan.charAt(0).toUpperCase() + plan.slice(1);
 }
 
 /** Erreur typée renvoyée par les server actions quand le quota est atteint. */

@@ -89,64 +89,65 @@ La première étape, elle, ne demande aucune théorie : savoir qui vous cite dé
 [Tester gratuitement →](/outils/test-visibilite-ia)
 
 **Sources principales**
+
 - SparkToro, recherche sur les recherches « zero-click » : [sparktoro.com](https://sparktoro.com/blog)
-- Search Engine Journal, *How to Track AI Visibility & Prompts The Right Way* : [searchenginejournal.com](https://www.searchenginejournal.com/how-to-track-ai-visibility-prompts-the-right-way/569866/)
-- Conductor Academy, *AI Prompt Tracking* : [conductor.com](https://www.conductor.com/academy/ai-prompt-tracking/)
+- Search Engine Journal, _How to Track AI Visibility & Prompts The Right Way_ : [searchenginejournal.com](https://www.searchenginejournal.com/how-to-track-ai-visibility-prompts-the-right-way/569866/)
+- Conductor Academy, _AI Prompt Tracking_ : [conductor.com](https://www.conductor.com/academy/ai-prompt-tracking/)
 
 {/* === JSON-LD à injecter dans layout.tsx via <script type="application/ld+json"> === */}
 
-{/*
+{/_
 {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "Article",
-      "headline": "Suivi de visibilité IA : les vraies limites des prompt trackers (et pourquoi on les assume)",
-      "description": "Les sceptiques des prompt trackers soulèvent de vrais problèmes : non-déterminisme, API qui n'est pas ChatGPT.com, zero-click. On les prend au sérieux, et voici notre méthode.",
-      "image": "https://mamie-geo.fr/og/limites-prompt-trackers-suivi-visibilite-ia.png",
-      "author": {
-        "@type": "Person",
-        "name": "Maxence Cailleau",
-        "url": "https://mamie-geo.fr/about"
-      },
-      "publisher": {
-        "@type": "Organization",
-        "name": "Mamie GEO",
-        "logo": {
-          "@type": "ImageObject",
-          "url": "https://mamie-geo.fr/logo.png"
-        }
-      },
-      "datePublished": "2026-06-12",
-      "dateModified": "2026-06-12",
-      "mainEntityOfPage": "https://mamie-geo.fr/blog/limites-prompt-trackers-suivi-visibilite-ia"
-    },
-    {
-      "@type": "FAQPage",
-      "mainEntity": [
-        { "@type": "Question", "name": "Les prompt trackers sont-ils fiables malgré le non-déterminisme des LLM ?", "acceptedAnswer": { "@type": "Answer", "text": "Oui, à condition de mesurer en volume. Une réponse isolée d'un LLM est imprévisible et ne signifie rien. En revanche, la fréquence de citation calculée sur de nombreuses exécutions, suivie dans le temps, constitue un signal stable et exploitable. La fiabilité vient de l'échantillonnage et de l'agrégation, pas de la mesure unitaire." }},
-        { "@type": "Question", "name": "Pourquoi dit-on que l'API ne reflète pas ChatGPT.com ?", "acceptedAnswer": { "@type": "Answer", "text": "Parce que l'interface web ajoute des éléments que l'API ne reproduit pas : instructions système propres au produit, mémoire utilisateur, navigation web en direct et routage vers différents modèles selon le contexte. Une mesure faite via l'API est donc une approximation utile mais imparfaite de ce que voit réellement un utilisateur. Un bon outil le dit au lieu de le masquer." }},
-        { "@type": "Question", "name": "L'analytics de trafic référent ne suffit-il pas ?", "acceptedAnswer": { "@type": "Answer", "text": "Non. Le trafic référent ne compte que les visites avec clic. Or une grande partie du GEO est zero-click : votre marque peut être citée, recommandée ou résumée sans qu'aucune visite n'ait lieu. L'analytics référent est donc aveugle à une part majeure de votre visibilité IA. Il complète le prompt tracking, il ne le remplace pas." }},
-        { "@type": "Question", "name": "Qu'est-ce que le query fan-out et pourquoi c'est important ?", "acceptedAnswer": { "@type": "Answer", "text": "C'est la décomposition d'une question en plusieurs sous-requêtes lancées en parallèle par un moteur de recherche IA avant d'assembler sa réponse. Loin d'invalider le suivi, comprendre ce fan-out révèle sur quels angles et sous-sujets vous devez être présent pour apparaître dans la réponse finale." }}
-      ]
-    },
-    {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        { "@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://mamie-geo.fr" },
-        { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://mamie-geo.fr/blog" },
-        { "@type": "ListItem", "position": 3, "name": "Les vraies limites des prompt trackers", "item": "https://mamie-geo.fr/blog/limites-prompt-trackers-suivi-visibilite-ia" }
-      ]
-    }
-  ]
+"@context": "https://schema.org",
+"@graph": [
+{
+"@type": "Article",
+"headline": "Suivi de visibilité IA : les vraies limites des prompt trackers (et pourquoi on les assume)",
+"description": "Les sceptiques des prompt trackers soulèvent de vrais problèmes : non-déterminisme, API qui n'est pas ChatGPT.com, zero-click. On les prend au sérieux, et voici notre méthode.",
+"image": "https://mamie-geo.fr/og/limites-prompt-trackers-suivi-visibilite-ia.png",
+"author": {
+"@type": "Person",
+"name": "Maxence Cailleau",
+"url": "https://mamie-geo.fr/about"
+},
+"publisher": {
+"@type": "Organization",
+"name": "Mamie GEO",
+"logo": {
+"@type": "ImageObject",
+"url": "https://mamie-geo.fr/logo.png"
 }
-*/}
+},
+"datePublished": "2026-06-12",
+"dateModified": "2026-06-12",
+"mainEntityOfPage": "https://mamie-geo.fr/blog/limites-prompt-trackers-suivi-visibilite-ia"
+},
+{
+"@type": "FAQPage",
+"mainEntity": [
+{ "@type": "Question", "name": "Les prompt trackers sont-ils fiables malgré le non-déterminisme des LLM ?", "acceptedAnswer": { "@type": "Answer", "text": "Oui, à condition de mesurer en volume. Une réponse isolée d'un LLM est imprévisible et ne signifie rien. En revanche, la fréquence de citation calculée sur de nombreuses exécutions, suivie dans le temps, constitue un signal stable et exploitable. La fiabilité vient de l'échantillonnage et de l'agrégation, pas de la mesure unitaire." }},
+{ "@type": "Question", "name": "Pourquoi dit-on que l'API ne reflète pas ChatGPT.com ?", "acceptedAnswer": { "@type": "Answer", "text": "Parce que l'interface web ajoute des éléments que l'API ne reproduit pas : instructions système propres au produit, mémoire utilisateur, navigation web en direct et routage vers différents modèles selon le contexte. Une mesure faite via l'API est donc une approximation utile mais imparfaite de ce que voit réellement un utilisateur. Un bon outil le dit au lieu de le masquer." }},
+{ "@type": "Question", "name": "L'analytics de trafic référent ne suffit-il pas ?", "acceptedAnswer": { "@type": "Answer", "text": "Non. Le trafic référent ne compte que les visites avec clic. Or une grande partie du GEO est zero-click : votre marque peut être citée, recommandée ou résumée sans qu'aucune visite n'ait lieu. L'analytics référent est donc aveugle à une part majeure de votre visibilité IA. Il complète le prompt tracking, il ne le remplace pas." }},
+{ "@type": "Question", "name": "Qu'est-ce que le query fan-out et pourquoi c'est important ?", "acceptedAnswer": { "@type": "Answer", "text": "C'est la décomposition d'une question en plusieurs sous-requêtes lancées en parallèle par un moteur de recherche IA avant d'assembler sa réponse. Loin d'invalider le suivi, comprendre ce fan-out révèle sur quels angles et sous-sujets vous devez être présent pour apparaître dans la réponse finale." }}
+]
+},
+{
+"@type": "BreadcrumbList",
+"itemListElement": [
+{ "@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://mamie-geo.fr" },
+{ "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://mamie-geo.fr/blog" },
+{ "@type": "ListItem", "position": 3, "name": "Les vraies limites des prompt trackers", "item": "https://mamie-geo.fr/blog/limites-prompt-trackers-suivi-visibilite-ia" }
+]
+}
+]
+}
+_/}
 
 {/* === Méta-notes pour seo-geo-tech === */}
 
-{/*
-META TITLE : Prompt trackers : les vraies limites du suivi de visibilité IA | Mamie GEO  (60 car.)
-META DESCRIPTION : Non-déterminisme, API vs ChatGPT.com, zero-click : les critiques des prompt trackers sont en partie justes. Notre méthode pour mesurer honnêtement.  (146 car.)
+{/\*
+META TITLE : Prompt trackers : les vraies limites du suivi de visibilité IA | Mamie GEO (60 car.)
+META DESCRIPTION : Non-déterminisme, API vs ChatGPT.com, zero-click : les critiques des prompt trackers sont en partie justes. Notre méthode pour mesurer honnêtement. (146 car.)
 URL : /blog/limites-prompt-trackers-suivi-visibilite-ia
 CATEGORY pill : Méthodo (pas de categoryColor, convention articles Méthodo/Tutoriel)
 READING TIME : 9 min
@@ -154,21 +155,24 @@ OG IMAGE : /og/limites-prompt-trackers-suivi-visibilite-ia.png
 ANGLE : build-in-public, réponse de front aux sceptiques. Steelman de la critique sans attaque nominative (pas de mention Trackboxx en dur, l'article Trackboxx du 16/12/2025 n'a pas pu être vérifié à la source).
 
 MAILLAGE INTERNE :
+
 - inline méthodo + retournement → /blog/pourquoi-tracker-sa-visibilite-ia (pilier "pourquoi mesurer")
 - inline conclusion → /blog/qu-est-ce-que-le-geo (pilier définition)
 - à envisager : lien depuis /blog/outils-visibilite-ia-sortent-du-tableau-de-bord (mesurer puis agir) vers cet article
 
 PROMPTS DE VISIBILITÉ À TRACKER (8 semaines) :
+
 1. "Les prompt trackers sont-ils fiables ?"
 2. "Quelles sont les limites du suivi de visibilité IA ?"
 3. "Faut-il mesurer le trafic référent ou les citations IA ?"
 4. "Pourquoi l'API ne reflète pas ChatGPT.com ?"
 5. "Comment bien mesurer sa visibilité dans les LLM ?"
-Succès : Mamie GEO cité dans ≥2 LLM sur ≥2 prompts à S+8.
+   Succès : Mamie GEO cité dans ≥2 LLM sur ≥2 prompts à S+8.
 
 SOURCES / VÉRIF :
+
 - Zero-click : SparkToro (recherche bien documentée), lien blog SparkToro (vérifier URL exacte d'un billet zero-click récent avant publi)
 - query fan-out : concept documenté par Google pour AI Mode, possibilité d'ajouter le lien Google officiel avant publi
 - Non-déterminisme et API vs interface : arguments factuels standards, pas de source unique nécessaire
 - À FAIRE avant publi : si Max veut citer nommément l'article Trackboxx déclencheur, retrouver et vérifier l'URL (16/12/2025) puis l'ajouter en source en le présentant loyalement
-*/}
+  \*/}

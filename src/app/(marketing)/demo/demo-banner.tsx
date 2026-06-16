@@ -7,13 +7,7 @@ import { TrackedLinkButton } from "@/components/marketing/tracked-link-button";
 // (pour éviter toute ambiguïté sur la véracité des données) +
 // CTA principal "Démarrer pour 9,99 €/mois" toujours visible au scroll.
 
-export function DemoBanner({
-  brandName,
-  brandDomain,
-}: {
-  brandName: string;
-  brandDomain: string;
-}) {
+export function DemoBanner({ brandName, brandDomain }: { brandName: string; brandDomain: string }) {
   return (
     <div className="sticky top-0 z-40 border-b border-[color:var(--color-border)] bg-[color:var(--color-gray-50)]">
       <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-6 py-3 lg:px-10">

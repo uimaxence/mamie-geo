@@ -40,22 +40,13 @@ export function VarianceSlide({ index, total }: Props) {
             maxWidth: 920,
           }}
         >
-          La <span style={{ color: COLORS.brandBlue }}>même banque</span>, le
-          même jour, les mêmes questions.
+          La <span style={{ color: COLORS.brandBlue }}>même banque</span>, le même jour, les mêmes
+          questions.
         </h1>
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 28, marginTop: 56 }}>
-          <ScoreCard
-            platform="Sur ChatGPT"
-            score="6"
-            verdict="Quasi invisible"
-            negative
-          />
-          <ScoreCard
-            platform="Sur Claude"
-            score="53"
-            verdict="Recommandée en 2e position"
-          />
+          <ScoreCard platform="Sur ChatGPT" score="6" verdict="Quasi invisible" negative />
+          <ScoreCard platform="Sur Claude" score="53" verdict="Recommandée en 2e position" />
         </div>
 
         <p
@@ -69,9 +60,8 @@ export function VarianceSlide({ index, total }: Props) {
             maxWidth: 880,
           }}
         >
-          Chaque IA a ses propres sources, son propre index, ses propres
-          préférences. Mesurer sa visibilité sur une seule IA, c&apos;est ne
-          rien mesurer.
+          Chaque IA a ses propres sources, son propre index, ses propres préférences. Mesurer sa
+          visibilité sur une seule IA, c&apos;est ne rien mesurer.
         </p>
       </div>
     </SlideShell>
@@ -118,9 +108,7 @@ function ScoreCard({
           fontWeight: 700,
         }}
       >
-        <span style={{ color: accent, fontSize: 28, fontWeight: 900 }}>
-          {negative ? "✗" : "✓"}
-        </span>
+        <span style={{ color: accent, fontSize: 28, fontWeight: 900 }}>{negative ? "✗" : "✓"}</span>
         {platform}
       </span>
       <span

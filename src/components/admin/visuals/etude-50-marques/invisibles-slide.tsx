@@ -47,8 +47,7 @@ export function InvisiblesSlide({ index, total }: Props) {
             maxWidth: 920,
           }}
         >
-          Connues de tous.{" "}
-          <span style={{ color: COLORS.brandBlue }}>Invisibles</span> pour les IA.
+          Connues de tous. <span style={{ color: COLORS.brandBlue }}>Invisibles</span> pour les IA.
         </h1>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 20, marginTop: 56 }}>
@@ -113,10 +112,7 @@ export function InvisiblesSlide({ index, total }: Props) {
                 }}
               >
                 {score.toLocaleString("fr-FR")}
-                <span style={{ fontSize: 26, fontWeight: 600, color: COLORS.inkSoft }}>
-                  {" "}
-                  /100
-                </span>
+                <span style={{ fontSize: 26, fontWeight: 600, color: COLORS.inkSoft }}> /100</span>
               </span>
             </div>
           ))}
@@ -133,9 +129,8 @@ export function InvisiblesSlide({ index, total }: Props) {
             maxWidth: 880,
           }}
         >
-          11 marques sur 50 sont sous les 10/100. Quand on demande à une IA
-          « quelle enseigne choisir », elles n&apos;existent pas. La notoriété
-          TV ne sert à rien ici.
+          11 marques sur 50 sont sous les 10/100. Quand on demande à une IA « quelle enseigne
+          choisir », elles n&apos;existent pas. La notoriété TV ne sert à rien ici.
         </p>
       </div>
     </SlideShell>

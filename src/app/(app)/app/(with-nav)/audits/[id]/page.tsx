@@ -51,9 +51,7 @@ export default async function AuditDetailPage({ params }: PageProps) {
   const warnings = checks.filter(
     (c) => c.severity === "warning" && (c.status === "warn" || c.status === "fail"),
   );
-  const info = checks.filter(
-    (c) => !critical.includes(c) && !warnings.includes(c),
-  );
+  const info = checks.filter((c) => !critical.includes(c) && !warnings.includes(c));
 
   return (
     <PageContainer width="detail">
@@ -96,14 +94,24 @@ export default async function AuditDetailPage({ params }: PageProps) {
           </div>
 
           <div className="flex shrink-0 flex-col gap-2">
-            <IssuePill tone="critical" count={critical.length} singular="critique" plural="critiques" />
+            <IssuePill
+              tone="critical"
+              count={critical.length}
+              singular="critique"
+              plural="critiques"
+            />
             <IssuePill
               tone="warning"
               count={warnings.length}
               singular="avertissement"
               plural="avertissements"
             />
-            <IssuePill tone="success" count={info.length} singular="bon point" plural="info & bons points" />
+            <IssuePill
+              tone="success"
+              count={info.length}
+              singular="bon point"
+              plural="info & bons points"
+            />
           </div>
         </div>
 
@@ -157,7 +165,11 @@ function IssuePill({
       className="inline-flex items-center gap-2 rounded-[var(--radius-pill)] px-3 py-1 text-sm text-[color:var(--color-ink-soft)]"
       style={{ backgroundColor: styles.bg }}
     >
-      <span aria-hidden className="size-2 shrink-0 rounded-full" style={{ backgroundColor: styles.dot }} />
+      <span
+        aria-hidden
+        className="size-2 shrink-0 rounded-full"
+        style={{ backgroundColor: styles.dot }}
+      />
       <strong className="text-[color:var(--color-ink)] tabular-nums">{count}</strong>
       {count > 1 ? plural : singular}
     </span>

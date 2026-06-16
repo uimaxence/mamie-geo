@@ -8,9 +8,7 @@ import { LLMError } from "./types";
 // cassette JSON. Pattern identique à anthropic.test.ts pour cohérence.
 // Cassettes dans tests/fixtures/llm/lechat/.
 
-const FIXTURES_DIR = fileURLToPath(
-  new URL("../../../tests/fixtures/llm/lechat/", import.meta.url),
-);
+const FIXTURES_DIR = fileURLToPath(new URL("../../../tests/fixtures/llm/lechat/", import.meta.url));
 
 async function loadCassette(name: string) {
   const raw = await readFile(`${FIXTURES_DIR}${name}.json`, "utf-8");
@@ -76,9 +74,9 @@ describe("createMistralClient", () => {
   });
 
   it("rejette un modèle sans tarif", () => {
-    expect(() =>
-      createMistralClient({ apiKey: "test-key", model: "mistral-fictif-9-9" }),
-    ).toThrow(/Tarif inconnu/);
+    expect(() => createMistralClient({ apiKey: "test-key", model: "mistral-fictif-9-9" })).toThrow(
+      /Tarif inconnu/,
+    );
   });
 
   it("mappe HTTP 401 vers LLMError code 'auth'", async () => {

@@ -60,7 +60,9 @@ export function BillingSection({
 
       {isActive && <ActiveBillingCard plan={plan} currentPeriodEnd={currentPeriodEnd} />}
 
-      {!isActive && !isBeta && <ChoosePlanGrid hasSubscription={hasSubscription} />}
+      {!isActive && !isBeta && (
+        <ChoosePlanGrid hasSubscription={hasSubscription} isTrialing={plan === "trialing"} />
+      )}
     </div>
   );
 }
@@ -88,8 +90,8 @@ function BetaAccessCard({
           <span className="text-sm font-semibold text-[color:var(--color-ink)]">Gratuit</span>
         </div>
         <p className="mt-3 text-sm text-[color:var(--color-muted)]">
-          Tu fais partie des beta-testeurs Mamie GEO — merci&nbsp;! Tu as accès au tracking des 5 IA,
-          gratuitement
+          Tu fais partie des beta-testeurs Mamie GEO — merci&nbsp;! Tu as accès au tracking des 5
+          IA, gratuitement
           {expiry ? (
             <>
               {" "}
@@ -103,7 +105,7 @@ function BetaAccessCard({
           conservées.
         </p>
       </div>
-      <ChoosePlanGrid hasSubscription={hasSubscription} />
+      <ChoosePlanGrid hasSubscription={hasSubscription} isTrialing={false} />
     </div>
   );
 }
@@ -152,13 +154,21 @@ function ActiveBillingCard({
   );
 }
 
-function ChoosePlanGrid({ hasSubscription }: { hasSubscription: boolean }) {
+function ChoosePlanGrid({
+  hasSubscription,
+  isTrialing,
+}: {
+  hasSubscription: boolean;
+  isTrialing: boolean;
+}) {
   return (
     <div>
       <p className="type-meta">
         {hasSubscription
           ? "Réactive ton abonnement en choisissant un plan."
-          : "Choisis un plan pour démarrer ton tracking. Garantie remboursement 14 jours."}
+          : isTrialing
+            ? "Ton essai gratuit est en cours. Choisis un plan pour continuer après tes 14 jours. Garantie remboursement 14 jours."
+            : "Choisis un plan pour démarrer ton tracking. Garantie remboursement 14 jours."}
       </p>
       <div className="mt-4 grid gap-4 sm:grid-cols-3">
         {(Object.keys(PLAN_DETAILS) as PurchasablePlan[]).map((p) => (

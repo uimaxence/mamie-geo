@@ -24,11 +24,7 @@ export function captureException(err: unknown, context?: Record<string, unknown>
 
 type SetMode = "set" | "set_once";
 
-export function setPersonProperty(
-  key: string,
-  value: unknown,
-  mode: SetMode = "set",
-): void {
+export function setPersonProperty(key: string, value: unknown, mode: SetMode = "set"): void {
   if (!isReady()) return;
   if (mode === "set_once") {
     posthog.setPersonProperties(undefined, { [key]: value });

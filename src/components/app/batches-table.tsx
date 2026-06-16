@@ -1,7 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { Bot, Cat, ChevronRight, MessageCircle, Search, Sparkles, type LucideIcon } from "lucide-react";
+import {
+  Bot,
+  Cat,
+  ChevronRight,
+  MessageCircle,
+  Search,
+  Sparkles,
+  type LucideIcon,
+} from "lucide-react";
 import {
   Collapsible,
   CollapsibleContent,
@@ -57,11 +65,7 @@ interface BatchesTableProps {
   };
 }
 
-export function BatchesTable({
-  batches,
-  showPromptColumn = true,
-  emptyState,
-}: BatchesTableProps) {
+export function BatchesTable({ batches, showPromptColumn = true, emptyState }: BatchesTableProps) {
   if (batches.length === 0) {
     return (
       <EmptyState
@@ -105,13 +109,7 @@ function HeaderRow({ showPromptColumn }: { showPromptColumn: boolean }) {
   );
 }
 
-function BatchRow({
-  batch,
-  showPromptColumn,
-}: {
-  batch: RunBatch;
-  showPromptColumn: boolean;
-}) {
+function BatchRow({ batch, showPromptColumn }: { batch: RunBatch; showPromptColumn: boolean }) {
   return (
     <Collapsible>
       <CollapsibleTrigger
@@ -126,10 +124,7 @@ function BatchRow({
           className="text-[color:var(--color-muted)] transition-transform duration-150 group-data-[state=open]:rotate-90"
         />
         {showPromptColumn && (
-          <span
-            className="flex-1 truncate text-[color:var(--color-ink)]"
-            title={batch.promptText}
-          >
+          <span className="flex-1 truncate text-[color:var(--color-ink)]" title={batch.promptText}>
             {batch.promptText}
           </span>
         )}
@@ -221,9 +216,7 @@ function LlmAvatar({ llm, run }: { llm: LLMValue; run: RunBatchEntry | undefined
   );
 }
 
-function avatarToneFor(
-  run: RunBatchEntry | undefined,
-): "cited" | "neutral" | "failed" | "muted" {
+function avatarToneFor(run: RunBatchEntry | undefined): "cited" | "neutral" | "failed" | "muted" {
   if (!run) return "muted";
   if (run.status === "failed") return "failed";
   if (run.status !== "success") return "muted";
@@ -281,9 +274,7 @@ function BatchRunsDetail({ runs }: { runs: RunBatchEntry[] }) {
             <tr key={run.id}>
               <DetailTd>
                 <span className="font-medium">{LLM_LABELS[run.llm] ?? run.llm}</span>
-                {run.cacheHit && (
-                  <span className="ml-2 type-meta">cache</span>
-                )}
+                {run.cacheHit && <span className="ml-2 type-meta">cache</span>}
               </DetailTd>
               <DetailTd>
                 <RunStatusBadge status={run.status} />
@@ -320,10 +311,7 @@ function DetailTh({
   return (
     <th
       scope="col"
-      className={cn(
-        "type-eyebrow py-1.5 px-2",
-        align === "right" ? "text-right" : "text-left",
-      )}
+      className={cn("type-eyebrow py-1.5 px-2", align === "right" ? "text-right" : "text-left")}
     >
       {children}
     </th>
@@ -338,9 +326,7 @@ function DetailTd({
   align?: "left" | "right";
 }) {
   return (
-    <td
-      className={cn("py-1.5 px-2 align-middle", align === "right" ? "text-right" : "text-left")}
-    >
+    <td className={cn("py-1.5 px-2 align-middle", align === "right" ? "text-right" : "text-left")}>
       {children}
     </td>
   );

@@ -163,11 +163,7 @@ function DeleteAccountDialog({ userEmail }: { userEmail: string }) {
           <Button variant="ghost" onClick={() => setOpen(false)} disabled={pending}>
             Annuler
           </Button>
-          <Button
-            variant="accent"
-            onClick={handleDelete}
-            disabled={!canSubmit || pending}
-          >
+          <Button variant="accent" onClick={handleDelete} disabled={!canSubmit || pending}>
             {pending ? "Suppression en cours…" : "Supprimer définitivement"}
           </Button>
         </DialogFooter>

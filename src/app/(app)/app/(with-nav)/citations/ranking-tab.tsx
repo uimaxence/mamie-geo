@@ -235,13 +235,7 @@ function formatDay(iso: string): string {
 // Statut compétitif au-dessus du leaderboard : où tu en es + le prochain
 // objectif concret (gamification par le rang, cf. doc 02 § Gamification
 // 2026-06-11 — pas de points ni de badges décoratifs, le rang EST le jeu).
-function RankStatus({
-  entries,
-  scopeLabel,
-}: {
-  entries: RankingEntry[];
-  scopeLabel: string;
-}) {
+function RankStatus({ entries, scopeLabel }: { entries: RankingEntry[]; scopeLabel: string }) {
   const you = entries.find((e) => e.type === "you");
   if (!you || you.mentions === 0) {
     // Cas « zéro citation » : runs présents mais ta marque jamais citée —
@@ -265,7 +259,12 @@ function RankStatus({
   return (
     <p className="mt-4 flex items-start gap-2 rounded-[var(--radius-lg)] border border-[color:var(--color-border)] bg-[color:var(--color-gray-50)] px-4 py-3 text-[0.8125rem] text-[color:var(--color-ink-soft)]">
       {you.rank === 1 ? (
-        <Trophy size={14} strokeWidth={2} aria-hidden className="mt-0.5 shrink-0 text-[color:var(--color-accent)]" />
+        <Trophy
+          size={14}
+          strokeWidth={2}
+          aria-hidden
+          className="mt-0.5 shrink-0 text-[color:var(--color-accent)]"
+        />
       ) : (
         <Target size={14} strokeWidth={2} aria-hidden className="mt-0.5 shrink-0" />
       )}
@@ -303,7 +302,10 @@ function RankStatus({
 function RankDelta({ entry }: { entry: RankingEntry }) {
   if (entry.previousRank === null) {
     return (
-      <span className="text-[0.75rem] text-[color:var(--color-faint)]" title="Pas encore d'historique">
+      <span
+        className="text-[0.75rem] text-[color:var(--color-faint)]"
+        title="Pas encore d'historique"
+      >
         —
       </span>
     );
@@ -334,11 +336,7 @@ function RankDelta({ entry }: { entry: RankingEntry }) {
   );
 }
 
-function Th({
-  children,
-  className,
-  ...props
-}: React.ThHTMLAttributes<HTMLTableCellElement>) {
+function Th({ children, className, ...props }: React.ThHTMLAttributes<HTMLTableCellElement>) {
   return (
     <th
       className={`px-4 py-2.5 text-left text-[0.75rem] font-medium text-[color:var(--color-muted)] ${className ?? ""}`}

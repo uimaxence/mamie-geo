@@ -33,8 +33,7 @@ export const GLOSSARY: Record<GlossaryTerm, string> = {
     "Nombre moyen de fois où ta marque est mentionnée dans une même réponse où elle apparaît.",
   citation:
     "Pourcentage des apparitions qui deviennent une citation explicite dans la réponse finale.",
-  "marque-citee":
-    "Nombre de runs du jour où ta marque est mentionnée, tous LLMs confondus.",
+  "marque-citee": "Nombre de runs du jour où ta marque est mentionnée, tous LLMs confondus.",
   "top-concurrent":
     "Concurrent le plus cité aujourd'hui, tous LLMs confondus. Utile pour repérer qui domine ton segment dans les réponses IA.",
   source:

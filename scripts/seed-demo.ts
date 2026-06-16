@@ -66,7 +66,10 @@ const LLMS = ["claude", "chatgpt", "perplexity", "gemini", "lechat"] as const;
 // Trend déterministe par LLM : starting score + drift + jitter.
 // Calibré pour avoir des courbes lisibles à 30j avec score qui monte
 // (effet "produit qui marche").
-const LLM_PROFILES: Record<(typeof LLMS)[number], { start: number; drift: number; jitter: number }> = {
+const LLM_PROFILES: Record<
+  (typeof LLMS)[number],
+  { start: number; drift: number; jitter: number }
+> = {
   claude: { start: 38, drift: 0.95, jitter: 4 },
   chatgpt: { start: 32, drift: 0.7, jitter: 5 },
   perplexity: { start: 28, drift: 0.6, jitter: 3 },

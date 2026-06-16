@@ -238,10 +238,7 @@ function ScanProgress({ domain, detected }: { domain: string; detected: SiteProf
     return () => clearInterval(interval);
   }, []);
 
-  const currentIndex = PROGRESS_STEPS.reduce(
-    (acc, step, i) => (elapsed >= step.atMs ? i : acc),
-    0,
-  );
+  const currentIndex = PROGRESS_STEPS.reduce((acc, step, i) => (elapsed >= step.atMs ? i : acc), 0);
 
   return (
     <div className="mx-auto max-w-2xl rounded-[var(--radius-xl)] border border-[color:var(--color-border)] bg-white p-8 text-center shadow-[var(--shadow-sm)]">
@@ -278,7 +275,9 @@ function ScanProgress({ domain, detected }: { domain: string; detected: SiteProf
           </div>
         ))}
       </div>
-      <p className="type-meta mt-6">~20 secondes — on analyse ton site puis l&apos;IA répond en direct.</p>
+      <p className="type-meta mt-6">
+        ~20 secondes — on analyse ton site puis l&apos;IA répond en direct.
+      </p>
     </div>
   );
 }

@@ -17,7 +17,7 @@ import {
 } from "@/components/ui";
 import { PageViewTracker } from "@/components/app/page-view-tracker";
 import { getDashboardData } from "@/lib/dashboard/queries";
-import { quotasFor } from "@/lib/plans/quotas";
+import { planLabel, quotasFor } from "@/lib/plans/quotas";
 import { scoreColor } from "@/lib/audit/score";
 import type { SubScore } from "@/lib/audit/types";
 import { listAudits } from "../actions";
@@ -238,7 +238,7 @@ function LockedView({ plan }: { plan: string }) {
         <PageHeader
           icon={GitCompare}
           title="Comparaison concurrents"
-          summary={`Audite en batch tes concurrents · disponible Starter (3) et Pro (10) · plan actuel : ${plan}`}
+          summary={`Audite en batch tes concurrents · disponible Starter (3) et Pro (10) · plan actuel : ${planLabel(plan)}`}
         />
       </div>
       <div className="mt-8">

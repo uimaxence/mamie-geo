@@ -38,7 +38,15 @@ interface ClassifiedSource extends SourceListItem {
 
 // Types affichés comme filtres, dans l'ordre de pertinence. On masque
 // les filtres sans aucune source pour éviter les chips vides.
-const FILTER_ORDER: EntityType[] = ["you", "competitor", "reference", "ugc", "editorial", "corporate", "other"];
+const FILTER_ORDER: EntityType[] = [
+  "you",
+  "competitor",
+  "reference",
+  "ugc",
+  "editorial",
+  "corporate",
+  "other",
+];
 const FILTER_LABEL: Record<EntityType, string> = {
   you: "Vous",
   competitor: "Concurrents",
@@ -237,8 +245,8 @@ function PresenceCallout({
         <strong className="font-semibold">
           Ton domaine apparaît dans {youCount} source{youCount > 1 ? "s" : ""}.
         </strong>{" "}
-        Les IA te citent déjà comme référence sur ton marché. Continue à publier pour
-        renforcer cette présence.
+        Les IA te citent déjà comme référence sur ton marché. Continue à publier pour renforcer
+        cette présence.
       </Callout>
     );
   }
@@ -268,13 +276,21 @@ function Callout({
       "border-[color:var(--color-success)]/25 bg-[color:var(--color-success-bg)] text-[color:var(--color-success)]",
     warning:
       "border-[color:var(--color-warning)]/25 bg-[color:var(--color-warning-bg)] text-[color:var(--color-warning)]",
-    neutral: "border-[color:var(--color-border)] bg-[color:var(--color-gray-50)] text-[color:var(--color-muted)]",
+    neutral:
+      "border-[color:var(--color-border)] bg-[color:var(--color-gray-50)] text-[color:var(--color-muted)]",
   }[tone];
 
   return (
-    <div className={cn("mt-5 flex items-start gap-2.5 rounded-[var(--radius-lg)] border px-4 py-3", toneClass)}>
+    <div
+      className={cn(
+        "mt-5 flex items-start gap-2.5 rounded-[var(--radius-lg)] border px-4 py-3",
+        toneClass,
+      )}
+    >
       <Icon size={16} strokeWidth={2} className="mt-0.5 shrink-0" aria-hidden />
-      <p className="text-[0.8125rem] leading-relaxed text-[color:var(--color-ink-soft)]">{children}</p>
+      <p className="text-[0.8125rem] leading-relaxed text-[color:var(--color-ink-soft)]">
+        {children}
+      </p>
     </div>
   );
 }
@@ -303,7 +319,9 @@ function FilterChip({
       )}
     >
       {label}
-      <span className={cn("tabular-nums", active ? "text-white/70" : "text-[color:var(--color-muted)]")}>
+      <span
+        className={cn("tabular-nums", active ? "text-white/70" : "text-[color:var(--color-muted)]")}
+      >
         {count}
       </span>
     </button>
@@ -329,11 +347,7 @@ function formatRelative(iso: string): string {
   return `il y a ${diffD} j`;
 }
 
-function Th({
-  children,
-  className,
-  ...props
-}: React.ThHTMLAttributes<HTMLTableCellElement>) {
+function Th({ children, className, ...props }: React.ThHTMLAttributes<HTMLTableCellElement>) {
   return (
     <th
       className={`px-4 py-2.5 text-left text-[0.75rem] font-medium text-[color:var(--color-muted)] ${className ?? ""}`}
@@ -344,12 +358,6 @@ function Th({
   );
 }
 
-function Td({
-  children,
-  className,
-}: {
-  children?: React.ReactNode;
-  className?: string;
-}) {
+function Td({ children, className }: { children?: React.ReactNode; className?: string }) {
   return <td className={`px-4 py-3 align-middle ${className ?? ""}`}>{children}</td>;
 }

@@ -42,13 +42,13 @@ export function PricingDoneForYou() {
                 </div>
               </div>
               <p className="type-body mt-4">
-                Pour quelques clients par trimestre, je prends en main personnellement la
-                visibilité SEO + GEO d&apos;une marque : de l&apos;audit à l&apos;implémentation,
-                jusqu&apos;à ce que les IA te citent.
+                Pour quelques clients par trimestre, je prends en main personnellement la visibilité
+                SEO + GEO d&apos;une marque : de l&apos;audit à l&apos;implémentation, jusqu&apos;à
+                ce que les IA te citent.
               </p>
               <p className="type-meta mt-4">
-                Sur devis, engagement trimestriel. {DFY_SLOTS_LEFT} marques maximum par trimestre — je
-                fais le travail moi-même, pas une équipe offshore.
+                Sur devis, engagement trimestriel. {DFY_SLOTS_LEFT} marques maximum par trimestre —
+                je fais le travail moi-même, pas une équipe offshore.
               </p>
               <LinkButton
                 href="/contact"

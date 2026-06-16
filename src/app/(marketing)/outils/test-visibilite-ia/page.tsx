@@ -81,9 +81,9 @@ export default function TestVisibiliteIAPage() {
             <h2 className="type-h1 mt-3">Un vrai test, pas une démo marketing.</h2>
             <p className="type-body mt-6 max-w-prose">
               Le scan interroge une IA en direct avec les questions que tes prospects posent
-              réellement. Tu vois la réponse telle qu&apos;elle est : qui est cité, dans quel
-              ordre, et si tu en fais partie. Pour les 4 autres IA — où les résultats varient
-              jusqu&apos;à ×8 — c&apos;est le suivi quotidien de l&apos;app qui prend le relais.
+              réellement. Tu vois la réponse telle qu&apos;elle est : qui est cité, dans quel ordre,
+              et si tu en fais partie. Pour les 4 autres IA — où les résultats varient jusqu&apos;à
+              ×8 — c&apos;est le suivi quotidien de l&apos;app qui prend le relais.
             </p>
           </div>
 

@@ -83,7 +83,18 @@ const CURATED_SECTORS: CuratedSector[] = [
     ],
   },
   {
-    keywords: ["travaux", "artisan", "plombier", "electricien", "renovation", "btp", "chauffagiste", "menuisier", "maçon", "macon"],
+    keywords: [
+      "travaux",
+      "artisan",
+      "plombier",
+      "electricien",
+      "renovation",
+      "btp",
+      "chauffagiste",
+      "menuisier",
+      "maçon",
+      "macon",
+    ],
     comparators: [
       { domain: "travaux.com", label: "Travaux.com" },
       { domain: "habitatpresto.com", label: "HabitatPresto" },

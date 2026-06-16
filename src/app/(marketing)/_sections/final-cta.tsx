@@ -46,9 +46,7 @@ export async function FinalCTA() {
          *    ton chaud)
          *  - microcopy gray-300 (réassurance discrète mais lisible) */}
         <span className="type-eyebrow text-[color:var(--color-gray-400)]">Prêt à voir ?</span>
-        <h2 className="type-display mt-4 text-white">
-          Sache enfin si les IA parlent de toi.
-        </h2>
+        <h2 className="type-display mt-4 text-white">Sache enfin si les IA parlent de toi.</h2>
         <p className="type-body-lg mt-6 max-w-xl text-[color:var(--color-gray-100)]">
           Mesure ta visibilité dans les 5 IA grand public en moins de 10 minutes. En français,
           hébergé en Europe.
@@ -65,7 +63,11 @@ export async function FinalCTA() {
                 variant="secondary"
                 size="lg"
                 trackEvent="home_cta_clicked"
-                trackProperties={{ cta_label: "Démarrer — 9,99 €/mois", section: "final", href: "/pricing" }}
+                trackProperties={{
+                  cta_label: "Démarrer — 9,99 €/mois",
+                  section: "final",
+                  href: "/pricing",
+                }}
               >
                 Démarrer — 9,99&nbsp;€/mois
               </TrackedLinkButton>
@@ -74,7 +76,11 @@ export async function FinalCTA() {
                 variant="ai"
                 size="lg"
                 trackEvent="home_cta_clicked"
-                trackProperties={{ cta_label: "Audit gratuit", section: "final", href: "/outils/audit-technique" }}
+                trackProperties={{
+                  cta_label: "Audit gratuit",
+                  section: "final",
+                  href: "/outils/audit-technique",
+                }}
               >
                 Audit gratuit
               </TrackedLinkButton>
