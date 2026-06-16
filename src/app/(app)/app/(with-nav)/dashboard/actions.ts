@@ -7,18 +7,18 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/db/client";
 import { brands, prompts, runs, workspaceMembers, workspaces } from "@/db/schema";
 import { auth } from "@/lib/auth";
-import type { LLMValue } from "@/lib/llm";
+import { getConfiguredLLMs } from "@/lib/llm";
 import { captureServerEvent } from "@/lib/posthog-server";
 import { enqueue } from "@/lib/queue";
 
-// Server Action pour le bouton "Lancer un run" du dashboard. Même logique
-// que /api/runs/trigger mais auth via session Better Auth (et pas
+// Server Action pour le bouton "Lancer maintenant" du dashboard. Même
+// logique que /api/runs/trigger mais auth via session Better Auth (et pas
 // CRON_SECRET), c'est le chemin user-initié, pas le chemin cron.
 //
-// Phase A : seul le LLM "claude" est tracké, ajout des autres en
-// Phase C derrière l'interface LLMClient existante.
-
-const TRACKED_LLMS: readonly LLMValue[] = ["claude"] as const;
+// Lance sur TOUS les LLMs configurés (getConfiguredLLMs — source de
+// vérité partagée avec le scheduler), pas seulement Claude. L'ancien
+// hardcode ["claude"] datait de la Phase A mono-provider (corrigé
+// 2026-06-16 : le run manuel ne couvrait qu'1 IA sur les 5).
 
 export interface TriggerResult {
   ok: true;
@@ -60,8 +60,9 @@ export async function triggerRunNow(): Promise<TriggerResult> {
   let runsCreated = 0;
   let skipped = 0;
 
+  const trackedLlms = getConfiguredLLMs();
   for (const row of activePrompts) {
-    for (const llm of TRACKED_LLMS) {
+    for (const llm of trackedLlms) {
       const runId = randomUUID();
       const jobId = await enqueue({
         kind: "execute_prompt",

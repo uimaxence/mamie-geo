@@ -12,10 +12,13 @@ import { DownloadableChart } from "@/components/charts/downloadable-chart";
 import { LLM_COLORS, LLM_LABELS } from "@/components/charts/llm-colors";
 import { BatchesTable } from "@/components/app/batches-table";
 import { deriveSourcesFunnelRatios } from "@/lib/metrics/sources-funnel";
+import { quotasFor } from "@/lib/plans/quotas";
+import { nextScheduledRunAt } from "@/lib/scheduler/next-run";
+import { loadSidebarData } from "@/app/(app)/app-sidebar-data";
 import { DashboardSetupGuide } from "./dashboard-setup-guide";
 import { DashboardTracker } from "./dashboard-tracker";
+import { NextRunBar } from "./next-run-bar";
 import { TrendSection } from "./trend-section";
-import { TriggerRunForm } from "./trigger-form";
 
 // Dashboard data dynamique. Direction Airbnb-like (pivot 2026-05-07).
 // 4 stats agrégées tous-LLMs (PR6 2026-05-18) : Score de visibilité moyen,
@@ -45,6 +48,12 @@ export default async function DashboardPage() {
     .from(prompts)
     .where(eq(prompts.brandId, data.brand.id));
   const promptCount = promptCountRow[0]?.n ?? 0;
+
+  // Cadence du plan → date du prochain run automatique (compte à rebours).
+  // loadSidebarData est mémoïsé par requête (déjà appelé par le layout).
+  const sidebar = await loadSidebarData();
+  const planCadence = quotasFor(sidebar?.workspace.plan ?? "trialing").cadence;
+  const nextRunISO = nextScheduledRunAt(planCadence, new Date()).toISOString();
 
   // Stats agrégées tous-LLMs (PR6), remplace l'ancienne logique Claude-only.
   const agg = data.metricsAggregated;
@@ -105,10 +114,13 @@ export default async function DashboardPage() {
           totalRuns: agg.totalRuns,
           llmsCount: agg.llmsCount,
         })}
-        right={<TriggerRunForm />}
       />
 
       <DashboardSetupGuide promptCount={promptCount} />
+
+      {/* Compte à rebours du prochain run + « Lancer maintenant ». Caché
+       * tant qu'aucun prompt (le guide d'activation prend le relais). */}
+      {promptCount > 0 && <NextRunBar nextRunISO={nextRunISO} cadence={planCadence} />}
 
       {/* 4 Stats, agrégées tous-LLMs (cf. PR6 2026-05-18). */}
       <section className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">

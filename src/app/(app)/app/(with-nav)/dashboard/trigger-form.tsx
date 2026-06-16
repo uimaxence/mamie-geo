@@ -46,15 +46,16 @@ export function TriggerRunForm() {
       <DialogTrigger asChild>
         <Button variant="primary">
           <Play size={14} strokeWidth={2} />
-          Lancer un run
+          Lancer maintenant
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Lancer un run maintenant ?</DialogTitle>
           <DialogDescription>
-            Tous tes prompts actifs seront exécutés sur les IA trackées. Les jobs déjà en cours sur
-            la même journée seront ignorés (idempotence).
+            Tous tes prompts actifs sont exécutés tout de suite sur toutes les IA suivies (sans
+            attendre le run automatique). Les runs déjà lancés aujourd&apos;hui sont ignorés (pas de
+            doublon).
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
