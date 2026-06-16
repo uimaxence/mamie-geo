@@ -308,7 +308,7 @@ export function buildDemoBundle(today: Date = new Date()): DemoBundle {
 
   const dashboard: DashboardData = {
     workspace: { id: "demo-workspace", name: "Démo · Floréal", plan: "starter" },
-    brand: { id: "demo-brand", name: DEMO_BRAND_NAME, domain: DEMO_BRAND_DOMAIN },
+    brand: { id: "demo-brand", name: DEMO_BRAND_NAME, domain: DEMO_BRAND_DOMAIN, aiPixelKey: null },
     competitorsCount: DEMO_COMPETITORS.length,
     promptsCount: DEMO_PROMPTS.length,
     metricsToday,

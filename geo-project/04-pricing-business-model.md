@@ -72,6 +72,7 @@ Prices annuels -20 % : **Solo 95,90 € / Starter 470 € / Pro 1 430 € HT/an*
 - 1 marque, 3 concurrents, 5 prompts, 5 LLMs (Le Chat inclus sans condition)
 - Fréquence **hebdomadaire** (run lundi 6h UTC), historique 90 j
 - Dashboard + email récap hebdo, 1 utilisateur, support email J+3
+- **Pixel d'attribution du trafic IA inclus dès ce plan** (cf. doc 09 § 2026-06-15) : preuve de ROI (coût ≈ nul, réduit le churn du plan d'entrée)
 
 Marge brute LLM ~75 % mono-LLM, ~59 % multi-LLM. Hook : « ton bilan visibilité IA chaque lundi pour le prix d'un café ». Limite voulue : 1 run/semaine → motive l'upgrade Starter.
 

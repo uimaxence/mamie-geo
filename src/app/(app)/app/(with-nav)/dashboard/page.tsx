@@ -2,7 +2,11 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { Activity, Eye, Flame, Home, Layers, PieChart, Quote, Users } from "lucide-react";
 import { auth } from "@/lib/auth";
-import { computeDelta, getDashboardData, getVisibilityTrend } from "@/lib/dashboard/queries";
+import {
+  computeDelta,
+  getDashboardData,
+  getVisibilityTrend,
+} from "@/lib/dashboard/queries";
 import { Card, PageContainer, PageHeader, Stat } from "@/components/ui";
 import { BreakdownBars } from "@/components/charts/breakdown-bars";
 import { DownloadableChart } from "@/components/charts/downloadable-chart";

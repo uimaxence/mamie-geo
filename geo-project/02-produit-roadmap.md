@@ -205,6 +205,7 @@ Une fois que le Tracker tourne et que les clients comprennent leur position, ils
 - **S12** — Voir les améliorations prioritaires (top 10) pour devenir plus citable
 - **S13** — Suivre la progression de mon score AI-readiness dans le temps
 - **S14** — Comparer mon AI-readiness vs concurrents
+- **S15** — Prouver que le GEO m'amène de vrais visiteurs (trafic IA réel superposé à mon score de visibilité)
 
 ### Features V1
 
@@ -216,6 +217,7 @@ Une fois que le Tracker tourne et que les clients comprennent leur position, ils
 | **Audit concurrents** | Même scan sur les 3-5 concurrents trackés, comparaison côte à côte |
 | **Suivi des recommandations** | Checklist persistante : ce qui a été fait, ce qui reste |
 | **Recrawl hebdomadaire** | Re-mesure automatique du score |
+| **Attribution trafic IA** | Pixel first-party cookieless (un `<script>` à coller) : compte les visites venant des moteurs IA et les superpose au score de visibilité au dashboard (« preuve de ROI »). Livré 2026-06-15 — cf. doc 09. NB : distinct de l'intégration GA4/Search Console qui reste en V2.5 (sert les clients déjà équipés ; le pixel marche pour tous) |
 
 ### Stack additionnelle V1
 

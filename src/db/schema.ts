@@ -168,6 +168,13 @@ export const brands = pgTable(
     // V0+ pause/resume — quand non null, le scheduler skipe cette brand
     // (cf. doc 02 § V0+). Resume = SET NULL.
     pausedAt: timestamp({ withTimezone: true }),
+    // V1 — clé publique du pixel d'attribution trafic IA (cf. doc 09 §
+    // 2026-06-15). Null tant que le pixel n'est pas activé. Format
+    // `mgpx_<24 [a-z0-9]>` (préfixe public, volontairement distinct de
+    // `sk_` Stripe — cf. `src/lib/ai-traffic/keys.ts`). Sert d'identifiant
+    // dans l'URL du snippet et de lookup à l'ingestion. `.unique()` crée
+    // l'index du lookup.
+    aiPixelKey: text("ai_pixel_key").unique(),
     createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [
@@ -290,6 +297,54 @@ export const citationMetricsDaily = pgTable(
     citationsCount: integer().notNull().default(0),
   },
   (t) => [primaryKey({ columns: [t.brandId, t.llm, t.date] })],
+);
+
+// ──────────────────────────────────────────────────────────────────────
+// Attribution du trafic IA — V1 (cf. doc 09 § 2026-06-15)
+// Le pixel first-party (cookieless) posé sur le site du client ne remonte
+// QUE les visites d'origine IA (referrers chatgpt.com/perplexity.ai/…, UTM
+// utm_source=chatgpt.com). On agrège directement en quotidien : pas de
+// table d'événements bruts (cookieless + agrégat = surface RGPD minimale).
+// `source` réutilise LLM_VALUES (Copilot fusionné sur "chatgpt") pour pouvoir
+// superposer ce trafic au score de visibilité Mamie au dashboard.
+// ──────────────────────────────────────────────────────────────────────
+
+export const aiTrafficDaily = pgTable(
+  "ai_traffic_daily",
+  {
+    brandId: uuid()
+      .notNull()
+      .references(() => brands.id, { onDelete: "cascade" }),
+    source: text().notNull(), // clé LLM_VALUES
+    date: date().notNull(),
+    visits: integer().notNull().default(0),
+  },
+  (t) => [
+    primaryKey({ columns: [t.brandId, t.source, t.date] }),
+    check(
+      "ai_traffic_source_check",
+      sql`${t.source} IN ('chatgpt','claude','perplexity','gemini','lechat')`,
+    ),
+    // Fenêtres cross-brand (purge, agrégats par date) — la PK couvre déjà
+    // les lectures par brand.
+    index("idx_ai_traffic_daily_date").on(t.date),
+  ],
+);
+
+// Rate-limit / dédup de l'endpoint public d'ingestion du pixel, en Postgres
+// (pas d'Upstash Redis en V1 — cf. doc 09 § 2026-06-15, à revisiter selon
+// volume). `bucketKey` = compteur d'une fenêtre : `global:{date}` (cap
+// quotidien anti-abus) ou `ip:{ipHash}:{source}:{date}` (cap par visiteur
+// hashé). L'IP n'est jamais stockée en clair : seul son hash salé du jour
+// entre dans la clé. Purge des lignes périmées (> 2 j) opportuniste.
+export const aiPixelThrottle = pgTable(
+  "ai_pixel_throttle",
+  {
+    bucketKey: text("bucket_key").primaryKey(),
+    count: integer().notNull().default(0),
+    windowStart: timestamp({ withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("idx_ai_pixel_throttle_window").on(t.windowStart)],
 );
 
 // ──────────────────────────────────────────────────────────────────────

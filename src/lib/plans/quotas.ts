@@ -38,6 +38,10 @@ export interface PlanQuotas {
   /** Nombre max de concurrents auditables en batch (page compare).
    *  0 = feature désactivée (Solo). */
   comparisonCompetitors: number;
+  /** Attribution du trafic IA (pixel cookieless) — V1, cf. doc 09 § 2026-06-15.
+   *  Inclus dès Solo (preuve de valeur, coût ≈ nul). false pour les états
+   *  dégradés : la clé du pixel existe toujours mais l'ingestion drop. */
+  aiTrafficTracking: boolean;
 }
 
 const QUOTAS: Record<PlanKey, PlanQuotas> = {
@@ -50,6 +54,7 @@ const QUOTAS: Record<PlanKey, PlanQuotas> = {
     cadence: "weekly",
     audits: 0,
     comparisonCompetitors: 0,
+    aiTrafficTracking: false,
   },
   // Accès gratuit offert aux beta-testeurs (octroi manuel admin, durée 3 mois).
   // Cadence weekly + prompts plafonnés pour maîtriser le coût LLM
@@ -61,6 +66,7 @@ const QUOTAS: Record<PlanKey, PlanQuotas> = {
     cadence: "weekly",
     audits: 5,
     comparisonCompetitors: 3,
+    aiTrafficTracking: true,
   },
   // Plan d'entrée 9,99 € — 1 run par semaine sur 5 LLMs, marge ~75 % en Phase A
   solo: {
@@ -70,6 +76,7 @@ const QUOTAS: Record<PlanKey, PlanQuotas> = {
     cadence: "weekly",
     audits: 5,
     comparisonCompetitors: 0,
+    aiTrafficTracking: true,
   },
   starter: {
     brands: 1,
@@ -78,6 +85,7 @@ const QUOTAS: Record<PlanKey, PlanQuotas> = {
     cadence: "daily",
     audits: 30,
     comparisonCompetitors: 3,
+    aiTrafficTracking: true,
   },
   pro: {
     brands: 3,
@@ -86,6 +94,7 @@ const QUOTAS: Record<PlanKey, PlanQuotas> = {
     cadence: "daily",
     audits: 100,
     comparisonCompetitors: 10,
+    aiTrafficTracking: true,
   },
   agency: {
     brands: 10,
@@ -94,6 +103,7 @@ const QUOTAS: Record<PlanKey, PlanQuotas> = {
     cadence: "daily",
     audits: Number.POSITIVE_INFINITY,
     comparisonCompetitors: Number.POSITIVE_INFINITY,
+    aiTrafficTracking: true,
   },
   enterprise: {
     brands: Number.POSITIVE_INFINITY,
@@ -102,6 +112,7 @@ const QUOTAS: Record<PlanKey, PlanQuotas> = {
     cadence: "daily",
     audits: Number.POSITIVE_INFINITY,
     comparisonCompetitors: Number.POSITIVE_INFINITY,
+    aiTrafficTracking: true,
   },
   // États dégradés : lecture seule, pas de runs ni d'audits ni d'ajout brand.
   past_due: {
@@ -111,6 +122,7 @@ const QUOTAS: Record<PlanKey, PlanQuotas> = {
     cadence: "weekly",
     audits: 0,
     comparisonCompetitors: 0,
+    aiTrafficTracking: false,
   },
   expired: {
     brands: 1,
@@ -119,6 +131,7 @@ const QUOTAS: Record<PlanKey, PlanQuotas> = {
     cadence: "weekly",
     audits: 0,
     comparisonCompetitors: 0,
+    aiTrafficTracking: false,
   },
   canceled: {
     brands: 1,
@@ -127,6 +140,7 @@ const QUOTAS: Record<PlanKey, PlanQuotas> = {
     cadence: "weekly",
     audits: 0,
     comparisonCompetitors: 0,
+    aiTrafficTracking: false,
   },
 };
 

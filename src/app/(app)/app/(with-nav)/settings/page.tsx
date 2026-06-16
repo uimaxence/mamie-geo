@@ -50,7 +50,7 @@ export default async function SettingsPage({ searchParams }: PageProps) {
     .where(eq(workspaces.id, data.workspace.id))
     .limit(1);
   const brandRow = await db
-    .select({ aliases: brands.aliases, pausedAt: brands.pausedAt })
+    .select({ aliases: brands.aliases, pausedAt: brands.pausedAt, aiPixelKey: brands.aiPixelKey })
     .from(brands)
     .where(eq(brands.id, data.brand.id))
     .limit(1);
@@ -179,7 +179,6 @@ export default async function SettingsPage({ searchParams }: PageProps) {
         <SectionCard title="Plan & usage" subtitle={`Période en cours : ${data.usage.periodStart}`}>
           <dl className="grid grid-cols-2 gap-x-8 gap-y-4 sm:grid-cols-3">
             <Field label="Runs effectués" value={String(data.usage.runsCount)} />
-            <Field label="Coût LLM cumulé" value={`$${data.usage.llmCostUsd.toFixed(4)}`} mono />
             <Field label="Prompts actifs" value={String(data.promptsCount)} />
           </dl>
         </SectionCard>

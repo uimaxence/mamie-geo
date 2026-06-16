@@ -161,6 +161,53 @@ haut et l'entrée "2026-05-05 — Réponses aux 10 questions de bootstrap".
 
 ### Décisions enregistrées
 
+#### 2026-06-15 — Attribution du trafic IA : pixel cookieless maison (preuve de ROI GEO)
+
+**Contexte** : objection récurrente des sceptiques du GEO — « la visibilité dans
+les IA, OK, mais est-ce que ça m'amène de vrais visiteurs ? ». Mamie ne mesurait
+que la visibilité (un score), pas le trafic. Question de Max : élargir vers du
+tracking de trafic web façon Vercel Analytics / Search Console ?
+
+**Options considérées** :
+- A : Web analytics « classique » (visites totales, sources, bounce) façon
+  GA/Plausible/Matomo.
+- B : Intégration GA4 / Search Console (OAuth read-only) pour corréler trafic IA
+  et visibilité.
+- C : Pixel first-party **maison**, cookieless, qui ne compte QUE les visites
+  d'origine IA (referrers chatgpt.com/perplexity.ai/…, UTM utm_source=chatgpt.com).
+
+**Choix** : **C**. Web analytics générique (A) écarté : contredit le positionnement
+(doc 00 « pas un outil SEO classique »), me-too gratuit, lourd (cookies/RGPD).
+GA4/GSC (B) ne sert que les clients déjà équipés et bien configurés → laisse de
+côté une grande partie des freelances/PME FR (objection décisive de Max : « et si
+le client n'a pas d'outil analytics ? »). B reste planifié en V2.5. Le pixel maison
+(C) marche pour tout le monde : un seul `<script>` à coller.
+
+**Sous-décisions** :
+- **Rate-limit en Postgres** (table `ai_pixel_throttle`), pas Upstash Redis :
+  faible volume au stade actuel, pas de nouvelle dépendance. À revisiter selon
+  volume (Upstash reste le choix de stack acté, jamais câblé).
+- **Cookieless / RGPD** : aucun cookie, aucune IP en clair (seul un hash SHA-256
+  salé du jour entre dans le rate-limit), agrégats quotidiens uniquement, pas de
+  table d'événements bruts → pas de bannière (cf. privacy policy § 9).
+- **Copilot fusionné sur `chatgpt`** (même moteur GPT) → `source` réutilise
+  `LLM_VALUES`, graphe de corrélation propre.
+- **Gate plan dès Solo** (`aiTrafficTracking: true`) : preuve de valeur, coût ≈ nul.
+
+**Conséquences attendues** : asset d'acquisition (courbe « trafic IA monte avec
+le score », exportable PNG pour rapport client / LinkedIn). Schéma : tables
+`ai_traffic_daily` + `ai_pixel_throttle` + colonne `brands.ai_pixel_key`
+(migration 0011). Endpoints publics `/api/ai-pixel/[key]` (snippet) et
+`/api/ai-pixel/collect` (ingestion). Section dashboard « Trafic IA — preuve de
+ROI » + installation dans Réglages. Risque produit n°1 = support « ça affiche 0 »
+(referrers strippés) → mitigé par un disclaimer « plancher détecté, pas exhaustif »
+dans l'UI.
+
+**À revisiter** : ~4 semaines post-déploiement (taux de détection réel vs trafic
+IA attendu, volume de l'endpoint public → décider si Upstash devient nécessaire).
+Hors V1 et à refuser : visiteurs uniques, trafic par page (réintroduit l'état par
+visiteur + dette RGPD).
+
 #### 2026-06-15 — Programme beta-testeurs : plan `beta` gratuit + observabilité (Sentry) + widget feedback
 
 **Contexte** : cold outreach Max proposant 10 accès gratuits 3 mois contre

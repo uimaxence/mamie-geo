@@ -1,6 +1,7 @@
 import { and, desc, eq, gte, lt } from "drizzle-orm";
 import { db } from "@/db/client";
 import {
+  aiTrafficDaily,
   brands,
   citationMetricsDaily,
   competitors,
@@ -33,6 +34,7 @@ export interface DashboardData {
     id: string;
     name: string;
     domain: string;
+    aiPixelKey: string | null;
   };
   competitorsCount: number;
   promptsCount: number;
@@ -202,6 +204,7 @@ export async function getDashboardData(userId: string): Promise<DashboardData | 
       id: brand.id,
       name: brand.name,
       domain: brand.domain,
+      aiPixelKey: brand.aiPixelKey,
     },
     competitorsCount,
     promptsCount,
@@ -370,6 +373,128 @@ export async function getVisibilityTrend(
   return Array.from(byDate.entries())
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([date, scores]) => ({ date, ...scores }));
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Attribution du trafic IA (V1) — section « preuve de ROI » du dashboard.
+// Superpose le trafic réel venant des moteurs IA (pixel cookieless) au score
+// de visibilité Mamie, pour répondre à la question du sceptique : « est-ce
+// que le GEO m'amène de vrais gens ? ». cf. doc 09 § 2026-06-15.
+// ─────────────────────────────────────────────────────────────────────
+
+export interface AiTrafficProofPoint {
+  /** ISO date YYYY-MM-DD */
+  date: string;
+  /** Visites d'origine IA détectées ce jour (toutes sources). */
+  visits: number;
+  /** Score de visibilité moyen tous-LLMs ce jour (0-100). */
+  visibility: number;
+}
+
+export interface AiTrafficData {
+  /** false si le pixel n'a pas encore de clé (jamais activé). */
+  hasPixel: boolean;
+  /** Total des visites IA sur la fenêtre. */
+  totalVisits: number;
+  /** Variation des 7 derniers jours vs les 7 précédents (%). */
+  deltaPct: number | null;
+  topSource: { source: string; visits: number } | null;
+  /** Répartition par moteur sur la fenêtre (pour le BreakdownBars). */
+  bySource: Array<{ source: string; visits: number }>;
+  /** Série corrélée trafic × visibilité (graphe double-axe). */
+  proof: AiTrafficProofPoint[];
+}
+
+/**
+ * Charge les données « trafic IA » pour la brand. Retourne `hasPixel: false`
+ * (et des zéros) si le pixel n'a jamais été activé. Best-effort : le trafic
+ * absent (pixel posé mais aucun hit) donne une série vide, l'UI affiche alors
+ * un état d'attente.
+ */
+export async function getAiTrafficData(
+  brandId: string,
+  aiPixelKey: string | null,
+  days = 30,
+): Promise<AiTrafficData> {
+  if (!aiPixelKey) {
+    return { hasPixel: false, totalVisits: 0, deltaPct: null, topSource: null, bySource: [], proof: [] };
+  }
+
+  const end = new Date();
+  const start = new Date(end);
+  start.setUTCDate(end.getUTCDate() - (days - 1));
+  const startStr = start.toISOString().slice(0, 10);
+
+  const rows = await db
+    .select({
+      date: aiTrafficDaily.date,
+      source: aiTrafficDaily.source,
+      visits: aiTrafficDaily.visits,
+    })
+    .from(aiTrafficDaily)
+    .where(and(eq(aiTrafficDaily.brandId, brandId), gte(aiTrafficDaily.date, startStr)))
+    .orderBy(aiTrafficDaily.date);
+
+  const visitsByDate = new Map<string, number>();
+  const visitsBySource = new Map<string, number>();
+  let totalVisits = 0;
+  for (const r of rows) {
+    visitsByDate.set(r.date, (visitsByDate.get(r.date) ?? 0) + r.visits);
+    visitsBySource.set(r.source, (visitsBySource.get(r.source) ?? 0) + r.visits);
+    totalVisits += r.visits;
+  }
+
+  const bySource = [...visitsBySource.entries()]
+    .map(([source, visits]) => ({ source, visits }))
+    .sort((a, b) => b.visits - a.visits);
+  const topSource = bySource[0] ?? null;
+
+  // Delta 7j glissant vs les 7j précédents.
+  const last7 = sumVisitsSince(visitsByDate, daysAgoIso(6));
+  const prev7 = sumVisitsBetween(visitsByDate, daysAgoIso(13), daysAgoIso(7));
+  const deltaPct = computeDelta(last7, prev7);
+
+  // Série corrélée : visibilité moyenne par date (réutilise getVisibilityTrend)
+  // alignée sur l'union des dates trafic + visibilité.
+  const trend = await getVisibilityTrend(brandId, days);
+  const visibilityByDate = new Map<string, number>();
+  for (const point of trend) {
+    const scores = Object.entries(point)
+      .filter(([k]) => k !== "date")
+      .map(([, v]) => (typeof v === "number" ? v : 0))
+      .filter((v) => v > 0);
+    const avg = scores.length === 0 ? 0 : scores.reduce((a, b) => a + b, 0) / scores.length;
+    visibilityByDate.set(point.date, Math.round(avg * 10) / 10);
+  }
+
+  const allDates = [...new Set([...visitsByDate.keys(), ...visibilityByDate.keys()])].sort((a, b) =>
+    a.localeCompare(b),
+  );
+  const proof: AiTrafficProofPoint[] = allDates.map((date) => ({
+    date,
+    visits: visitsByDate.get(date) ?? 0,
+    visibility: visibilityByDate.get(date) ?? 0,
+  }));
+
+  return { hasPixel: true, totalVisits, deltaPct, topSource, bySource, proof };
+}
+
+function daysAgoIso(n: number): string {
+  const d = new Date();
+  d.setUTCDate(d.getUTCDate() - n);
+  return d.toISOString().slice(0, 10);
+}
+
+function sumVisitsSince(byDate: Map<string, number>, sinceIso: string): number {
+  let sum = 0;
+  for (const [date, v] of byDate) if (date >= sinceIso) sum += v;
+  return sum;
+}
+
+function sumVisitsBetween(byDate: Map<string, number>, fromIso: string, toIso: string): number {
+  let sum = 0;
+  for (const [date, v] of byDate) if (date >= fromIso && date <= toIso) sum += v;
+  return sum;
 }
 
 // ─────────────────────────────────────────────────────────────────────

@@ -11,6 +11,7 @@ import {
   ListChecks,
   LogOut,
   MessageSquareQuote,
+  Radar,
   Receipt,
   Wrench,
   type LucideIcon,
@@ -60,6 +61,9 @@ const NAV: NavItem[] = [
   // 2026-06-08 (cf. doc 09) : fusion Sources + Concurrents dans une
   // seule entrée « Citations » avec deux tabs internes.
   { href: "/app/citations", label: "Citations", icon: BookOpen },
+  // Trafic IA réel (pixel cookieless) — preuve de ROI, surface dédiée
+  // déplacée du dashboard (2026-06-15, cf. doc 09).
+  { href: "/app/traffic", label: "Trafic IA", icon: Radar },
   { href: "/app/audits", label: "Audits techniques", icon: Wrench },
   // Contenu éducatif evergreen (10 leviers GEO), distinct de l'audit
   // par-URL : la plupart des leviers sont off-page (branding, avis…).
