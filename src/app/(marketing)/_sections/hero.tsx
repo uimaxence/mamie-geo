@@ -34,9 +34,9 @@ export function Hero() {
               variant="primary"
               size="lg"
               trackEvent="home_cta_clicked"
-              trackProperties={{ cta_label: "Démarrer — 9,99 €/mois", section: "hero", href: "/pricing" }}
+              trackProperties={{ cta_label: "Démarrer 9,99 €/mois", section: "hero", href: "/pricing" }}
             >
-              Démarrer — 9,99&nbsp;€/mois
+              Démarrer 9,99&nbsp;€/mois
             </TrackedLinkButton>
             <TrackedLinkButton
               href="/demo"
