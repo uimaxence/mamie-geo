@@ -122,7 +122,8 @@ Page `semrush.com/ai-seo/overview/` au 2026-05-13 — référence pour le refres
 
 #### SE Ranking
 
-- €129/mois, AI search add-on +$71. Tout-en-un, francophone disponible ; mid-tier généraliste, pas focus GEO
+- €129/mois, AI search add-on $89/mois. Tout-en-un, francophone disponible ; mid-tier généraliste, pas focus GEO
+- **SE Visible** (standalone GEO, observé 2026-06) : $189/mois (450 prompts) → $355 → $519. Ne tracke que ChatGPT + Google AI Mode (Perplexity, Gemini, Claude « coming soon »), pas de Le Chat, anglais-first. Hors segment SMB FR
 
 ### Niches verticales
 
@@ -142,7 +143,14 @@ Page `semrush.com/ai-seo/overview/` au 2026-05-13 — référence pour le refres
 
 ### Vrais concurrents directs en France
 
-**Aucun.** Pas d'outil SaaS francophone GEO-first conçu pour le marché FR. C'est le trou stratégique.
+⚠️ **Mis à jour 2026-06-12** : le trou n'est plus vide. Des SaaS GEO francophones ont émergé entre mai et juin 2026 (cf. doc 09 § Snapshot Juin 2026) :
+
+- **Qwairy** (qwairy.co) — 59 €/mois Starter → 199 € Pro. Présenté comme la suite GEO de référence FR dans plusieurs comparatifs. **Concurrent FR direct n°1.**
+- **Botrank.ai** — 75 €/mois Starter → 245 € Business. Support FR, tracke Mistral via scraping UI, audit GEO technique, agent IA « Bob ».
+- **Meteoria** — scraping UI (réponses fidèles à ce que voit l'utilisateur) plutôt qu'APIs natives.
+- **Are You Mention** — tracking mentions LLM, gratuit pour l'instant.
+
+**Le différenciateur n'est donc plus « seul outil GEO FR »** mais : entrée à **9,99 €** (vs 59 € Qwairy, 75 € Botrank, soit 6× moins cher), **API natives** (vs scraping UI fragile), Le Chat dès Starter, RGPD/EU natif, tone humain FR, marque blanche en cœur d'offre. La fenêtre se referme plus vite que les 12-18 mois estimés → distribution = urgence.
 
 ### Quasi-acteurs (à surveiller)
 
@@ -170,6 +178,8 @@ Page `semrush.com/ai-seo/overview/` au 2026-05-13 — référence pour le refres
 | Rankscale     | €20           | 4                  | ❌      | ❌        | Limitée             | Solo                             |
 | Cairrot       | $99           | 5                  | ❌      | ❌        | Standard            | Agences B2B                      |
 | Semrush AI    | inclus        | Plusieurs          | ❌      | ✅        | Non                 | SEO teams                        |
+| Qwairy (FR)   | €59           | Plusieurs          | ?       | ✅        | ?                   | SMB / scale-ups FR               |
+| Botrank (FR)  | €75           | 5 (scraping)       | ✅      | ✅        | ?                   | SMB FR                           |
 | **Mamie GEO** | **€9,99-149** | **5 dont Le Chat** | **✅**  | **✅**    | **Cœur de produit** | **Freelance + SMB + agences FR** |
 
 ---
@@ -254,6 +264,6 @@ Page `semrush.com/ai-seo/overview/` au 2026-05-13 — référence pour le refres
 
 ## Conclusion stratégique du chapitre
 
-Marché en hypercroissance, trou français évident, concurrents internationaux structurellement mal placés sur le SMB francophone (trop chers, anglo-saxons, pas Mistral). Fenêtre 12-18 mois avant que Peec ou Semrush ne ferment le gap. **L'enjeu n'est pas de faire mieux que Profound — c'est d'arriver vite et de capturer le francophone avant la localisation anglo-saxonne.**
+Marché en hypercroissance, concurrents internationaux structurellement mal placés sur le SMB francophone (trop chers, anglo-saxons, pas Mistral). **Mise à jour 2026-06 : le trou FR n'est plus vide** — Qwairy (59 €), Botrank (75 €), Meteoria et Are You Mention ont émergé. La fenêtre se referme plus vite que les 12-18 mois estimés. **L'enjeu n'est plus d'arriver le premier (raté de peu) mais d'être le moins cher (9,99 €), le plus EU/RGPD-natif et le plus humain — et surtout d'exécuter la distribution maintenant, avant que Qwairy ne consolide la catégorie FR.**
 
 → Voir [02-produit-roadmap.md](./02-produit-roadmap.md). Note : 3 articles comparatifs publiés sur le blog (vs Peec, vs Otterly, vs Rankscale — 2026-06-08, cf. doc 06 § Comparison pages).
