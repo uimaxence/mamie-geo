@@ -1,8 +1,8 @@
 import { cache } from "react";
 import { headers } from "next/headers";
-import { and, desc, eq } from "drizzle-orm";
+import { and, count, desc, eq } from "drizzle-orm";
 import { db } from "@/db/client";
-import { brands, technicalAudits, workspaceMembers, workspaces } from "@/db/schema";
+import { brands, prompts, technicalAudits, workspaceMembers, workspaces } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import type { CheckResult } from "@/lib/audit/types";
 
@@ -37,6 +37,9 @@ export interface SidebarData {
    *  rouge sur l'item "Audits techniques" de la sidebar. 0 = pas de
    *  bulle affichée. */
   criticalIssuesCount: number;
+  /** True si la brand courante n'a aucun prompt configuré → on affiche la
+   *  coachmark d'activation pointant vers l'onglet « Prompts ». */
+  needsPromptSetup: boolean;
 }
 
 export const loadSidebarData = cache(async (): Promise<SidebarData | null> => {
@@ -71,6 +74,13 @@ export const loadSidebarData = cache(async (): Promise<SidebarData | null> => {
 
   const criticalIssuesCount = await countCriticalIssues(ws.workspaceId);
 
+  // Coachmark d'activation : la brand courante a-t-elle au moins 1 prompt ?
+  const promptCountRow = await db
+    .select({ n: count() })
+    .from(prompts)
+    .where(eq(prompts.brandId, brandsRows[0]!.id));
+  const needsPromptSetup = (promptCountRow[0]?.n ?? 0) === 0;
+
   return {
     user: { id: session.user.id, email: session.user.email },
     workspace: {
@@ -87,6 +97,7 @@ export const loadSidebarData = cache(async (): Promise<SidebarData | null> => {
     currentBrandId: brandsRows[0]!.id,
     currentBrandsCount: brandsRows.length,
     criticalIssuesCount,
+    needsPromptSetup,
   };
 });
 

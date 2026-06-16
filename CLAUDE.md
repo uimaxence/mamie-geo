@@ -326,8 +326,12 @@ plan dans `src/lib/plans/quotas.ts`) :
 `<PageContainer>` sur 100 % des pages, tables responsive
 (`hidden md:table-cell`), AppTopBar horizontale + BrandSwitcher.
 
-**Activation in-app** (2026-06-16) : dashboard avec **0 prompt** →
-`DashboardSetupGuide` (carte d'amorçage + modale 3 étapes → `/app/prompts`).
+**Activation in-app** (2026-06-16) : brand sans prompt (`needsPromptSetup`
+dans `SidebarData`) → **coachmark `PromptsCoachmark` ancrée à l'onglet
+« Prompts »** (bulle sombre + flèche en `fixed` calculé sur la rect de
+l'ancre — échappe au clip `overflow` de la nav — + highlight de l'onglet,
+dismiss localStorage, desktop only). Sur le dashboard, `DashboardSetupGuide`
+(carte d'amorçage + modale d'étapes **à la demande**, plus d'auto-ouverture).
 Badge plan sidebar en FR (« trialing » → « Essai gratuit »). Fermeture du
 PlanPicker sans choix → `TrialExplainerModal` (essai 14 j expliqué).
 

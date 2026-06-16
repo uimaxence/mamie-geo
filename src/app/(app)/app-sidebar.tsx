@@ -16,7 +16,7 @@ import {
   Wrench,
   type LucideIcon,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 import {
@@ -30,6 +30,7 @@ import {
 } from "@/components/ui";
 import { Logo } from "@/components/marketing/logo";
 import { SidebarSubscribeCard } from "@/components/app/sidebar-subscribe-card";
+import { PromptsCoachmark } from "@/components/app/prompts-coachmark";
 import { FeedbackDialog } from "@/components/app/feedback-dialog";
 import {
   CAL_SUPPORT_CONFIG,
@@ -85,16 +86,24 @@ export interface AppSidebarProps {
 
 export function AppSidebar({ data, mode = "desktop", onNavigate }: AppSidebarProps) {
   if (mode === "drawer") {
-    return <SidebarInner data={data} onNavigate={onNavigate} />;
+    return <SidebarInner data={data} mode="drawer" onNavigate={onNavigate} />;
   }
   return (
     <aside className="hidden md:flex md:flex-col md:w-56 md:shrink-0 md:border-r md:border-[color:var(--color-border)] md:bg-white md:h-[calc(100vh-3rem)] md:sticky md:top-12">
-      <SidebarInner data={data} onNavigate={onNavigate} />
+      <SidebarInner data={data} mode="desktop" onNavigate={onNavigate} />
     </aside>
   );
 }
 
-function SidebarInner({ data, onNavigate }: { data: SidebarData; onNavigate?: () => void }) {
+function SidebarInner({
+  data,
+  mode,
+  onNavigate,
+}: {
+  data: SidebarData;
+  mode: "desktop" | "drawer";
+  onNavigate?: () => void;
+}) {
   return (
     <div className="flex h-full flex-col">
       {/* Top, logo Mamie GEO icon-only, clic dashboard. Le wordmark
@@ -115,6 +124,8 @@ function SidebarInner({ data, onNavigate }: { data: SidebarData; onNavigate?: ()
         <SidebarNav
           onNavigate={onNavigate}
           criticalIssuesCount={data.criticalIssuesCount}
+          needsPromptSetup={data.needsPromptSetup}
+          mode={mode}
         />
       </nav>
 
@@ -133,60 +144,102 @@ function SidebarInner({ data, onNavigate }: { data: SidebarData; onNavigate?: ()
   );
 }
 
+const PROMPTS_COACHMARK_DISMISS_KEY = "mamie:prompts-coachmark:dismissed";
+
 function SidebarNav({
   onNavigate,
   criticalIssuesCount,
+  needsPromptSetup,
+  mode,
 }: {
   onNavigate?: () => void;
   criticalIssuesCount: number;
+  needsPromptSetup: boolean;
+  mode: "desktop" | "drawer";
 }) {
   const pathname = usePathname();
+  const [promptsEl, setPromptsEl] = useState<HTMLAnchorElement | null>(null);
+  // Coachmark masquée après dismiss (persistant). On part masqué pour éviter
+  // un flash avant lecture du localStorage (SSR/hydratation).
+  const [coachDismissed, setCoachDismissed] = useState(true);
+  useEffect(() => {
+    // Synchro avec localStorage (système externe) au montage.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setCoachDismissed(localStorage.getItem(PROMPTS_COACHMARK_DISMISS_KEY) === "1");
+  }, []);
+
+  const onPromptsPage = pathname?.startsWith("/app/prompts") ?? false;
+  // Desktop only : en drawer mobile, un popover `fixed` à droite sortirait
+  // de l'écran. La coachmark guide la première config, pas un usage récurrent.
+  const showCoachmark = needsPromptSetup && mode === "desktop" && !onPromptsPage && !coachDismissed;
+
+  function dismissCoachmark() {
+    localStorage.setItem(PROMPTS_COACHMARK_DISMISS_KEY, "1");
+    setCoachDismissed(true);
+  }
+
   return (
-    <ul className="flex flex-col gap-0.5">
-      {NAV.map((item) => {
-        const active = pathname === item.href || (pathname?.startsWith(item.href + "/") ?? false);
-        const showCriticalBadge =
-          item.href === "/app/audits" && criticalIssuesCount > 0;
-        return (
-          <li key={item.href}>
-            <Link
-              href={item.href}
-              onClick={onNavigate}
-              aria-current={active ? "page" : undefined}
-              className={cn(
-                "relative flex items-center gap-2.5 rounded-[var(--radius-md)] px-3 py-2 text-sm font-medium transition-colors",
-                active
-                  ? "bg-[color:var(--color-gray-100)] text-[color:var(--color-ink)]"
-                  : "text-[color:var(--color-ink-soft)] hover:bg-[color:var(--color-gray-50)] hover:text-[color:var(--color-ink)]",
-              )}
-            >
-              {active && (
-                <span
-                  aria-hidden
-                  className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-full bg-[color:var(--color-ink)]"
+    <>
+      <ul className="flex flex-col gap-0.5">
+        {NAV.map((item) => {
+          const active = pathname === item.href || (pathname?.startsWith(item.href + "/") ?? false);
+          const showCriticalBadge = item.href === "/app/audits" && criticalIssuesCount > 0;
+          const isPromptsItem = item.href === "/app/prompts";
+          const highlight = isPromptsItem && showCoachmark && !active;
+          return (
+            <li key={item.href}>
+              <Link
+                ref={isPromptsItem ? setPromptsEl : undefined}
+                href={item.href}
+                onClick={onNavigate}
+                aria-current={active ? "page" : undefined}
+                className={cn(
+                  "relative flex items-center gap-2.5 rounded-[var(--radius-md)] px-3 py-2 text-sm font-medium transition-colors",
+                  active
+                    ? "bg-[color:var(--color-gray-100)] text-[color:var(--color-ink)]"
+                    : "text-[color:var(--color-ink-soft)] hover:bg-[color:var(--color-gray-50)] hover:text-[color:var(--color-ink)]",
+                  // Met l'onglet « en gros » tant que la coachmark est active.
+                  highlight &&
+                    "bg-[color:var(--color-accent)]/[0.08] text-[color:var(--color-ink)] ring-1 ring-inset ring-[color:var(--color-accent)]/40",
+                )}
+              >
+                {active && (
+                  <span
+                    aria-hidden
+                    className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-full bg-[color:var(--color-ink)]"
+                  />
+                )}
+                <item.icon
+                  size={16}
+                  strokeWidth={2}
+                  className={cn(
+                    active ? "text-[color:var(--color-ink)]" : "text-[color:var(--color-muted)]",
+                    highlight && "text-[color:var(--color-accent)]",
+                  )}
                 />
-              )}
-              <item.icon
-                size={16}
-                strokeWidth={2}
-                className={
-                  active ? "text-[color:var(--color-ink)]" : "text-[color:var(--color-muted)]"
-                }
-              />
-              <span className="flex-1 truncate whitespace-nowrap">{item.label}</span>
-              {showCriticalBadge && (
-                <Badge
-                  tone="error"
-                  aria-label={`${criticalIssuesCount} problème${criticalIssuesCount > 1 ? "s" : ""} critique${criticalIssuesCount > 1 ? "s" : ""} à corriger`}
-                >
-                  {criticalIssuesCount}
-                </Badge>
-              )}
-            </Link>
-          </li>
-        );
-      })}
-    </ul>
+                <span className="flex-1 truncate whitespace-nowrap">{item.label}</span>
+                {showCriticalBadge && (
+                  <Badge
+                    tone="error"
+                    aria-label={`${criticalIssuesCount} problème${criticalIssuesCount > 1 ? "s" : ""} critique${criticalIssuesCount > 1 ? "s" : ""} à corriger`}
+                  >
+                    {criticalIssuesCount}
+                  </Badge>
+                )}
+                {/* Pastille accent sur l'onglet Prompts à configurer. */}
+                {highlight && (
+                  <span
+                    aria-hidden
+                    className="size-2 shrink-0 rounded-full bg-[color:var(--color-accent)]"
+                  />
+                )}
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+      {showCoachmark && <PromptsCoachmark anchor={promptsEl} onDismiss={dismissCoachmark} />}
+    </>
   );
 }
 

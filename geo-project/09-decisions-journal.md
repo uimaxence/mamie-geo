@@ -187,9 +187,14 @@ est en essai gratuit.
   `proposition` côté `prompt-generator`). La proposition + le secteur sont
   persistés dans `brands.description` (colonne existante, pas de migration) pour
   une régénération ultérieure sans re-scraper.
-- **Guide in-app** : quand un workspace a **0 prompt**, le dashboard affiche une
-  carte d'amorçage persistante + une modale de bienvenue (3 étapes) qui pousse
-  vers `/app/prompts` (`DashboardSetupGuide`).
+- **Guide in-app** : quand la brand n'a **0 prompt** (`needsPromptSetup` exposé
+  dans `SidebarData`), une **coachmark ancrée à l'onglet « Prompts »** de la
+  sidebar (`PromptsCoachmark` — bulle sombre + flèche, positionnée en `fixed`
+  d'après la rect de l'ancre pour échapper au clip `overflow` de la nav, +
+  highlight de l'onglet, dismiss localStorage, desktop only) pointe l'onglet
+  « en gros ». Le dashboard garde une carte d'amorçage + une modale d'étapes
+  **ouverte à la demande** (`DashboardSetupGuide`, plus d'auto-ouverture de
+  modale centrale — itération 2026-06-16 après retour Max).
 - **Clarté essai** : le badge sidebar « trialing » devient « Essai gratuit »
   (libellés FR de tous les statuts) et, à la fermeture du PlanPicker sans choix,
   une modale `TrialExplainerModal` explique l'essai 14 j (tracking déjà actif,

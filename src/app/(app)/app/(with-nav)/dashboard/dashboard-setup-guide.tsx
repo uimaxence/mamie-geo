@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ArrowRight, ListChecks, Sparkles, Target, Users } from "lucide-react";
 import {
   Button,
@@ -14,14 +14,12 @@ import {
 import { capture } from "@/lib/posthog-client";
 
 // Guide d'activation in-app : tant qu'aucun prompt n'est configuré, le
-// dashboard ne sert à rien (stats vides). On accompagne donc l'utilisateur
-// avec (a) une carte d'amorçage persistante en haut du dashboard et (b) une
-// modale de bienvenue qui s'ouvre une fois par session pour expliquer les
-// étapes. Couvre surtout les comptes créés via « Configurer plus tard »
-// (quickSetup) et les nouveaux signups qui n'ont pas saisi de prompt.
-// Demande 2026-06-16.
-
-const SESSION_KEY = "mamie:dashboard-setup-guide:seen";
+// dashboard ne sert à rien (stats vides). Carte d'amorçage persistante en
+// haut du dashboard + modale d'étapes détaillées ouverte À LA DEMANDE
+// (bouton « Voir les étapes »). Le nudge AUTOMATIQUE est porté par la
+// coachmark ancrée à l'onglet « Prompts » (cf. PromptsCoachmark) — pas de
+// modale qui s'ouvre toute seule (demande 2026-06-16). Couvre surtout les
+// comptes créés via « Configurer plus tard » (quickSetup).
 
 const STEPS = [
   {
@@ -44,19 +42,12 @@ const STEPS = [
 export function DashboardSetupGuide({ promptCount }: { promptCount: number }) {
   const [open, setOpen] = useState(false);
 
-  // Auto-ouverture de la modale, une fois par session, uniquement si rien
-  // n'est configuré. sessionStorage = ne pas re-spammer à chaque navigation.
-  useEffect(() => {
-    if (promptCount > 0) return;
-    if (typeof window === "undefined") return;
-    if (sessionStorage.getItem(SESSION_KEY)) return;
-    sessionStorage.setItem(SESSION_KEY, "1");
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+  if (promptCount > 0) return null;
+
+  function openSteps() {
     setOpen(true);
     capture("dashboard_setup_guide_shown", { prompt_count: promptCount });
-  }, [promptCount]);
-
-  if (promptCount > 0) return null;
+  }
 
   return (
     <>
@@ -70,13 +61,13 @@ export function DashboardSetupGuide({ promptCount }: { promptCount: number }) {
             <div>
               <h2 className="type-h3">Configure tes prompts pour démarrer</h2>
               <p className="type-meta mt-1 max-w-xl">
-                Ton dashboard restera vide tant que tu n&apos;as pas de prompts à suivre. Ça prend
-                2 minutes — on peut même te les suggérer à partir de ton site.
+                Ton dashboard restera vide tant que tu n&apos;as pas de prompts à suivre. Ça prend 2
+                minutes — on peut même te les suggérer à partir de ton site.
               </p>
             </div>
           </div>
           <div className="flex shrink-0 items-center gap-3">
-            <Button variant="ghost" size="md" onClick={() => setOpen(true)}>
+            <Button variant="ghost" size="md" onClick={openSteps}>
               Voir les étapes
             </Button>
             <LinkButton
@@ -92,36 +83,36 @@ export function DashboardSetupGuide({ promptCount }: { promptCount: number }) {
       </Card>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-md p-8 sm:p-10">
           <div className="flex flex-col items-center text-center">
-            <span className="flex size-12 items-center justify-center rounded-full bg-[color:var(--color-accent)]/10">
-              <Sparkles size={24} className="text-[color:var(--color-accent)]" strokeWidth={2} />
+            <span className="flex size-14 items-center justify-center rounded-full bg-[color:var(--color-accent)]/10">
+              <Sparkles size={26} className="text-[color:var(--color-accent)]" strokeWidth={2} />
             </span>
-            <DialogTitle className="mt-4 type-h2">Bienvenue ! Lançons ton tracking.</DialogTitle>
-            <DialogDescription className="mt-2 max-w-md">
-              En 3 étapes, Mamie commence à mesurer ta visibilité dans ChatGPT, Claude, Perplexity,
-              Gemini et Le Chat.
+            <DialogTitle className="mt-5 type-h2">Lançons ton tracking</DialogTitle>
+            <DialogDescription className="mt-3 max-w-sm text-balance leading-relaxed">
+              En 3 étapes, Mamie mesure ta visibilité dans ChatGPT, Claude, Perplexity, Gemini et Le
+              Chat.
             </DialogDescription>
           </div>
 
-          <ol className="mt-6 flex flex-col gap-4">
+          <ol className="mt-8 flex flex-col gap-6">
             {STEPS.map((step, i) => (
-              <li key={step.title} className="flex items-start gap-3">
-                <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[color:var(--color-gray-100)] text-sm font-semibold text-[color:var(--color-ink)]">
+              <li key={step.title} className="flex items-start gap-4">
+                <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[color:var(--color-gray-100)] text-sm font-semibold text-[color:var(--color-ink)]">
                   {i + 1}
                 </span>
-                <div>
-                  <p className="flex items-center gap-1.5 text-sm font-medium text-[color:var(--color-ink)]">
-                    <step.icon size={14} className="text-[color:var(--color-accent)]" />
+                <div className="flex-1 pt-0.5">
+                  <p className="flex items-center gap-2 text-sm font-semibold text-[color:var(--color-ink)]">
+                    <step.icon size={15} className="text-[color:var(--color-accent)]" />
                     {step.title}
                   </p>
-                  <p className="type-meta mt-0.5">{step.body}</p>
+                  <p className="type-meta mt-1.5 leading-relaxed">{step.body}</p>
                 </div>
               </li>
             ))}
           </ol>
 
-          <div className="mt-7 flex flex-col gap-2">
+          <div className="mt-9 flex flex-col items-center gap-3">
             <LinkButton
               href="/app/prompts"
               variant="primary"
