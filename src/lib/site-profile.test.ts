@@ -210,4 +210,32 @@ describe("detectSiteProfile", () => {
     });
     expect(profile).toBeNull();
   });
+
+  it("crawle les pages internes d'offre et injecte leur texte dans le prompt (onboarding)", async () => {
+    const home = `<html><head><title>Acme</title></head><body><nav>
+      <a href="/nos-services">Nos services</a>
+      <a href="/blog">Blog</a>
+    </nav></body></html>`;
+    const servicesPage = `<html><body>
+      <h1>Fabrication de meubles</h1>
+      <p>Atelier d'ébénisterie spécialisé dans la fabrication artisanale de meubles sur mesure en chêne massif.</p>
+    </body></html>`;
+    const fetchMock = fakeFetchSequence([
+      { body: home },
+      { body: servicesPage },
+      { body: mistralResponse({ marque: "Acme", secteur: "ébénisterie", zone: null }) },
+    ]);
+    const profile = await detectSiteProfile({
+      domain: "acme.fr",
+      apiKey: "test-key",
+      extraPages: 2,
+      fetch: fetchMock,
+    });
+    expect(profile?.sector).toBe("ébénisterie");
+    const calls = vi.mocked(fetchMock).mock.calls;
+    // home, puis page interne, puis Mistral.
+    expect(calls[1]?.[0]).toBe("https://acme.fr/nos-services");
+    const mistralBody = String((calls[2]?.[1] as RequestInit | undefined)?.body ?? "");
+    expect(mistralBody).toContain("fabrication artisanale de meubles");
+  });
 });

@@ -1,6 +1,9 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { count, eq } from "drizzle-orm";
 import { Activity, Eye, Flame, Home, Layers, PieChart, Quote, Users } from "lucide-react";
+import { db } from "@/db/client";
+import { prompts } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import {
   computeDelta,
@@ -13,6 +16,7 @@ import { DownloadableChart } from "@/components/charts/downloadable-chart";
 import { LLM_COLORS, LLM_LABELS } from "@/components/charts/llm-colors";
 import { BatchesTable } from "@/components/app/batches-table";
 import { deriveSourcesFunnelRatios } from "@/lib/metrics/sources-funnel";
+import { DashboardSetupGuide } from "./dashboard-setup-guide";
 import { DashboardTracker } from "./dashboard-tracker";
 import { TrendSection } from "./trend-section";
 import { TriggerRunForm } from "./trigger-form";
@@ -36,6 +40,15 @@ export default async function DashboardPage() {
   // Trend sur 90 jours (max range exposée par le SegmentedControl) ;
   // le filtrage 7d/30d/90d se fait client-side dans <TrendSection>.
   const fullTrend = await getVisibilityTrend(data.brand.id, 90);
+
+  // Aucun prompt → le dashboard est vide et inutile : on déclenche le guide
+  // d'activation (carte + modale). Couvre surtout les comptes "Configurer
+  // plus tard" (quickSetup, pas de prompt créé).
+  const promptCountRow = await db
+    .select({ n: count() })
+    .from(prompts)
+    .where(eq(prompts.brandId, data.brand.id));
+  const promptCount = promptCountRow[0]?.n ?? 0;
 
   // Stats agrégées tous-LLMs (PR6), remplace l'ancienne logique Claude-only.
   const agg = data.metricsAggregated;
@@ -98,6 +111,8 @@ export default async function DashboardPage() {
         })}
         right={<TriggerRunForm />}
       />
+
+      <DashboardSetupGuide promptCount={promptCount} />
 
       {/* 4 Stats, agrégées tous-LLMs (cf. PR6 2026-05-18). */}
       <section className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">

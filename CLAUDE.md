@@ -267,7 +267,7 @@ la doc devient un cimetière.
 
 ---
 
-## 9. État du projet (snapshot — 2026-06-15)
+## 9. État du projet (snapshot — 2026-06-16)
 
 > Ce snapshot décrit l'état **courant** uniquement. L'historique détaillé
 > de chaque évolution (le « comment on en est arrivé là ») vit dans
@@ -317,10 +317,19 @@ plan dans `src/lib/plans/quotas.ts`) :
 - `conseils` — plan d'action priorisé 01-10 (« Commence ici » / « Ensuite »)
 - `runs/[id]`, `settings` (workspace, aliases, pause/resume brand,
   exports CSV, billing, danger zone RGPD), `onboarding` (wizard 3 étapes
-  + PlanPickerModal), `admin/visuals` (visuels LinkedIn, guard email Max)
+  + PlanPickerModal ; **étape 3 scrape le site — home + 2 pages internes
+  via `detectSiteProfile({extraPages})` — checklist animée, profil détecté
+  injecté dans `suggestPrompts` (`sector`/`proposition`), persisté dans
+  `brands.description`** ; 2026-06-16), `admin/visuals` (visuels LinkedIn,
+  guard email Max)
 
 `<PageContainer>` sur 100 % des pages, tables responsive
 (`hidden md:table-cell`), AppTopBar horizontale + BrandSwitcher.
+
+**Activation in-app** (2026-06-16) : dashboard avec **0 prompt** →
+`DashboardSetupGuide` (carte d'amorçage + modale 3 étapes → `/app/prompts`).
+Badge plan sidebar en FR (« trialing » → « Essai gratuit »). Fermeture du
+PlanPicker sans choix → `TrialExplainerModal` (essai 14 j expliqué).
 
 **Marketing/blog** : home, pricing, 4 pages légales, 3 lead magnets
 (`/outils/test-visibilite-ia` scan express live 2026-06-12 : 3 prompts

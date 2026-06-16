@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { capture } from "@/lib/posthog-client";
 import { PlanPickerModal, type PlanPickerVariant } from "./plan-picker-modal";
+import { TrialExplainerModal } from "./trial-explainer-modal";
 
 // Décide quand afficher le PlanPickerModal :
 //   - post-onboarding : URL contient ?onboarded=1 → variant "default"
@@ -25,6 +26,7 @@ type TriggerSource = "post_onboarding" | "auto_re_prompt" | "sidebar_click" | "b
 const SESSION_KEY = "mamie:plan-picker:dismissed";
 const LATER_24H_KEY = "mamie:plan-picker:later-until";
 const POST_ONBOARDED_SESSION_KEY = "mamie:plan-picker:post-onboarded-handled";
+const TRIAL_EXPLAINER_SESSION_KEY = "mamie:trial-explainer:shown";
 
 function deriveVariant(plan: string, trialEndsAt: string | null, now: number): PlanPickerVariant | null {
   if (plan === "expired" || plan === "canceled") return "expired";
@@ -44,6 +46,7 @@ export function PlanPickerModalTrigger({ plan, trialEndsAt }: Props) {
     variant: PlanPickerVariant;
     trigger: TriggerSource;
   }>({ open: false, variant: "default", trigger: "auto_re_prompt" });
+  const [explainerOpen, setExplainerOpen] = useState(false);
 
   // Auto-show au mount selon les règles. Ce useEffect lit sessionStorage,
   // localStorage, URL params et Date.now — sources externes pour
@@ -123,17 +126,27 @@ export function PlanPickerModalTrigger({ plan, trialEndsAt }: Props) {
     sessionStorage.setItem(SESSION_KEY, state.variant);
     if (state.variant === "expired") {
       localStorage.setItem(LATER_24H_KEY, String(Date.now() + 24 * 60 * 60 * 1000));
+    } else if (!sessionStorage.getItem(TRIAL_EXPLAINER_SESSION_KEY)) {
+      // L'utilisateur ferme sans choisir de plan : on lui explique qu'il
+      // est en essai gratuit (sinon "trialing" reste obscur). Une seule fois
+      // par session, et jamais sur le variant expired (déjà clair).
+      sessionStorage.setItem(TRIAL_EXPLAINER_SESSION_KEY, "1");
+      setExplainerOpen(true);
+      capture("trial_explainer_shown", { from_variant: state.variant });
     }
     setState((s) => ({ ...s, open: false }));
   }
 
   return (
-    <PlanPickerModal
-      open={state.open}
-      onOpenChange={handleOpenChange}
-      variant={state.variant}
-      trialEndsAt={trialEndsAt}
-      trigger={state.trigger}
-    />
+    <>
+      <PlanPickerModal
+        open={state.open}
+        onOpenChange={handleOpenChange}
+        variant={state.variant}
+        trialEndsAt={trialEndsAt}
+        trigger={state.trigger}
+      />
+      <TrialExplainerModal open={explainerOpen} onClose={() => setExplainerOpen(false)} />
+    </>
   );
 }

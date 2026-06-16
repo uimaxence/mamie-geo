@@ -16,6 +16,8 @@ import {
   type PromptGenerator,
 } from "@/lib/llm/prompt-generator";
 import { enqueue } from "@/lib/queue";
+import { detectSiteProfile, type SiteProfile } from "@/lib/site-profile";
+import { normalizeDomainInput, pathFromDomainInput } from "@/lib/utils";
 
 // Server action : crée workspace + brand + concurrents + prompts en
 // une transaction logique (4 INSERTs séquentiels, idempotents par UUID).
@@ -31,6 +33,10 @@ const onboardingSchema = z.object({
     .max(120)
     .regex(/^[a-z0-9.-]+\.[a-z]{2,}$/i, "Format domaine invalide (ex: monsite.fr)"),
   brandAliases: z.array(z.string().min(1).max(80)).max(10),
+  // Profil détecté au scraping (étape 3), optionnel : persisté sur la brand
+  // pour la « régénération depuis profil » ultérieure et l'affichage.
+  sector: z.string().min(2).max(120).optional(),
+  proposition: z.string().min(2).max(400).optional(),
   competitors: z
     .array(
       z.object({
@@ -105,14 +111,21 @@ export async function submitOnboarding(raw: OnboardingInput): Promise<Onboarding
     role: "owner",
   });
 
-  // 2. Create brand
+  // 2. Create brand. `description` = profil métier détecté au scraping
+  //    (proposition + secteur), réutilisé plus tard pour régénérer des
+  //    prompts depuis le profil sans re-scraper.
   const brandId = randomUUID();
+  const brandDescription =
+    [data.proposition?.trim(), data.sector?.trim() && `Secteur : ${data.sector.trim()}`]
+      .filter(Boolean)
+      .join(" — ") || null;
   await db.insert(brands).values({
     id: brandId,
     workspaceId,
     name: data.brandName,
     domain: data.domain,
     aliases: data.brandAliases,
+    description: brandDescription,
   });
 
   // 3. Create competitors
@@ -257,6 +270,10 @@ const suggestSchema = z.object({
     .min(3)
     .max(120)
     .regex(/^[a-z0-9.-]+\.[a-z]{2,}$/i),
+  // Contexte métier (scraping onboarding) — sans lui, les suggestions sont
+  // hors-sujet (cf. doc 09 § 2026-06-16).
+  sector: z.string().min(2).max(120).optional(),
+  proposition: z.string().min(2).max(400).optional(),
   competitors: z.array(z.string().min(1).max(80)).max(10).default([]),
   aliases: z.array(z.string().min(1).max(80)).max(10).default([]),
   existingPrompts: z.array(z.string().min(1).max(500)).max(50).default([]),
@@ -299,6 +316,8 @@ export async function suggestPrompts(raw: SuggestPromptsInput): Promise<SuggestP
     brandName: data.brandName,
     domain: data.domain,
     language: "fr",
+    sector: data.sector,
+    proposition: data.proposition,
     competitors: data.competitors.length > 0 ? data.competitors : undefined,
     aliases: data.aliases.length > 0 ? data.aliases : undefined,
     existingPrompts: data.existingPrompts.length > 0 ? data.existingPrompts : undefined,
@@ -306,4 +325,39 @@ export async function suggestPrompts(raw: SuggestPromptsInput): Promise<SuggestP
   });
 
   return { prompts: result.prompts, costUsd: result.costUsd };
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Détection du profil métier depuis le site (onboarding, étape 3).
+// Scrape la home + 2 pages internes (à propos / produit) puis 1 appel
+// Mistral pour déduire marque + secteur + zone + proposition. Le wizard
+// l'appelle au moment de suggérer les prompts pour ancrer la génération
+// dans la vraie activité (sans ça : prompts hors-sujet, cf. doc 09
+// § 2026-06-16). Réutilise exactement le moteur des scans publics.
+// ─────────────────────────────────────────────────────────────────────
+
+export type OnboardingProfile = SiteProfile;
+
+export async function detectOnboardingProfile(rawDomain: string): Promise<OnboardingProfile | null> {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) throw new Error("Non authentifié");
+
+  const domain = normalizeDomainInput(typeof rawDomain === "string" ? rawDomain : "");
+  if (!domain || !/^[a-z0-9.-]+\.[a-z]{2,}$/i.test(domain)) return null;
+  if (!env.MISTRAL_API_KEY) return null;
+
+  const pagePath = pathFromDomainInput(rawDomain) || undefined;
+  const profile = await detectSiteProfile({
+    domain,
+    pagePath,
+    apiKey: env.MISTRAL_API_KEY,
+    extraPages: 2,
+  });
+  logCronEvent({
+    event: profile ? "onboarding_profile_detected" : "onboarding_profile_failed",
+    userId: session.user.id,
+    domain,
+    ...(profile ? { sector: profile.sector, hasZone: Boolean(profile.zone) } : {}),
+  });
+  return profile;
 }

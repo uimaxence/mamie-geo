@@ -25,6 +25,15 @@ export interface PromptSuggestionInput {
   brandName: string;
   domain: string;
   language: "fr" | "en";
+  // Secteur / catégorie de marché de la marque (ex: "imprimerie en ligne",
+  // "crm"), déduit du scraping du site à l'onboarding. SANS ce contexte, le
+  // générateur n'a que le nom + le domaine et invente des prompts hors-sujet
+  // (constaté 2026-06-16). Avec, les questions NON-BRANDED ciblent la vraie
+  // catégorie que les prospects tapent.
+  sector?: string;
+  // Ce que l'entreprise vend concrètement, en une phrase (champ "proposition"
+  // de detectSiteProfile). Ancre les prompts dans l'offre réelle.
+  proposition?: string;
   // Concurrents optionnels — si fournis, on instruit Haiku de générer
   // des prompts où la marque ET les concurrents sont plausibles dans la
   // réponse. Sinon, prompts plus génériques sur la catégorie.
@@ -206,6 +215,16 @@ function buildUserPrompt(input: PromptSuggestionInput, count: number): string {
       ? `Alias / variations du nom (à ne PAS utiliser dans les questions NON-BRANDED) : ${input.aliases.join(", ")}.`
       : null;
 
+  // Contexte métier issu du scraping du site (onboarding). C'est le signal
+  // qui empêche les prompts hors-sujet : sans secteur, le modèle devine
+  // l'activité à partir du seul nom de domaine.
+  const sectorBlock = input.sector
+    ? `Secteur / catégorie de marché : ${input.sector}. Les questions NON-BRANDED DOIVENT porter sur cette catégorie (un prospect qui cherche « le meilleur ${input.sector} » ou une solution à un besoin de cette catégorie).`
+    : null;
+  const propositionBlock = input.proposition
+    ? `Ce que l'entreprise propose concrètement (déduit de son site) : ${input.proposition}. Ancre les questions dans cette offre réelle, pas dans une interprétation du nom de domaine.`
+    : null;
+
   // Bloc des prompts déjà trackés. On les expose explicitement avec une
   // consigne « ne propose RIEN d'équivalent ». Truncation à 25 entries
   // pour rester sous la limite de tokens (input.length max ~280 chars
@@ -224,6 +243,8 @@ function buildUserPrompt(input: PromptSuggestionInput, count: number): string {
   return [
     `Marque cible : ${input.brandName}`,
     `Domaine : ${input.domain}`,
+    sectorBlock,
+    propositionBlock,
     aliasBlock,
     competitorBlock,
     existingBlock,

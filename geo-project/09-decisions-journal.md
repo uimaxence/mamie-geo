@@ -161,6 +161,53 @@ haut et l'entrée "2026-05-05 — Réponses aux 10 questions de bootstrap".
 
 ### Décisions enregistrées
 
+#### 2026-06-16 — Activation : scraping du site à l'onboarding + guides in-app + clarté de l'essai
+
+**Contexte** : test « comme un prospect » sur la base de prod migrée. Trois
+frictions constatées : (1) la suggestion de prompts à l'onboarding disait
+n'importe quoi — le générateur ne recevait que le nom + le domaine, aucun
+contexte sur l'activité réelle du site ; (2) un compte arrivé sur le dashboard
+sans prompt configuré (ex. « Configurer plus tard ») se retrouve devant un écran
+vide et inutile, sans accompagnement ; (3) après fermeture du PlanPicker (croix),
+l'utilisateur voit un badge « trialing » incompréhensible et ne sait pas qu'il
+est en essai gratuit.
+
+**Options considérées** :
+- A : laisser l'utilisateur tout saisir à la main (statu quo).
+- B : réutiliser le moteur de profil des scans publics (`detectSiteProfile`) à
+  l'onboarding pour ancrer la génération de prompts, + guides in-app.
+
+**Choix** : B.
+- **Onboarding** : à l'étape 3, on scrape la home **+ 2 pages internes** d'offre
+  (à propos / produit / services) — nouvelle option `extraPages` de
+  `detectSiteProfile`, helper `extractInternalOfferPaths`. Le profil détecté
+  (marque, secteur, zone, proposition) est montré en live via une checklist
+  animée (« Lecture de ton site », « Activité détectée : … », « Génération de
+  prompts ») puis injecté dans `suggestPrompts` (nouveaux champs `sector` +
+  `proposition` côté `prompt-generator`). La proposition + le secteur sont
+  persistés dans `brands.description` (colonne existante, pas de migration) pour
+  une régénération ultérieure sans re-scraper.
+- **Guide in-app** : quand un workspace a **0 prompt**, le dashboard affiche une
+  carte d'amorçage persistante + une modale de bienvenue (3 étapes) qui pousse
+  vers `/app/prompts` (`DashboardSetupGuide`).
+- **Clarté essai** : le badge sidebar « trialing » devient « Essai gratuit »
+  (libellés FR de tous les statuts) et, à la fermeture du PlanPicker sans choix,
+  une modale `TrialExplainerModal` explique l'essai 14 j (tracking déjà actif,
+  pas de facturation, choix du plan quand on veut).
+
+**Justification** : le produit était complet mais l'activation patinait sur la
+première impression. Le scraping existait déjà (scans publics) — on le branche
+là où il manquait. Coût marginal ~0,01 $/onboarding (profil Mistral + 1 page
+interne ou 2 + génération), négligeable vs un signup qui repart faute de prompts
+pertinents.
+
+**Conséquences attendues** : prompts d'onboarding pertinents dès le 1er essai,
+moins de comptes « vides » abandonnés, moins de confusion sur le statut d'essai.
+
+**À revisiter** : 2026-07-15 — mesurer (PostHog `onboarding_site_analysis_done`,
+`dashboard_setup_cta_clicked`, `trial_explainer_shown`) si l'activation
+(prompts configurés / signup) progresse ; ajuster le nombre de pages crawlées.
+
 #### 2026-06-15 — Attribution du trafic IA : pixel cookieless maison (preuve de ROI GEO)
 
 **Contexte** : objection récurrente des sceptiques du GEO — « la visibilité dans

@@ -86,6 +86,8 @@ interface SiteContext {
   embeddedText: string;
   footerExcerpt: string;
   localityHint: string | null;
+  /** Texte agrégé de 1-2 pages internes (à propos, produit…) — crawl onboarding. */
+  extraPagesText?: string;
 }
 
 // Mots-outils français : un fragment de payload qui en contient est
@@ -155,6 +157,54 @@ function extractNavLinks($: cheerio.CheerioAPI): string[] {
   return links;
 }
 
+// Liens internes qui décrivent l'OFFRE (par opposition au légal/blog/social
+// déjà exclu par NAV_LINK_EXCLUDE_REGEX). Priorisés pour le crawl onboarding :
+// ces pages portent la proposition de valeur détaillée que la home résume.
+const OFFER_PATH_REGEX =
+  /(propos|about|qui-?sommes|notre-?histoire|produit|product|service|solution|fonctionnalit|feature|offre|prestation|expertise|metier|savoir-?faire|ce-?que|pourquoi)/i;
+
+/**
+ * Extrait jusqu'à `max` chemins internes (même domaine) qui décrivent l'offre,
+ * pour enrichir le profil au-delà de la seule home (crawl onboarding). Ignore
+ * ancres, fichiers, liens externes et pages légales/blog/social.
+ */
+export function extractInternalOfferPaths(
+  $: cheerio.CheerioAPI,
+  domain: string,
+  max: number,
+): string[] {
+  const seen = new Set<string>();
+  const paths: string[] = [];
+  for (const el of $("nav a[href], header a[href], main a[href]").toArray()) {
+    const href = ($(el).attr("href") ?? "").trim();
+    if (!href || href.startsWith("#") || href.startsWith("mailto:") || href.startsWith("tel:")) {
+      continue;
+    }
+    let path: string | null = null;
+    if (href.startsWith("/") && !href.startsWith("//")) {
+      path = href;
+    } else if (/^https?:\/\//i.test(href)) {
+      try {
+        const url = new URL(href);
+        // Même domaine uniquement (ignore sous-domaines distincts).
+        if (url.hostname.replace(/^www\./, "") === domain.replace(/^www\./, "")) {
+          path = url.pathname + url.search;
+        }
+      } catch {
+        continue;
+      }
+    }
+    if (!path || path === "/" || /\.(pdf|jpg|png|svg|zip|webp|gif)$/i.test(path)) continue;
+    if (NAV_LINK_EXCLUDE_REGEX.test(path) || !OFFER_PATH_REGEX.test(path)) continue;
+    const key = path.split(/[?#]/)[0]!.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    paths.push(path);
+    if (paths.length >= max) break;
+  }
+  return paths;
+}
+
 /** Extrait les signaux utiles de la home (déterministe, sans LLM). */
 export function extractSiteContext(domain: string, html: string): SiteContext {
   const $ = cheerio.load(html);
@@ -211,6 +261,7 @@ function buildPrompt(ctx: SiteContext): string {
       `Navigation du site (gamme de produits/services) : ${ctx.navLinks.join(" · ")}`,
     ctx.bodyExcerpt && `Texte de la page : ${ctx.bodyExcerpt}`,
     ctx.embeddedText && `Texte de la page (application JavaScript) : ${ctx.embeddedText}`,
+    ctx.extraPagesText && `Texte de pages internes (à propos / produits / services) : ${ctx.extraPagesText}`,
     ctx.footerExcerpt && `Footer : ${ctx.footerExcerpt}`,
     ctx.localityHint && `Localité détectée dans l'adresse : ${ctx.localityHint}`,
   ].filter(Boolean);
@@ -294,6 +345,42 @@ export interface DetectSiteProfileOptions {
   pagePath?: string;
   apiKey: string;
   fetch?: typeof fetch;
+  /**
+   * Nombre de pages internes (à propos / produit / services) à crawler EN PLUS
+   * de la home pour enrichir le profil (0 = home seule, défaut des scans
+   * publics). L'onboarding passe 2 : la home résume, les pages internes
+   * détaillent la vraie offre → secteur plus précis, prompts pertinents.
+   */
+  extraPages?: number;
+}
+
+const MAX_EXTRA_PAGES = 3;
+
+/**
+ * Crawle quelques pages internes décrivant l'offre et renvoie leur texte
+ * agrégé (headings + paragraphes). Best effort : les pages injoignables
+ * sont ignorées. Séquentiel et borné — quelques fetchs au moment de
+ * l'onboarding, pas un crawler.
+ */
+async function crawlExtraPages(
+  $: cheerio.CheerioAPI,
+  domain: string,
+  count: number,
+  fetchImpl: typeof fetch,
+): Promise<string> {
+  const paths = extractInternalOfferPaths($, domain, Math.min(count, MAX_EXTRA_PAGES));
+  const chunks: string[] = [];
+  for (const path of paths) {
+    const html = await fetchPageHtml(`https://${domain}${path}`, fetchImpl);
+    if (!html) continue;
+    const sub = extractSiteContext(domain, html);
+    const text = [sub.headings.join(" · "), sub.bodyExcerpt || sub.embeddedText]
+      .filter(Boolean)
+      .join(" — ")
+      .trim();
+    if (text) chunks.push(text);
+  }
+  return chunks.join(" ⟡ ").slice(0, 1800);
 }
 
 /**
@@ -308,6 +395,13 @@ export async function detectSiteProfile(
   const html = await fetchPageHtml(`https://${options.domain}${options.pagePath || "/"}`, fetchImpl);
   if (!html) return null;
   const ctx = extractSiteContext(options.domain, html);
+
+  // Crawl onboarding : enrichit le contexte avec quelques pages internes
+  // avant l'appel LLM (la home seule est souvent un slogan).
+  if (options.extraPages && options.extraPages > 0) {
+    const $home = cheerio.load(html);
+    ctx.extraPagesText = await crawlExtraPages($home, options.domain, options.extraPages, fetchImpl);
+  }
 
   try {
     const content = await mistralJson(buildPrompt(ctx), options.apiKey, fetchImpl, MAX_TOKENS);
