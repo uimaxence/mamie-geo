@@ -45,7 +45,7 @@ const sizeClass: Record<Size, string> = {
 };
 
 const baseClass =
-  "inline-flex items-center justify-center gap-2 rounded-[var(--radius-pill)] border font-medium disabled:cursor-not-allowed disabled:opacity-50";
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[var(--radius-pill)] border font-medium disabled:cursor-not-allowed disabled:opacity-50";
 
 function buildContent(variant: Variant, children: ReactNode): ReactNode {
   if (variant !== "ai") return children;
