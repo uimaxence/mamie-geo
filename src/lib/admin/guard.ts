@@ -9,7 +9,11 @@ import { auth } from "@/lib/auth";
 // Auth fait foi. Centralisé ici pour éviter la divergence entre le guard
 // d'affichage (layout) et le guard d'écriture (actions).
 export const ADMIN_EMAILS = new Set(
-  ["maxencecailleau.pro@gmail.com", ...(process.env.ADMIN_EMAILS?.split(",") ?? [])]
+  [
+    "maxencecailleau.pro@gmail.com",
+    "maxence.cailleau1@gmail.com",
+    ...(process.env.ADMIN_EMAILS?.split(",") ?? []),
+  ]
     .map((e) => e.trim().toLowerCase())
     .filter(Boolean),
 );

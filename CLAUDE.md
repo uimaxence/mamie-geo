@@ -269,7 +269,7 @@ la doc devient un cimetière.
 
 ---
 
-## 9. État du projet (snapshot — 2026-06-16)
+## 9. État du projet (snapshot — 2026-06-17)
 
 > Ce snapshot décrit l'état **courant** uniquement. L'historique détaillé
 > de chaque évolution (le « comment on en est arrivé là ») vit dans
@@ -283,9 +283,10 @@ Phase courante = DISTRIBUTION / acquisition.**
 Phasage acté 2026-05-07 (doc 09) : A = moteur Haiku cheap, B = design
 system + UI + marketing + blog, C = multi-LLM + Stripe + weekly email.
 Tous les items « V0+ veille concurrence » du doc 02 sont livrés
-(2026-06-08). Stripe LIVE, DNS Brevo, Prices annuels et clé Brave : OK.
-Seul ops résiduel : crédit Perplexity. Le produit est complet — le
-goulot est désormais l'acquisition, pas le code.
+(2026-06-08). Stripe LIVE, DNS Brevo, Prices annuels, clé Brave et clé
+Perplexity en prod : OK (2026-06-17 — les 5 IA sont actives). Plus
+d'ops technique résiduel. Le produit est complet — le goulot est
+désormais l'acquisition, pas le code.
 
 ### Livré — vue d'ensemble
 
@@ -294,7 +295,9 @@ queue Postgres + Vercel Cron (dispatch \*/5 min, scheduler 06:00 UTC,
 cadence par plan et par prompt). 5 providers via `getConfiguredLLMs()`
 (`src/lib/llm/index.ts`) : Claude Haiku 4.5, Mistral `mistral-large-latest`,
 OpenAI `gpt-4o-mini` + web_search, Gemini `gemini-2.5-flash` + grounding,
-Perplexity `sonar` (code prêt, clé manquante). Détection regex +
+Perplexity `sonar` (clé en prod depuis 2026-06-17 → auto-activé par
+`getConfiguredLLMs()`, runs créés à partir du cron suivant, jamais
+rétroactivement). Détection regex +
 scoring Haiku tool_use (sentiment, position, concurrents + leur
 `position` depuis 2026-06-10). Upsert `citation_metrics_daily` + funnel
 sources (retrieved/retrievals/citations, 2026-06-08). Hard-cap 200 % du
@@ -347,12 +350,15 @@ PlanPicker sans choix → `TrialExplainerModal` (essai 14 j expliqué).
 **Marketing/blog** : home, pricing, 4 pages légales, **4 lead magnets**.
 **`/outils/visibilite-locale`** « Carte de visibilité IA locale » (2026-06-17,
 angle différenciateur GEO local, doc 09) : site + email → ville détectée +
-~8 communes géocodées autour (`geocodeCityCluster`) → 1 requête « meilleur
-{secteur} à {ville} » par ville (≤ 9) à Le Chat (`mistral-small`, réutilise
-`extractBrandsCited`) → **vraie carte Leaflet** (tuiles CARTO Positron,
+~6 communes géocodées autour (`buildCityCluster`, coords exactes
+`adresse.data.gouv.fr`, ≤ 7 villes) → 1 requête « meilleurs {secteur} à
+{ville} » par ville à **Perplexity `sonar`** (IA grounded web → vraie reco
+locale = du GEO, pas du SEO ; retour Max 2026-06-17, ex-Brave grounding
+abandonné car il mesurait du SEO) puis parsing des marques via Mistral
+(`extractBrandsCited`) → **vraie carte Leaflet** (tuiles CARTO Positron,
 dynamic import) avec **zones colorées** par ville (vert recommandé / rouge
 concurrent à ta place, `src/lib/local-map/*`) + **prompts cliquables →
-login**. ~0,004-0,006 €/scan, mêmes garde-fous (honeypot, rate-limit, cache
+login**. ~0,04 €/scan, mêmes garde-fous (honeypot, rate-limit, cache
 24 h). Dép. `leaflet` 1.9 (chunk dynamique). Autres :
 (`/outils/test-visibilite-ia` scan express live 2026-06-12 : 3 prompts
 × Le Chat mistral-small ~0,002 €/scan, verdict regex OU jugement LLM
@@ -469,26 +475,24 @@ publics. DB Neon : 23 tables + migrations 0000-0012 (0012 =
 
 ### Reste à faire (post-lancement — site EN PROD ET EN LIGNE depuis 2026-06)
 
-> Brevo blog list, 3 Prices annuels Stripe et clé Brave Search : **faits**.
-> Le site est public. **Seul l'ops technique résiduel** = crédit
-> Perplexity. La priorité n'est plus le pré-lancement mais la
-> **distribution** (cf. doc 05 + doc 11). Concurrents FR émergents
+> Brevo blog list, Prices annuels Stripe, clé Brave et clé Perplexity en
+> prod : **faits**. Le site est public, **les 5 IA tournent**. Plus
+> d'ops technique résiduel. La priorité n'est plus le pré-lancement mais
+> la **distribution** (cf. doc 05 + doc 11). Concurrents FR émergents
 > (Qwairy, Botrank) → la fenêtre se referme, exécuter maintenant.
 
-1. **Crédit Perplexity** ($50 min) + `PERPLEXITY_API_KEY` en prod →
-   5e provider auto-activé, pas de redeploy. **Seul item ops restant.**
-2. **DISTRIBUTION (priorité n°1)** : posts LinkedIn réguliers + étude 50
+1. **DISTRIBUTION (priorité n°1)** : posts LinkedIn réguliers + étude 50
    marques (doc 11 § 3.4 : 3 posts restants, 2 articles, 1 carrousel DA
    Mamie) + outreach direct communautés FR (SEO Camp, Slack/Discord SEO
    FR, WebRankInfo). Les posts seuls ne convertissent pas : coupler aux
    lead magnets + DM. Benchmark réaliste : premiers payants mois 3-6
    post-lancement.
-3. **Drip d'éducation post-signup**.
-4. **Gamification suite** (doc 02 § Gamification) : rang dans le weekly
+2. **Drip d'éducation post-signup**.
+3. **Gamification suite** (doc 02 § Gamification) : rang dans le weekly
    email, badges de statut N°1/Top 3 (dashboard + BrandSwitcher),
    événements de rang (V1). Surveiller le coût scoring systématique
    (`usage_counters.llmCostUsd`) après 2 semaines de prod.
-5. **Suivi conversion lead magnets** (~4 semaines post-lancement) :
+4. **Suivi conversion lead magnets** (~4 semaines post-lancement) :
    express vs ex-funnel manuel, scans comparateurs → trial (PostHog) ;
    retirer la pastille « Nouveau » de la nav.
 

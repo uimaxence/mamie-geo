@@ -4,6 +4,7 @@ import { and, count, desc, eq } from "drizzle-orm";
 import { db } from "@/db/client";
 import { brands, prompts, technicalAudits, workspaceMembers, workspaces } from "@/db/schema";
 import { auth } from "@/lib/auth";
+import { isAdminEmail } from "@/lib/admin/guard";
 import type { CheckResult } from "@/lib/audit/types";
 
 // Données passées à la sidebar (user + workspace + brands).
@@ -40,6 +41,12 @@ export interface SidebarData {
   /** True si la brand courante n'a aucun prompt configuré → on affiche la
    *  coachmark d'activation pointant vers l'onglet « Prompts ». */
   needsPromptSetup: boolean;
+  /** True si l'email de la session est dans l'allowlist admin. Sert
+   *  UNIQUEMENT à afficher le raccourci Admin dans le menu utilisateur —
+   *  la vraie garde d'accès reste le layout serveur /app/admin/* (qui
+   *  re-vérifie l'email signé), donc un flag forcé client-side ne donne
+   *  aucun accès. */
+  isAdmin: boolean;
 }
 
 export const loadSidebarData = cache(async (): Promise<SidebarData | null> => {
@@ -98,6 +105,7 @@ export const loadSidebarData = cache(async (): Promise<SidebarData | null> => {
     currentBrandsCount: brandsRows.length,
     criticalIssuesCount,
     needsPromptSetup,
+    isAdmin: isAdminEmail(session.user.email),
   };
 });
 

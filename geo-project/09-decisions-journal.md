@@ -230,6 +230,28 @@ zéro impact sur le cœur SaaS), avant tout chantier in-app.
   les composants de l'app (`ScoreRing` score local, `BreakdownBars` « concurrents les plus
   cités dans ta zone »). Carte plus propre (tuiles CARTO `light_nolabels`, zones douces).
 
+**Décision finale du moteur — du SEO au vrai GEO (retour Max, même jour)** : la mesure du
+« meilleur {métier} à {ville} » a transité par 3 moteurs avant de se figer :
+1. **LLM « from knowledge »** (Le Chat `mistral-small` sans search) — rejeté : hallucine des
+   marques (« Menuiserie Cholet ») et n'a aucune fraîcheur web.
+2. **Brave Search grounding** (on cherche le web puis on résume les SERP) — rejeté **net par
+   Max** : « on ne regarde plus vraiment le LLM mais plutôt le SEO, donc c'est problématique ».
+   Juste : grounder via SERP mesure **qui ranke** (du SEO), pas **ce que l'IA recommande**
+   (du GEO). Contradiction avec le pitch même de Mamie. `grounding.ts` supprimé.
+3. **Perplexity `sonar`** (IA **grounded web native** : elle cherche le web *elle-même* et
+   répond) — **choisi**. On repose la question à l'IA et on parse SA réponse, comme un client
+   le vivrait → c'est du GEO réel. Le Chat via API n'ayant pas de search natif, l'IA mesurée
+   et affichée sur la carte est Perplexity (les 4 autres restent verrouillées → trial).
+- **Géocodage exact** : `geocodeCityCluster` (bbox France via Mistral, imprécis) remplacé par
+  `buildCityCluster` → coordonnées exactes via `adresse.data.gouv.fr` (gratuit, FR), ~6
+  communes ≤ 45 km triées par distance, ≤ 7 villes. **1 requête par ville** (les 2 intentions
+  `deriveLocalIntents` retirées — `sonar` est plus cher, on garde le scan borné). Parsing des
+  marques toujours via Mistral (`extractBrandsCited`). Coût **~0,04 €/scan**.
+- **Clé `PERPLEXITY_API_KEY` posée en prod le 2026-06-17** → `getConfiguredLLMs()` l'auto-active :
+  5ᵉ IA trackée dans tout le SaaS, sans redeploy. Runs Perplexity créés **à partir du cron
+  suivant uniquement, jamais rétroactivement** (idempotency key datée du jour, cf. design
+  scheduler) — confirmé avec Max : on n'antidate pas l'historique.
+
 **Positionnement** : « le référencement local de l'ère IA ». Marketing : la carte = lead
 magnet viral + futur visuel LinkedIn + baromètre local (prolonge l'étude 50 marques).
 

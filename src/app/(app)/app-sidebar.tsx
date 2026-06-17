@@ -13,6 +13,7 @@ import {
   MessageSquareQuote,
   Radar,
   Receipt,
+  Shield,
   Wrench,
   type LucideIcon,
 } from "lucide-react";
@@ -139,7 +140,7 @@ function SidebarInner({
       {/* Bottom, feedback + user menu */}
       <div className="border-t border-[color:var(--color-border)] p-3">
         <FeedbackDialog />
-        <UserMenu email={data.user.email} plan={data.workspace.plan} />
+        <UserMenu email={data.user.email} plan={data.workspace.plan} isAdmin={data.isAdmin} />
       </div>
     </div>
   );
@@ -244,7 +245,7 @@ function SidebarNav({
   );
 }
 
-function UserMenu({ email, plan }: { email: string; plan: string }) {
+function UserMenu({ email, plan, isAdmin }: { email: string; plan: string; isAdmin: boolean }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
 
@@ -298,6 +299,19 @@ function UserMenu({ email, plan }: { email: string; plan: string }) {
             Contacter le support
           </button>
         </DropdownMenuItem>
+        {/* Raccourci Admin — affiché seulement aux admins. L'accès réel
+            est gardé côté serveur par le layout /app/admin/*. */}
+        {isAdmin && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <Link href="/app/admin/visuals">
+                <Shield size={14} strokeWidth={2} />
+                Admin
+              </Link>
+            </DropdownMenuItem>
+          </>
+        )}
         <DropdownMenuSeparator />
         <DropdownMenuItem danger onSelect={handleSignOut} disabled={pending}>
           <LogOut size={14} strokeWidth={2} />
