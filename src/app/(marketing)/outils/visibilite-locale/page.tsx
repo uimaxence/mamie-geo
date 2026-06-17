@@ -50,7 +50,9 @@ export default function VisibiliteLocalePage() {
           </p>
         </div>
 
-        <div className="mx-auto mt-14 max-w-2xl">
+        {/* Large : les résultats s'affichent en 2 colonnes (carte + charts).
+         * Le formulaire se recentre tout seul à max-w-2xl. */}
+        <div className="mx-auto mt-14 max-w-5xl">
           <LocalMapForm />
         </div>
       </Section>

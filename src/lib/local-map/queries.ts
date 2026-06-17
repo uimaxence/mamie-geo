@@ -1,9 +1,8 @@
-// Question locale posée à l'IA pour une ville donnée. Une seule question
-// par ville (vs 3 pour le scan express) : la carte tire sa force du
-// NOMBRE de villes, pas du nombre de questions par ville. Formulation
-// « consommateur » : exactement ce qu'un client tape dans ChatGPT/Le Chat.
+// Construction des questions locales : une intention de recherche
+// (« meilleur menuisier », « pose de fenêtres ») × une ville → la question
+// posée à l'IA. La carte tire sa force du NOMBRE de villes × intentions.
 
-const MAX_CITIES = 9; // ville principale + jusqu'à 8 autour — borne le coût.
+const MAX_CITIES = 7; // ville principale + jusqu'à 6 autour — borne le coût.
 
 export interface ScanCity {
   name: string;
@@ -11,8 +10,21 @@ export interface ScanCity {
   lng: number | null;
 }
 
-export function buildLocalQuery(sector: string, city: string): string {
-  return `Quels sont les meilleurs ${sector.trim()} à ${city.trim()} ? Donne-moi les noms les plus recommandés.`;
+export function buildLocalQuery(intent: string, city: string): string {
+  return `${intent.trim()} à ${city.trim()} ? Donne-moi les noms les plus recommandés.`;
+}
+
+/**
+ * Variantes de matching d'une marque pour la détection regex : on gère
+ * « & » ↔ « et » (les IA réécrivent souvent « ACB Portes & Fenêtres » en
+ * « ... Portes et Fenêtres ») et l'inverse. Dédupliqué.
+ */
+export function brandPatterns(brand: string): string[] {
+  const b = brand.trim();
+  const variants = new Set<string>([b]);
+  if (b.includes("&")) variants.add(b.replace(/\s*&\s*/g, " et "));
+  if (/\bet\b/i.test(b)) variants.add(b.replace(/\bet\b/gi, "&"));
+  return [...variants].map((v) => v.replace(/\s+/g, " ").trim()).filter(Boolean);
 }
 
 /**

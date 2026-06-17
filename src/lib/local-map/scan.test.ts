@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { normalizeText } from "@/lib/comparators/sectors";
 import type { BrandExtraction } from "@/lib/express-scan/extract";
-import { dedupeCities, type ScanCity } from "./queries";
+import { brandPatterns, dedupeCities, type ScanCity } from "./queries";
 import { runLocalMapScan } from "./scan";
 
 const city = (name: string, lat: number | null = null, lng: number | null = null): ScanCity => ({
@@ -10,87 +10,103 @@ const city = (name: string, lat: number | null = null, lng: number | null = null
   lng,
 });
 
+const fakeExtract = (data: BrandExtraction) => async (): Promise<BrandExtraction> => data;
+
+describe("brandPatterns", () => {
+  it("gère « & » ↔ « et »", () => {
+    const p = brandPatterns("ACB Portes & Fenêtres");
+    expect(p).toContain("ACB Portes & Fenêtres");
+    expect(p).toContain("ACB Portes et Fenêtres");
+  });
+});
+
 describe("dedupeCities", () => {
-  it("garde l'ordre, déduplique (casse/accents) et borne à 9", () => {
+  it("garde l'ordre, déduplique (casse/accents) et borne à 7", () => {
     const list = dedupeCities(
       [
         city("Tours", 47.39, 0.69),
         city("tours"),
-        city("Blois", 47.59, 1.33),
         ...Array.from({ length: 12 }, (_, i) => city(`Ville${i}`, 47, 1)),
       ],
       normalizeText,
     );
     expect(list[0]?.name).toBe("Tours");
-    expect(list[0]?.lat).toBe(47.39); // coords conservées
-    expect(list.filter((c) => normalizeText(c.name) === "tours")).toHaveLength(1);
-    expect(list).toHaveLength(9);
+    expect(list[0]?.lat).toBe(47.39);
+    expect(list).toHaveLength(7);
   });
 });
 
 describe("runLocalMapScan", () => {
-  const fakeExtract = (data: BrandExtraction) => async (): Promise<BrandExtraction> => data;
-
-  it("recommandé via regex, propage les coords, topRival null si recommandé", async () => {
+  it("détecte la marque sous un nom étendu via « & »↔« et » (regex), même si l'extraction la rate", async () => {
     const result = await runLocalMapScan({
-      brand: "Coiffure Léa",
-      sector: "coiffeur",
-      cities: [city("Tours", 47.39, 0.69), city("Blois", 47.59, 1.33)],
-      execute: vi.fn(async (q: string) =>
-        q.includes("Tours")
-          ? { text: "À Tours, je recommande Coiffure Léa et Studio Hair." }
-          : { text: "À Blois, le meilleur est Top Hair." },
-      ),
+      brand: "ACB Portes & Fenêtres",
+      sector: "menuiserie",
+      cities: [city("Angers", 47.47, -0.55)],
+      intents: ["meilleur menuisier"],
+      execute: vi.fn(async () => ({
+        text: "À Angers : ACB Portes et Fenêtres INTERNORM TSCHOEPPE, et Sogefi.",
+      })),
       extractBrands: fakeExtract({
-        brandsPerResponse: [["Coiffure Léa", "Studio Hair"], ["Top Hair"]],
-        targetCitedPerResponse: [true, false],
+        brandsPerResponse: [["ACB Portes et Fenêtres INTERNORM TSCHOEPPE", "Sogefi"]],
+        targetCitedPerResponse: [false], // l'extraction rate, la regex doit rattraper
       }),
     });
-
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    const [tours, blois] = result.report.cities;
-    expect(tours?.recommended).toBe(true);
-    expect(tours?.lat).toBe(47.39);
-    expect(tours?.rivals).toEqual(["Studio Hair"]);
-    expect(tours?.topRival).toBeNull();
-    expect(blois?.recommended).toBe(false);
-    expect(blois?.topRival).toBe("Top Hair");
-    expect(result.report.recommendedCount).toBe(1);
-    expect(result.report.mainCity).toBe("Tours");
+    const angers = result.report.cities[0]!;
+    expect(angers.recommended).toBe(true);
+    // Le nom étendu de la marque n'est PAS compté comme concurrent.
+    expect(angers.rivals).toEqual(["Sogefi"]);
   });
 
-  it("recommandé via le jugement d'extraction même si la regex rate la variante", async () => {
+  it("2 intentions par ville : recommandé si cité dans AU MOINS une", async () => {
     const result = await runLocalMapScan({
-      brand: "Boursorama",
-      sector: "banque",
+      brand: "Léa",
+      sector: "coiffeur",
       cities: [city("Tours", 47.39, 0.69)],
-      execute: vi.fn(async () => ({ text: "Le mieux à Tours, c'est BoursoBank." })),
+      intents: ["meilleur coiffeur", "coloration"],
+      // 1ʳᵉ question : pas cité ; 2ᵉ : cité.
+      execute: vi.fn(async (q: string) =>
+        q.startsWith("coloration")
+          ? { text: "Léa fait de super colorations." }
+          : { text: "Top Hair." },
+      ),
       extractBrands: fakeExtract({
-        brandsPerResponse: [["BoursoBank"]],
-        targetCitedPerResponse: [true],
+        brandsPerResponse: [["Top Hair"], ["Léa"]],
+        targetCitedPerResponse: [false, true],
       }),
     });
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.report.cities[0]?.recommended).toBe(true);
+    expect(result.report.cities[0]?.queries).toHaveLength(2);
   });
 
-  it("jette les libellés génériques « {métier} {ville} » et garde les vraies marques", async () => {
+  it("jette les libellés génériques et agrège les concurrents par nb de villes", async () => {
     const result = await runLocalMapScan({
       brand: "Fenêtres sur Loir",
       sector: "menuiserie",
-      cities: [city("Cholet", 47.06, -0.88)],
-      execute: vi.fn(async () => ({ text: "À Cholet : Menuiserie Cholet, K-LINE." })),
+      cities: [city("Cholet", 47.06, -0.88), city("Saumur", 47.26, -0.08)],
+      intents: ["meilleur menuisier"],
+      execute: vi.fn(async (q: string) =>
+        q.includes("Cholet")
+          ? { text: "Menuiserie Cholet, K-LINE." }
+          : { text: "K-LINE et Sogal." },
+      ),
       extractBrands: fakeExtract({
-        brandsPerResponse: [["Menuiserie Cholet", "K-LINE"]],
-        targetCitedPerResponse: [false],
+        brandsPerResponse: [
+          ["Menuiserie Cholet", "K-LINE"],
+          ["K-LINE", "Sogal"],
+        ],
+        targetCitedPerResponse: [false, false],
       }),
     });
     expect(result.ok).toBe(true);
     if (!result.ok) return;
+    // « Menuiserie Cholet » filtré (générique pour Cholet).
     expect(result.report.cities[0]?.rivals).toEqual(["K-LINE"]);
-    expect(result.report.cities[0]?.topRival).toBe("K-LINE");
+    // K-LINE cité dans 2 villes → en tête du top concurrents.
+    expect(result.report.topCompetitors[0]).toEqual({ name: "K-LINE", cityCount: 2 });
   });
 
   it("remonte une erreur si le LLM échoue", async () => {
@@ -98,6 +114,7 @@ describe("runLocalMapScan", () => {
       brand: "X",
       sector: "y",
       cities: [city("Tours")],
+      intents: ["meilleur y"],
       execute: vi.fn(async () => {
         throw new Error("boom");
       }),

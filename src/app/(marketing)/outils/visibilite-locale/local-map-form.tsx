@@ -30,12 +30,18 @@ export function LocalMapForm() {
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
-  async function runScan(profile: { brandName: string; sector: string; mainCity: string }) {
+  async function runScan(profile: {
+    brandName: string;
+    sector: string;
+    mainCity: string;
+    proposition?: string;
+  }) {
     const result = await runLocalMapScanAction({
       email: email.trim(),
       brandName: profile.brandName,
       sector: profile.sector,
       mainCity: profile.mainCity,
+      proposition: profile.proposition ?? "",
       websiteDomain: websiteDomain.trim().toLowerCase(),
       hpField,
     });
@@ -101,6 +107,7 @@ export function LocalMapForm() {
         brandName: profile.brandName,
         sector: profile.sector,
         mainCity: profile.zone,
+        proposition: profile.proposition,
       });
     });
   }

@@ -196,6 +196,17 @@ zéro impact sur le cœur SaaS), avant tout chantier in-app.
   `public_local_map_scan_completed`.
 - Hub `/outils` : 4ᵉ outil en tête avec pastille « Nouveau ».
 
+**Itération (retours Max, même jour)** :
+- **Prompts plus pertinents** : 2 intentions de recherche dérivées de l'activité détectée
+  (`deriveLocalIntents` depuis secteur + proposition — ex. « meilleur menuisier » +
+  « pose de fenêtres ») × chaque ville. ~7 villes × 2 → coût ~0,008-0,01 €/scan.
+- **Détection robuste de la marque** : `brandPatterns` gère « & » ↔ « et » ; le nom étendu
+  cité par l'IA (« ACB Portes et Fenêtres INTERNORM… ») est reconnu comme la marque ET
+  exclu des concurrents. Filtre renforcé des faux concurrents (« {métier} {ville} »).
+- **Layout dashboard** : carte à gauche, charts à droite (≥ lg, responsive), en réutilisant
+  les composants de l'app (`ScoreRing` score local, `BreakdownBars` « concurrents les plus
+  cités dans ta zone »). Carte plus propre (tuiles CARTO `light_nolabels`, zones douces).
+
 **Positionnement** : « le référencement local de l'ère IA ». Marketing : la carte = lead
 magnet viral + futur visuel LinkedIn + baromètre local (prolonge l'étude 50 marques).
 

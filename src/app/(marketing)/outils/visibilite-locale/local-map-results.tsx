@@ -1,20 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Check, Lock, MessageSquare, X } from "lucide-react";
-import { Badge, Button, LinkButton } from "@/components/ui";
+import { ArrowRight, Check, Lock, MapPin, MessageSquare, Trophy, X } from "lucide-react";
+import { Badge, Button, LinkButton, ScoreRing } from "@/components/ui";
+import { BreakdownBars } from "@/components/charts/breakdown-bars";
 import { FounderPortrait } from "@/components/marketing/founder-portrait";
 import { DFY_SLOTS_BADGE } from "@/lib/done-for-you";
 import { capture } from "@/lib/posthog-client";
 import type { CityVisibility, LocalMapReport } from "@/lib/local-map/types";
 import { LocalMap } from "./local-map";
 
-// Résultat de la carte locale : verdict + carte qui s'allume + détail par
-// ville, puis les 4 autres IA verrouillées → funnel signup, puis upsell
-// accompagnement. Cf. concept GEO local (doc 09 § 2026-06-17).
+// Résultat de la carte locale — layout « dashboard » (carte à gauche,
+// charts app à droite ≥ lg, responsive en colonne sinon). Réutilise les
+// composants de l'app (ScoreRing, BreakdownBars) pour la cohérence DA.
+// Cf. concept GEO local (doc 09 § 2026-06-17, itération layout + charts).
 
 const LOCKED_LLMS = ["ChatGPT", "Claude", "Gemini", "Perplexity"];
 const SIGNUP_HREF = "/login?mode=signup&from=carte-locale";
+const COMP_COLORS = ["#329cff", "#8b5cf6", "#ec4899", "#f59e0b", "#14b8a6", "#64748b"];
 
 function trackCta(cta: string, extra?: Record<string, unknown>) {
   capture("tool_cta_clicked", { tool: "visibilite-locale", cta, ...extra });
@@ -31,54 +34,103 @@ export function LocalMapResults({
 }) {
   const missing = report.cities.filter((c) => !c.recommended);
   const firstRival = missing.find((c) => c.topRival)?.topRival ?? null;
+  const visibilityPct =
+    report.totalCities > 0 ? (report.recommendedCount / report.totalCities) * 100 : 0;
 
   return (
-    <div className="mx-auto max-w-3xl">
-      <div className="rounded-[var(--radius-xl)] border border-[color:var(--color-border)] bg-white p-6 shadow-[var(--shadow-sm)] sm:p-8">
-        <p className="type-eyebrow text-center">
-          {report.brand} · {report.sector} · autour de {report.mainCity} · {report.llmLabel} · en
-          direct
-        </p>
+    <div className="mx-auto max-w-5xl">
+      <p className="type-eyebrow text-center">
+        {report.brand} · {report.sector} · autour de {report.mainCity} · {report.llmLabel} · en
+        direct
+      </p>
 
-        <div className="mt-6">
-          <LocalMap cities={report.cities} brand={report.brand} />
-        </div>
+      {/* Ligne 1 : carte (gauche) + score & concurrents (droite) */}
+      <div className="mt-6 grid grid-cols-1 gap-5 lg:grid-cols-[1.3fr_1fr]">
+        <Card>
+          <CardTitle icon={MapPin}>Ta carte de visibilité IA locale</CardTitle>
+          <div className="mt-4">
+            <LocalMap cities={report.cities} brand={report.brand} />
+          </div>
+        </Card>
 
-        <p className="type-body mx-auto mt-6 max-w-md text-center">
-          {verdictText(report, firstRival)}
-        </p>
+        <div className="flex flex-col gap-5">
+          <Card>
+            <CardTitle>Score local</CardTitle>
+            <div className="mt-3 flex items-center gap-5">
+              <ScoreRing value={visibilityPct} size={104} suffix={null} />
+              <div>
+                <p className="text-sm font-medium text-[color:var(--color-ink)]">
+                  Recommandé dans {report.recommendedCount} ville
+                  {report.recommendedCount > 1 ? "s" : ""} sur {report.totalCities}
+                </p>
+                <p className="type-meta mt-1">
+                  % de villes où l&apos;IA te cite quand on cherche ton activité.
+                </p>
+              </div>
+            </div>
+          </Card>
 
-        {/* Détail par ville */}
-        <div className="mt-8 flex flex-col gap-2">
-          {report.cities.map((city) => (
-            <CityRow key={city.name} city={city} />
-          ))}
+          <Card>
+            <CardTitle icon={Trophy}>Concurrents les plus cités dans ta zone</CardTitle>
+            {report.topCompetitors.length > 0 ? (
+              <div className="mt-4">
+                <BreakdownBars
+                  segments={report.topCompetitors.map((c, i) => ({
+                    id: c.name,
+                    label: c.name,
+                    value: c.cityCount,
+                    color: COMP_COLORS[i % COMP_COLORS.length]!,
+                    suffix: c.cityCount > 1 ? " villes" : " ville",
+                  }))}
+                  mode="absolute"
+                  maxValue={report.totalCities}
+                />
+              </div>
+            ) : (
+              <p className="type-meta mt-3">
+                Aucun concurrent clairement identifié — le terrain local est ouvert.
+              </p>
+            )}
+          </Card>
         </div>
       </div>
 
-      {/* Les questions posées — cliquables → login (conversion) */}
-      <PromptsBlock report={report} />
+      <p className="type-body mx-auto mt-6 max-w-xl text-center">
+        {verdictText(report, firstRival)}
+      </p>
+
+      {/* Ligne 2 : détail par ville (gauche) + questions posées (droite) */}
+      <div className="mt-8 grid grid-cols-1 gap-5 lg:grid-cols-2">
+        <Card>
+          <CardTitle>Détail par ville</CardTitle>
+          <div className="mt-4 flex flex-col gap-2">
+            {report.cities.map((city) => (
+              <CityRow key={city.name} city={city} />
+            ))}
+          </div>
+        </Card>
+
+        <PromptsCard report={report} />
+      </div>
 
       {/* Les 4 autres IA, verrouillées */}
-      <div className="mt-6 rounded-[var(--radius-xl)] border-2 border-[color:var(--color-ink)] bg-white p-6 sm:p-8">
+      <div className="mt-8 rounded-[var(--radius-xl)] border-2 border-[color:var(--color-ink)] bg-white p-6 sm:p-8">
         <h3 className="type-h3">Et sur les 4 autres IA, dans tes villes ?</h3>
         <p className="type-body mt-2">
           Tu viens de voir Le Chat. Mais tes prospects demandent aussi à ChatGPT, Claude, Perplexity
           et Gemini — et d&apos;une IA à l&apos;autre, les recommandations changent du tout au tout.
           Le suivi de l&apos;app te montre ta carte locale sur les 5 IA, et son évolution.
         </p>
-        <div className="mt-5 flex flex-col gap-2">
+        <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4">
           {LOCKED_LLMS.map((llm) => (
             <Link
               key={llm}
               href={SIGNUP_HREF}
               onClick={() => trackCta("locked_llm", { llm })}
-              className="group flex items-center justify-between rounded-[var(--radius-lg)] border border-[color:var(--color-border)] bg-[color:var(--color-gray-50)] px-4 py-3 transition hover:border-[color:var(--color-ink)] hover:bg-white"
+              className="group flex items-center justify-between rounded-[var(--radius-lg)] border border-[color:var(--color-border)] bg-[color:var(--color-gray-50)] px-3 py-2.5 transition hover:border-[color:var(--color-ink)] hover:bg-white"
             >
               <span className="text-sm font-medium text-[color:var(--color-ink)]">{llm}</span>
-              <span className="inline-flex items-center gap-1.5 text-xs font-medium text-[color:var(--color-faint)] transition group-hover:text-[color:var(--color-ink)]">
-                <Lock size={13} /> débloquer
-              </span>
+              <Lock size={13} className="text-[color:var(--color-faint)]" />
             </Link>
           ))}
         </div>
@@ -112,6 +164,29 @@ export function LocalMapResults({
   );
 }
 
+function Card({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="rounded-[var(--radius-xl)] border border-[color:var(--color-border)] bg-white p-5 shadow-[var(--shadow-sm)] sm:p-6">
+      {children}
+    </div>
+  );
+}
+
+function CardTitle({
+  children,
+  icon: Icon,
+}: {
+  children: React.ReactNode;
+  icon?: React.ComponentType<{ size?: number; className?: string }>;
+}) {
+  return (
+    <div className="flex items-center gap-2">
+      {Icon && <Icon size={15} className="text-[color:var(--color-accent)]" />}
+      <h3 className="type-eyebrow">{children}</h3>
+    </div>
+  );
+}
+
 function verdictText(report: LocalMapReport, firstRival: string | null): string {
   const { recommendedCount, totalCities, mainCity } = report;
   if (recommendedCount === 0) {
@@ -133,59 +208,9 @@ function formatList(items: string[]): string {
   return `${items.slice(0, -1).join(", ")} et ${items[items.length - 1]}`;
 }
 
-// Les questions exactes posées à l'IA, ville par ville. Cliquables : chaque
-// question redirige vers le signup (« suis cette requête dans l'app »). On
-// montre la transparence (rien n'est caché) ET on convertit.
-function PromptsBlock({ report }: { report: LocalMapReport }) {
-  return (
-    <div className="mt-6 rounded-[var(--radius-xl)] border border-[color:var(--color-border)] bg-white p-6 sm:p-8">
-      <div className="flex items-center gap-2">
-        <MessageSquare size={16} className="text-[color:var(--color-accent)]" />
-        <h3 className="type-h3">Les questions qu&apos;on a posées à l&apos;IA</h3>
-      </div>
-      <p className="type-meta mt-2">
-        Exactement ce que tes clients tapent. Clique sur une question pour la suivre dans
-        l&apos;app, chaque jour et sur les 5 IA.
-      </p>
-      <div className="mt-4 flex flex-col gap-2">
-        {report.cities.map((city) => (
-          <Link
-            key={city.name}
-            href={SIGNUP_HREF}
-            onClick={() => trackCta("prompt_click", { city: city.name })}
-            className="group flex items-center justify-between gap-3 rounded-[var(--radius-lg)] border border-[color:var(--color-border)] bg-[color:var(--color-gray-50)] px-4 py-3 transition hover:border-[color:var(--color-ink)] hover:bg-white"
-          >
-            <span className="flex items-center gap-2 text-sm">
-              <span
-                className={`flex size-4 shrink-0 items-center justify-center rounded-full ${
-                  city.recommended
-                    ? "bg-[color:var(--color-success)]"
-                    : "bg-[color:var(--color-error)]"
-                }`}
-              >
-                {city.recommended ? (
-                  <Check size={10} strokeWidth={3} className="text-white" />
-                ) : (
-                  <X size={10} strokeWidth={3} className="text-white" />
-                )}
-              </span>
-              <span className="italic text-[color:var(--color-ink-soft)]">
-                «&nbsp;{city.query}&nbsp;»
-              </span>
-            </span>
-            <span className="inline-flex shrink-0 items-center gap-1 text-xs font-medium text-[color:var(--color-faint)] transition group-hover:gap-1.5 group-hover:text-[color:var(--color-ink)]">
-              suivre <ArrowRight size={13} />
-            </span>
-          </Link>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 function CityRow({ city }: { city: CityVisibility }) {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-2 rounded-[var(--radius-lg)] border border-[color:var(--color-border)] bg-white px-4 py-3">
+    <div className="flex flex-wrap items-center justify-between gap-2 rounded-[var(--radius-lg)] border border-[color:var(--color-border)] bg-white px-4 py-2.5">
       <div className="flex items-center gap-2">
         {city.recommended ? (
           <Check size={16} className="shrink-0 text-[color:var(--color-success)]" />
@@ -213,9 +238,42 @@ function CityRow({ city }: { city: CityVisibility }) {
   );
 }
 
+// Les questions posées (exemples sur la ville principale, × N villes) —
+// cliquables → signup. Transparence + conversion.
+function PromptsCard({ report }: { report: LocalMapReport }) {
+  const main = report.cities[0];
+  const examples = main?.queries ?? [];
+  return (
+    <div className="rounded-[var(--radius-xl)] border border-[color:var(--color-border)] bg-white p-5 shadow-[var(--shadow-sm)] sm:p-6">
+      <CardTitle icon={MessageSquare}>Les questions qu&apos;on a posées à l&apos;IA</CardTitle>
+      <p className="type-meta mt-2">
+        Exactement ce que tes clients tapent, dans {report.totalCities} villes. Clique pour suivre
+        ces questions dans l&apos;app, chaque jour et sur les 5 IA.
+      </p>
+      <div className="mt-4 flex flex-col gap-2">
+        {examples.map((query) => (
+          <Link
+            key={query}
+            href={SIGNUP_HREF}
+            onClick={() => trackCta("prompt_click")}
+            className="group flex items-center justify-between gap-3 rounded-[var(--radius-lg)] border border-[color:var(--color-border)] bg-[color:var(--color-gray-50)] px-4 py-3 transition hover:border-[color:var(--color-ink)] hover:bg-white"
+          >
+            <span className="text-sm italic text-[color:var(--color-ink-soft)]">
+              «&nbsp;{query}&nbsp;»
+            </span>
+            <span className="inline-flex shrink-0 items-center gap-1 text-xs font-medium text-[color:var(--color-faint)] transition group-hover:gap-1.5 group-hover:text-[color:var(--color-ink)]">
+              suivre <ArrowRight size={13} />
+            </span>
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function AccompagnementUpsell() {
   return (
-    <div className="mt-6 rounded-[var(--radius-xl)] border border-[color:var(--color-border)] bg-[color:var(--color-gray-50)] p-6 sm:p-8">
+    <div className="mt-8 rounded-[var(--radius-xl)] border border-[color:var(--color-border)] bg-[color:var(--color-gray-50)] p-6 sm:p-8">
       <div className="flex flex-wrap items-center gap-4">
         <FounderPortrait size={56} />
         <div className="flex flex-wrap items-center gap-2">

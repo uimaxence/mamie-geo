@@ -17,8 +17,15 @@ export interface CityVisibility {
   rivals: string[];
   /** Concurrent n°1 cité « à ta place » (premier rival), null si recommandé/aucun. */
   topRival: string | null;
-  /** La question exacte posée à l'IA (affichée au prospect). */
-  query: string;
+  /** Les questions exactes posées à l'IA pour cette ville (1 par intention). */
+  queries: string[];
+}
+
+/** Concurrent agrégé sur toute la zone (pour le chart « top concurrents »). */
+export interface CompetitorTally {
+  name: string;
+  /** Nombre de villes où ce concurrent est cité. */
+  cityCount: number;
 }
 
 export interface LocalMapReport {
@@ -28,8 +35,12 @@ export interface LocalMapReport {
   mainCity: string;
   /** LLM interrogé (V0 : Le Chat via mistral-small). */
   llmLabel: string;
+  /** Intentions de recherche utilisées (« meilleur menuisier », « pose de fenêtres »…). */
+  intents: string[];
   /** Ville centrale + villes autour, dans l'ordre d'affichage. */
   cities: CityVisibility[];
+  /** Concurrents les plus cités dans la zone, triés (pour le chart). */
+  topCompetitors: CompetitorTally[];
   /** Nombre de villes où la marque est recommandée. */
   recommendedCount: number;
   totalCities: number;

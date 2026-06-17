@@ -12,6 +12,7 @@ import {
   storeLocalMapReport,
 } from "@/lib/local-map/cache";
 import { geocodeCityCluster } from "@/lib/local-map/cities";
+import { deriveLocalIntents } from "@/lib/local-map/intents";
 import { runLocalMapScan } from "@/lib/local-map/scan";
 import type { ScanCity } from "@/lib/local-map/queries";
 import { localMapScanSchema, type LocalMapScanInput } from "@/lib/local-map/schemas";
@@ -88,10 +89,13 @@ export async function runLocalMapScanAction(raw: LocalMapScanInput): Promise<Loc
   if (cached) {
     result = { ok: true, report: cached };
   } else {
-    // Géocode le cluster (ville principale + ~8 communes autour, avec
-    // coords pour la carte). Best effort : si l'IA échoue, fallback sur la
-    // seule ville principale (sans coords → carte en mode liste).
-    const geocoded = await geocodeCityCluster({ apiKey, city: mainCity, sector, count: 8 });
+    // En parallèle : intentions de recherche (selon l'activité) + géocodage
+    // du cluster (ville + ~6 communes autour, avec coords pour la carte).
+    const proposition = data.proposition?.trim() || undefined;
+    const [intents, geocoded] = await Promise.all([
+      deriveLocalIntents({ apiKey, sector, proposition, count: 2 }),
+      geocodeCityCluster({ apiKey, city: mainCity, sector, count: 6 }),
+    ]);
     const cities: ScanCity[] =
       geocoded.length > 0 ? geocoded : [{ name: mainCity, lat: null, lng: null }];
 
@@ -100,6 +104,7 @@ export async function runLocalMapScanAction(raw: LocalMapScanInput): Promise<Loc
       brand,
       sector,
       cities,
+      intents,
       execute: (prompt) => client.execute({ prompt, language: "fr" }),
       extractBrands: (responseTexts) =>
         extractBrandsCited({ apiKey, targetBrand: brand, responseTexts }),
