@@ -11,6 +11,7 @@ import {
 import { getUserContext } from "@/lib/auth/user-context";
 import type { LLMValue } from "@/lib/llm";
 import type { ParsedBrandsPayload } from "@/lib/citation/types";
+import { detectMentions } from "@/lib/citation/detect";
 import { getRunBatches, type RunBatch } from "@/lib/runs/batches";
 import { aggregatePromptMetrics, type PromptRunForMetrics } from "./metrics";
 
@@ -115,6 +116,13 @@ export interface PromptWithMetrics {
   persistance: number;
   topCompetitors: PromptMetricCompetitor[];
   lastAnalyzedAt: Date | null;
+  /**
+   * True si le prompt nomme explicitement la marque (nom ou alias dans le
+   * texte). Dans ce cas la citation — et donc le rang #1 — est triviale :
+   * l'IA répond forcément sur la marque qu'on lui sert. On ne le présente
+   * donc pas comme un signal de visibilité organique (cf. UI table).
+   */
+  isBranded: boolean;
 }
 
 export interface PromptsWithMetricsResult {
@@ -192,6 +200,16 @@ export async function listPromptsWithMetrics(
     runsByPrompt.set(r.promptId, list);
   }
 
+  // Détection « prompt brandé » : le texte nomme la marque (nom + aliases).
+  // Réutilise le matcher de citation (frontière de mot, insensible accents/casse)
+  // pour rester cohérent avec la détection des réponses LLM.
+  const brandTarget = {
+    id: ctx.brand.id,
+    name: ctx.brand.name,
+    type: "brand" as const,
+    patterns: [ctx.brand.name, ...ctx.brand.aliases],
+  };
+
   const result: PromptWithMetrics[] = promptRows.map((p) => {
     const metrics = aggregatePromptMetrics(runsByPrompt.get(p.id) ?? []);
     return {
@@ -207,6 +225,7 @@ export async function listPromptsWithMetrics(
       totalRuns: metrics.totalRuns,
       persistance: metrics.persistance,
       lastAnalyzedAt: metrics.lastAnalyzedAt,
+      isBranded: detectMentions(p.text, [brandTarget]).length > 0,
       topCompetitors: metrics.topCompetitors.map((c) => ({
         name: c.name,
         domain: domainByName.get(c.name.toLowerCase()) ?? null,

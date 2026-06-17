@@ -63,7 +63,7 @@ export function PromptsAnalyticsTable({ rows, windowDays }: PromptsAnalyticsTabl
               </Td>
 
               <Td align="right">
-                <RangBadge rang={p.rang} />
+                <RangBadge rang={p.rang} isBranded={p.isBranded} />
               </Td>
 
               <Td className="hidden md:table-cell">
@@ -114,15 +114,32 @@ export function PromptsAnalyticsTable({ rows, windowDays }: PromptsAnalyticsTabl
 
       <p className="type-meta mt-4">
         Métriques calculées sur les {windowDays} derniers jours. Rang = position de ta marque par
-        fréquence de citation parmi les marques citées sur le prompt.
+        fréquence de citation parmi les marques citées sur le prompt. Les prompts marqués «&nbsp;marque&nbsp;»
+        te nomment explicitement : l'IA répond forcément sur toi, le rang y est donc attendu et
+        n'indique pas ta visibilité organique — privilégie les prompts génériques pour ça.
       </p>
     </div>
   );
 }
 
-function RangBadge({ rang }: { rang: number | null }) {
+function RangBadge({ rang, isBranded }: { rang: number | null; isBranded: boolean }) {
   if (rang === null) {
     return <span className="type-meta">—</span>;
+  }
+  // Prompt brandé : la marque est nommée dans le prompt, donc être cité
+  // (souvent #1) est attendu et ne mesure pas la visibilité organique. On
+  // affiche le rang en neutre + une mention « marque » plutôt que le vert
+  // de victoire, pour ne pas survendre un signal trivial.
+  if (isBranded) {
+    return (
+      <span
+        title="Ta marque est nommée dans ce prompt : l'IA répond forcément sur toi, donc le rang n'est pas un signal de visibilité organique."
+        className="inline-flex cursor-help items-center justify-end gap-1.5"
+      >
+        <Badge tone="neutral">{`#${rang}`}</Badge>
+        <span className="type-meta">marque</span>
+      </span>
+    );
   }
   const tone = rang === 1 ? "success" : rang <= 3 ? "accent" : "warning";
   return <Badge tone={tone}>{`#${rang}`}</Badge>;
