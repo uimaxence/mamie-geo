@@ -455,6 +455,21 @@ export const subscriptionEvents = pgTable(
 );
 
 // ──────────────────────────────────────────────────────────────────────
+// Idempotence webhooks Stripe (cf. doc 09 § 2026-06-17)
+// Stripe livre at-least-once : un même event peut arriver plusieurs fois
+// (retry, replay). On « claim » l'event AVANT d'exécuter le handler :
+// l'insert atomique sur `eventId` (PK) échoue/no-op si déjà vu → on skip
+// les effets de bord (emails, events PostHog) au lieu de les rejouer.
+// `subscription_events` ne suffisait pas : il était écrit APRÈS le handler.
+// ──────────────────────────────────────────────────────────────────────
+
+export const stripeProcessedEvents = pgTable("stripe_processed_events", {
+  eventId: text("event_id").primaryKey(),
+  eventType: text("event_type").notNull(),
+  processedAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+});
+
+// ──────────────────────────────────────────────────────────────────────
 // Usage counters — fenêtre = mois de facturation Stripe
 // ──────────────────────────────────────────────────────────────────────
 

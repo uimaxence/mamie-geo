@@ -9,6 +9,7 @@ import { db } from "@/db/client";
 import { brands, competitors, prompts, runs, workspaceMembers, workspaces } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { logCronEvent } from "@/lib/cron-logger";
+import { captureServerEvent } from "@/lib/posthog-server";
 import { env } from "@/lib/env";
 import {
   createAnthropicPromptGenerator,
@@ -193,6 +194,19 @@ export async function submitOnboarding(raw: OnboardingInput): Promise<Onboarding
     }
   }
 
+  // Mesure du funnel : workspace effectivement créé en base (source de
+  // vérité serveur, distincte de `onboarding_completed` tiré côté client).
+  await captureServerEvent({
+    event: "workspace_created",
+    distinctId: session.user.id,
+    ctx: { workspaceId, plan: "trialing" },
+    properties: {
+      source: "full",
+      prompts_count: data.prompts.length,
+      competitors_count: data.competitors.length,
+    },
+  });
+
   return { ok: true, workspaceId };
 }
 
@@ -264,6 +278,13 @@ export async function quickSetup(raw: QuickSetupInput): Promise<OnboardingResult
     event: "onboarding_quick_setup",
     workspaceId,
     userId: session.user.id,
+  });
+
+  await captureServerEvent({
+    event: "workspace_created",
+    distinctId: session.user.id,
+    ctx: { workspaceId, plan: "trialing" },
+    properties: { source: "quick", prompts_count: 0, competitors_count: 0 },
   });
 
   return { ok: true, workspaceId };

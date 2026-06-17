@@ -5,6 +5,7 @@ import { db } from "@/db/client";
 import { account, session, user, verification } from "@/db/schema";
 import { env } from "@/lib/env";
 import { sendMagicLinkEmail } from "@/lib/email";
+import { captureServerEvent } from "@/lib/posthog-server";
 
 // Better Auth — config V0 magic-link only.
 // cf. geo-project/03-architecture-technique.md § Auth
@@ -68,6 +69,27 @@ export const auth = betterAuth({
   }),
   emailAndPassword: { enabled: false },
   socialProviders,
+  // Mesure du funnel : event `user_created` au moment où Better Auth crée
+  // un compte (magic-link confirmé ou Google) — sans lui, on ne pouvait pas
+  // mesurer le taux de confirmation magic-link (cf. audit 2026-06-17).
+  // Best-effort : ne jamais faire échouer le signup si PostHog est down.
+  databaseHooks: {
+    user: {
+      create: {
+        after: async (createdUser) => {
+          try {
+            await captureServerEvent({
+              event: "user_created",
+              distinctId: createdUser.id,
+              properties: { email: createdUser.email },
+            });
+          } catch {
+            // no-op : la création de compte ne doit pas dépendre de PostHog.
+          }
+        },
+      },
+    },
+  },
   plugins: [
     magicLink({
       expiresIn: 60 * 10, // 10 minutes

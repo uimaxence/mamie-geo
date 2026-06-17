@@ -1,5 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { eq } from "drizzle-orm";
 import type Stripe from "stripe";
+import { db } from "@/db/client";
+import { stripeProcessedEvents } from "@/db/schema";
 import { logCronEvent } from "@/lib/cron-logger";
 import { env } from "@/lib/env";
 import { getStripe } from "@/lib/stripe/client";
@@ -14,12 +17,17 @@ import {
 } from "@/lib/stripe/webhook-handlers";
 
 // POST /api/webhooks/stripe, endpoint de réception des webhooks Stripe.
-// Vérifie la signature, dispatch vers le bon handler, écrit une ligne
-// dans `subscription_events` (idempotent via stripeEventId UNIQUE).
+// Vérifie la signature, dispatch vers le bon handler, écrit l'audit dans
+// `subscription_events`.
 //
 // Stripe garantit at-least-once delivery → un même event peut arriver
-// plusieurs fois (retry, replay manuel). Le `subscription_events.stripeEventId`
-// UNIQUE empêche les doublons d'effet de bord.
+// plusieurs fois (retry, replay manuel). IDEMPOTENCE (corrigée 2026-06-17) :
+// on « claim » l'event AVANT d'exécuter le handler via un insert atomique
+// dans `stripe_processed_events` (PK = eventId). Si l'event a déjà été vu,
+// on skip → pas de double email ni de double event PostHog (l'ancien code
+// exécutait le handler PUIS enregistrait, donc les effets de bord étaient
+// rejoués à chaque redelivery). Si le handler échoue, on relâche le claim
+// pour que le retry Stripe le retraite.
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -62,6 +70,23 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ received: true, handled: false });
   }
 
+  // Claim atomique de l'event AVANT toute action. `onConflictDoNothing`
+  // renvoie [] si l'event a déjà été traité (PK dupliquée) → on skip les
+  // effets de bord. Atomique → robuste même sur 2 livraisons simultanées.
+  const claimed = await db
+    .insert(stripeProcessedEvents)
+    .values({ eventId: event.id, eventType: event.type })
+    .onConflictDoNothing()
+    .returning({ eventId: stripeProcessedEvents.eventId });
+  if (claimed.length === 0) {
+    logCronEvent({
+      event: "stripe_webhook_duplicate_skipped",
+      type: event.type,
+      stripeEventId: event.id,
+    });
+    return NextResponse.json({ received: true, handled: false, duplicate: true });
+  }
+
   try {
     let result;
     switch (event.type) {
@@ -102,6 +127,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ received: true, handled: true });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
+    // Le handler a échoué : on relâche le claim pour que le retry Stripe
+    // (500 ci-dessous) puisse retraiter l'event proprement.
+    await db
+      .delete(stripeProcessedEvents)
+      .where(eq(stripeProcessedEvents.eventId, event.id))
+      .catch(() => {});
     logCronEvent({
       level: "error",
       event: "stripe_webhook_handler_error",

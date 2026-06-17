@@ -161,6 +161,38 @@ haut et l'entrée "2026-05-05 — Réponses aux 10 questions de bootstrap".
 
 ### Décisions enregistrées
 
+#### 2026-06-17 — Audit Stripe/funnel : idempotence webhook + email essai-terminé + events funnel
+
+**Contexte** : audit de l'intégration Stripe et du funnel de conversion (« checker que
+tout fonctionne et est opti »). Trois correctifs livrés (le 4e — stratégie de pression de
+conversion en mid-trial — reste à discuter, pas du code).
+
+1. **Idempotence webhook (bug HAUT)** : la route exécutait le handler PUIS enregistrait
+   l'event dans `subscription_events` (UNIQUE `stripeEventId`). Comme Stripe livre
+   *at-least-once*, une redelivery (retry/replay) **rejouait tous les effets de bord** :
+   emails dupliqués + events PostHog re-tirés → **MRR et taux de conversion surcomptés**.
+   Fix : **insert-first** dans une nouvelle table `stripe_processed_events` (PK = eventId,
+   migration 0012) — claim atomique `onConflictDoNothing().returning()` AVANT le handler ;
+   si déjà vu → skip ; si le handler échoue → on relâche le claim pour que le retry
+   retraite. Robuste même sur 2 livraisons simultanées.
+2. **Email « essai terminé » jamais envoyé (bug MOYEN)** : `handleSubscriptionDeleted`
+   lisait `subscription.metadata.email`, jamais posé au checkout → `trySendEmail(null)`.
+   Fix : `findWorkspaceOwnerEmail(workspaceId)` (join `user`). Commentaire périmé corrigé
+   (les quotas trialing NE sont PLUS 0/0 mais Solo depuis le 2026-06-16).
+3. **Mesurabilité du funnel** : ajout des events `user_created` (hook Better Auth
+   `databaseHooks.user.create.after`) et `workspace_created` (server, dans
+   `submitOnboarding` + `quickSetup`). Sans eux, impossible de mesurer le taux de
+   confirmation magic-link et les créations de workspace côté serveur.
+
+**Conséquences attendues** : plus de doubles emails ni de doubles events Stripe → métriques
+de conversion fiables ; relance d'essai-terminé effective ; funnel signup→activation
+mesurable. **Ops** : appliquer la migration 0012 en prod (`pnpm db:migrate`).
+
+**À revisiter** : reste de l'audit (point 4) — pression de conversion quasi nulle en
+jours 0-10 du modèle « essai gratuit sans carte » (PlanPicker plus auto-ouvert
+post-onboarding, sidebar card seulement ≤ 3 j). Décision produit à trancher (nudge précoce,
+carte plus tôt, ou A/B essai avec/sans carte).
+
 #### 2026-06-17 — Aide à l'interprétation : RELATIF, pas absolu + remontée du rang sur le dashboard
 
 **Contexte** : retour Max — « on donne les données mais on sait pas vraiment si c'est bien

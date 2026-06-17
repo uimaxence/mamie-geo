@@ -1,7 +1,7 @@
 import { and, eq } from "drizzle-orm";
 import type Stripe from "stripe";
 import { db } from "@/db/client";
-import { subscriptionEvents, workspaceMembers, workspaces } from "@/db/schema";
+import { subscriptionEvents, user, workspaceMembers, workspaces } from "@/db/schema";
 import { logCronEvent } from "@/lib/cron-logger";
 import { sendTransactional } from "@/lib/email";
 import { renderPaymentFailed } from "@/lib/email/templates/payment-failed";
@@ -55,6 +55,19 @@ async function findWorkspaceOwnerUserId(workspaceId: string): Promise<string | n
     .orderBy(workspaceMembers.createdAt)
     .limit(1);
   return admin[0]?.userId ?? null;
+}
+
+/** Email du owner du workspace — pour les emails transactionnels webhook.
+ *  (Avant 2026-06-17 on lisait `subscription.metadata.email`, jamais posé
+ *  au checkout → l'email d'essai-terminé ne partait jamais.) */
+async function findWorkspaceOwnerEmail(workspaceId: string): Promise<string | null> {
+  const row = await db
+    .select({ email: user.email })
+    .from(workspaceMembers)
+    .innerJoin(user, eq(user.id, workspaceMembers.userId))
+    .where(and(eq(workspaceMembers.workspaceId, workspaceId), eq(workspaceMembers.role, "owner")))
+    .limit(1);
+  return row[0]?.email ?? null;
 }
 
 /** Envoi best-effort d'un email transactionnel — on log et on continue si fail. */
@@ -121,13 +134,13 @@ export async function handleCheckoutCompleted(
   const periodEnd = firstItemPeriodEnd(subscription);
 
   // Détection trial : Stripe pose `trial_end` quand la session a été créée
-  // avec `subscription_data.trial_period_days`. Dans ce cas, on garde
-  // workspace.plan = "trialing" (les quotas restent à 0/0 jusqu'à conversion
-  // ou trial_will_end) et on enregistre trialEndsAt pour piloter le picker
-  // urgence + emails J+10/J+13. La carte est déjà collectée par Stripe →
-  // au passage trial→active, handleSubscriptionUpdated bumpera plan au
-  // bon tier.
-  // cf. doc 09 § 2026-06-08 (réintroduction trial 14j avec carte requise).
+  // avec `subscription_data.trial_period_days`. Dans ce cas on garde
+  // workspace.plan = "trialing" (quotas Solo + schedulable depuis le
+  // 2026-06-16 — l'app tourne pendant l'essai) et on enregistre trialEndsAt
+  // pour piloter le picker urgence + emails J+10/J+13. La carte est déjà
+  // collectée → au passage trial→active, handleSubscriptionUpdated bumpe le
+  // plan au bon tier (un trial Stripe sur Pro reste donc en quotas Solo
+  // pendant 14 j, acceptable — cf. doc 09 § 2026-06-16).
   const trialEnd = subscription.trial_end;
   const isTrialing = subscription.status === "trialing" && typeof trialEnd === "number";
   const planToSet = isTrialing ? "trialing" : plan;
@@ -361,7 +374,7 @@ export async function handleSubscriptionDeleted(
   // déclinée OU cancel explicite pendant le trial). Pattern reprise en
   // 1 clic via portal. Sent best-effort, n'échoue pas le webhook.
   if (wasInTrial) {
-    const recipientEmail = subscription.metadata?.email ?? null;
+    const recipientEmail = await findWorkspaceOwnerEmail(ws.id);
     await trySendEmail(
       recipientEmail,
       renderTrialExpired({

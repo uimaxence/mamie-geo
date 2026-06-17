@@ -454,8 +454,9 @@ générique et GA4/GSC écartés (GA4/GSC reste V2.5). Disclaimer UI « plancher
 détecté ».
 
 **Tests** : Vitest colocation (100+ tests, dont quotas/hard-cap `beta` +
-detect/schemas pixel IA) + 13 E2E Playwright flows publics. DB Neon : 22
-tables + migrations 0000-0011.
+detect/schemas pixel IA + ranking/interpret) + 13 E2E Playwright flows
+publics. DB Neon : 23 tables + migrations 0000-0012 (0012 =
+`stripe_processed_events`, idempotence webhook insert-first, 2026-06-17).
 
 ### Reste à faire (post-lancement — site EN PROD ET EN LIGNE depuis 2026-06)
 
