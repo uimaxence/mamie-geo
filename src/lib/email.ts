@@ -579,6 +579,45 @@ Relance possible : audit manuel 5 IA complet, ou trial 14 j.`,
 }
 
 /**
+ * Notification interne — lead depuis la « Carte de visibilité IA locale »
+ * (/outils/visibilite-locale). Récap : recommandé dans X villes sur Y.
+ */
+export async function sendLocalMapLeadEmail(params: {
+  prospectEmail: string;
+  brandName: string;
+  sector: string;
+  mainCity: string;
+  recommendedCount: number;
+  totalCities: number;
+  cities: { name: string; recommended: boolean; topRival: string | null }[];
+  websiteDomain?: string;
+}) {
+  const { prospectEmail, brandName, sector, mainCity, recommendedCount, totalCities, cities } =
+    params;
+  const cityLines = cities
+    .map(
+      (c) =>
+        `  - ${c.name} : ${c.recommended ? "recommandé ✅" : `absent ❌${c.topRival ? ` (l'IA cite « ${c.topRival} »)` : ""}`}`,
+    )
+    .join("\n");
+  await sendTransactional({
+    to: "hello@mamie-geo.fr",
+    replyTo: prospectEmail,
+    subject: `[Carte locale] ${brandName} (${sector}, ${mainCity}) — recommandé dans ${recommendedCount}/${totalCities} villes`,
+    text: `Lead depuis /outils/visibilite-locale (carte de visibilité IA locale)
+
+Prospect  : ${prospectEmail}
+Marque    : ${brandName}
+Secteur   : ${sector}
+Ville     : ${mainCity}${params.websiteDomain ? `\nSite      : ${params.websiteDomain}` : ""}
+Résultat  : recommandé dans ${recommendedCount}/${totalCities} villes sur Le Chat (mistral-small)
+${cityLines}
+
+Relance possible : suivi local par zone (Pro), ou trial 14 j.`,
+  });
+}
+
+/**
  * Email envoyé à un beta-testeur quand son accès gratuit arrive à terme
  * (cron expire-comp). Propose la bascule payante (essai 14 j) sans coupure
  * brutale de relation. HTML branded, même DA que la confirmation de scan.

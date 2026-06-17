@@ -344,7 +344,14 @@ dismiss localStorage, desktop only). Sur le dashboard, `DashboardSetupGuide`
 Badge plan sidebar en FR (« trialing » → « Essai gratuit »). Fermeture du
 PlanPicker sans choix → `TrialExplainerModal` (essai 14 j expliqué).
 
-**Marketing/blog** : home, pricing, 4 pages légales, 3 lead magnets
+**Marketing/blog** : home, pricing, 4 pages légales, **4 lead magnets**.
+**`/outils/visibilite-locale`** « Carte de visibilité IA locale » (2026-06-17,
+angle différenciateur GEO local, doc 09) : site + email → ville détectée +
+4 communes autour (`suggestNearbyCities`) → 1 requête « meilleur {secteur}
+à {ville} » par ville à Le Chat (`mistral-small`, réutilise
+`extractBrandsCited`) → **carte radiale qui s'allume** (vert recommandé /
+rouge concurrent à ta place, `src/lib/local-map/*`), ~0,003-0,005 €/scan,
+mêmes garde-fous (honeypot, rate-limit, cache 24 h). Autres :
 (`/outils/test-visibilite-ia` scan express live 2026-06-12 : 3 prompts
 × Le Chat mistral-small ~0,002 €/scan, verdict regex OU jugement LLM
 des variantes de nom, 4 autres IA verrouillées → CTA trial, upsell

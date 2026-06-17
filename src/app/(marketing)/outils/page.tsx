@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, Globe, Sparkles, Wrench } from "lucide-react";
+import { ArrowRight, Globe, MapPin, Sparkles, Wrench } from "lucide-react";
 import { Badge, Section } from "@/components/ui";
 import { MarketingFooter } from "../_sections/marketing-footer";
 import { MarketingHeader } from "../_sections/marketing-header";
 
 export const metadata: Metadata = {
-  title: "Outils gratuits — visibilité IA, comparateurs, audit technique",
+  title: "Outils gratuits — visibilité IA locale, comparateurs, audit technique",
   description:
-    "Trois outils gratuits pour mesurer ta visibilité dans les IA : scan de présence sur les comparateurs, audit complet ChatGPT/Claude/Perplexity/Gemini/Le Chat, audit technique SEO + GEO en 10 secondes.",
+    "Des outils gratuits pour mesurer ta visibilité dans les IA : carte de visibilité IA locale (ville par ville), scan de présence sur les comparateurs, test de visibilité en direct, audit technique SEO + GEO en 10 secondes.",
   alternates: { canonical: "/outils" },
 };
 
@@ -28,9 +28,22 @@ interface Tool {
 
 const TOOLS: Tool[] = [
   {
+    href: "/outils/visibilite-locale",
+    Icon: MapPin,
+    isNew: true,
+    title: "Carte de visibilité IA locale",
+    description:
+      "Tes clients demandent à l'IA « le meilleur {ton métier} » dans leur ville. On pose la question pour ta ville et les communes autour, et on allume ta carte : là où tu es absent, l'IA recommande tes concurrents.",
+    bullets: [
+      "Site + email, ville et activité détectées automatiquement",
+      "Verdict par ville : recommandé, ou concurrent cité à ta place",
+      "Une carte qui s'allume, vert/rouge — le SEO local version IA",
+    ],
+    meta: "~30 secondes · IA interrogée ville par ville",
+  },
+  {
     href: "/outils/comparateurs",
     Icon: Globe,
-    isNew: true,
     title: "Scan comparateurs",
     description:
       "32 % des sources citées par les IA sont des comparateurs. Donne ton site, on détecte ta marque, ton secteur et ta zone, et on vérifie ta présence sur les sites que les IA lisent.",
@@ -80,8 +93,8 @@ export default function OutilsPage() {
             Gratuit · sans carte bancaire
           </Badge>
           <h1 className="type-display">
-            Trois outils gratuits pour{" "}
-            <strong className="font-bold">mesurer ta visibilité IA</strong>.
+            Des outils gratuits pour <strong className="font-bold">mesurer ta visibilité IA</strong>
+            .
           </h1>
           <p className="type-body-lg mt-6">
             Les IA recommandent déjà des marques à tes clients. Ces outils te montrent où tu en es —
@@ -89,7 +102,7 @@ export default function OutilsPage() {
           </p>
         </div>
 
-        <div className="mx-auto mt-14 grid max-w-5xl grid-cols-1 gap-6 md:grid-cols-3">
+        <div className="mx-auto mt-14 grid max-w-4xl grid-cols-1 gap-6 sm:grid-cols-2">
           {TOOLS.map((tool) => (
             <ToolCard key={tool.href} tool={tool} />
           ))}

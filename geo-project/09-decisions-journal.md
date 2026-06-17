@@ -161,6 +161,41 @@ haut et l'entrée "2026-05-05 — Réponses aux 10 questions de bootstrap".
 
 ### Décisions enregistrées
 
+#### 2026-06-17 — Angle différenciateur « GEO local » : lead magnet « Carte de visibilité IA locale »
+
+**Contexte** : recherche d'un angle que la concurrence (Peec, Qwairy, Botrank, Profound…)
+ne couvre pas. Insight : « GEO » a un double sens jamais exploité — *Generative Engine
+Optimization* × **Géographique**. Tous les concurrents posent des prompts **génériques**
+(« meilleur CRM »), pensés pour des marques globales. Or les clients demandent « meilleur
+{métier} à {ville} » et la cible de Mamie (PME/freelances FR + agences locales) est
+ultra-locale. Et le code détectait déjà la zone de chalandise (`site-profile.ts`) + faisait
+des requêtes localisées (`comparators/scan.ts`). Concept complet : voir la note de plan.
+
+**Choix** : démarrer par la **Phase 1 = lead magnet public** (validation la moins risquée,
+zéro impact sur le cœur SaaS), avant tout chantier in-app.
+
+**Livré (Phase 1)** : `/outils/visibilite-locale` — « Carte de visibilité IA locale ».
+- Parcours **miroir du scan express** : site + email → `detectSiteProfileAction` déduit
+  marque/activité/ville → si activité nationale (pas de ville), bascule manuelle.
+- Moteur `src/lib/local-map/` : `suggestNearbyCities` (1 appel Mistral → 4 communes
+  autour), 1 requête localisée « meilleur {secteur} à {ville} » par ville (≤ 5 villes) à
+  Le Chat (`mistral-small`), réutilise `extractBrandsCited` (express) pour le verdict +
+  les concurrents. Coût ~0,003-0,005 €/scan. Garde-fous identiques (honeypot, rate-limit
+  5/IP/h + cap 50/j, cache 24 h).
+- **Visuel « wow »** : `local-map.tsx` — carte radiale (ta ville au centre, communes autour
+  en satellites reliés, vert = l'IA te recommande / rouge = un concurrent à ta place),
+  révélation animée. Cas « personne cité » cadré comme une opportunité.
+- Email lead interne + confirmation prospect (essai 14 j) ; events `tool_lead_form_submitted`
+  / `tool_profile_autodetected` / `tool_cta_clicked` / `public_local_map_scan_completed`.
+- Hub `/outils` : 4ᵉ outil en tête avec pastille « Nouveau ».
+
+**Positionnement** : « le référencement local de l'ère IA ». Marketing : la carte = lead
+magnet viral + futur visuel LinkedIn + baromètre local (prolonge l'étude 50 marques).
+
+**À revisiter** : ~2 semaines de prod — taux de complétion + CTR CTA vs les 2 autres lead
+magnets. Si ça accroche → Phase 2 (local in-app : colonne `prompts.location`, vue « Par
+zone », badges « N°1 local », gating Pro/Agency car coût ×N villes).
+
 #### 2026-06-17 — Audit Stripe/funnel : idempotence webhook + email essai-terminé + events funnel
 
 **Contexte** : audit de l'intégration Stripe et du funnel de conversion (« checker que
