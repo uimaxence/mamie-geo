@@ -238,17 +238,19 @@ function CityRow({ city }: { city: CityVisibility }) {
   );
 }
 
-// Les questions posées (exemples sur la ville principale, × N villes) —
-// cliquables → signup. Transparence + conversion.
+// Les recherches locales analysées (1 par ville), cliquables → signup.
+// Transparence (ce qu'on a réellement cherché) + conversion.
 function PromptsCard({ report }: { report: LocalMapReport }) {
-  const main = report.cities[0];
-  const examples = main?.queries ?? [];
+  const examples = report.cities
+    .map((c) => c.queries[0])
+    .filter((q): q is string => Boolean(q))
+    .slice(0, 6);
   return (
     <div className="rounded-[var(--radius-xl)] border border-[color:var(--color-border)] bg-white p-5 shadow-[var(--shadow-sm)] sm:p-6">
-      <CardTitle icon={MessageSquare}>Les questions qu&apos;on a posées à l&apos;IA</CardTitle>
+      <CardTitle icon={MessageSquare}>Les recherches qu&apos;on a analysées</CardTitle>
       <p className="type-meta mt-2">
-        Exactement ce que tes clients tapent, dans {report.totalCities} villes. Clique pour suivre
-        ces questions dans l&apos;app, chaque jour et sur les 5 IA.
+        Exactement ce que tes clients tapent dans tes {report.totalCities} villes. Clique pour
+        suivre ces recherches dans l&apos;app, chaque jour et sur les 5 IA.
       </p>
       <div className="mt-4 flex flex-col gap-2">
         {examples.map((query) => (

@@ -2,38 +2,33 @@
 
 import { headers } from "next/headers";
 import { logCronEvent } from "@/lib/cron-logger";
+import { createBraveSearch } from "@/lib/comparators/brave";
 import { sendLocalMapLeadEmail, sendScanConfirmationEmail } from "@/lib/email";
 import { env } from "@/lib/env";
-import { extractBrandsCited } from "@/lib/express-scan/extract";
 import {
   checkLocalMapRateLimit,
   getCachedLocalMapReport,
   localMapCacheKey,
   storeLocalMapReport,
 } from "@/lib/local-map/cache";
-import { geocodeCityCluster } from "@/lib/local-map/cities";
-import { deriveLocalIntents } from "@/lib/local-map/intents";
-import { runLocalMapScan } from "@/lib/local-map/scan";
-import type { ScanCity } from "@/lib/local-map/queries";
+import { buildCityCluster } from "@/lib/local-map/cities";
+import { extractLocalBusinesses } from "@/lib/local-map/grounding";
+import { runGroundedLocalScan } from "@/lib/local-map/scan";
 import { localMapScanSchema, type LocalMapScanInput } from "@/lib/local-map/schemas";
 import type { LocalMapResult } from "@/lib/local-map/types";
-import { createMistralClient } from "@/lib/llm/mistral";
 import { captureServerEvent, identifyServerUser } from "@/lib/posthog-server";
 
 // Server action /outils/visibilite-locale — « Carte de visibilité IA
-// locale » (concept GEO local, doc 09 § 2026-06-17). On déduit les villes
-// autour de la ville principale (1 appel Mistral), puis on demande à Le
-// Chat « meilleur {secteur} à {ville} ? » pour chaque ville. Verdict par
-// ville → carte qui s'allume + CTA trial. Même garde-fous que le scan
-// express (honeypot, rate-limit, cache 24 h).
+// locale » (concept GEO local, doc 09 § 2026-06-17). GROUNDED : pour chaque
+// ville, une vraie recherche web (Brave) « meilleur {métier} à {ville} »,
+// puis Mistral extrait les entreprises locales réellement nommées (vs
+// l'invention « from knowledge »). Géocodage exact via adresse.data.gouv.
+// Garde-fous identiques au scan express (honeypot, rate-limit, cache 24 h).
 
 async function getIp(): Promise<string> {
   const hdrs = await headers();
   return hdrs.get("x-forwarded-for")?.split(",")[0]?.trim() ?? hdrs.get("x-real-ip") ?? "unknown";
 }
-
-const SCAN_MODEL = "mistral-small-latest";
-const SCAN_MAX_TOKENS = 1024;
 
 export async function runLocalMapScanAction(raw: LocalMapScanInput): Promise<LocalMapResult> {
   const parsed = localMapScanSchema.safeParse(raw);
@@ -55,7 +50,8 @@ export async function runLocalMapScanAction(raw: LocalMapScanInput): Promise<Loc
     };
   }
 
-  if (!env.MISTRAL_API_KEY) {
+  // Le grounding réaliste nécessite Mistral (extraction) ET Brave (recherche web).
+  if (!env.MISTRAL_API_KEY || !env.BRAVE_SEARCH_API_KEY) {
     logCronEvent({ level: "warn", event: "local_map_no_api_key" });
     return {
       ok: false,
@@ -89,25 +85,27 @@ export async function runLocalMapScanAction(raw: LocalMapScanInput): Promise<Loc
   if (cached) {
     result = { ok: true, report: cached };
   } else {
-    // En parallèle : intentions de recherche (selon l'activité) + géocodage
-    // du cluster (ville + ~6 communes autour, avec coords pour la carte).
-    const proposition = data.proposition?.trim() || undefined;
-    const [intents, geocoded] = await Promise.all([
-      deriveLocalIntents({ apiKey, sector, proposition, count: 2 }),
-      geocodeCityCluster({ apiKey, city: mainCity, sector, count: 6 }),
-    ]);
-    const cities: ScanCity[] =
-      geocoded.length > 0 ? geocoded : [{ name: mainCity, lat: null, lng: null }];
+    // Cluster géocodé (ville + ~6 communes proches) via adresse.data.gouv.
+    const cluster = await buildCityCluster({ apiKey, city: mainCity, sector, count: 6 });
+    if (cluster.length === 0) {
+      logCronEvent({ level: "warn", event: "local_map_geocode_failed", mainCity });
+      return {
+        ok: false,
+        code: "no_location",
+        message: `On n'a pas trouvé « ${mainCity} » comme commune française. Vérifie l'orthographe de ta ville.`,
+      };
+    }
 
-    const client = createMistralClient({ apiKey, model: SCAN_MODEL, maxTokens: SCAN_MAX_TOKENS });
-    result = await runLocalMapScan({
+    const search = createBraveSearch({ apiKey: env.BRAVE_SEARCH_API_KEY });
+    result = await runGroundedLocalScan({
       brand,
+      brandDomain: websiteDomain,
       sector,
-      cities,
-      intents,
-      execute: (prompt) => client.execute({ prompt, language: "fr" }),
-      extractBrands: (responseTexts) =>
-        extractBrandsCited({ apiKey, targetBrand: brand, responseTexts }),
+      cities: cluster,
+      search,
+      ground: (perCity) =>
+        extractLocalBusinesses({ apiKey, brand, brandDomain: websiteDomain, sector, perCity }),
+      llmLabel: "résultats web · Le Chat + Brave",
     });
     if (result.ok) storeLocalMapReport(cacheKey, result.report);
   }

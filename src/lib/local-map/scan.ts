@@ -1,35 +1,39 @@
-import { detectMentions } from "@/lib/citation/detect";
 import { normalizeText } from "@/lib/comparators/sectors";
-import type { BrandExtraction } from "@/lib/express-scan/extract";
-import { brandPatterns, buildLocalQuery, dedupeCities, type ScanCity } from "./queries";
+import type { SearchFn } from "@/lib/comparators/types";
+import { brandPatterns, dedupeCities, type ScanCity } from "./queries";
+import type { CityGrounding } from "./grounding";
 import type { CityVisibility, CompetitorTally, LocalMapReport, LocalMapResult } from "./types";
 
-// Moteur de la carte locale : pour chaque ville, on pose 1 question par
-// INTENTION (« meilleur menuisier à Angers », « pose de fenêtres à
-// Angers »…) à Le Chat. Verdict « recommandé » = regex (detectMentions,
-// patterns tolérants & ↔ et) OU jugement de l'extraction. Réutilise
-// l'extraction marques du scan express. Agrège les concurrents sur la zone.
+// Moteur de la carte locale, version GROUNDED (2026-06-17, retour Max) :
+// pour chaque ville on fait une vraie recherche web (Brave) « meilleur
+// {métier} à {ville} », puis Mistral extrait les entreprises locales
+// réellement nommées dans les résultats. Fini les marques inventées « from
+// knowledge » : on lit le web, comme ChatGPT. Agrège les concurrents.
 
-export interface LocalMapExecuteResult {
-  text: string;
-}
-
-export interface RunLocalMapParams {
+export interface RunGroundedScanParams {
   brand: string;
+  /** Domaine de la marque — présence certaine si trouvé dans les résultats. */
+  brandDomain?: string;
   sector: string;
-  /** Villes à analyser, ville principale en premier, avec coords (ou null). */
+  /** Villes à analyser, ville principale en premier, géocodées. */
   cities: readonly ScanCity[];
-  /** Intentions de recherche (≥ 1) appliquées à chaque ville. */
-  intents: readonly string[];
-  execute: (prompt: string) => Promise<LocalMapExecuteResult>;
-  extractBrands: (responseTexts: string[]) => Promise<BrandExtraction>;
+  /** Recherche web (Brave en prod, fake en test). */
+  search: SearchFn;
+  /** Extraction grounded des entreprises par ville (Mistral en prod, fake en test). */
+  ground: (
+    perCity: { city: string; results: Awaited<ReturnType<SearchFn>> }[],
+  ) => Promise<CityGrounding[]>;
+  /** Nombre de résultats web par ville (déf. 8). */
+  resultsPerCity?: number;
   llmLabel?: string;
 }
 
+function buildQuery(sector: string, city: string): string {
+  return `meilleur ${sector.trim()} à ${city.trim()}`;
+}
+
 /**
- * Vrai concurrent ? On jette les libellés génériques « {métier} {ville} »
- * (ex : « Menuiserie Cholet ») : un nom qui CONTIENT la ville comme mot est
- * presque toujours une description de catégorie, pas une marque.
+ * Vrai concurrent ? On jette les libellés « {métier} {ville} » génériques.
  */
 function isGenericForCity(rivalNormalized: string, cityNormalized: string): boolean {
   if (!cityNormalized) return false;
@@ -37,67 +41,52 @@ function isGenericForCity(rivalNormalized: string, cityNormalized: string): bool
   return new RegExp(`(^|\\s)${escaped}(\\s|$)`).test(rivalNormalized);
 }
 
-export async function runLocalMapScan(params: RunLocalMapParams): Promise<LocalMapResult> {
+export async function runGroundedLocalScan(params: RunGroundedScanParams): Promise<LocalMapResult> {
   const brand = params.brand.trim();
   const brandNormalized = normalizeText(brand);
-  const patterns = brandPatterns(brand);
-  const patternNorms = patterns.map(normalizeText).filter((p) => p.length >= 3);
+  const patternNorms = brandPatterns(brand)
+    .map(normalizeText)
+    .filter((p) => p.length >= 3);
   const cities = dedupeCities(params.cities, normalizeText);
-  const intents = params.intents.length > 0 ? params.intents : [`meilleur ${params.sector.trim()}`];
-
   if (cities.length === 0) {
     return { ok: false, code: "no_location", message: "Aucune ville à analyser." };
   }
 
-  // Liste plate (ville × intention) → 1 appel LLM par item.
-  const items = cities.flatMap((city) =>
-    intents.map((intent) => ({ city, query: buildLocalQuery(intent, city.name) })),
-  );
+  const queries = cities.map((c) => buildQuery(params.sector, c.name));
 
-  let texts: string[];
+  // 1 recherche web par ville (en parallèle).
+  let perCity: { city: string; results: Awaited<ReturnType<SearchFn>> }[];
   try {
-    const responses = await Promise.all(items.map((it) => params.execute(it.query)));
-    texts = responses.map((r) => r.text);
+    perCity = await Promise.all(
+      cities.map(async (c, i) => ({
+        city: c.name,
+        results: await params.search(queries[i]!, params.resultsPerCity ?? 8),
+      })),
+    );
   } catch (error) {
     return {
       ok: false,
       code: "llm_unavailable",
-      message: `LLM indisponible: ${error instanceof Error ? error.message : String(error)}`,
+      message: `Recherche indisponible: ${error instanceof Error ? error.message : String(error)}`,
     };
   }
 
-  const extraction = await params.extractBrands(texts);
+  const grounding = await params.ground(perCity);
+  const byCity = new Map(grounding.map((g) => [normalizeText(g.city), g]));
 
-  // Détection par item.
-  const perItem = items.map((it, i) => {
-    const text = texts[i] ?? "";
-    const detected = detectMentions(text, [{ id: "brand", name: brand, type: "brand", patterns }]);
-    const recommended = detected.length > 0 || (extraction.targetCitedPerResponse[i] ?? false);
-    const cityNormalized = normalizeText(it.city.name);
-    const rivals = (extraction.brandsPerResponse[i] ?? []).filter((name) => {
-      const n = normalizeText(name);
-      // Exclut la marque cible, même citée sous un nom étendu (« ACB
-      // Portes et Fenêtres INTERNORM… » contient « acb portes et fenetres »).
-      if (n === brandNormalized || patternNorms.some((p) => n.includes(p))) return false;
-      return !isGenericForCity(n, cityNormalized);
-    });
-    return { city: it.city, query: it.query, recommended, rivals };
-  });
-
-  // Regroupe par ville (recommandé = cité dans AU MOINS une intention).
-  const cityResults: CityVisibility[] = cities.map((city) => {
-    const itemsForCity = perItem.filter((p) => p.city === city);
-    const recommended = itemsForCity.some((p) => p.recommended);
+  const cityResults: CityVisibility[] = cities.map((city, i) => {
+    const g = byCity.get(normalizeText(city.name)) ?? grounding[i];
+    const cityNormalized = normalizeText(city.name);
     const rivals: string[] = [];
     const seen = new Set<string>();
-    for (const p of itemsForCity) {
-      for (const r of p.rivals) {
-        const key = normalizeText(r);
-        if (seen.has(key)) continue;
-        seen.add(key);
-        rivals.push(r);
-      }
+    for (const name of g?.businesses ?? []) {
+      const n = normalizeText(name);
+      if (n === brandNormalized || patternNorms.some((p) => n.includes(p))) continue;
+      if (isGenericForCity(n, cityNormalized) || seen.has(n)) continue;
+      seen.add(n);
+      rivals.push(name);
     }
+    const recommended = g?.present ?? false;
     return {
       name: city.name,
       lat: city.lat,
@@ -105,11 +94,11 @@ export async function runLocalMapScan(params: RunLocalMapParams): Promise<LocalM
       recommended,
       rivals,
       topRival: recommended ? null : (rivals[0] ?? null),
-      queries: itemsForCity.map((p) => p.query),
+      queries: [queries[i]!],
     };
   });
 
-  // Agrège les concurrents sur la zone : dans combien de villes chacun est cité.
+  // Agrège les concurrents : dans combien de villes chacun est cité.
   const tally = new Map<string, { name: string; cities: Set<string> }>();
   for (const c of cityResults) {
     for (const r of c.rivals) {
@@ -128,8 +117,7 @@ export async function runLocalMapScan(params: RunLocalMapParams): Promise<LocalM
     brand,
     sector: params.sector.trim(),
     mainCity: cities[0]!.name,
-    llmLabel: params.llmLabel ?? "Le Chat (Mistral)",
-    intents: [...intents],
+    llmLabel: params.llmLabel ?? "recherche web en direct",
     cities: cityResults,
     topCompetitors,
     recommendedCount: cityResults.filter((c) => c.recommended).length,

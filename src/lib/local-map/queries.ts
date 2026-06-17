@@ -10,10 +10,6 @@ export interface ScanCity {
   lng: number | null;
 }
 
-export function buildLocalQuery(intent: string, city: string): string {
-  return `${intent.trim()} à ${city.trim()} ? Donne-moi les noms les plus recommandés.`;
-}
-
 /**
  * Variantes de matching d'une marque pour la détection regex : on gère
  * « & » ↔ « et » (les IA réécrivent souvent « ACB Portes & Fenêtres » en

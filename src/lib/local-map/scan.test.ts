@@ -1,16 +1,16 @@
 import { describe, expect, it, vi } from "vitest";
 import { normalizeText } from "@/lib/comparators/sectors";
-import type { BrandExtraction } from "@/lib/express-scan/extract";
+import type { WebSearchResult } from "@/lib/comparators/types";
+import type { CityGrounding } from "./grounding";
 import { brandPatterns, dedupeCities, type ScanCity } from "./queries";
-import { runLocalMapScan } from "./scan";
+import { runGroundedLocalScan } from "./scan";
 
-const city = (name: string, lat: number | null = null, lng: number | null = null): ScanCity => ({
-  name,
-  lat,
-  lng,
+const city = (name: string, lat = 47.4, lng = 0.5): ScanCity => ({ name, lat, lng });
+const result = (title: string, domain: string): WebSearchResult => ({
+  title,
+  url: `https://${domain}`,
+  domain,
 });
-
-const fakeExtract = (data: BrandExtraction) => async (): Promise<BrandExtraction> => data;
 
 describe("brandPatterns", () => {
   it("gère « & » ↔ « et »", () => {
@@ -21,107 +21,75 @@ describe("brandPatterns", () => {
 });
 
 describe("dedupeCities", () => {
-  it("garde l'ordre, déduplique (casse/accents) et borne à 7", () => {
+  it("garde l'ordre, déduplique et borne à 7", () => {
     const list = dedupeCities(
-      [
-        city("Tours", 47.39, 0.69),
-        city("tours"),
-        ...Array.from({ length: 12 }, (_, i) => city(`Ville${i}`, 47, 1)),
-      ],
+      [city("Tours"), city("tours"), ...Array.from({ length: 12 }, (_, i) => city(`V${i}`))],
       normalizeText,
     );
     expect(list[0]?.name).toBe("Tours");
-    expect(list[0]?.lat).toBe(47.39);
     expect(list).toHaveLength(7);
   });
 });
 
-describe("runLocalMapScan", () => {
-  it("détecte la marque sous un nom étendu via « & »↔« et » (regex), même si l'extraction la rate", async () => {
-    const result = await runLocalMapScan({
-      brand: "ACB Portes & Fenêtres",
-      sector: "menuiserie",
-      cities: [city("Angers", 47.47, -0.55)],
-      intents: ["meilleur menuisier"],
-      execute: vi.fn(async () => ({
-        text: "À Angers : ACB Portes et Fenêtres INTERNORM TSCHOEPPE, et Sogefi.",
-      })),
-      extractBrands: fakeExtract({
-        brandsPerResponse: [["ACB Portes et Fenêtres INTERNORM TSCHOEPPE", "Sogefi"]],
-        targetCitedPerResponse: [false], // l'extraction rate, la regex doit rattraper
-      }),
-    });
-    expect(result.ok).toBe(true);
-    if (!result.ok) return;
-    const angers = result.report.cities[0]!;
-    expect(angers.recommended).toBe(true);
-    // Le nom étendu de la marque n'est PAS compté comme concurrent.
-    expect(angers.rivals).toEqual(["Sogefi"]);
-  });
+describe("runGroundedLocalScan", () => {
+  const fakeGround = (data: CityGrounding[]) => async (): Promise<CityGrounding[]> => data;
 
-  it("2 intentions par ville : recommandé si cité dans AU MOINS une", async () => {
-    const result = await runLocalMapScan({
-      brand: "Léa",
-      sector: "coiffeur",
-      cities: [city("Tours", 47.39, 0.69)],
-      intents: ["meilleur coiffeur", "coloration"],
-      // 1ʳᵉ question : pas cité ; 2ᵉ : cité.
-      execute: vi.fn(async (q: string) =>
-        q.startsWith("coloration")
-          ? { text: "Léa fait de super colorations." }
-          : { text: "Top Hair." },
-      ),
-      extractBrands: fakeExtract({
-        brandsPerResponse: [["Top Hair"], ["Léa"]],
-        targetCitedPerResponse: [false, true],
-      }),
-    });
-    expect(result.ok).toBe(true);
-    if (!result.ok) return;
-    expect(result.report.cities[0]?.recommended).toBe(true);
-    expect(result.report.cities[0]?.queries).toHaveLength(2);
-  });
-
-  it("jette les libellés génériques et agrège les concurrents par nb de villes", async () => {
-    const result = await runLocalMapScan({
+  it("recommandé si la marque est présente ; concurrents filtrés (marque étendue + générique)", async () => {
+    const out = await runGroundedLocalScan({
       brand: "Fenêtres sur Loir",
       sector: "menuiserie",
-      cities: [city("Cholet", 47.06, -0.88), city("Saumur", 47.26, -0.08)],
-      intents: ["meilleur menuisier"],
-      execute: vi.fn(async (q: string) =>
-        q.includes("Cholet")
-          ? { text: "Menuiserie Cholet, K-LINE." }
-          : { text: "K-LINE et Sogal." },
+      cities: [city("Seiches-sur-le-Loir"), city("Angers")],
+      search: vi.fn(async (q: string) =>
+        q.includes("Angers")
+          ? [result("ACB Portes", "acb.fr"), result("Menuiserie Angers", "x.fr")]
+          : [result("Fenêtres sur Loir", "fenetres-sur-loir.fr")],
       ),
-      extractBrands: fakeExtract({
-        brandsPerResponse: [
-          ["Menuiserie Cholet", "K-LINE"],
-          ["K-LINE", "Sogal"],
-        ],
-        targetCitedPerResponse: [false, false],
-      }),
+      ground: fakeGround([
+        // Seiches : marque présente.
+        { city: "Seiches-sur-le-Loir", businesses: ["Fenêtres sur Loir"], present: true },
+        // Angers : pas la marque, cite ACB + un générique « Menuiserie Angers ».
+        { city: "Angers", businesses: ["ACB Portes", "Menuiserie Angers"], present: false },
+      ]),
     });
-    expect(result.ok).toBe(true);
-    if (!result.ok) return;
-    // « Menuiserie Cholet » filtré (générique pour Cholet).
-    expect(result.report.cities[0]?.rivals).toEqual(["K-LINE"]);
-    // K-LINE cité dans 2 villes → en tête du top concurrents.
-    expect(result.report.topCompetitors[0]).toEqual({ name: "K-LINE", cityCount: 2 });
+    expect(out.ok).toBe(true);
+    if (!out.ok) return;
+    const [seiches, angers] = out.report.cities;
+    expect(seiches?.recommended).toBe(true);
+    expect(seiches?.rivals).toEqual([]); // la marque elle-même n'est pas un rival
+    expect(angers?.recommended).toBe(false);
+    expect(angers?.rivals).toEqual(["ACB Portes"]); // « Menuiserie Angers » filtré
+    expect(angers?.topRival).toBe("ACB Portes");
+    expect(out.report.recommendedCount).toBe(1);
   });
 
-  it("remonte une erreur si le LLM échoue", async () => {
-    const result = await runLocalMapScan({
+  it("agrège les concurrents par nombre de villes", async () => {
+    const out = await runGroundedLocalScan({
+      brand: "Moi",
+      sector: "coiffeur",
+      cities: [city("Tours"), city("Blois")],
+      search: vi.fn(async () => [] as WebSearchResult[]),
+      ground: fakeGround([
+        { city: "Tours", businesses: ["Top Hair", "Studio X"], present: false },
+        { city: "Blois", businesses: ["Top Hair"], present: false },
+      ]),
+    });
+    expect(out.ok).toBe(true);
+    if (!out.ok) return;
+    expect(out.report.topCompetitors[0]).toEqual({ name: "Top Hair", cityCount: 2 });
+  });
+
+  it("erreur si la recherche web échoue", async () => {
+    const out = await runGroundedLocalScan({
       brand: "X",
       sector: "y",
       cities: [city("Tours")],
-      intents: ["meilleur y"],
-      execute: vi.fn(async () => {
-        throw new Error("boom");
+      search: vi.fn(async () => {
+        throw new Error("brave down");
       }),
-      extractBrands: fakeExtract({ brandsPerResponse: [], targetCitedPerResponse: [] }),
+      ground: fakeGround([]),
     });
-    expect(result.ok).toBe(false);
-    if (result.ok) return;
-    expect(result.code).toBe("llm_unavailable");
+    expect(out.ok).toBe(false);
+    if (out.ok) return;
+    expect(out.code).toBe("llm_unavailable");
   });
 });

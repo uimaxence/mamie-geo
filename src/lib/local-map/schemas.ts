@@ -13,9 +13,6 @@ export const localMapScanSchema = z.object({
     .min(3, "Décris ton activité (ex : « plombier », « ostéopathe », « restaurant »)")
     .max(80),
   mainCity: z.string().min(2, "Indique ta ville principale").max(80),
-  // Ce que vend l'entreprise (détecté au scraping) — sert à générer des
-  // intentions de recherche pertinentes (« pose de fenêtres » vs générique).
-  proposition: z.string().max(400).optional().or(z.literal("")),
   websiteDomain: z.preprocess(
     (value) => (typeof value === "string" ? normalizeDomainInput(value) : value),
     z

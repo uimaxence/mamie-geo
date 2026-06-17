@@ -35,8 +35,6 @@ export interface LocalMapReport {
   mainCity: string;
   /** LLM interrogé (V0 : Le Chat via mistral-small). */
   llmLabel: string;
-  /** Intentions de recherche utilisées (« meilleur menuisier », « pose de fenêtres »…). */
-  intents: string[];
   /** Ville centrale + villes autour, dans l'ordre d'affichage. */
   cities: CityVisibility[];
   /** Concurrents les plus cités dans la zone, triés (pour le chart). */
