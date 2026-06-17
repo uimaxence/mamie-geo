@@ -10,6 +10,18 @@ import type { CityVisibility, LocalMapReport, LocalMapResult } from "./types";
 // Réutilise l'extraction marques du scan express (forme BrandExtraction).
 // Les coordonnées (géocodées en amont) sont propagées pour la carte.
 
+/**
+ * Vrai concurrent ? On jette les libellés génériques « {métier} {ville} »
+ * (ex : « Menuiserie Cholet ») : pour une question sur la ville X, un nom
+ * qui CONTIENT X comme mot est presque toujours une description de
+ * catégorie, pas une marque (filet de sécurité en plus du prompt).
+ */
+function isGenericForCity(rivalNormalized: string, cityNormalized: string): boolean {
+  if (!cityNormalized) return false;
+  const escaped = cityNormalized.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return new RegExp(`(^|\\s)${escaped}(\\s|$)`).test(rivalNormalized);
+}
+
 export interface LocalMapExecuteResult {
   text: string;
 }
@@ -55,8 +67,12 @@ export async function runLocalMapScan(params: RunLocalMapParams): Promise<LocalM
       { id: "brand", name: brand, type: "brand", patterns: [brand] },
     ]);
     const recommended = detected.length > 0 || (extraction.targetCitedPerResponse[i] ?? false);
+    const cityNormalized = normalizeText(city.name);
     const rivals = (extraction.brandsPerResponse[i] ?? [])
-      .filter((name) => normalizeText(name) !== brandNormalized)
+      .filter((name) => {
+        const n = normalizeText(name);
+        return n !== brandNormalized && !isGenericForCity(n, cityNormalized);
+      })
       .filter(
         (name, idx, arr) => arr.findIndex((n) => normalizeText(n) === normalizeText(name)) === idx,
       );

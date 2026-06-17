@@ -76,6 +76,23 @@ describe("runLocalMapScan", () => {
     expect(result.report.cities[0]?.recommended).toBe(true);
   });
 
+  it("jette les libellés génériques « {métier} {ville} » et garde les vraies marques", async () => {
+    const result = await runLocalMapScan({
+      brand: "Fenêtres sur Loir",
+      sector: "menuiserie",
+      cities: [city("Cholet", 47.06, -0.88)],
+      execute: vi.fn(async () => ({ text: "À Cholet : Menuiserie Cholet, K-LINE." })),
+      extractBrands: fakeExtract({
+        brandsPerResponse: [["Menuiserie Cholet", "K-LINE"]],
+        targetCitedPerResponse: [false],
+      }),
+    });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.report.cities[0]?.rivals).toEqual(["K-LINE"]);
+    expect(result.report.cities[0]?.topRival).toBe("K-LINE");
+  });
+
   it("remonte une erreur si le LLM échoue", async () => {
     const result = await runLocalMapScan({
       brand: "X",

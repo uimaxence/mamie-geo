@@ -15,7 +15,7 @@ import type { CityVisibility } from "@/lib/local-map/types";
 const GREEN = "#16a34a";
 const RED = "#dc2626";
 const INK = "#191919";
-const ZONE_RADIUS_M = 22000;
+const ZONE_RADIUS_M = 20000;
 
 export function LocalMap({ cities, brand }: { cities: CityVisibility[]; brand: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -40,7 +40,9 @@ export function LocalMap({ cities, brand }: { cities: CityVisibility[]; brand: s
       });
       mapRef.current = map;
 
-      L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+      // `light_nolabels` : carte claire SANS les noms de villes/routes du
+      // fond → nos pastilles sont les seuls labels, rendu net et « à nous ».
+      L.tileLayer("https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png", {
         attribution: "&copy; OpenStreetMap &copy; CARTO",
         maxZoom: 19,
       }).addTo(map);
@@ -49,26 +51,25 @@ export function LocalMap({ cities, brand }: { cities: CityVisibility[]; brand: s
       for (let i = 0; i < geo.length; i++) {
         const city = geo[i]!;
         const color = city.recommended ? GREEN : RED;
-        // Zone (cercle généreux) — le « territoire » de la marque.
+        // Zone (cercle généreux) — le « territoire » de la marque. Douce et
+        // sans bord dur pour que les chevauchements restent lisibles.
         L.circle([city.lat, city.lng], {
           radius: ZONE_RADIUS_M,
-          color,
-          weight: 1,
-          opacity: 0.4,
+          stroke: false,
           fillColor: color,
-          fillOpacity: 0.16,
+          fillOpacity: 0.12,
         }).addTo(map);
 
         // Pastille ville (divIcon HTML pour le style).
         const isMain = i === 0;
         const icon = city.recommended ? "✓" : "✕";
         const html = isMain
-          ? `<div style="display:flex;flex-direction:column;align-items:center;gap:1px;padding:6px 10px;border:2px solid ${INK};border-radius:10px;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.12);white-space:nowrap;font-family:Inter,system-ui,sans-serif;">
-               <span style="font-size:9px;letter-spacing:.04em;text-transform:uppercase;color:#737373;">📍 ${escapeHtml(city.name)}</span>
-               <span style="font-size:12px;font-weight:600;color:${INK};max-width:140px;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(brand)}</span>
+          ? `<div style="display:flex;flex-direction:column;align-items:center;gap:1px;padding:6px 11px;border:1.5px solid ${INK};border-radius:10px;background:#fff;box-shadow:0 6px 16px rgba(0,0,0,.12);white-space:nowrap;font-family:Inter,system-ui,sans-serif;">
+               <span style="font-size:9px;letter-spacing:.04em;text-transform:uppercase;color:#9b9b9b;">${escapeHtml(city.name)}</span>
+               <span style="font-size:12.5px;font-weight:600;color:${INK};max-width:150px;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(brand)}</span>
              </div>`
-          : `<div style="display:flex;align-items:center;gap:5px;padding:3px 8px;border:1px solid ${color}66;border-radius:999px;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.1);white-space:nowrap;font-family:Inter,system-ui,sans-serif;">
-               <span style="display:inline-flex;width:15px;height:15px;align-items:center;justify-content:center;border-radius:999px;background:${color};color:#fff;font-size:9px;font-weight:700;">${icon}</span>
+          : `<div style="display:flex;align-items:center;gap:6px;padding:3px 9px 3px 5px;border:1px solid #e6e6e6;border-radius:999px;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.07);white-space:nowrap;font-family:Inter,system-ui,sans-serif;">
+               <span style="display:inline-flex;width:15px;height:15px;align-items:center;justify-content:center;border-radius:999px;background:${color};color:#fff;font-size:9px;font-weight:700;line-height:1;">${icon}</span>
                <span style="font-size:11px;font-weight:500;color:${INK};">${escapeHtml(city.name)}</span>
              </div>`;
 
@@ -111,7 +112,7 @@ export function LocalMap({ cities, brand }: { cities: CityVisibility[]; brand: s
   return (
     <div
       ref={containerRef}
-      className="h-[420px] w-full overflow-hidden rounded-[var(--radius-xl)] border border-[color:var(--color-border)]"
+      className="h-[420px] w-full overflow-hidden rounded-[var(--radius-xl)] border border-[color:var(--color-border)] bg-[color:var(--color-gray-50)] shadow-[var(--shadow-sm)]"
       role="img"
       aria-label={`Carte de visibilité IA locale de ${brand}`}
     />

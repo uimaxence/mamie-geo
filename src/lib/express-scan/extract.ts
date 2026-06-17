@@ -66,7 +66,10 @@ export async function extractBrandsCited(options: ExtractBrandsOptions): Promise
             content: `La marque cible est « ${options.targetBrand} ».
 
 Pour chacune des réponses suivantes :
-1. liste les marques, entreprises ou produits commerciaux explicitement cités (noms propres uniquement, ordre d'apparition, sans doublon) ;
+1. liste UNIQUEMENT les noms propres d'entreprises ou de marques réelles explicitement citées (ordre d'apparition, sans doublon). EXCLUS impérativement :
+   - les libellés génériques formés d'un métier + une ville/zone (ex : « Menuiserie Angers », « Plombier Tours », « Restaurant Lyon », « Menuiserie Extérieure 49 ») : ce sont des descriptions de catégorie ou des titres de page, PAS des entreprises nommées ;
+   - les catégories, types de produits, annuaires et sites comparateurs (« PagesJaunes », « les artisans locaux »…).
+   Dans le doute, si ce n'est pas clairement le nom propre d'une entreprise, ne l'inclus pas. Si une réponse ne cite aucune entreprise nommée, renvoie une liste vide.
 2. indique si la marque cible est citée, y compris sous un autre nom (ancien nom, variante d'orthographe, raison sociale — ex : « BoursoBank » et « Boursorama Banque » sont la même marque).
 
 Réponds uniquement en JSON : {"reponses": [{"marques": ["..."], "cible_citee": true|false}, ...]} avec exactement ${options.responseTexts.length} entrées.
