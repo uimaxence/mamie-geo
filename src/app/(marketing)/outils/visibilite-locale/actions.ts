@@ -2,9 +2,10 @@
 
 import { headers } from "next/headers";
 import { logCronEvent } from "@/lib/cron-logger";
-import { createBraveSearch } from "@/lib/comparators/brave";
 import { sendLocalMapLeadEmail, sendScanConfirmationEmail } from "@/lib/email";
 import { env } from "@/lib/env";
+import { extractBrandsCited } from "@/lib/express-scan/extract";
+import { createPerplexityClient } from "@/lib/llm/perplexity";
 import {
   checkLocalMapRateLimit,
   getCachedLocalMapReport,
@@ -12,18 +13,18 @@ import {
   storeLocalMapReport,
 } from "@/lib/local-map/cache";
 import { buildCityCluster } from "@/lib/local-map/cities";
-import { extractLocalBusinesses } from "@/lib/local-map/grounding";
-import { runGroundedLocalScan } from "@/lib/local-map/scan";
+import { runLocalScan } from "@/lib/local-map/scan";
 import { localMapScanSchema, type LocalMapScanInput } from "@/lib/local-map/schemas";
 import type { LocalMapResult } from "@/lib/local-map/types";
 import { captureServerEvent, identifyServerUser } from "@/lib/posthog-server";
 
 // Server action /outils/visibilite-locale — « Carte de visibilité IA
-// locale » (concept GEO local, doc 09 § 2026-06-17). GROUNDED : pour chaque
-// ville, une vraie recherche web (Brave) « meilleur {métier} à {ville} »,
-// puis Mistral extrait les entreprises locales réellement nommées (vs
-// l'invention « from knowledge »). Géocodage exact via adresse.data.gouv.
-// Garde-fous identiques au scan express (honeypot, rate-limit, cache 24 h).
+// locale » (concept GEO local, doc 09 § 2026-06-17). On mesure du VRAI GEO :
+// pour chaque ville on pose « meilleur {métier} à {ville} ? » à Perplexity
+// (sonar, qui cherche le web en direct → recommandation réelle, pas du SEO
+// ni une invention « from knowledge »), puis Mistral parse les marques
+// citées. Géocodage exact via adresse.data.gouv. Garde-fous identiques au
+// scan express (honeypot, rate-limit, cache 24 h).
 
 async function getIp(): Promise<string> {
   const hdrs = await headers();
@@ -50,8 +51,9 @@ export async function runLocalMapScanAction(raw: LocalMapScanInput): Promise<Loc
     };
   }
 
-  // Le grounding réaliste nécessite Mistral (extraction) ET Brave (recherche web).
-  if (!env.MISTRAL_API_KEY || !env.BRAVE_SEARCH_API_KEY) {
+  // Perplexity (IA grounded web) pour la recommandation locale + Mistral
+  // pour le parsing des marques.
+  if (!env.PERPLEXITY_API_KEY || !env.MISTRAL_API_KEY) {
     logCronEvent({ level: "warn", event: "local_map_no_api_key" });
     return {
       ok: false,
@@ -96,16 +98,17 @@ export async function runLocalMapScanAction(raw: LocalMapScanInput): Promise<Loc
       };
     }
 
-    const search = createBraveSearch({ apiKey: env.BRAVE_SEARCH_API_KEY });
-    result = await runGroundedLocalScan({
+    // Perplexity répond en cherchant le web (recommandation réelle) ;
+    // Mistral parse les marques citées (réutilise le scan express).
+    const perplexity = createPerplexityClient({ apiKey: env.PERPLEXITY_API_KEY });
+    result = await runLocalScan({
       brand,
-      brandDomain: websiteDomain,
       sector,
       cities: cluster,
-      search,
-      ground: (perCity) =>
-        extractLocalBusinesses({ apiKey, brand, brandDomain: websiteDomain, sector, perCity }),
-      llmLabel: "résultats web · Le Chat + Brave",
+      execute: (prompt) => perplexity.execute({ prompt, language: "fr" }),
+      extractBrands: (responseTexts) =>
+        extractBrandsCited({ apiKey, targetBrand: brand, responseTexts }),
+      llmLabel: "Perplexity · recherche web en direct",
     });
     if (result.ok) storeLocalMapReport(cacheKey, result.report);
   }

@@ -1,52 +1,49 @@
+import { detectMentions } from "@/lib/citation/detect";
 import { normalizeText } from "@/lib/comparators/sectors";
-import type { SearchFn } from "@/lib/comparators/types";
+import type { BrandExtraction } from "@/lib/express-scan/extract";
 import { brandPatterns, dedupeCities, type ScanCity } from "./queries";
-import type { CityGrounding } from "./grounding";
 import type { CityVisibility, CompetitorTally, LocalMapReport, LocalMapResult } from "./types";
 
-// Moteur de la carte locale, version GROUNDED (2026-06-17, retour Max) :
-// pour chaque ville on fait une vraie recherche web (Brave) « meilleur
-// {métier} à {ville} », puis Mistral extrait les entreprises locales
-// réellement nommées dans les résultats. Fini les marques inventées « from
-// knowledge » : on lit le web, comme ChatGPT. Agrège les concurrents.
+// Moteur de la carte locale (2026-06-17, retour Max) : on mesure du vrai
+// GEO, pas du SEO. Pour chaque ville on pose la question « meilleur
+// {métier} à {ville} ? » à une IA GROUNDED (Perplexity sonar, qui cherche
+// le web en direct) et on parse SA réponse — exactement comme un client le
+// vivrait. Le Chat (Mistral) via API n'a pas de search natif → on ne mesure
+// donc pas Le Chat ici mais Perplexity (affiché tel quel). Parsing des
+// marques réutilisé du scan express (extractBrandsCited, Mistral).
 
-export interface RunGroundedScanParams {
+export interface LocalExecuteResult {
+  text: string;
+}
+
+export interface RunLocalScanParams {
   brand: string;
-  /** Domaine de la marque — présence certaine si trouvé dans les résultats. */
-  brandDomain?: string;
   sector: string;
   /** Villes à analyser, ville principale en premier, géocodées. */
   cities: readonly ScanCity[];
-  /** Recherche web (Brave en prod, fake en test). */
-  search: SearchFn;
-  /** Extraction grounded des entreprises par ville (Mistral en prod, fake en test). */
-  ground: (
-    perCity: { city: string; results: Awaited<ReturnType<SearchFn>> }[],
-  ) => Promise<CityGrounding[]>;
-  /** Nombre de résultats web par ville (déf. 8). */
-  resultsPerCity?: number;
+  /** Appel IA grounded (Perplexity en prod, fake en test). */
+  execute: (prompt: string) => Promise<LocalExecuteResult>;
+  /** Extraction marques citées + variantes de nom (Mistral en prod, fake en test). */
+  extractBrands: (responseTexts: string[]) => Promise<BrandExtraction>;
   llmLabel?: string;
 }
 
 function buildQuery(sector: string, city: string): string {
-  return `meilleur ${sector.trim()} à ${city.trim()}`;
+  return `Quels sont les meilleurs ${sector.trim()} à ${city.trim()} ? Donne-moi les noms les plus recommandés.`;
 }
 
-/**
- * Vrai concurrent ? On jette les libellés « {métier} {ville} » génériques.
- */
+/** Jette les libellés génériques « {métier} {ville} » (pas une marque). */
 function isGenericForCity(rivalNormalized: string, cityNormalized: string): boolean {
   if (!cityNormalized) return false;
   const escaped = cityNormalized.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   return new RegExp(`(^|\\s)${escaped}(\\s|$)`).test(rivalNormalized);
 }
 
-export async function runGroundedLocalScan(params: RunGroundedScanParams): Promise<LocalMapResult> {
+export async function runLocalScan(params: RunLocalScanParams): Promise<LocalMapResult> {
   const brand = params.brand.trim();
   const brandNormalized = normalizeText(brand);
-  const patternNorms = brandPatterns(brand)
-    .map(normalizeText)
-    .filter((p) => p.length >= 3);
+  const patterns = brandPatterns(brand);
+  const patternNorms = patterns.map(normalizeText).filter((p) => p.length >= 3);
   const cities = dedupeCities(params.cities, normalizeText);
   if (cities.length === 0) {
     return { ok: false, code: "no_location", message: "Aucune ville à analyser." };
@@ -54,39 +51,35 @@ export async function runGroundedLocalScan(params: RunGroundedScanParams): Promi
 
   const queries = cities.map((c) => buildQuery(params.sector, c.name));
 
-  // 1 recherche web par ville (en parallèle).
-  let perCity: { city: string; results: Awaited<ReturnType<SearchFn>> }[];
+  let texts: string[];
   try {
-    perCity = await Promise.all(
-      cities.map(async (c, i) => ({
-        city: c.name,
-        results: await params.search(queries[i]!, params.resultsPerCity ?? 8),
-      })),
-    );
+    const responses = await Promise.all(queries.map((q) => params.execute(q)));
+    texts = responses.map((r) => r.text);
   } catch (error) {
     return {
       ok: false,
       code: "llm_unavailable",
-      message: `Recherche indisponible: ${error instanceof Error ? error.message : String(error)}`,
+      message: `IA indisponible: ${error instanceof Error ? error.message : String(error)}`,
     };
   }
 
-  const grounding = await params.ground(perCity);
-  const byCity = new Map(grounding.map((g) => [normalizeText(g.city), g]));
+  const extraction = await params.extractBrands(texts);
 
   const cityResults: CityVisibility[] = cities.map((city, i) => {
-    const g = byCity.get(normalizeText(city.name)) ?? grounding[i];
+    const text = texts[i] ?? "";
+    const detected = detectMentions(text, [{ id: "brand", name: brand, type: "brand", patterns }]);
+    const recommended = detected.length > 0 || (extraction.targetCitedPerResponse[i] ?? false);
     const cityNormalized = normalizeText(city.name);
     const rivals: string[] = [];
     const seen = new Set<string>();
-    for (const name of g?.businesses ?? []) {
+    for (const name of extraction.brandsPerResponse[i] ?? []) {
       const n = normalizeText(name);
+      // Exclut la marque (même étendue) et les génériques « métier ville ».
       if (n === brandNormalized || patternNorms.some((p) => n.includes(p))) continue;
       if (isGenericForCity(n, cityNormalized) || seen.has(n)) continue;
       seen.add(n);
       rivals.push(name);
     }
-    const recommended = g?.present ?? false;
     return {
       name: city.name,
       lat: city.lat,
@@ -117,7 +110,7 @@ export async function runGroundedLocalScan(params: RunGroundedScanParams): Promi
     brand,
     sector: params.sector.trim(),
     mainCity: cities[0]!.name,
-    llmLabel: params.llmLabel ?? "recherche web en direct",
+    llmLabel: params.llmLabel ?? "Perplexity",
     cities: cityResults,
     topCompetitors,
     recommendedCount: cityResults.filter((c) => c.recommended).length,

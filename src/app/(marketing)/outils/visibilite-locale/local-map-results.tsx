@@ -15,7 +15,9 @@ import { LocalMap } from "./local-map";
 // composants de l'app (ScoreRing, BreakdownBars) pour la cohérence DA.
 // Cf. concept GEO local (doc 09 § 2026-06-17, itération layout + charts).
 
-const LOCKED_LLMS = ["ChatGPT", "Claude", "Gemini", "Perplexity"];
+// Perplexity est l'IA montrée en clair (grounded web) ; les 4 autres sont
+// verrouillées → trial.
+const LOCKED_LLMS = ["ChatGPT", "Claude", "Gemini", "Le Chat"];
 const SIGNUP_HREF = "/login?mode=signup&from=carte-locale";
 const COMP_COLORS = ["#329cff", "#8b5cf6", "#ec4899", "#f59e0b", "#14b8a6", "#64748b"];
 
@@ -117,9 +119,9 @@ export function LocalMapResults({
       <div className="mt-8 rounded-[var(--radius-xl)] border-2 border-[color:var(--color-ink)] bg-white p-6 sm:p-8">
         <h3 className="type-h3">Et sur les 4 autres IA, dans tes villes ?</h3>
         <p className="type-body mt-2">
-          Tu viens de voir Le Chat. Mais tes prospects demandent aussi à ChatGPT, Claude, Perplexity
-          et Gemini — et d&apos;une IA à l&apos;autre, les recommandations changent du tout au tout.
-          Le suivi de l&apos;app te montre ta carte locale sur les 5 IA, et son évolution.
+          Tu viens de voir Perplexity. Mais tes prospects demandent aussi à ChatGPT, Claude, Gemini
+          et Le Chat — et d&apos;une IA à l&apos;autre, les recommandations changent du tout au
+          tout. Le suivi de l&apos;app te montre ta carte locale sur les 5 IA, et son évolution.
         </p>
         <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4">
           {LOCKED_LLMS.map((llm) => (
@@ -247,10 +249,10 @@ function PromptsCard({ report }: { report: LocalMapReport }) {
     .slice(0, 6);
   return (
     <div className="rounded-[var(--radius-xl)] border border-[color:var(--color-border)] bg-white p-5 shadow-[var(--shadow-sm)] sm:p-6">
-      <CardTitle icon={MessageSquare}>Les recherches qu&apos;on a analysées</CardTitle>
+      <CardTitle icon={MessageSquare}>Les questions qu&apos;on a posées à l&apos;IA</CardTitle>
       <p className="type-meta mt-2">
-        Exactement ce que tes clients tapent dans tes {report.totalCities} villes. Clique pour
-        suivre ces recherches dans l&apos;app, chaque jour et sur les 5 IA.
+        Exactement ce que tes clients demandent à l&apos;IA dans tes {report.totalCities} villes.
+        Clique pour suivre ces questions dans l&apos;app, chaque jour et sur les 5 IA.
       </p>
       <div className="mt-4 flex flex-col gap-2">
         {examples.map((query) => (
