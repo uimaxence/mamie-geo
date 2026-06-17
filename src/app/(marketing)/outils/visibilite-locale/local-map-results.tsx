@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Check, Lock, X } from "lucide-react";
+import { ArrowRight, Check, Lock, MessageSquare, X } from "lucide-react";
 import { Badge, Button, LinkButton } from "@/components/ui";
 import { FounderPortrait } from "@/components/marketing/founder-portrait";
 import { DFY_SLOTS_BADGE } from "@/lib/done-for-you";
@@ -55,6 +55,9 @@ export function LocalMapResults({
           ))}
         </div>
       </div>
+
+      {/* Les questions posées — cliquables → login (conversion) */}
+      <PromptsBlock report={report} />
 
       {/* Les 4 autres IA, verrouillées */}
       <div className="mt-6 rounded-[var(--radius-xl)] border-2 border-[color:var(--color-ink)] bg-white p-6 sm:p-8">
@@ -128,6 +131,56 @@ function formatList(items: string[]): string {
   if (items.length === 0) return "—";
   if (items.length === 1) return items[0]!;
   return `${items.slice(0, -1).join(", ")} et ${items[items.length - 1]}`;
+}
+
+// Les questions exactes posées à l'IA, ville par ville. Cliquables : chaque
+// question redirige vers le signup (« suis cette requête dans l'app »). On
+// montre la transparence (rien n'est caché) ET on convertit.
+function PromptsBlock({ report }: { report: LocalMapReport }) {
+  return (
+    <div className="mt-6 rounded-[var(--radius-xl)] border border-[color:var(--color-border)] bg-white p-6 sm:p-8">
+      <div className="flex items-center gap-2">
+        <MessageSquare size={16} className="text-[color:var(--color-accent)]" />
+        <h3 className="type-h3">Les questions qu&apos;on a posées à l&apos;IA</h3>
+      </div>
+      <p className="type-meta mt-2">
+        Exactement ce que tes clients tapent. Clique sur une question pour la suivre dans
+        l&apos;app, chaque jour et sur les 5 IA.
+      </p>
+      <div className="mt-4 flex flex-col gap-2">
+        {report.cities.map((city) => (
+          <Link
+            key={city.name}
+            href={SIGNUP_HREF}
+            onClick={() => trackCta("prompt_click", { city: city.name })}
+            className="group flex items-center justify-between gap-3 rounded-[var(--radius-lg)] border border-[color:var(--color-border)] bg-[color:var(--color-gray-50)] px-4 py-3 transition hover:border-[color:var(--color-ink)] hover:bg-white"
+          >
+            <span className="flex items-center gap-2 text-sm">
+              <span
+                className={`flex size-4 shrink-0 items-center justify-center rounded-full ${
+                  city.recommended
+                    ? "bg-[color:var(--color-success)]"
+                    : "bg-[color:var(--color-error)]"
+                }`}
+              >
+                {city.recommended ? (
+                  <Check size={10} strokeWidth={3} className="text-white" />
+                ) : (
+                  <X size={10} strokeWidth={3} className="text-white" />
+                )}
+              </span>
+              <span className="italic text-[color:var(--color-ink-soft)]">
+                «&nbsp;{city.query}&nbsp;»
+              </span>
+            </span>
+            <span className="inline-flex shrink-0 items-center gap-1 text-xs font-medium text-[color:var(--color-faint)] transition group-hover:gap-1.5 group-hover:text-[color:var(--color-ink)]">
+              suivre <ArrowRight size={13} />
+            </span>
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 function CityRow({ city }: { city: CityVisibility }) {

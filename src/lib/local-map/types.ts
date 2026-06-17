@@ -8,6 +8,9 @@
 export interface CityVisibility {
   /** Ville interrogée (« Tours »). */
   name: string;
+  /** Coordonnées pour la carte (null si non géocodée → absente de la carte). */
+  lat: number | null;
+  lng: number | null;
   /** La marque est-elle recommandée par l'IA à cette ville ? */
   recommended: boolean;
   /** Marques/concurrents que l'IA cite à cette ville (hors la marque cible). */

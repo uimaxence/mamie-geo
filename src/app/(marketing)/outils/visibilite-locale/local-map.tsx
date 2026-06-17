@@ -1,138 +1,127 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Check, MapPin, X } from "lucide-react";
+import "leaflet/dist/leaflet.css";
+import { useEffect, useRef } from "react";
+import type { Map as LeafletMap } from "leaflet";
 import type { CityVisibility } from "@/lib/local-map/types";
 
-// La « carte » qui s'allume : ville principale au centre, villes autour
-// en satellites reliés par des traits, chacune verte (l'IA te recommande)
-// ou rouge (un concurrent à ta place). Rendu en HTML positionné en % +
-// SVG pour les liens → responsive, et révélation animée des nœuds.
+// Vraie carte (Leaflet + tuiles claires CARTO Positron, RGPD-friendly, pas
+// de Google) avec une ZONE colorée autour de chaque ville : vert là où
+// l'IA te recommande, rouge là où elle cite un concurrent à ta place. Les
+// zones sont généreuses (rayon ~22 km) et se chevauchent → un « territoire »
+// IA lisible d'un coup d'œil. Rendu impératif (dynamic import) pour éviter
+// tout accès à `window` côté serveur.
 
-const SATELLITE_RADIUS = 37; // % du demi-côté
-const START_ANGLE = -90; // premier satellite en haut
-
-interface Pos {
-  x: number;
-  y: number;
-}
-
-function satellitePositions(count: number): Pos[] {
-  if (count === 0) return [];
-  return Array.from({ length: count }, (_, i) => {
-    const angle = ((START_ANGLE + (i * 360) / count) * Math.PI) / 180;
-    return {
-      x: 50 + SATELLITE_RADIUS * Math.cos(angle),
-      y: 50 + SATELLITE_RADIUS * Math.sin(angle),
-    };
-  });
-}
+const GREEN = "#16a34a";
+const RED = "#dc2626";
+const INK = "#191919";
+const ZONE_RADIUS_M = 22000;
 
 export function LocalMap({ cities, brand }: { cities: CityVisibility[]; brand: string }) {
-  const [mounted, setMounted] = useState(false);
-  // Déclenche la révélation animée des nœuds après le 1er rendu.
+  const containerRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<LeafletMap | null>(null);
+
+  const geo = cities.filter(
+    (c): c is CityVisibility & { lat: number; lng: number } => c.lat !== null && c.lng !== null,
+  );
+
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setMounted(true);
+    if (geo.length === 0 || !containerRef.current) return;
+    let cancelled = false;
+
+    void (async () => {
+      const L = (await import("leaflet")).default;
+      if (cancelled || !containerRef.current || mapRef.current) return;
+
+      const map = L.map(containerRef.current, {
+        scrollWheelZoom: false,
+        attributionControl: true,
+        zoomControl: true,
+      });
+      mapRef.current = map;
+
+      L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+        attribution: "&copy; OpenStreetMap &copy; CARTO",
+        maxZoom: 19,
+      }).addTo(map);
+
+      const main = geo[0];
+      for (let i = 0; i < geo.length; i++) {
+        const city = geo[i]!;
+        const color = city.recommended ? GREEN : RED;
+        // Zone (cercle généreux) — le « territoire » de la marque.
+        L.circle([city.lat, city.lng], {
+          radius: ZONE_RADIUS_M,
+          color,
+          weight: 1,
+          opacity: 0.4,
+          fillColor: color,
+          fillOpacity: 0.16,
+        }).addTo(map);
+
+        // Pastille ville (divIcon HTML pour le style).
+        const isMain = i === 0;
+        const icon = city.recommended ? "✓" : "✕";
+        const html = isMain
+          ? `<div style="display:flex;flex-direction:column;align-items:center;gap:1px;padding:6px 10px;border:2px solid ${INK};border-radius:10px;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.12);white-space:nowrap;font-family:Inter,system-ui,sans-serif;">
+               <span style="font-size:9px;letter-spacing:.04em;text-transform:uppercase;color:#737373;">📍 ${escapeHtml(city.name)}</span>
+               <span style="font-size:12px;font-weight:600;color:${INK};max-width:140px;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(brand)}</span>
+             </div>`
+          : `<div style="display:flex;align-items:center;gap:5px;padding:3px 8px;border:1px solid ${color}66;border-radius:999px;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.1);white-space:nowrap;font-family:Inter,system-ui,sans-serif;">
+               <span style="display:inline-flex;width:15px;height:15px;align-items:center;justify-content:center;border-radius:999px;background:${color};color:#fff;font-size:9px;font-weight:700;">${icon}</span>
+               <span style="font-size:11px;font-weight:500;color:${INK};">${escapeHtml(city.name)}</span>
+             </div>`;
+
+        L.marker([city.lat, city.lng], {
+          icon: L.divIcon({
+            html,
+            className: "",
+            iconSize: [0, 0],
+            iconAnchor: [0, isMain ? 18 : 12],
+          }),
+          zIndexOffset: isMain ? 1000 : 0,
+          interactive: false,
+        }).addTo(map);
+      }
+
+      const bounds = L.latLngBounds(geo.map((c) => [c.lat, c.lng] as [number, number]));
+      map.fitBounds(bounds.pad(0.25));
+      if (main) map.setMaxBounds(bounds.pad(1.2));
+      // Le conteneur peut être monté à 0px (transition) → recalcule la taille.
+      setTimeout(() => map.invalidateSize(), 60);
+    })();
+
+    return () => {
+      cancelled = true;
+      mapRef.current?.remove();
+      mapRef.current = null;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const [main, ...satellites] = cities;
-  const positions = satellitePositions(satellites.length);
+  if (geo.length === 0) {
+    return (
+      <div className="rounded-[var(--radius-lg)] border border-dashed border-[color:var(--color-border)] bg-[color:var(--color-gray-50)] px-4 py-6 text-center text-sm text-[color:var(--color-muted)]">
+        On n&apos;a pas pu placer tes villes sur la carte cette fois — le détail par ville reste
+        ci-dessous.
+      </div>
+    );
+  }
 
   return (
-    <div className="relative mx-auto aspect-square w-full max-w-[420px]">
-      {/* Liens centre → satellites (couleur = verdict de la ville). */}
-      <svg
-        viewBox="0 0 100 100"
-        preserveAspectRatio="none"
-        className="absolute inset-0 size-full"
-        aria-hidden
-      >
-        {satellites.map((city, i) => {
-          const p = positions[i]!;
-          return (
-            <line
-              key={city.name}
-              x1={50}
-              y1={50}
-              x2={p.x}
-              y2={p.y}
-              stroke={city.recommended ? "var(--color-success)" : "var(--color-error)"}
-              strokeWidth={0.5}
-              strokeOpacity={mounted ? 0.35 : 0}
-              style={{
-                transition: "stroke-opacity 600ms ease",
-                transitionDelay: `${200 + i * 120}ms`,
-              }}
-              vectorEffect="non-scaling-stroke"
-            />
-          );
-        })}
-      </svg>
-
-      {/* Nœud central : ta marque / ta ville. */}
-      {main && (
-        <div
-          className="absolute z-10 -translate-x-1/2 -translate-y-1/2"
-          style={{ left: "50%", top: "50%" }}
-        >
-          <div className="flex flex-col items-center gap-1 rounded-[var(--radius-lg)] border-2 border-[color:var(--color-ink)] bg-white px-4 py-2.5 text-center shadow-[var(--shadow-md)]">
-            <span className="inline-flex items-center gap-1 type-eyebrow">
-              <MapPin size={11} /> {main.name}
-            </span>
-            <span className="max-w-[7rem] truncate text-sm font-semibold text-[color:var(--color-ink)]">
-              {brand}
-            </span>
-          </div>
-        </div>
-      )}
-
-      {/* Satellites : villes autour. */}
-      {satellites.map((city, i) => {
-        const p = positions[i]!;
-        return (
-          <div
-            key={city.name}
-            className="absolute -translate-x-1/2 -translate-y-1/2"
-            style={{
-              left: `${p.x}%`,
-              top: `${p.y}%`,
-              opacity: mounted ? 1 : 0,
-              transform: `translate(-50%, -50%) scale(${mounted ? 1 : 0.8})`,
-              transition: "opacity 500ms ease, transform 500ms ease",
-              transitionDelay: `${300 + i * 120}ms`,
-            }}
-          >
-            <CityNode city={city} />
-          </div>
-        );
-      })}
-    </div>
+    <div
+      ref={containerRef}
+      className="h-[420px] w-full overflow-hidden rounded-[var(--radius-xl)] border border-[color:var(--color-border)]"
+      role="img"
+      aria-label={`Carte de visibilité IA locale de ${brand}`}
+    />
   );
 }
 
-function CityNode({ city }: { city: CityVisibility }) {
-  const good = city.recommended;
-  return (
-    <div
-      className={`flex items-center gap-1.5 rounded-[var(--radius-pill)] border bg-white px-3 py-1.5 shadow-[var(--shadow-sm)] ${
-        good ? "border-[color:var(--color-success)]/40" : "border-[color:var(--color-error)]/40"
-      }`}
-    >
-      <span
-        className={`flex size-4 shrink-0 items-center justify-center rounded-full ${
-          good ? "bg-[color:var(--color-success)]" : "bg-[color:var(--color-error)]"
-        }`}
-      >
-        {good ? (
-          <Check size={10} strokeWidth={3} className="text-white" />
-        ) : (
-          <X size={10} strokeWidth={3} className="text-white" />
-        )}
-      </span>
-      <span className="whitespace-nowrap text-xs font-medium text-[color:var(--color-ink)]">
-        {city.name}
-      </span>
-    </div>
-  );
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 }

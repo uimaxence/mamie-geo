@@ -11,8 +11,9 @@ import {
   localMapCacheKey,
   storeLocalMapReport,
 } from "@/lib/local-map/cache";
-import { suggestNearbyCities } from "@/lib/local-map/cities";
+import { geocodeCityCluster } from "@/lib/local-map/cities";
 import { runLocalMapScan } from "@/lib/local-map/scan";
+import type { ScanCity } from "@/lib/local-map/queries";
 import { localMapScanSchema, type LocalMapScanInput } from "@/lib/local-map/schemas";
 import type { LocalMapResult } from "@/lib/local-map/types";
 import { createMistralClient } from "@/lib/llm/mistral";
@@ -87,18 +88,18 @@ export async function runLocalMapScanAction(raw: LocalMapScanInput): Promise<Loc
   if (cached) {
     result = { ok: true, report: cached };
   } else {
-    // Villes autour : fournies par le prospect, sinon déduites (best effort).
-    const surrounding =
-      data.surroundingCities.length > 0
-        ? data.surroundingCities
-        : await suggestNearbyCities({ apiKey, city: mainCity, sector, count: 4 });
+    // Géocode le cluster (ville principale + ~8 communes autour, avec
+    // coords pour la carte). Best effort : si l'IA échoue, fallback sur la
+    // seule ville principale (sans coords → carte en mode liste).
+    const geocoded = await geocodeCityCluster({ apiKey, city: mainCity, sector, count: 8 });
+    const cities: ScanCity[] =
+      geocoded.length > 0 ? geocoded : [{ name: mainCity, lat: null, lng: null }];
 
     const client = createMistralClient({ apiKey, model: SCAN_MODEL, maxTokens: SCAN_MAX_TOKENS });
     result = await runLocalMapScan({
       brand,
       sector,
-      mainCity,
-      surroundingCities: surrounding,
+      cities,
       execute: (prompt) => client.execute({ prompt, language: "fr" }),
       extractBrands: (responseTexts) =>
         extractBrandsCited({ apiKey, targetBrand: brand, responseTexts }),

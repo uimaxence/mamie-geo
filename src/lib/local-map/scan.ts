@@ -1,14 +1,14 @@
 import { detectMentions } from "@/lib/citation/detect";
 import { normalizeText } from "@/lib/comparators/sectors";
 import type { BrandExtraction } from "@/lib/express-scan/extract";
-import { buildLocalQuery, resolveCityList } from "./queries";
+import { buildLocalQuery, dedupeCities, type ScanCity } from "./queries";
 import type { CityVisibility, LocalMapReport, LocalMapResult } from "./types";
 
 // Moteur de la carte locale : 1 question localisée par ville, posée en
 // parallèle à 1 LLM (Le Chat / mistral-small). Verdict « recommandé » =
-// regex (detectMentions, la même que le tracking) OU jugement de
-// l'extraction (qui attrape les variantes de nom). Réutilise
-// l'extraction marques du scan express (même forme BrandExtraction).
+// regex (detectMentions) OU jugement de l'extraction (variantes de nom).
+// Réutilise l'extraction marques du scan express (forme BrandExtraction).
+// Les coordonnées (géocodées en amont) sont propagées pour la carte.
 
 export interface LocalMapExecuteResult {
   text: string;
@@ -17,11 +17,9 @@ export interface LocalMapExecuteResult {
 export interface RunLocalMapParams {
   brand: string;
   sector: string;
-  mainCity: string;
-  surroundingCities: readonly string[];
-  /** Appel LLM (Le Chat / mistral-small en prod, fake en test). */
+  /** Villes à analyser, ville principale en premier, avec coords (ou null). */
+  cities: readonly ScanCity[];
   execute: (prompt: string) => Promise<LocalMapExecuteResult>;
-  /** Extraction marques citées + jugement variante de nom (par réponse/ville). */
   extractBrands: (responseTexts: string[]) => Promise<BrandExtraction>;
   llmLabel?: string;
 }
@@ -29,13 +27,13 @@ export interface RunLocalMapParams {
 export async function runLocalMapScan(params: RunLocalMapParams): Promise<LocalMapResult> {
   const brand = params.brand.trim();
   const brandNormalized = normalizeText(brand);
-  const cities = resolveCityList(params.mainCity, params.surroundingCities, normalizeText);
+  const cities = dedupeCities(params.cities, normalizeText);
 
   if (cities.length === 0) {
     return { ok: false, code: "no_location", message: "Aucune ville à analyser." };
   }
 
-  const queries = cities.map((city) => buildLocalQuery(params.sector, city));
+  const queries = cities.map((c) => buildLocalQuery(params.sector, c.name));
 
   let texts: string[];
   try {
@@ -57,14 +55,15 @@ export async function runLocalMapScan(params: RunLocalMapParams): Promise<LocalM
       { id: "brand", name: brand, type: "brand", patterns: [brand] },
     ]);
     const recommended = detected.length > 0 || (extraction.targetCitedPerResponse[i] ?? false);
-    // Concurrents = marques citées qui ne sont pas la marque cible.
     const rivals = (extraction.brandsPerResponse[i] ?? [])
       .filter((name) => normalizeText(name) !== brandNormalized)
       .filter(
         (name, idx, arr) => arr.findIndex((n) => normalizeText(n) === normalizeText(name)) === idx,
       );
     return {
-      name: city,
+      name: city.name,
+      lat: city.lat,
+      lng: city.lng,
       recommended,
       rivals,
       topRival: recommended ? null : (rivals[0] ?? null),
@@ -75,7 +74,7 @@ export async function runLocalMapScan(params: RunLocalMapParams): Promise<LocalM
   const report: LocalMapReport = {
     brand,
     sector: params.sector.trim(),
-    mainCity: cities[0]!,
+    mainCity: cities[0]!.name,
     llmLabel: params.llmLabel ?? "Le Chat (Mistral)",
     cities: cityResults,
     recommendedCount: cityResults.filter((c) => c.recommended).length,

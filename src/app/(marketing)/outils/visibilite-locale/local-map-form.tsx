@@ -36,7 +36,6 @@ export function LocalMapForm() {
       brandName: profile.brandName,
       sector: profile.sector,
       mainCity: profile.mainCity,
-      surroundingCities: [],
       websiteDomain: websiteDomain.trim().toLowerCase(),
       hpField,
     });

@@ -13,8 +13,6 @@ export const localMapScanSchema = z.object({
     .min(3, "Décris ton activité (ex : « plombier », « ostéopathe », « restaurant »)")
     .max(80),
   mainCity: z.string().min(2, "Indique ta ville principale").max(80),
-  // Villes autour, optionnelles : si vides, on les déduit automatiquement.
-  surroundingCities: z.array(z.string().min(2).max(80)).max(6).default([]),
   websiteDomain: z.preprocess(
     (value) => (typeof value === "string" ? normalizeDomainInput(value) : value),
     z

@@ -177,16 +177,23 @@ zéro impact sur le cœur SaaS), avant tout chantier in-app.
 **Livré (Phase 1)** : `/outils/visibilite-locale` — « Carte de visibilité IA locale ».
 - Parcours **miroir du scan express** : site + email → `detectSiteProfileAction` déduit
   marque/activité/ville → si activité nationale (pas de ville), bascule manuelle.
-- Moteur `src/lib/local-map/` : `suggestNearbyCities` (1 appel Mistral → 4 communes
-  autour), 1 requête localisée « meilleur {secteur} à {ville} » par ville (≤ 5 villes) à
-  Le Chat (`mistral-small`), réutilise `extractBrandsCited` (express) pour le verdict +
-  les concurrents. Coût ~0,003-0,005 €/scan. Garde-fous identiques (honeypot, rate-limit
-  5/IP/h + cap 50/j, cache 24 h).
-- **Visuel « wow »** : `local-map.tsx` — carte radiale (ta ville au centre, communes autour
-  en satellites reliés, vert = l'IA te recommande / rouge = un concurrent à ta place),
-  révélation animée. Cas « personne cité » cadré comme une opportunité.
+- Moteur `src/lib/local-map/` : `geocodeCityCluster` (1 appel Mistral → ville principale
+  + ~8 communes autour AVEC coordonnées, filtrées sur la bbox France), 1 requête localisée
+  « meilleur {secteur} à {ville} » par ville (≤ 9) à Le Chat (`mistral-small`), réutilise
+  `extractBrandsCited` (express) pour le verdict + les concurrents. Coût ~0,004-0,006 €/scan.
+  Garde-fous identiques (honeypot, rate-limit 5/IP/h + cap 50/j, cache 24 h).
+- **VRAIE carte** (itération après retour Max — la 1ʳᵉ version était un schéma radial, pas
+  une carte) : `local-map.tsx` rend **Leaflet** (impératif, dynamic import → pas d'accès
+  `window` en SSR) avec tuiles claires **CARTO Positron** (RGPD-friendly, pas de Google) et
+  une **ZONE colorée généreuse** (~22 km, chevauchement = « territoire ») autour de chaque
+  ville : vert = recommandé, rouge = concurrent à ta place. **Nouvelle dépendance : `leaflet`
+  1.9** (+ `@types/leaflet`) — justifiée : seule façon crédible d'afficher une vraie carte
+  sans Google ; chargée en chunk dynamique (≈ 0 impact sur le First Load).
+- **Prompts cliquables → login** : `PromptsBlock` liste les questions exactes posées à l'IA
+  (transparence) ; chaque clic redirige vers le signup (`from=carte-locale`) = conversion.
 - Email lead interne + confirmation prospect (essai 14 j) ; events `tool_lead_form_submitted`
-  / `tool_profile_autodetected` / `tool_cta_clicked` / `public_local_map_scan_completed`.
+  / `tool_profile_autodetected` / `tool_cta_clicked` (dont `prompt_click`) /
+  `public_local_map_scan_completed`.
 - Hub `/outils` : 4ᵉ outil en tête avec pastille « Nouveau ».
 
 **Positionnement** : « le référencement local de l'ère IA ». Marketing : la carte = lead
