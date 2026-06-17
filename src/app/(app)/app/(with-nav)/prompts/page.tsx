@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
-import { listPrompts } from "@/lib/prompts/queries";
+import { listPrompts, listPromptsWithMetrics } from "@/lib/prompts/queries";
 import { quotasFor } from "@/lib/plans/quotas";
 import { PageContainer } from "@/components/ui";
 import { PromptsList } from "./prompts-list";
@@ -16,8 +16,11 @@ export default async function PromptsPage() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) redirect("/login");
 
-  const data = await listPrompts(session.user.id);
-  if (!data) redirect("/app/onboarding");
+  const [data, metricsData] = await Promise.all([
+    listPrompts(session.user.id),
+    listPromptsWithMetrics(session.user.id),
+  ]);
+  if (!data || !metricsData) redirect("/app/onboarding");
 
   const quotas = quotasFor(data.plan);
 
@@ -25,6 +28,8 @@ export default async function PromptsPage() {
     <PageContainer>
       <PromptsList
         initialPrompts={data.prompts}
+        metrics={metricsData.prompts}
+        windowDays={metricsData.windowDays}
         plan={data.plan}
         planCadence={quotas.cadence}
         maxPrompts={quotas.prompts}

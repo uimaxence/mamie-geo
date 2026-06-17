@@ -161,6 +161,29 @@ haut et l'entrée "2026-05-05 — Réponses aux 10 questions de bootstrap".
 
 ### Décisions enregistrées
 
+#### 2026-06-17 — Vue « Prompts + analytics » + widget « Top Sources »
+
+**Contexte** : la page `/app/prompts` ne montrait que de l'opérationnel (catégorie, cadence, runs success, dernier run) ; pour voir ce qu'un prompt « donne » il fallait ouvrir chaque détail un par un. Demande Max : une vue d'ensemble croisant prompt ↔ analytics, plus un classement des domaines cités comme sources par les IA.
+
+**Options considérées** :
+- A : table de métriques par prompt dédiée en base + worker d'agrégation.
+- B : agrégation à la requête depuis les `runs` déjà persistés (comme `getPromptDetail`).
+- C : N+1 via `getPromptDetail` par prompt.
+
+**Choix** : **B**. Nouvelle fonction pure `aggregatePromptMetrics` (`src/lib/prompts/metrics.ts`) repliant les `runs` d'un prompt → `listPromptsWithMetrics(userId, windowDays=30)` (une seule requête runs + une passe JS). Aucun nouvel appel LLM, aucune migration.
+- **Emplacement = les deux** (acté avec Max) : page Prompts enrichie d'un toggle **Liste ↔ Analytics** (`PromptsAnalyticsTable`) + carte **« Mentions récentes »** sur le dashboard.
+- **Tags / Localisation = réutilisation** : « Tags » = `prompts.category`, « Localisation » = `prompts.language` (FR). Pas de système de tags libre (reporté).
+- **Top Sources** : `aggregateSourceDomains` (`src/lib/sources/domain.ts`) replie par domaine l'agrégat-par-URL de `listCitedSources` ; carte `TopSourcesCard` sur le dashboard et en tête de l'onglet Sources. `extractHost` sorti de `sources-table.tsx` en util partagé.
+
+**Définition des métriques par prompt (fenêtre 30 j)** :
+- **Rang** : rang de la marque par **fréquence de citation** parmi toutes les marques citées sur le prompt (`1 + nb de marques strictement plus citées`), `—` si jamais citée. Choix honnête : on n'a en base que la position grossière (début/milieu/fin), pas un ordinal précis.
+- **Visibilité** : `aggregateVisibility` (position × sentiment, inchangé).
+- **Mentions** : nb de runs citant la marque. **Persistance** : jours-cités / jours-avec-run (constance dans le temps, distincte de la visibilité). **Top concurrents** : top 3 par citations (favicon via la table `competitors`).
+
+**Conséquences attendues** : compréhension par-prompt immédiate, pont dashboard → vue Analytics → détail prompt. Coût requête = prompts × ~5 LLM × 30 j en JS (même profil que `getPromptDetail`).
+
+**À revisiter** : si une brand Pro à 150 prompts fait gonfler le payload `parsedBrands` de `listPromptsWithMetrics`, ajouter `brandId` sur `runs` (filtre direct) ou pré-agréger. Promouvoir « Rang » dans le weekly email (gamification, doc 02).
+
 #### 2026-06-17 — Angle différenciateur « GEO local » : lead magnet « Carte de visibilité IA locale »
 
 **Contexte** : recherche d'un angle que la concurrence (Peec, Qwairy, Botrank, Profound…)

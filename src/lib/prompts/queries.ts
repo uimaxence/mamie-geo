@@ -12,6 +12,7 @@ import { getUserContext } from "@/lib/auth/user-context";
 import type { LLMValue } from "@/lib/llm";
 import type { ParsedBrandsPayload } from "@/lib/citation/types";
 import { getRunBatches, type RunBatch } from "@/lib/runs/batches";
+import { aggregatePromptMetrics, type PromptRunForMetrics } from "./metrics";
 
 // Queries pour les pages /app/prompts (liste + détail).
 // Toutes les queries appliquent un auth check par userId — pas de
@@ -86,6 +87,135 @@ export async function listPrompts(userId: string): Promise<PromptListResult | nu
     brandId: ctx.brand.id,
     plan: ctx.workspace.plan,
   };
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Liste prompts + analytics — /app/prompts (vue Analytics) + dashboard
+// ─────────────────────────────────────────────────────────────────────
+
+export interface PromptMetricCompetitor {
+  name: string;
+  /** Domaine pour le favicon, null si concurrent non tracké (→ initiale). */
+  domain: string | null;
+  citationCount: number;
+}
+
+export interface PromptWithMetrics {
+  id: string;
+  text: string;
+  category: string | null;
+  language: string;
+  isActive: boolean;
+  createdAt: Date;
+  /** Rang par fréquence de citation (1 = plus citée), null si jamais citée. */
+  rang: number | null;
+  visibilityScore: number;
+  mentions: number;
+  totalRuns: number;
+  persistance: number;
+  topCompetitors: PromptMetricCompetitor[];
+  lastAnalyzedAt: Date | null;
+}
+
+export interface PromptsWithMetricsResult {
+  prompts: PromptWithMetrics[];
+  windowDays: number;
+}
+
+/**
+ * Liste les prompts de la brand avec leurs métriques analytics agrégées
+ * sur une fenêtre glissante (visibilité, rang, mentions, persistance, top
+ * concurrents). Une seule passe runs + agrégation JS (cf. metrics.ts).
+ * Aucun appel LLM — relit les runs déjà persistés.
+ */
+export async function listPromptsWithMetrics(
+  userId: string,
+  windowDays = 30,
+): Promise<PromptsWithMetricsResult | null> {
+  const ctx = await getUserContext(userId);
+  if (!ctx) return null;
+
+  const since = new Date();
+  since.setUTCDate(since.getUTCDate() - windowDays);
+
+  // Prompts de la brand (métadonnée). Triés createdAt DESC comme la liste.
+  const promptRows = await db
+    .select({
+      id: prompts.id,
+      text: prompts.text,
+      category: prompts.category,
+      language: prompts.language,
+      isActive: prompts.isActive,
+      createdAt: prompts.createdAt,
+    })
+    .from(prompts)
+    .where(eq(prompts.brandId, ctx.brand.id))
+    .orderBy(desc(prompts.createdAt));
+
+  // Runs success de la fenêtre pour tous les prompts de la brand, en une
+  // requête (join via promptId). On ne tire que les colonnes nécessaires.
+  const runRows = await db
+    .select({
+      promptId: runs.promptId,
+      scheduledAt: runs.scheduledAt,
+      executedAt: runs.executedAt,
+      parsedBrands: runs.parsedBrands,
+    })
+    .from(runs)
+    .innerJoin(prompts, eq(prompts.id, runs.promptId))
+    .where(
+      and(
+        eq(prompts.brandId, ctx.brand.id),
+        eq(runs.status, "success"),
+        sql`${runs.scheduledAt} >= ${since}`,
+      ),
+    );
+
+  // Map name → domain des concurrents trackés, pour les favicons.
+  const competitorRows = await db
+    .select({ name: competitors.name, domain: competitors.domain })
+    .from(competitors)
+    .where(eq(competitors.brandId, ctx.brand.id));
+  const domainByName = new Map<string, string | null>(
+    competitorRows.map((c) => [c.name.toLowerCase(), c.domain]),
+  );
+
+  // Regroupe les runs par prompt.
+  const runsByPrompt = new Map<string, PromptRunForMetrics[]>();
+  for (const r of runRows) {
+    const list = runsByPrompt.get(r.promptId) ?? [];
+    list.push({
+      scheduledAt: r.scheduledAt,
+      executedAt: r.executedAt,
+      parsedBrands: r.parsedBrands as ParsedBrandsPayload | null,
+    });
+    runsByPrompt.set(r.promptId, list);
+  }
+
+  const result: PromptWithMetrics[] = promptRows.map((p) => {
+    const metrics = aggregatePromptMetrics(runsByPrompt.get(p.id) ?? []);
+    return {
+      id: p.id,
+      text: p.text,
+      category: p.category,
+      language: p.language,
+      isActive: p.isActive,
+      createdAt: p.createdAt,
+      rang: metrics.rang,
+      visibilityScore: metrics.visibilityScore,
+      mentions: metrics.mentions,
+      totalRuns: metrics.totalRuns,
+      persistance: metrics.persistance,
+      lastAnalyzedAt: metrics.lastAnalyzedAt,
+      topCompetitors: metrics.topCompetitors.map((c) => ({
+        name: c.name,
+        domain: domainByName.get(c.name.toLowerCase()) ?? null,
+        citationCount: c.citationCount,
+      })),
+    };
+  });
+
+  return { prompts: result, windowDays };
 }
 
 // ─────────────────────────────────────────────────────────────────────
@@ -295,8 +425,3 @@ export async function getPromptDetail(
     recentBatches,
   };
 }
-
-// Note : `competitors` import est utilisé indirectement via le schema
-// dans le scope JS — on garde pour permettre un futur enrichissement
-// (résolution name → id concurrent dans topCompetitors).
-void competitors;

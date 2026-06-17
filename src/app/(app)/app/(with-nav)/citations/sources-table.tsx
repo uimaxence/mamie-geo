@@ -8,6 +8,7 @@ import { BrandFavicon } from "@/components/app/brand-favicon";
 import { BrandMultiSelect } from "@/components/app/brand-multi-select";
 import { encodeSourceSlug } from "@/lib/sources/slug";
 import { classifySource } from "@/lib/sources/classify";
+import { extractHost } from "@/lib/sources/domain";
 import { cn } from "@/lib/utils";
 import type { SourceListItem } from "@/lib/sources/queries";
 import type { EntityType } from "@/components/ui";
@@ -326,14 +327,6 @@ function FilterChip({
       </span>
     </button>
   );
-}
-
-function extractHost(url: string): string {
-  try {
-    return new URL(url).host.replace(/^www\./, "");
-  } catch {
-    return url;
-  }
 }
 
 function formatRelative(iso: string): string {

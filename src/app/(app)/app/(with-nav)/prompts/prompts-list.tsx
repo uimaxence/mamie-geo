@@ -43,8 +43,9 @@ import {
   updatePrompt,
 } from "./actions";
 import { PromptFormDialog } from "./prompt-form-dialog";
+import { PromptsAnalyticsTable } from "./prompts-analytics-table";
 import { planLabel } from "@/lib/plans/quotas";
-import type { PromptRow } from "@/lib/prompts/queries";
+import type { PromptRow, PromptWithMetrics } from "@/lib/prompts/queries";
 
 // Liste interactive des prompts : filtre par statut + pagination
 // client-side + dialogs CRUD + toast feedback. Reçoit la liste full
@@ -53,6 +54,7 @@ import type { PromptRow } from "@/lib/prompts/queries";
 const PAGE_SIZE = 25;
 
 type FilterMode = "all" | "active" | "paused";
+type ViewMode = "list" | "analytics";
 
 const FILTER_OPTIONS = [
   { value: "all" as const, label: "Tous" },
@@ -60,16 +62,32 @@ const FILTER_OPTIONS = [
   { value: "paused" as const, label: "En pause" },
 ];
 
+const VIEW_OPTIONS = [
+  { value: "list" as const, label: "Liste" },
+  { value: "analytics" as const, label: "Analytics" },
+];
+
 interface PromptsListProps {
   initialPrompts: PromptRow[];
+  /** Mêmes prompts enrichis de leurs métriques (vue Analytics). */
+  metrics: PromptWithMetrics[];
+  windowDays: number;
   plan: string;
   planCadence: "daily" | "weekly";
   maxPrompts: number;
 }
 
-export function PromptsList({ initialPrompts, plan, planCadence, maxPrompts }: PromptsListProps) {
+export function PromptsList({
+  initialPrompts,
+  metrics,
+  windowDays,
+  plan,
+  planCadence,
+  maxPrompts,
+}: PromptsListProps) {
   const router = useRouter();
   const [filter, setFilter] = useState<FilterMode>("all");
+  const [view, setView] = useState<ViewMode>("list");
   const [page, setPage] = useState(1);
   const [pending, startTransition] = useTransition();
   const [createOpen, setCreateOpen] = useState(false);
@@ -84,8 +102,16 @@ export function PromptsList({ initialPrompts, plan, planCadence, maxPrompts }: P
     return initialPrompts;
   }, [initialPrompts, filter]);
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const filteredMetrics = useMemo(() => {
+    if (filter === "active") return metrics.filter((p) => p.isActive);
+    if (filter === "paused") return metrics.filter((p) => !p.isActive);
+    return metrics;
+  }, [metrics, filter]);
+
+  const activeCount = view === "analytics" ? filteredMetrics.length : filtered.length;
+  const totalPages = Math.max(1, Math.ceil(activeCount / PAGE_SIZE));
   const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const paginatedMetrics = filteredMetrics.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   const quotaText =
     maxPrompts === Number.POSITIVE_INFINITY
@@ -263,7 +289,7 @@ export function PromptsList({ initialPrompts, plan, planCadence, maxPrompts }: P
         )
       ) : (
         <>
-          <div className="mt-10 flex items-center justify-between gap-4">
+          <div className="mt-10 flex flex-wrap items-center justify-between gap-4">
             <SegmentedControl
               value={filter}
               onValueChange={(v) => {
@@ -274,11 +300,21 @@ export function PromptsList({ initialPrompts, plan, planCadence, maxPrompts }: P
               ariaLabel="Filtrer les prompts"
               size="sm"
             />
-            <span className="type-meta">
-              {filtered.length} affiché{filtered.length > 1 ? "s" : ""}
-            </span>
+            <SegmentedControl
+              value={view}
+              onValueChange={(v) => {
+                setView(v);
+                setPage(1);
+              }}
+              options={VIEW_OPTIONS}
+              ariaLabel="Mode d'affichage"
+              size="sm"
+            />
           </div>
 
+          {view === "analytics" ? (
+            <PromptsAnalyticsTable rows={paginatedMetrics} windowDays={windowDays} />
+          ) : (
           <div className="mt-4 overflow-x-auto">
             <table className="w-full border-collapse text-left">
               <thead>
@@ -378,6 +414,7 @@ export function PromptsList({ initialPrompts, plan, planCadence, maxPrompts }: P
               </tbody>
             </table>
           </div>
+          )}
 
           {totalPages > 1 && (
             <div className="mt-8">

@@ -7,6 +7,8 @@ import { PageHeader, Tabs, TabsContent, TabsList, TabsTrigger } from "@/componen
 import type { CompetitorRowWithMetrics, RankingData } from "@/lib/competitors/queries";
 import type { BrandSelfMetrics, SuggestedCompetitor } from "@/lib/competitors/metrics";
 import type { SourceListItem } from "@/lib/sources/queries";
+import { aggregateSourceDomains } from "@/lib/sources/domain";
+import { TopSourcesCard } from "@/components/app/top-sources-card";
 import { CompetitorsTable } from "./competitors-table";
 import { RankingTab } from "./ranking-tab";
 import { SourcesTable } from "./sources-table";
@@ -115,6 +117,11 @@ export function CitationsView({
         </TabsContent>
 
         <TabsContent value="sources" className="mt-6">
+          {sources.length > 0 && (
+            <div className="mb-6">
+              <TopSourcesCard domains={aggregateSourceDomains(sources, 8)} />
+            </div>
+          )}
           <SourcesTable
             sources={sources}
             workspaceBrands={workspaceBrands}

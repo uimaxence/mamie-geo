@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { count, eq } from "drizzle-orm";
@@ -11,6 +12,11 @@ import { BreakdownBars } from "@/components/charts/breakdown-bars";
 import { DownloadableChart } from "@/components/charts/downloadable-chart";
 import { LLM_COLORS, LLM_LABELS } from "@/components/charts/llm-colors";
 import { BatchesTable } from "@/components/app/batches-table";
+import { RecentMentionsCard } from "@/components/app/recent-mentions-card";
+import { TopSourcesCard } from "@/components/app/top-sources-card";
+import { listPromptsWithMetrics } from "@/lib/prompts/queries";
+import { listCitedSources } from "@/lib/sources/queries";
+import { aggregateSourceDomains } from "@/lib/sources/domain";
 import { deriveSourcesFunnelRatios } from "@/lib/metrics/sources-funnel";
 import { bestWorstLlm, interpretPartDeVoix } from "@/lib/metrics/interpret";
 import { quotasFor } from "@/lib/plans/quotas";
@@ -61,6 +67,23 @@ export default async function DashboardPage() {
   // Statut de rang « où tu te situes » (relatif vs concurrents) — réutilise
   // le classement déjà calculé, zéro appel LLM. Affiché si des runs existent.
   const rankSummary = promptCount > 0 ? await getRankSummary(session.user.id) : null;
+
+  // Aperçus par-prompt + top domaines sources (mêmes données que les vues
+  // Analytics des prompts / onglet Sources, zéro appel LLM). Affichés
+  // seulement quand des prompts existent.
+  const [promptMetrics, citedSources] =
+    promptCount > 0
+      ? await Promise.all([
+          listPromptsWithMetrics(session.user.id),
+          listCitedSources([data.brand.id]),
+        ])
+      : [null, []];
+  // Mentions récentes : prompts déjà analysés, du plus récent au plus ancien.
+  const recentMentions = (promptMetrics?.prompts ?? [])
+    .filter((p) => p.lastAnalyzedAt !== null)
+    .sort((a, b) => (b.lastAnalyzedAt?.getTime() ?? 0) - (a.lastAnalyzedAt?.getTime() ?? 0))
+    .slice(0, 5);
+  const topSourceDomains = aggregateSourceDomains(citedSources, 5);
 
   // Stats agrégées tous-LLMs (PR6), remplace l'ancienne logique Claude-only.
   const agg = data.metricsAggregated;
@@ -203,6 +226,23 @@ export default async function DashboardPage() {
        * stats. Réponse directe à « mes données sont-elles bonnes ? ». */}
       {rankSummary && rankSummary.totalRuns > 0 && <RankSummaryCard summary={rankSummary} />}
 
+      {/* Aperçu par-prompt : derniers prompts analysés + rang vs concurrents.
+       * Renvoie vers la vue Analytics complète de /app/prompts. */}
+      {recentMentions.length > 0 && (
+        <section className="mt-14">
+          <div className="mb-4 flex items-baseline justify-between">
+            <h2 className="type-h2">Mentions récentes</h2>
+            <Link
+              href="/app/prompts"
+              className="type-meta hover:text-[color:var(--color-ink)]"
+            >
+              Voir tous les prompts →
+            </Link>
+          </div>
+          <RecentMentionsCard brandName={data.brand.name} prompts={recentMentions} />
+        </section>
+      )}
+
       {/* Évolution avec time-range picker */}
       <div className="mt-14">
         <TrendSection fullTrend={fullTrend} series={trendSeries} />
@@ -261,6 +301,16 @@ export default async function DashboardPage() {
           citationsCount={agg.sourcesFunnel.citationsCount}
         />
       </section>
+
+      {/* Top domaines cités comme sources par les IA. Données repliées par
+       * domaine depuis les URLs (aggregateSourceDomains). */}
+      {promptCount > 0 && (
+        <section className="mt-14">
+          <DownloadableChart filename="top-sources">
+            <TopSourcesCard domains={topSourceDomains} />
+          </DownloadableChart>
+        </section>
+      )}
 
       {/* Runs récents, groupés par batch (prompt × jour) */}
       <section className="mt-14">
