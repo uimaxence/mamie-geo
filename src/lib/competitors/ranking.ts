@@ -180,6 +180,94 @@ export function computeRankHistory(options: ComputeRankHistoryOptions): RankHist
   return points;
 }
 
+// ── Statut compétitif (phrase « où tu en es ») ───────────────────────
+// Source de vérité UNIQUE de la phrase de rang, partagée par l'onglet
+// Classement (citations) et la carte de rang du dashboard (cf. doc 09
+// § 2026-06-17 — remontée du rang). Pur : rendu côté UI.
+
+export type RankStatusKind = "leader" | "ranked" | "uncited-others" | "uncited-none";
+
+export interface RankStatus {
+  kind: RankStatusKind;
+  /** Lecture relative : success = tu mènes, warning = on te précède/remplace. */
+  tone: "success" | "neutral" | "warning";
+  /** Icône suggérée pour l'UI. */
+  icon: "trophy" | "target";
+  /** Rang de ta marque (null si pas encore citée). */
+  rank: number | null;
+  /** Taille du classement (toi + concurrents + marques citées). */
+  outOf: number;
+  /** Rang sur la fenêtre précédente, pour le delta. */
+  previousRank: number | null;
+  /** Partie mise en gras (« Ta marque est n°2 »), vide pour les cas non cités. */
+  headline: string;
+  /** Reste de la phrase (« sur 8 tous LLMs confondus — à 3 citations de X (n°1) »). */
+  detail: string;
+}
+
+/**
+ * Construit la phrase de statut compétitif à partir d'un classement déjà
+ * trié (`computeRanking`). `scopeLabel` = « tous LLMs confondus » ou
+ * « sur ChatGPT ». Reproduit à l'identique le wording de l'onglet
+ * Classement pour rester cohérent partout.
+ */
+export function buildRankStatus(entries: RankingEntry[], scopeLabel: string): RankStatus {
+  const you = entries.find((e) => e.type === "you");
+
+  if (!you || you.mentions === 0) {
+    const someoneCited = entries.some((e) => e.mentions > 0);
+    return {
+      kind: someoneCited ? "uncited-others" : "uncited-none",
+      tone: someoneCited ? "warning" : "neutral",
+      icon: "target",
+      rank: null,
+      outOf: entries.length,
+      previousRank: you?.previousRank ?? null,
+      headline: "",
+      detail: someoneCited
+        ? `Ta marque n'a pas encore été citée sur la fenêtre, ${scopeLabel}. Le classement montre qui est recommandé à ta place — c'est ton point de départ.`
+        : `Ta marque n'a pas encore été citée sur la fenêtre, ${scopeLabel}. Aucune marque suivie n'a été citée non plus : les IA répondent sans recommander de marque sur tes prompts actuels, ou les marques citées ne sont pas encore détectées.`,
+    };
+  }
+
+  const above = entries.find((e) => e.rank === you.rank - 1);
+  const below = entries.find((e) => e.rank === you.rank + 1);
+
+  if (you.rank === 1) {
+    const lead = below
+      ? you.mentions === below.mentions
+        ? ` — à égalité de citations avec ${below.name}.`
+        : ` — ${you.mentions - below.mentions} citation${you.mentions - below.mentions > 1 ? "s" : ""} d'avance sur ${below.name}.`
+      : ".";
+    return {
+      kind: "leader",
+      tone: "success",
+      icon: "trophy",
+      rank: 1,
+      outOf: entries.length,
+      previousRank: you.previousRank,
+      headline: "Ta marque est n°1",
+      detail: ` ${scopeLabel}${lead}`,
+    };
+  }
+
+  const gapDetail = above
+    ? above.mentions === you.mentions
+      ? ` — à égalité de citations avec ${above.name} (n°${above.rank}).`
+      : ` — à ${above.mentions - you.mentions} citation${above.mentions - you.mentions > 1 ? "s" : ""} de ${above.name} (n°${above.rank}).`
+    : ".";
+  return {
+    kind: "ranked",
+    tone: "neutral",
+    icon: "target",
+    rank: you.rank,
+    outOf: entries.length,
+    previousRank: you.previousRank,
+    headline: `Ta marque est n°${you.rank}`,
+    detail: ` sur ${entries.length} ${scopeLabel}${gapDetail}`,
+  };
+}
+
 interface WindowEntity {
   key: string;
   name: string;

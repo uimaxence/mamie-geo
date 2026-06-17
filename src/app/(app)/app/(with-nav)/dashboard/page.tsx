@@ -12,12 +12,15 @@ import { DownloadableChart } from "@/components/charts/downloadable-chart";
 import { LLM_COLORS, LLM_LABELS } from "@/components/charts/llm-colors";
 import { BatchesTable } from "@/components/app/batches-table";
 import { deriveSourcesFunnelRatios } from "@/lib/metrics/sources-funnel";
+import { bestWorstLlm, interpretPartDeVoix } from "@/lib/metrics/interpret";
 import { quotasFor } from "@/lib/plans/quotas";
 import { nextScheduledRunAt } from "@/lib/scheduler/next-run";
+import { getRankSummary } from "@/lib/competitors/queries";
 import { loadSidebarData } from "@/app/(app)/app-sidebar-data";
 import { DashboardSetupGuide } from "./dashboard-setup-guide";
 import { DashboardTracker } from "./dashboard-tracker";
 import { NextRunBar } from "./next-run-bar";
+import { RankSummaryCard } from "./rank-summary-card";
 import { TrendSection } from "./trend-section";
 
 // Dashboard data dynamique. Direction Airbnb-like (pivot 2026-05-07).
@@ -54,6 +57,10 @@ export default async function DashboardPage() {
   const sidebar = await loadSidebarData();
   const planCadence = quotasFor(sidebar?.workspace.plan ?? "trialing").cadence;
   const nextRunISO = nextScheduledRunAt(planCadence, new Date()).toISOString();
+
+  // Statut de rang « où tu te situes » (relatif vs concurrents) — réutilise
+  // le classement déjà calculé, zéro appel LLM. Affiché si des runs existent.
+  const rankSummary = promptCount > 0 ? await getRankSummary(session.user.id) : null;
 
   // Stats agrégées tous-LLMs (PR6), remplace l'ancienne logique Claude-only.
   const agg = data.metricsAggregated;
@@ -93,6 +100,22 @@ export default async function DashboardPage() {
   const trendSeries = Array.from(
     new Set(fullTrend.flatMap((p) => Object.keys(p).filter((k) => k !== "date"))),
   );
+
+  // Lectures RELATIVES (cf. doc 09 § 2026-06-17) : part de voix vs concurrents,
+  // et meilleure/plus faible IA. Aucun seuil absolu sur le score 0-100.
+  const partDeVoixReading = interpretPartDeVoix({
+    brandCited: agg.brandCitedCount,
+    topCompetitorCited: agg.topCompetitor?.citationCount ?? 0,
+    topName: agg.topCompetitor?.name ?? null,
+  });
+  const llmReading = bestWorstLlm(breakdownSegments);
+  // Map le ton de lecture (MetricBadgeTone) vers le ton de la value du Stat.
+  const partDeVoixStatTone =
+    partDeVoixReading.tone === "success"
+      ? "success"
+      : partDeVoixReading.tone === "warning"
+        ? "warning"
+        : "default";
 
   return (
     <PageContainer>
@@ -166,16 +189,19 @@ export default async function DashboardPage() {
             label="Part de voix"
             glossaryTerm="part-de-voix"
             value={hasRunsToday ? `${agg.partDeVoix.toFixed(1)}%` : "—"}
+            // Teinte relative : vert si tu mènes tes concurrents, ambre sinon
+            // (jamais de seuil absolu — cf. doc 09 § 2026-06-17).
+            tone={hasRunsToday ? partDeVoixStatTone : "default"}
             icon={PieChart}
             iconTone="blue"
-            hint={
-              hasRunsToday
-                ? `${agg.brandCitedCount} pour toi · ${agg.topCompetitor?.citationCount ?? 0} top concurrent`
-                : "en attente du premier run"
-            }
+            hint={hasRunsToday ? partDeVoixReading.text : "en attente du premier run"}
           />
         </Card>
       </section>
+
+      {/* « Où tu te situes » : rang relatif vs concurrents, juste sous les
+       * stats. Réponse directe à « mes données sont-elles bonnes ? ». */}
+      {rankSummary && rankSummary.totalRuns > 0 && <RankSummaryCard summary={rankSummary} />}
 
       {/* Évolution avec time-range picker */}
       <div className="mt-14">
@@ -197,6 +223,21 @@ export default async function DashboardPage() {
                 ? "Snapshot du jour, en attente du premier run"
                 : "Snapshot du jour, score 0–100 par moteur"}
             </p>
+            {/* Lecture inter-IA : le score absolu varie énormément d'une IA à
+             * l'autre, donc on situe par IA plutôt qu'en absolu (enseignement
+             * n°1 de l'étude 50 marques). */}
+            {llmReading && (
+              <p className="type-meta mt-1 text-[color:var(--color-ink-soft)]">
+                Ta meilleure IA : <strong>{llmReading.best.label}</strong> ({llmReading.best.value})
+                {llmReading.worst && (
+                  <>
+                    {" "}
+                    · ta plus faible : <strong>{llmReading.worst.label}</strong> (
+                    {llmReading.worst.value}) — concentre tes efforts là où tu es absent.
+                  </>
+                )}
+              </p>
+            )}
           </div>
         </div>
         <div className="mt-6">
@@ -337,6 +378,15 @@ function FunnelSourcesSection({
           />
         </Card>
       </div>
+      {/* Comment lire : note pédagogique (relative au funnel), pas un verdict
+       * coloré. Le funnel est une confiance croissante Apparition → Citation. */}
+      {hasData && (
+        <p className="mt-3 type-meta text-[color:var(--color-ink-soft)]">
+          Comment lire : plus tes apparitions se transforment en citations explicites, mieux
+          c&apos;est — ici {ratios.citationPct.toFixed(1)} % le deviennent. Une apparition élevée
+          mais peu de citations = les IA te trouvent sans encore te recommander.
+        </p>
+      )}
     </>
   );
 }

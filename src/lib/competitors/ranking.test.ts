@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { computeRanking, computeRankHistory, type RankingDailyRow } from "./ranking";
+import {
+  buildRankStatus,
+  computeRanking,
+  computeRankHistory,
+  type RankingDailyRow,
+  type RankingEntry,
+} from "./ranking";
 
 // Tests de la fonction pure computeRanking — données issues de
 // citation_metrics_daily (brandCitedCount + competitorsData).
@@ -259,5 +265,74 @@ describe("computeRankHistory", () => {
     });
     // Sur Claude seul, Profound (5) devance la marque (2).
     expect(claudeOnly.at(-1)?.rank).toBe(2);
+  });
+});
+
+describe("buildRankStatus", () => {
+  function entry(
+    p: Partial<RankingEntry> & { rank: number; type: RankingEntry["type"] },
+  ): RankingEntry {
+    return {
+      key: p.type === "you" ? "you" : `e-${p.rank}`,
+      name: p.name ?? (p.type === "you" ? "Ma marque" : `Marque ${p.rank}`),
+      type: p.type,
+      domain: null,
+      mentions: p.mentions ?? 0,
+      apparitionPct: 0,
+      previousRank: p.previousRank ?? null,
+      rank: p.rank,
+    };
+  }
+
+  it("leader : trophée + ton success + avance sur le n°2", () => {
+    const s = buildRankStatus(
+      [
+        entry({ rank: 1, type: "you", mentions: 10 }),
+        entry({ rank: 2, type: "competitor", name: "Acme", mentions: 6 }),
+      ],
+      "tous LLMs confondus",
+    );
+    expect(s.kind).toBe("leader");
+    expect(s.tone).toBe("success");
+    expect(s.icon).toBe("trophy");
+    expect(s.headline).toBe("Ta marque est n°1");
+    expect(s.detail).toContain("Acme");
+  });
+
+  it("ranked : ton neutre + écart au-dessus nommé", () => {
+    const s = buildRankStatus(
+      [
+        entry({ rank: 1, type: "competitor", name: "Acme", mentions: 9 }),
+        entry({ rank: 2, type: "you", mentions: 4 }),
+      ],
+      "tous LLMs confondus",
+    );
+    expect(s.kind).toBe("ranked");
+    expect(s.rank).toBe(2);
+    expect(s.headline).toBe("Ta marque est n°2");
+    expect(s.detail).toContain("à 5 citations de Acme");
+  });
+
+  it("zéro citation mais d'autres cités : warning + message « recommandé à ta place »", () => {
+    const s = buildRankStatus(
+      [
+        entry({ rank: 1, type: "competitor", name: "Acme", mentions: 7 }),
+        entry({ rank: 2, type: "you", mentions: 0 }),
+      ],
+      "tous LLMs confondus",
+    );
+    expect(s.kind).toBe("uncited-others");
+    expect(s.tone).toBe("warning");
+    expect(s.rank).toBeNull();
+    expect(s.detail).toContain("recommandé à ta place");
+  });
+
+  it("personne cité : neutre", () => {
+    const s = buildRankStatus(
+      [entry({ rank: 1, type: "you", mentions: 0 })],
+      "tous LLMs confondus",
+    );
+    expect(s.kind).toBe("uncited-none");
+    expect(s.tone).toBe("neutral");
   });
 });

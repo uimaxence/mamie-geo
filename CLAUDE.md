@@ -304,7 +304,14 @@ quota. Coût mesuré ~$0,04/run + ~$0,003/scoring.
 plan dans `src/lib/plans/quotas.ts`) :
 
 - `dashboard` — stats agrégées tous-LLMs + Part de voix, funnel sources,
-  charts (AreaChart/BreakdownBars, save-as-PNG), batches dépliables
+  charts (AreaChart/BreakdownBars, save-as-PNG), batches dépliables,
+  compte à rebours du prochain run + « Lancer maintenant ». **Aide à
+  l'interprétation RELATIVE (2026-06-17, cf. doc 09)** : carte « Où tu te
+  situes » (rang vs concurrents via `getRankSummary`/`buildRankStatus` —
+  source unique partagée avec l'onglet Classement, zéro appel LLM), Part de
+  voix teintée vs concurrents, lecture « meilleure/plus faible IA », note
+  « comment lire » du funnel. **Pas de seuil absolu** sur le score 0-100
+  (les seuils 80/60 restent à l'audit) — `src/lib/metrics/interpret.ts`
 - `prompts` (+`[id]`) — CRUD, suggestion IA, régénération depuis profil,
   cadence per-prompt
 - `citations` — table concurrents + onglet « Classement » (`?tab=ranking`,

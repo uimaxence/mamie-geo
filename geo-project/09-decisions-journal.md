@@ -161,6 +161,47 @@ haut et l'entrée "2026-05-05 — Réponses aux 10 questions de bootstrap".
 
 ### Décisions enregistrées
 
+#### 2026-06-17 — Aide à l'interprétation : RELATIF, pas absolu + remontée du rang sur le dashboard
+
+**Contexte** : retour Max — « on donne les données mais on sait pas vraiment si c'est bien
+ou pas ». Objectif à terme : un système de rank pour « se situer ».
+
+**Options considérées** :
+- A : colorer le score de visibilité 0-100 en vert/orange/rouge avec des seuils absolus
+  (comme l'audit AI-readiness 80/60).
+- B : interprétation **relative** uniquement (rang vs concurrents, tendance vs J-7,
+  comparaison inter-IA), pas de seuil absolu sur la visibilité.
+
+**Choix** : **B** (décision Max).
+- Le score absolu est **trompeur** : l'étude 50 marques (doc 11) montre une même marque à
+  6/100 sur ChatGPT et 53/100 sur Claude le même jour. Un seuil « 60 = moyen » n'a pas de
+  sens transversal. Aligné avec doc 02 (« le rang EST le jeu », pas de jugement absolu).
+  Les seuils 80/60 restent réservés à l'**audit** (`src/lib/audit/score.ts`), inchangés.
+
+**Quick win livré (1ʳᵉ itération)** :
+- **Carte « Où tu te situes » sur le dashboard** : remonte le statut de rang déjà calculé
+  (jusqu'ici enterré dans *Citations → Classement*) — « Ta marque est n°2 sur 8 — à 3
+  citations du n°1 » + delta de rang vs J-7 + lien vers le classement + hint de fiabilité
+  < 14 j. Helper pur **`buildRankStatus()`** (`competitors/ranking.ts`) = **source unique**
+  de la phrase, consommée par l'onglet Classement ET le dashboard (plus de divergence).
+  Query compacte **`getRankSummary()`** (réutilise `getRankingData`, **zéro appel LLM**).
+- **Labels d'interprétation relatifs** (module pur `src/lib/metrics/interpret.ts`, testé) :
+  Part de voix teintée success/ambre selon que tu mènes ou non tes concurrents + phrase de
+  lecture ; lecture inter-IA « ta meilleure / plus faible IA » sous le breakdown (situe par
+  IA, pas en absolu) ; note « comment lire » pédagogique sous le funnel (pas de verdict
+  coloré).
+
+**Conséquences attendues** : l'utilisateur sait enfin « se situer » sans qu'on impose un
+jugement absolu illusoire. Coût LLM nul (tout est dérivé de `citation_metrics_daily`).
+
+**Hors périmètre (2ᵉ itération si validée)** : badges « N°1 / Top 3 » sur le dashboard et
+le BrandSwitcher · rang dans l'email hebdo (`send-weekly-email.ts`) · événements de rang
+« tu viens de passer n°2 » · benchmark sectoriel (repoussé V3).
+
+**À revisiter** : après 2 semaines de prod — mesurer si la carte de rang réduit le « churn
+de compréhension » (PostHog `ranking_viewed` / temps sur dashboard) avant d'investir la 2ᵉ
+itération.
+
 #### 2026-06-16 — Essai gratuit 14 j par défaut sur Solo, SANS carte (revient sur « carte requise » du 2026-06-08)
 
 **Contexte** : test « comme un prospect ». Le compte créé est en `plan=trialing`

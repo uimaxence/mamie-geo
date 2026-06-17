@@ -14,11 +14,14 @@ import {
   type SuggestedCompetitor,
 } from "./metrics";
 import {
+  buildRankStatus,
   computeRanking,
   computeRankHistory,
+  RANKING_RELIABLE_AFTER_DAYS,
   type RankHistoryPoint,
   type RankingDailyRow,
   type RankingEntry,
+  type RankStatus,
 } from "./ranking";
 
 // Queries pour la page /app/citations (onglet Concurrents).
@@ -298,5 +301,42 @@ export async function getRankingData(
     historyByLlm: Object.fromEntries(
       llms.map((llm) => [llm, computeRankHistory({ ...base, llm })]),
     ),
+  };
+}
+
+// ── Résumé de rang pour le dashboard (« se situer ») ─────────────────
+
+export interface RankSummary {
+  /** Phrase de statut (même source que l'onglet Classement). */
+  status: RankStatus;
+  /** Runs success de la fenêtre (0 → le dashboard masque la carte). */
+  totalRuns: number;
+  /** Jours distincts de données — pilote le hint de fiabilité. */
+  dataDays: number;
+  /** dataDays >= RANKING_RELIABLE_AFTER_DAYS. */
+  reliable: boolean;
+  windowDays: number;
+  deltaDays: number;
+}
+
+/**
+ * Version compacte du classement pour le dashboard : juste la phrase de
+ * statut « tu es n°X sur N — à Y citations du n°X-1 » + fiabilité.
+ * Réutilise `getRankingData` (même chargement, zéro appel LLM).
+ */
+export async function getRankSummary(
+  userId: string,
+  windowDays = 30,
+  deltaDays = 7,
+): Promise<RankSummary | null> {
+  const data = await getRankingData(userId, windowDays, deltaDays);
+  if (!data) return null;
+  return {
+    status: buildRankStatus(data.all, "tous LLMs confondus"),
+    totalRuns: data.totalRuns,
+    dataDays: data.dataDays,
+    reliable: data.dataDays >= RANKING_RELIABLE_AFTER_DAYS,
+    windowDays: data.windowDays,
+    deltaDays: data.deltaDays,
   };
 }

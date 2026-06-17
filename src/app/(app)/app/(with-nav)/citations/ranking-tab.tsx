@@ -11,7 +11,11 @@ import { LLM_LABELS } from "@/components/charts/llm-colors";
 import { RankLineChart } from "@/components/charts/rank-line-chart";
 import { capture } from "@/lib/posthog-client";
 import type { RankingData } from "@/lib/competitors/queries";
-import { RANKING_RELIABLE_AFTER_DAYS, type RankingEntry } from "@/lib/competitors/ranking";
+import {
+  buildRankStatus,
+  RANKING_RELIABLE_AFTER_DAYS,
+  type RankingEntry,
+} from "@/lib/competitors/ranking";
 import { createCompetitor } from "./actions";
 
 // Onglet Classement de /app/citations (cf. doc 02 § Ranking, étapes 1+2).
@@ -235,30 +239,13 @@ function formatDay(iso: string): string {
 // Statut compétitif au-dessus du leaderboard : où tu en es + le prochain
 // objectif concret (gamification par le rang, cf. doc 02 § Gamification
 // 2026-06-11 — pas de points ni de badges décoratifs, le rang EST le jeu).
+// La phrase est construite par `buildRankStatus` (source unique, partagée
+// avec la carte de rang du dashboard).
 function RankStatus({ entries, scopeLabel }: { entries: RankingEntry[]; scopeLabel: string }) {
-  const you = entries.find((e) => e.type === "you");
-  if (!you || you.mentions === 0) {
-    // Cas « zéro citation » : runs présents mais ta marque jamais citée —
-    // rendre l'invisibilité explicite plutôt qu'un tableau de tirets muets.
-    const someoneCited = entries.some((e) => e.mentions > 0);
-    return (
-      <p className="mt-4 flex items-start gap-2 rounded-[var(--radius-lg)] border border-[color:var(--color-border)] bg-[color:var(--color-gray-50)] px-4 py-3 text-[0.8125rem] text-[color:var(--color-ink-soft)]">
-        <Target size={14} strokeWidth={2} aria-hidden className="mt-0.5 shrink-0" />
-        <span>
-          Ta marque n&apos;a pas encore été citée sur la fenêtre, {scopeLabel}.{" "}
-          {someoneCited
-            ? "Le classement ci-dessous montre qui est recommandé à ta place — c'est ton point de départ."
-            : "Aucune marque suivie n'a été citée non plus : les IA répondent sans recommander de marque sur tes prompts actuels, ou les marques citées ne sont pas encore détectées."}
-        </span>
-      </p>
-    );
-  }
-
-  const above = entries.find((e) => e.rank === you.rank - 1);
-  const below = entries.find((e) => e.rank === you.rank + 1);
+  const status = buildRankStatus(entries, scopeLabel);
   return (
     <p className="mt-4 flex items-start gap-2 rounded-[var(--radius-lg)] border border-[color:var(--color-border)] bg-[color:var(--color-gray-50)] px-4 py-3 text-[0.8125rem] text-[color:var(--color-ink-soft)]">
-      {you.rank === 1 ? (
+      {status.icon === "trophy" ? (
         <Trophy
           size={14}
           strokeWidth={2}
@@ -269,29 +256,10 @@ function RankStatus({ entries, scopeLabel }: { entries: RankingEntry[]; scopeLab
         <Target size={14} strokeWidth={2} aria-hidden className="mt-0.5 shrink-0" />
       )}
       <span>
-        {you.rank === 1 ? (
-          <>
-            <strong className="font-semibold text-[color:var(--color-ink)]">
-              Ta marque est n°1
-            </strong>{" "}
-            {scopeLabel}
-            {below &&
-              (you.mentions === below.mentions
-                ? ` — à égalité de citations avec ${below.name}.`
-                : ` — ${you.mentions - below.mentions} citation${you.mentions - below.mentions > 1 ? "s" : ""} d'avance sur ${below.name}.`)}
-          </>
-        ) : (
-          <>
-            <strong className="font-semibold text-[color:var(--color-ink)]">
-              Ta marque est n°{you.rank}
-            </strong>{" "}
-            sur {entries.length} {scopeLabel}
-            {above &&
-              (above.mentions === you.mentions
-                ? ` — à égalité de citations avec ${above.name} (n°${above.rank}).`
-                : ` — à ${above.mentions - you.mentions} citation${above.mentions - you.mentions > 1 ? "s" : ""} de ${above.name} (n°${above.rank}).`)}
-          </>
+        {status.headline && (
+          <strong className="font-semibold text-[color:var(--color-ink)]">{status.headline}</strong>
         )}
+        {status.detail}
       </span>
     </p>
   );
