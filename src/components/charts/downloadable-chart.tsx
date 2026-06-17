@@ -12,13 +12,23 @@ interface DownloadableChartProps {
   children: React.ReactNode;
   /** Optional className for the inner wrapper (passes through to the captured node). */
   className?: string;
+  /**
+   * Contrôles (filtres, SegmentedControl…) rendus dans la barre d'outils
+   * du chart, à gauche du bouton PNG dont ils sont séparés par un divider
+   * subtil. Sortis du capture PNG (toolbar = sibling de la ref). */
+  toolbar?: React.ReactNode;
 }
 
-// Wrapper client réutilisable : injecte un petit bouton « Télécharger PNG »
-// en haut à droite et expose le contenu via une ref que html-to-image
-// capture en sortie @2x. Posté ailleurs dans le dashboard pour offrir
-// l'export visuel aux clients qui veulent embed un screenshot dans un
-// rapport (cf. doc 02 § V0+ save-as-PNG charts).
+// Wrapper client réutilisable : rend une barre d'outils au-dessus du chart
+// avec un bouton « Télécharger PNG » aligné à droite (et, optionnellement,
+// les filtres via `toolbar`), puis expose le contenu via une ref que
+// html-to-image capture en sortie @2x. Offre l'export visuel aux clients
+// qui veulent embed un screenshot dans un rapport (cf. doc 02 § V0+
+// save-as-PNG charts).
+//
+// 2026-06-17 : le bouton était `absolute` par-dessus le coin du chart, ce
+// qui le faisait chevaucher le contenu. Déplacé dans une barre d'outils
+// dédiée au-dessus du graphe, groupé avec les filtres.
 //
 // La logique de capture suit le pattern déjà éprouvé dans
 // src/components/admin/visuals/visual-canvas.tsx, simplifié (pas de
@@ -29,6 +39,7 @@ export function DownloadableChart({
   backgroundColor = "#ffffff",
   children,
   className,
+  toolbar,
 }: DownloadableChartProps) {
   const ref = useRef<HTMLDivElement>(null);
   const [busy, setBusy] = useState(false);
@@ -53,23 +64,26 @@ export function DownloadableChart({
   }
 
   return (
-    <div className="relative">
-      {/* Bouton PNG positionné À L'INTÉRIEUR du chart (top-right). Avant 2026-06-08
-       * il était en `-top-10` (40 px au-dessus du container), ce qui le faisait
-       * chevaucher le <SegmentedControl> du header de section. Maintenant il flotte
-       * dans le coin top-right du chart, semi-transparent au repos pour ne pas
-       * polluer le visuel, opaque au hover. */}
-      <button
-        type="button"
-        onClick={handleDownload}
-        disabled={busy}
-        aria-label="Télécharger en PNG"
-        title="Télécharger en PNG"
-        className="absolute right-3 top-3 z-10 inline-flex items-center gap-1.5 rounded-[var(--radius-pill)] border border-[color:var(--color-border)] bg-white/85 px-3 py-1.5 text-xs font-medium text-[color:var(--color-ink-soft)] shadow-[var(--shadow-sm)] backdrop-blur-sm transition hover:bg-white hover:text-[color:var(--color-ink)] disabled:cursor-not-allowed disabled:opacity-50"
-      >
-        <Download size={12} strokeWidth={2.2} />
-        {busy ? "Export…" : "PNG"}
-      </button>
+    <div>
+      {/* Barre d'outils du chart : filtres optionnels (toolbar) + bouton PNG,
+       * séparés par un divider vertical subtil. Sortie du capture PNG. */}
+      <div className="mb-2 flex items-center justify-end gap-3">
+        {toolbar}
+        {toolbar && (
+          <span aria-hidden className="h-5 w-px shrink-0 bg-[color:var(--color-border)]" />
+        )}
+        <button
+          type="button"
+          onClick={handleDownload}
+          disabled={busy}
+          aria-label="Télécharger en PNG"
+          title="Télécharger en PNG"
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-[var(--radius-pill)] border border-[color:var(--color-border)] bg-white px-3 py-1.5 text-xs font-medium text-[color:var(--color-ink-soft)] transition hover:bg-[color:var(--color-gray-50)] hover:text-[color:var(--color-ink)] disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <Download size={12} strokeWidth={2.2} />
+          {busy ? "Export…" : "PNG"}
+        </button>
+      </div>
       <div ref={ref} className={className} style={{ backgroundColor }}>
         {children}
       </div>

@@ -91,21 +91,23 @@ export function TrendSection({
 
   return (
     <section>
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h2 className="type-h2">Évolution de visibilité</h2>
-          <p className="type-meta mt-1">Score 0–100 par LLM</p>
-        </div>
-        <SegmentedControl
-          value={range}
-          onValueChange={handleRangeChange}
-          options={RANGE_OPTIONS}
-          ariaLabel="Fenêtre temporelle"
-          size="sm"
-        />
+      <div>
+        <h2 className="type-h2">Évolution de visibilité</h2>
+        <p className="type-meta mt-1">Score 0–100 par LLM</p>
       </div>
       <div className="mt-6">
-        <DownloadableChart filename={`visibilite-evolution-${range}`}>
+        <DownloadableChart
+          filename={`visibilite-evolution-${range}`}
+          toolbar={
+            <SegmentedControl
+              value={range}
+              onValueChange={handleRangeChange}
+              options={RANGE_OPTIONS}
+              ariaLabel="Fenêtre temporelle"
+              size="sm"
+            />
+          }
+        >
           <div className="relative p-4">
             <LineChart data={scaffold} series={effectiveSeries} />
             {isSparse && (

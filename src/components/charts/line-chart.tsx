@@ -63,10 +63,8 @@ export function LineChart({
           itemStyle={{ color: "white" }}
           cursor={{ stroke: "var(--color-border-strong)", strokeWidth: 1 }}
         />
-        {/* Légende déplacée en BAS du chart (2026-06-09) : le top-right est
-         * occupé par le bouton « PNG » du <DownloadableChart>, garder les
-         * deux en collision rendait la légende illisible (cf. bug screen
-         * Max). Bottom-left, classique sur les line charts multi-séries. */}
+        {/* Légende en BAS du chart : bottom-left, classique sur les line
+         * charts multi-séries, évite la collision avec le contenu top-right. */}
         <Legend
           verticalAlign="bottom"
           align="left"
