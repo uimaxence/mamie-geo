@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Check, Lock, MapPin, MessageSquare, Trophy, X } from "lucide-react";
+import { ArrowRight, Lock, MapPin, MessageSquare, Trophy } from "lucide-react";
 import { Badge, Button, LinkButton, ScoreRing } from "@/components/ui";
 import { BreakdownBars } from "@/components/charts/breakdown-bars";
 import { FounderPortrait } from "@/components/marketing/founder-portrait";
@@ -106,8 +106,8 @@ export function LocalMapResults({
         <Card>
           <CardTitle>Détail par ville</CardTitle>
           <div className="mt-4 flex flex-col gap-2">
-            {report.cities.map((city) => (
-              <CityRow key={city.name} city={city} />
+            {report.cities.map((city, i) => (
+              <CityRow key={city.name} city={city} index={i} />
             ))}
           </div>
         </Card>
@@ -210,15 +210,23 @@ function formatList(items: string[]): string {
   return `${items.slice(0, -1).join(", ")} et ${items[items.length - 1]}`;
 }
 
-function CityRow({ city }: { city: CityVisibility }) {
+function CityRow({ city, index }: { city: CityVisibility; index: number }) {
+  // Pastille en miroir de la carte : ★ = ta ville (index 0), n° + couleur
+  // (vert recommandé / rouge concurrent) pour les villes autour.
+  const isMain = index === 0;
+  const badgeStyle = isMain
+    ? "bg-[color:var(--color-ink)] text-white"
+    : city.recommended
+      ? "bg-[color:var(--color-success)] text-white"
+      : "bg-[color:var(--color-error)] text-white";
   return (
     <div className="flex flex-wrap items-center justify-between gap-2 rounded-[var(--radius-lg)] border border-[color:var(--color-border)] bg-white px-4 py-2.5">
-      <div className="flex items-center gap-2">
-        {city.recommended ? (
-          <Check size={16} className="shrink-0 text-[color:var(--color-success)]" />
-        ) : (
-          <X size={16} className="shrink-0 text-[color:var(--color-error)]" />
-        )}
+      <div className="flex items-center gap-2.5">
+        <span
+          className={`inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold ${badgeStyle}`}
+        >
+          {isMain ? "★" : index}
+        </span>
         <span className="text-sm font-medium text-[color:var(--color-ink)]">{city.name}</span>
       </div>
       {city.recommended ? (
