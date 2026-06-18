@@ -115,8 +115,8 @@ export function PromptsAnalyticsTable({ rows, windowDays }: PromptsAnalyticsTabl
       <p className="type-meta mt-4">
         Métriques calculées sur les {windowDays} derniers jours. Rang = position de ta marque par
         fréquence de citation parmi les marques citées sur le prompt. Les prompts marqués «&nbsp;marque&nbsp;»
-        te nomment explicitement : l'IA répond forcément sur toi, le rang y est donc attendu et
-        n'indique pas ta visibilité organique — privilégie les prompts génériques pour ça.
+        te nomment explicitement : l&apos;IA répond forcément sur toi, le rang y est donc attendu et
+        n&apos;indique pas ta visibilité organique — privilégie les prompts génériques pour ça.
       </p>
     </div>
   );
