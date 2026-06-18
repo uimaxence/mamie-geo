@@ -201,7 +201,7 @@ export function RankingTab({ data }: { data: RankingData }) {
 
       <p className="type-meta mt-3">
         Les marques « détectées » sont citées par les IA dans les réponses à tes prompts mais pas
-        encore suivies — clique « Suivre » pour les ajouter à tes concurrents.
+        encore suivies : clique « Suivre » pour les ajouter à tes concurrents.
       </p>
 
       {/* Évolution du rang : un point par jour (sous-fenêtre glissante 7 j),
@@ -274,7 +274,7 @@ function RankDelta({ entry }: { entry: RankingEntry }) {
         className="text-[0.75rem] text-[color:var(--color-faint)]"
         title="Pas encore d'historique"
       >
-        —
+        -
       </span>
     );
   }

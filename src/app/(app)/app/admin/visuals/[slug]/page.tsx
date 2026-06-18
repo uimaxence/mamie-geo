@@ -34,7 +34,7 @@ export default async function VisualDetailPage({ params }: Props) {
         <p className="type-body max-w-2xl">{visual.description}</p>
         {total > 1 && (
           <div className="mt-1 text-sm font-medium text-[color:var(--color-muted)]">
-            Carousel {total} slides — télécharge chaque slide individuellement, dans l&apos;ordre
+            Carousel {total} slides : télécharge chaque slide individuellement, dans l&apos;ordre
             sur LinkedIn.
           </div>
         )}

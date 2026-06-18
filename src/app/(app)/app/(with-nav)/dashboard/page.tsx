@@ -174,7 +174,7 @@ export default async function DashboardPage() {
           <Stat
             label="Score de visibilité"
             glossaryTerm="visibility-score"
-            value={hasRunsToday ? visibilityScore.toFixed(1) : "—"}
+            value={hasRunsToday ? visibilityScore.toFixed(1) : "-"}
             icon={Flame}
             iconTone="orange"
             delta={scoreDelta !== null ? { value: scoreDelta, period: "vs J-7" } : null}
@@ -189,7 +189,7 @@ export default async function DashboardPage() {
           <Stat
             label="Marque citée"
             glossaryTerm="marque-citee"
-            value={hasRunsToday ? `${agg.brandCitedCount}/${agg.totalRuns}` : "—"}
+            value={hasRunsToday ? `${agg.brandCitedCount}/${agg.totalRuns}` : "-"}
             icon={Activity}
             iconTone="green"
             hint="runs tous LLMs aujourd'hui"
@@ -199,7 +199,7 @@ export default async function DashboardPage() {
           <Stat
             label="Top concurrent"
             glossaryTerm="top-concurrent"
-            value={agg.topCompetitor?.name ?? "—"}
+            value={agg.topCompetitor?.name ?? "-"}
             icon={Users}
             iconTone="purple"
             hint={
@@ -211,7 +211,7 @@ export default async function DashboardPage() {
           <Stat
             label="Part de voix"
             glossaryTerm="part-de-voix"
-            value={hasRunsToday ? `${agg.partDeVoix.toFixed(1)}%` : "—"}
+            value={hasRunsToday ? `${agg.partDeVoix.toFixed(1)}%` : "-"}
             // Teinte relative : vert si tu mènes tes concurrents, ambre sinon
             // (jamais de seuil absolu — cf. doc 09 § 2026-06-17).
             tone={hasRunsToday ? partDeVoixStatTone : "default"}
@@ -273,7 +273,7 @@ export default async function DashboardPage() {
                   <>
                     {" "}
                     · ta plus faible : <strong>{llmReading.worst.label}</strong> (
-                    {llmReading.worst.value}) — concentre tes efforts là où tu es absent.
+                    {llmReading.worst.value}). Concentre tes efforts là où tu es absent.
                   </>
                 )}
               </p>
@@ -393,7 +393,7 @@ function FunnelSourcesSection({
           <Stat
             label="Apparition"
             glossaryTerm="apparition"
-            value={hasData ? `${ratios.apparitionPct.toFixed(1)}%` : "—"}
+            value={hasData ? `${ratios.apparitionPct.toFixed(1)}%` : "-"}
             icon={Eye}
             iconTone="blue"
             hint={hasData ? `${retrievedCount}/${totalRuns} réponses` : "en attente de données"}
@@ -403,7 +403,7 @@ function FunnelSourcesSection({
           <Stat
             label="Fréquence"
             glossaryTerm="frequence"
-            value={hasData ? ratios.frequence.toFixed(2) : "—"}
+            value={hasData ? ratios.frequence.toFixed(2) : "-"}
             icon={Layers}
             iconTone="purple"
             hint={
@@ -417,7 +417,7 @@ function FunnelSourcesSection({
           <Stat
             label="Citation"
             glossaryTerm="citation"
-            value={hasData ? `${ratios.citationPct.toFixed(1)}%` : "—"}
+            value={hasData ? `${ratios.citationPct.toFixed(1)}%` : "-"}
             icon={Quote}
             iconTone="green"
             hint={
@@ -433,7 +433,7 @@ function FunnelSourcesSection({
       {hasData && (
         <p className="mt-3 type-meta text-[color:var(--color-ink-soft)]">
           Comment lire : plus tes apparitions se transforment en citations explicites, mieux
-          c&apos;est — ici {ratios.citationPct.toFixed(1)} % le deviennent. Une apparition élevée
+          c&apos;est. Ici {ratios.citationPct.toFixed(1)} % le deviennent. Une apparition élevée
           mais peu de citations = les IA te trouvent sans encore te recommander.
         </p>
       )}

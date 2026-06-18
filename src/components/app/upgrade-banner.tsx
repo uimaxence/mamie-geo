@@ -28,7 +28,7 @@ interface BannerCopy {
 
 const COPY: Record<string, BannerCopy> = {
   trialing: {
-    message: "Essai gratuit en cours — choisis un plan pour continuer après tes 14 jours.",
+    message: "Essai gratuit en cours : choisis un plan pour continuer après tes 14 jours.",
     cta: "Choisir un plan",
     tone: "neutral",
     variant: "trialing",

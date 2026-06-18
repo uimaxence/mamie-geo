@@ -444,7 +444,7 @@ function Step3({ state, setState }: { state: WizardState; setState: (s: WizardSt
         <h1 className="type-h1">Les prompts à suivre.</h1>
         <p className="type-body-lg mt-3">
           On lit ton site pour comprendre ton activité, puis on te propose les questions que tes
-          prospects posent aux IA. 3 minimum, 25 maximum — tu édites tout ce que tu veux.
+          prospects posent aux IA. 3 minimum, 25 maximum, tu édites tout ce que tu veux.
         </p>
       </div>
 

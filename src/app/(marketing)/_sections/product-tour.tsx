@@ -47,7 +47,7 @@ export function ProductTour() {
         <h2 className="type-h1 mt-3">Voici à quoi ressemble ton dashboard.</h2>
         <p className="type-body-lg mt-4">
           Capturé en condition réelle sur une boutique e-commerce de démo. Pas un mockup, pas un
-          Figma — c&apos;est l&apos;app que tu utiliseras dès ton premier login.
+          Figma : c&apos;est l&apos;app que tu utiliseras dès ton premier login.
         </p>
       </div>
 

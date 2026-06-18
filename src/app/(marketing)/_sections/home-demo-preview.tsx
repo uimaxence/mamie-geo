@@ -115,7 +115,7 @@ export function HomeDemoPreview() {
             <Card className="p-4">
               <Stat
                 label="Top concurrent"
-                value={agg.topCompetitor?.name ?? "—"}
+                value={agg.topCompetitor?.name ?? "Aucun"}
                 icon={Users}
                 iconTone="purple"
                 hint={

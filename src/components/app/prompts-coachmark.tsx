@@ -74,7 +74,7 @@ export function PromptsCoachmark({
       </p>
       <p className="mt-1.5 text-sm font-semibold leading-snug">Configure tes prompts</p>
       <p className="mt-2 text-[13px] leading-relaxed text-white/70">
-        Sans prompts, ton tracking ne démarre pas. Ça prend 2 minutes — on peut même te les suggérer
+        Sans prompts, ton tracking ne démarre pas. Ça prend 2 minutes, on peut même te les suggérer
         à partir de ton site.
       </p>
 

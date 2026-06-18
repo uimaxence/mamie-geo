@@ -442,7 +442,7 @@ export function EtudeClassement() {
 
   return (
     <ChartFrame
-      title="Score de visibilité IA — moyenne des 5 plateformes, sur 100"
+      title="Score de visibilité IA : moyenne des 5 plateformes, sur 100"
       footnote="Score = position dans la réponse × sentiment, moyenné sur les 8 prompts du secteur de la marque (absent = 0). Snapshot du 10 juin 2026."
     >
       <div className="mb-5 flex flex-wrap gap-2">
@@ -509,7 +509,7 @@ export function EtudeProfilMarque({ defaut = "Société Générale" }: { defaut?
   return (
     <ChartFrame
       title="Une marque, cinq visibilités"
-      footnote="La même marque, le même jour, les mêmes questions — et jusqu'à 8× d'écart de visibilité selon la plateforme."
+      footnote="La même marque, le même jour, les mêmes questions, et jusqu'à 8× d'écart de visibilité selon la plateforme."
     >
       <label className="mb-5 block">
         <span className="type-meta mb-1.5 block">Choisis une marque</span>

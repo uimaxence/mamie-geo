@@ -21,7 +21,7 @@ export function DemoFinalCta() {
             trackEvent="demo_cta_clicked"
             trackProperties={{ cta_label: "Démarrer 9,99 €/mois", section: "final" }}
           >
-            Démarrer — 9,99&nbsp;€/mois
+            Démarrer à 9,99&nbsp;€/mois
           </TrackedLinkButton>
           <TrackedLinkButton
             href="/outils/audit-technique"

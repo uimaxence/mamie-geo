@@ -33,7 +33,7 @@ export function renderTrialReminder(data: TrialReminderData): RenderedEmail {
 
   const body = isFinal
     ? `Demain (${formatDate(data.trialEndsOn)}), ton abonnement Mamie GEO ${escapeHtml(data.plan)} démarre automatiquement. Tu peux toujours annuler en 1 clic depuis ton compte (sans frais).`
-    : `Il te reste 4 jours sur ton essai gratuit. Tes runs continuent de tourner quotidiennement sur les 5 IA suivies — jette un œil à ton dashboard pour voir ce que tu obtiens. À J+14 (${formatDate(data.trialEndsOn)}), ton abonnement démarre automatiquement.`;
+    : `Il te reste 4 jours sur ton essai gratuit. Tes runs continuent de tourner quotidiennement sur les 5 IA suivies : jette un œil à ton dashboard pour voir ce que tu obtiens. À J+14 (${formatDate(data.trialEndsOn)}), ton abonnement démarre automatiquement.`;
 
   const ctaLabel = isFinal ? "Voir mes options" : "Voir mon dashboard";
   const ctaUrl = isFinal ? data.portalUrl : data.dashboardUrl;

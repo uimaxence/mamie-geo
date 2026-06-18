@@ -85,7 +85,7 @@ export function FeedbackDialog() {
             <DialogHeader>
               <DialogTitle>Merci&nbsp;!</DialogTitle>
               <DialogDescription>
-                Ton retour est bien arrivé. On lit tout — et on répond souvent.
+                Ton retour est bien arrivé. On lit tout, et on répond souvent.
               </DialogDescription>
             </DialogHeader>
             <DialogFooter className="mt-6 sm:justify-center">
@@ -97,7 +97,7 @@ export function FeedbackDialog() {
             <DialogHeader>
               <DialogTitle>Ton avis nous aide</DialogTitle>
               <DialogDescription>
-                Un bug, une idée, une remarque&nbsp;? Dis-nous tout — surtout pendant la beta.
+                Un bug, une idée, une remarque&nbsp;? Dis-nous tout, surtout pendant la beta.
               </DialogDescription>
             </DialogHeader>
 

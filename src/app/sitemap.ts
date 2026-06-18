@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { COMPARISONS } from "@/app/(marketing)/vs/comparisons";
 import { listArticles } from "@/lib/blog/registry";
 import { env } from "@/lib/env";
 
@@ -20,6 +21,7 @@ const STATIC_ROUTES: { path: string; priority: number; changeFrequency: "weekly"
   { path: "/outils/comparateurs", priority: 0.7, changeFrequency: "monthly" },
   { path: "/outils/test-visibilite-ia", priority: 0.7, changeFrequency: "monthly" },
   { path: "/outils/audit-technique", priority: 0.7, changeFrequency: "monthly" },
+  { path: "/vs", priority: 0.7, changeFrequency: "monthly" },
   { path: "/legal/cgu", priority: 0.3, changeFrequency: "monthly" },
   { path: "/legal/privacy", priority: 0.3, changeFrequency: "monthly" },
   { path: "/legal/mentions", priority: 0.3, changeFrequency: "monthly" },
@@ -43,5 +45,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.8,
   }));
 
-  return [...staticEntries, ...articleEntries];
+  const comparisonEntries: MetadataRoute.Sitemap = COMPARISONS.map((c) => ({
+    url: `${BASE_URL}/vs/${c.slug}`,
+    lastModified: now,
+    changeFrequency: "monthly" as const,
+    priority: 0.7,
+  }));
+
+  return [...staticEntries, ...articleEntries, ...comparisonEntries];
 }

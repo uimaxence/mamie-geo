@@ -7,7 +7,6 @@ import type { SiteProfile } from "@/lib/site-profile";
 import type { LocalMapReport } from "@/lib/local-map/types";
 import { detectSiteProfileAction } from "../location-actions";
 import { runLocalMapScanAction } from "./actions";
-import { DEMO_LOCAL_MAP_REPORT } from "./local-map-demo";
 import { LocalMapResults } from "./local-map-results";
 
 // Form de la carte locale : le prospect saisit SITE + EMAIL — marque,
@@ -27,13 +26,7 @@ export function LocalMapForm() {
   const [city, setCity] = useState("");
   const [detected, setDetected] = useState<SiteProfile | null>(null);
   const [hpField, setHpField] = useState("");
-  // Aperçu démo (capture marketing) si `?demo` est présent dans l'URL.
-  // Lu côté client uniquement, jamais en parcours réel.
-  const [report, setReport] = useState<LocalMapReport | null>(() =>
-    typeof window !== "undefined" && new URLSearchParams(window.location.search).has("demo")
-      ? DEMO_LOCAL_MAP_REPORT
-      : null,
-  );
+  const [report, setReport] = useState<LocalMapReport | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 

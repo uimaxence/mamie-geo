@@ -71,7 +71,7 @@ export function ComparatorForm() {
       if (!profile) {
         setMode("manual");
         setError(
-          "On n'a pas réussi à analyser ton site automatiquement — complète ces 3 champs et relance.",
+          "On n'a pas réussi à analyser ton site automatiquement. Complète ces 3 champs et relance.",
         );
         return;
       }
@@ -278,7 +278,7 @@ function ScanProgress({ domain, detected }: { domain: string; detected: SiteProf
           </div>
         ))}
       </div>
-      <p className="type-meta mt-6">~15 secondes — on analyse ton site puis le web en direct.</p>
+      <p className="type-meta mt-6">~15 secondes, on analyse ton site puis le web en direct.</p>
     </div>
   );
 }

@@ -169,7 +169,7 @@ Si tu utilises ton téléphone : le lien s'ouvrira dans ton navigateur, pas dans
 
 Tu n'as pas demandé ce lien ? Ignore cet email, il ne se passera rien.
 
-— L'équipe Mamie GEO`;
+L'équipe Mamie GEO`;
   // HTML inline branded — gradient halo bleu brand, logo Mamie,
   // CTA bouton noir, instructions mobile-friendly + fallback support.
   const html = `<!doctype html>
@@ -200,7 +200,7 @@ Tu n'as pas demandé ce lien ? Ignore cet email, il ne se passera rien.
 
         <div style="margin:32px 0 0;padding:16px;background:linear-gradient(135deg,rgba(50,156,255,0.10) 0%,rgba(50,156,255,0.04) 100%);border-radius:10px;">
           <p style="margin:0 0 6px;font-size:13px;font-weight:600;color:#191919;">📱 Sur ton téléphone&nbsp;?</p>
-          <p style="margin:0;font-size:13px;line-height:1.55;color:#525252;">Le lien s'ouvrira dans ton navigateur, pas dans l'app email. Pas besoin de revenir manuellement à la page de login — ta session sera active partout.</p>
+          <p style="margin:0;font-size:13px;line-height:1.55;color:#525252;">Le lien s'ouvrira dans ton navigateur, pas dans l'app email. Pas besoin de revenir manuellement à la page de login, ta session sera active partout.</p>
         </div>
 
         <p style="margin:32px 0 0;padding-top:20px;border-top:1px solid #efefef;font-size:12px;color:#737373;line-height:1.55;">
@@ -339,7 +339,7 @@ export async function sendNewArticleNewsletter(article: {
   }
 
   const articleUrl = `${env.NEXT_PUBLIC_APP_URL}/blog/${article.slug}`;
-  const subject = `Nouveau sur Mamie GEO — ${article.title}`;
+  const subject = `Nouveau sur Mamie GEO : ${article.title}`;
   const htmlContent = buildNewArticleHtml({ ...article, url: articleUrl });
 
   // 1. Create campaign
@@ -463,14 +463,14 @@ Ton résultat : ${resultSummary}.
 
 Deux façons d'aller plus loin :
 
-1. Suivre ta visibilité dans les 5 IA (ChatGPT, Claude, Perplexity, Gemini, Le Chat), tous les jours, avec l'évolution de ton rang face à tes concurrents — essai 14 jours :
+1. Suivre ta visibilité dans les 5 IA (ChatGPT, Claude, Perplexity, Gemini, Le Chat), tous les jours, avec l'évolution de ton rang face à tes concurrents (essai 14 jours) :
 https://mamie-geo.fr/login?mode=signup&from=scan-email
 
 2. Tu préfères déléguer ? Je m'occupe personnellement du SEO + GEO de quelques marques par trimestre, de l'audit à l'implémentation. On en parle 30 minutes, gratuitement :
 https://mamie-geo.fr/contact
 
 À très vite,
-— Max, fondateur de Mamie GEO
+Max, fondateur de Mamie GEO
 
 PS : une question sur ton résultat ? Réponds simplement à cet email.`;
 
@@ -488,12 +488,12 @@ PS : une question sur ton résultat ? Réponds simplement à cet email.`;
 
         <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;letter-spacing:-0.01em;">Ton résultat pour ${safeBrand}</h1>
         <p style="margin:0 0 24px;font-size:15px;line-height:1.6;color:#404040;">
-          ${safeSummary} — c'est ce que tes prospects voient quand ils demandent une recommandation à une IA, aujourd'hui.
+          ${safeSummary}. C'est ce que tes prospects voient quand ils demandent une recommandation à une IA, aujourd'hui.
         </p>
 
         <p style="margin:0 0 12px;font-size:14px;font-weight:600;color:#191919;">La suite logique&nbsp;:</p>
         <p style="margin:0 0 20px;font-size:14px;line-height:1.6;color:#404040;">
-          Suis ta visibilité dans les <strong>5 IA</strong> tous les jours — qui est cité, à quelle position, et ton rang face à tes concurrents.
+          Suis ta visibilité dans les <strong>5 IA</strong> tous les jours : qui est cité, à quelle position, et ton rang face à tes concurrents.
         </p>
         <p style="margin:0 0 28px;">
           <a href="https://mamie-geo.fr/login?mode=signup&from=scan-email" style="display:inline-block;background:#191919;color:#fff;text-decoration:none;padding:12px 22px;border-radius:9999px;font-weight:500;font-size:14px;">Démarrer l'essai 14 jours →</a>
@@ -510,7 +510,7 @@ PS : une question sur ton résultat ? Réponds simplement à cet email.`;
         </div>
 
         <p style="margin:28px 0 0;padding-top:20px;border-top:1px solid #efefef;font-size:12px;color:#737373;line-height:1.55;">
-          Une question sur ton résultat&nbsp;? Réponds simplement à cet email.<br />— Max, fondateur de Mamie GEO
+          Une question sur ton résultat&nbsp;? Réponds simplement à cet email.<br />Max, fondateur de Mamie GEO
         </p>
       </td></tr>
     </table>
@@ -537,7 +537,7 @@ export async function sendComparatorLeadEmail(params: {
   await sendTransactional({
     to: "hello@mamie-geo.fr",
     replyTo: prospectEmail,
-    subject: `[Scan comparateurs] ${brandName} (${sector}) — ${presentCount}/${totalChecked}`,
+    subject: `[Scan comparateurs] ${brandName} (${sector}) : ${presentCount}/${totalChecked}`,
     text: `Lead depuis /outils/comparateurs
 
 Prospect  : ${prospectEmail}
@@ -566,7 +566,7 @@ export async function sendExpressScanLeadEmail(params: {
   await sendTransactional({
     to: "hello@mamie-geo.fr",
     replyTo: prospectEmail,
-    subject: `[Scan express] ${brandName} (${sector}) — cité ${citedCount}/${totalPrompts} sur Le Chat`,
+    subject: `[Scan express] ${brandName} (${sector}) : cité ${citedCount}/${totalPrompts} sur Le Chat`,
     text: `Lead depuis /outils/test-visibilite-ia (scan express live)
 
 Prospect  : ${prospectEmail}
@@ -603,7 +603,7 @@ export async function sendLocalMapLeadEmail(params: {
   await sendTransactional({
     to: "hello@mamie-geo.fr",
     replyTo: prospectEmail,
-    subject: `[Carte locale] ${brandName} (${sector}, ${mainCity}) — recommandé dans ${recommendedCount}/${totalCities} villes`,
+    subject: `[Carte locale] ${brandName} (${sector}, ${mainCity}) : recommandé dans ${recommendedCount}/${totalCities} villes`,
     text: `Lead depuis /outils/visibilite-locale (carte de visibilité IA locale)
 
 Prospect  : ${prospectEmail}
@@ -629,17 +629,17 @@ export async function sendBetaExpiredEmail(params: { to: string; workspaceName: 
   const signupUrl = "https://mamie-geo.fr/login?mode=signup&from=beta-expired";
   const text = `Salut,
 
-Merci d'avoir testé Mamie GEO pour ${workspaceName} pendant la phase beta — ton retour a compté.
+Merci d'avoir testé Mamie GEO pour ${workspaceName} pendant la phase beta, ton retour a compté.
 
 Ton accès gratuit vient d'arriver à échéance. Pour continuer à suivre ta visibilité dans les 5 IA (ChatGPT, Claude, Perplexity, Gemini, Le Chat), tu peux démarrer un essai 14 jours et choisir ton plan :
 ${signupUrl}
 
-Tes données (marques, prompts, historique) sont conservées — tu repars exactement d'où tu t'es arrêté.
+Tes données (marques, prompts, historique) sont conservées : tu repars exactement d'où tu t'es arrêté.
 
 Une question, un avis, une envie de plan sur-mesure ? Réponds simplement à cet email.
 
 À très vite,
-— Max, fondateur de Mamie GEO`;
+Max, fondateur de Mamie GEO`;
 
   const html = `<!doctype html>
 <html lang="fr">
@@ -655,7 +655,7 @@ Une question, un avis, une envie de plan sur-mesure ? Réponds simplement à cet
 
         <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;letter-spacing:-0.01em;">Ton accès beta arrive à échéance</h1>
         <p style="margin:0 0 24px;font-size:15px;line-height:1.6;color:#404040;">
-          Merci d'avoir testé Mamie GEO pour <strong>${safeName}</strong> pendant la beta — ton retour a compté.
+          Merci d'avoir testé Mamie GEO pour <strong>${safeName}</strong> pendant la beta, ton retour a compté.
         </p>
         <p style="margin:0 0 20px;font-size:14px;line-height:1.6;color:#404040;">
           Pour continuer à suivre ta visibilité dans les <strong>5 IA</strong>, démarre un essai 14 jours et choisis ton plan. Tes données sont conservées : tu repars d'où tu t'es arrêté.
@@ -665,7 +665,7 @@ Une question, un avis, une envie de plan sur-mesure ? Réponds simplement à cet
         </p>
 
         <p style="margin:28px 0 0;padding-top:20px;border-top:1px solid #efefef;font-size:12px;color:#737373;line-height:1.55;">
-          Une question, un avis, un plan sur-mesure&nbsp;? Réponds simplement à cet email.<br />— Max, fondateur de Mamie GEO
+          Une question, un avis, un plan sur-mesure&nbsp;? Réponds simplement à cet email.<br />Max, fondateur de Mamie GEO
         </p>
       </td></tr>
     </table>
@@ -696,10 +696,10 @@ export async function sendFeedbackEmail(params: {
     text: `Feedback in-app
 
 De        : ${userEmail}
-Workspace : ${workspaceName ?? "—"}
-Plan      : ${plan ?? "—"}
+Workspace : ${workspaceName ?? "n/a"}
+Plan      : ${plan ?? "n/a"}
 Catégorie : ${category}
-Page      : ${pageUrl ?? "—"}
+Page      : ${pageUrl ?? "n/a"}
 
 Message :
 ${message}`,

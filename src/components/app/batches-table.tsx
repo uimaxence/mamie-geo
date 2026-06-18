@@ -249,7 +249,7 @@ function SentimentBadge({ sentiment }: { sentiment: BatchDominantSentiment }) {
   if (sentiment === "mixed") return <Badge tone="neutral">Mixte</Badge>;
   // "absent" ou null : marque non citée ou pas encore scorée → pas
   // de signal sentiment exploitable
-  return <span className="type-meta">—</span>;
+  return <span className="type-meta">-</span>;
 }
 
 /**
@@ -336,7 +336,7 @@ function BrandSignal({ value }: { value: RunBatchEntry["brandMentioned"] }) {
   if (value === true) return <Badge tone="success">citée</Badge>;
   if (value === false) return <span className="type-meta">non</span>;
   if (value === "skipped") return <span className="type-meta">regex 0</span>;
-  return <span className="type-meta">—</span>;
+  return <span className="type-meta">-</span>;
 }
 
 /**
@@ -348,7 +348,7 @@ function EntrySentimentBadge({ sentiment }: { sentiment: RunBatchEntry["brandSen
   if (sentiment === "positive") return <Badge tone="success">Positif</Badge>;
   if (sentiment === "negative") return <Badge tone="error">Négatif</Badge>;
   if (sentiment === "neutral") return <Badge tone="warning">Neutre</Badge>;
-  return <span className="type-meta">—</span>;
+  return <span className="type-meta">-</span>;
 }
 
 function formatRelative(date: Date): string {

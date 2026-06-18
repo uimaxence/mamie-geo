@@ -76,7 +76,7 @@ function SnippetBlock({ snippet }: { snippet: string }) {
           <Bot size={14} strokeWidth={2.2} />
         )}
         {copied === "prompt"
-          ? "Prompt copié — colle-le dans ton assistant IA"
+          ? "Prompt copié, colle-le dans ton assistant IA"
           : "Copier le prompt d'installation (Claude Code, Cursor…)"}
       </button>
     </div>
@@ -170,7 +170,7 @@ export function AiPixelInstall({
         </p>
         <p className="type-meta mt-1 max-w-prose">
           Un seul script à coller sur ton site. Il compte uniquement les visites venant des moteurs
-          IA (ChatGPT, Perplexity, Gemini, Le Chat) — cookieless, sans bannière, sans donnée
+          IA (ChatGPT, Perplexity, Gemini, Le Chat) : cookieless, sans bannière, sans donnée
           personnelle.
         </p>
         {error && <p className="type-meta mt-2 text-[color:var(--color-error)]">{error}</p>}
@@ -268,7 +268,7 @@ export function AiPixelInstall({
 
           <Step n={3} title="Vérifie l'installation">
             <p className="type-meta mt-1 max-w-prose">
-              On va chercher le script sur ta page d&apos;accueil — pas besoin d&apos;attendre une
+              On va chercher le script sur ta page d&apos;accueil, pas besoin d&apos;attendre une
               visite IA. Tu peux aussi tester en direct avec{" "}
               <code className="type-tabular">?utm_source=chatgpt.com</code> à la fin d&apos;une de
               tes URLs.
@@ -291,13 +291,13 @@ export function AiPixelInstall({
         <div className="mt-6 border-t border-[color:var(--color-border)] pt-4">
           <p className="type-meta text-xs text-[color:var(--color-ink-soft)]">
             <span className="font-medium">Clé liée à {boundDomain}.</span> Le pixel ne compte que
-            les visites depuis ce domaine (et ses sous-domaines) — la même clé copiée sur un autre
+            les visites depuis ce domaine (et ses sous-domaines) : la même clé copiée sur un autre
             site n&apos;est pas comptée. Pour suivre un autre site, crée une nouvelle marque : elle
             aura sa propre clé.
           </p>
           <p className="type-meta mt-2 text-xs text-[color:var(--color-muted)]">
             Cookieless &amp; RGPD-friendly : aucun cookie, aucune IP stockée, aucun consentement
-            requis. Le pixel ne mesure que l&apos;origine IA des visites — pas un analytics complet.
+            requis. Le pixel ne mesure que l&apos;origine IA des visites, pas un analytics complet.
           </p>
         </div>
       </div>
@@ -310,7 +310,7 @@ function CheckFeedback({ check }: { check: CheckPixelResult }) {
     return (
       <Feedback tone="success" icon={CheckCircle2}>
         Script détecté sur <span className="type-tabular">{check.url}</span>. L&apos;installation
-        est bonne — il ne reste qu&apos;à recevoir une visite venant d&apos;une IA pour les
+        est bonne : il ne reste qu&apos;à recevoir une visite venant d&apos;une IA pour les
         premières données.
       </Feedback>
     );
@@ -320,14 +320,14 @@ function CheckFeedback({ check }: { check: CheckPixelResult }) {
       <Feedback tone="warning" icon={AlertCircle}>
         Script introuvable sur <span className="type-tabular">{check.url}</span>. Vérifie qu&apos;il
         est bien collé avant <code className="type-tabular">&lt;/head&gt;</code>, puis réessaie. Si
-        tu l&apos;injectes via un tag manager (Google Tag Manager…), ce test ne peut pas le voir —
+        tu l&apos;injectes via un tag manager (Google Tag Manager…), ce test ne peut pas le voir :
         teste alors avec <code className="type-tabular">?utm_source=chatgpt.com</code>.
       </Feedback>
     );
   }
   return (
     <Feedback tone="neutral" icon={AlertCircle}>
-      {check.ok ? "" : check.error} Le script reste valide — tu peux tester en direct avec{" "}
+      {check.ok ? "" : check.error} Le script reste valide, tu peux tester en direct avec{" "}
       <code className="type-tabular">?utm_source=chatgpt.com</code>.
     </Feedback>
   );

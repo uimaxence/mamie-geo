@@ -149,7 +149,7 @@ function renderStatCard(stat: WeeklyRecapStat): string {
 
 function renderDeltaLine(stat: WeeklyRecapStat): string {
   if (stat.deltaPct === null || stat.deltaPct === undefined) {
-    return `<div style="font-size: 12px; color: #737373; margin-top: 6px;">—</div>`;
+    return `<div style="font-size: 12px; color: #737373; margin-top: 6px;">n/a</div>`;
   }
   const direction =
     stat.deltaPct > 0 ? "delta-up" : stat.deltaPct < 0 ? "delta-down" : "delta-neutral";

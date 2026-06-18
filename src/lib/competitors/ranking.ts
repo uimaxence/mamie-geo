@@ -225,7 +225,7 @@ export function buildRankStatus(entries: RankingEntry[], scopeLabel: string): Ra
       previousRank: you?.previousRank ?? null,
       headline: "",
       detail: someoneCited
-        ? `Ta marque n'a pas encore été citée sur la fenêtre, ${scopeLabel}. Le classement montre qui est recommandé à ta place — c'est ton point de départ.`
+        ? `Ta marque n'a pas encore été citée sur la fenêtre, ${scopeLabel}. Le classement montre qui est recommandé à ta place : c'est ton point de départ.`
         : `Ta marque n'a pas encore été citée sur la fenêtre, ${scopeLabel}. Aucune marque suivie n'a été citée non plus : les IA répondent sans recommander de marque sur tes prompts actuels, ou les marques citées ne sont pas encore détectées.`,
     };
   }
@@ -236,8 +236,8 @@ export function buildRankStatus(entries: RankingEntry[], scopeLabel: string): Ra
   if (you.rank === 1) {
     const lead = below
       ? you.mentions === below.mentions
-        ? ` — à égalité de citations avec ${below.name}.`
-        : ` — ${you.mentions - below.mentions} citation${you.mentions - below.mentions > 1 ? "s" : ""} d'avance sur ${below.name}.`
+        ? `, à égalité de citations avec ${below.name}.`
+        : `, ${you.mentions - below.mentions} citation${you.mentions - below.mentions > 1 ? "s" : ""} d'avance sur ${below.name}.`
       : ".";
     return {
       kind: "leader",
@@ -253,8 +253,8 @@ export function buildRankStatus(entries: RankingEntry[], scopeLabel: string): Ra
 
   const gapDetail = above
     ? above.mentions === you.mentions
-      ? ` — à égalité de citations avec ${above.name} (n°${above.rank}).`
-      : ` — à ${above.mentions - you.mentions} citation${above.mentions - you.mentions > 1 ? "s" : ""} de ${above.name} (n°${above.rank}).`
+      ? `, à égalité de citations avec ${above.name} (n°${above.rank}).`
+      : `, à ${above.mentions - you.mentions} citation${above.mentions - you.mentions > 1 ? "s" : ""} de ${above.name} (n°${above.rank}).`
     : ".";
   return {
     kind: "ranked",

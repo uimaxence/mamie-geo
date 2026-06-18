@@ -69,7 +69,7 @@ export async function FinalCTA() {
                   href: "/pricing",
                 }}
               >
-                Démarrer — 9,99&nbsp;€/mois
+                Démarrer à 9,99&nbsp;€/mois
               </TrackedLinkButton>
               <TrackedLinkButton
                 href="/outils/audit-technique"

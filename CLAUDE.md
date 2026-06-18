@@ -189,6 +189,7 @@ Source : `geo-project/03-architecture-technique.md` § Structure du repo.
 
 ### Style général
 
+- **Jamais de tiret cadratin « — » (U+2014) ni de tiret demi-cadratin « – » (U+2013)** — ni dans la copie visible (UI, blog, emails, marketing, SEO), ni dans les commentaires de code, ni dans cette doc. C'est un marqueur « écrit par une IA » qu'on bannit. Remplacer par deux-points, virgule, parenthèses, point, ou reformuler. Pour une valeur vide en UI, utiliser le trait d'union simple « - ». Le trait d'union « - » reste autorisé dans les mots composés et les puces.
 - Pas de commentaire qui paraphrase le code. Commentaires uniquement pour le **pourquoi non-évident** (workaround, invariant, contrainte cachée)
 - JSDoc sur les fonctions exportées non-triviales (signature publique d'un module)
 - Pas d'over-engineering : 3 lignes répétées valent mieux qu'une abstraction prématurée
@@ -375,7 +376,17 @@ supprimé) + hub `/outils`
 linké en nav « Outils gratuits » (pastille « Nouveau »). Blog MDX
 content-driven (`src/content/blog/*.mdx`, FAQPage JSON-LD, OG dynamique,
 related, TOC, sitemap auto) : 3 articles de fond + 3 comparatifs (Peec,
-Otterly, Rankscale). Newsletter Brevo prête (`BREVO_BLOG_LIST_ID`
+Otterly, Rankscale). **Landing pages comparatives `/vs`** (2026-06-18,
+format conversion-first inspiré de sendshort.ai/compare) : hub `/vs` +
+7 face-à-face concurrents (`/vs/qwairy`, `/vs/meteoria`, `/vs/botrank`,
+`/vs/peec-ai`, `/vs/profound`, `/vs/otterly`, `/vs/rankscale`) pilotés
+par un template
+config-driven `vs/_vs-page.tsx` (hero face-à-face, tableau feature
+groupé, « qui choisir », FAQ, double JSON-LD breadcrumb + FAQPage).
+Liste centralisée dans `vs/comparisons.ts` (alimente le hub ET la
+colonne Comparatifs du footer). Concurrents FR (Qwairy/Meteoria) :
+angle prix + API natives + simplicité, pas « francophone » (ils le sont
+aussi), trade-offs assumés. Newsletter Brevo prête (`BREVO_BLOG_LIST_ID`
 manquant). SEO : host canonique non-www, noindex `.vercel.app`,
 canonicals auto-référentes, OG/Twitter cards site-wide (2026-06-12 :
 image statique `src/app/opengraph-image.tsx`, og:title hérité du title

@@ -93,10 +93,10 @@ export default async function SettingsPage({ searchParams }: PageProps) {
         <SectionCard title="Compte" subtitle="Informations personnelles">
           <dl className="grid grid-cols-2 gap-x-8 gap-y-4 sm:grid-cols-3">
             <Field label="Email" value={session.user.email} />
-            <Field label="Rôle workspace" value={memberRow[0]?.role ?? "—"} />
+            <Field label="Rôle workspace" value={memberRow[0]?.role ?? "-"} />
             <Field
               label="Compte créé"
-              value={userRows?.createdAt ? formatDate(userRows.createdAt) : "—"}
+              value={userRows?.createdAt ? formatDate(userRows.createdAt) : "-"}
             />
           </dl>
         </SectionCard>
@@ -118,7 +118,7 @@ export default async function SettingsPage({ searchParams }: PageProps) {
                 </Badge>
               }
             />
-            <Field label="Slug" value={wsRow[0]?.slug ?? "—"} mono />
+            <Field label="Slug" value={wsRow[0]?.slug ?? "-"} mono />
           </dl>
         </SectionCard>
 
@@ -228,7 +228,7 @@ export default async function SettingsPage({ searchParams }: PageProps) {
          * Pas dans une Card pour ne pas la « normaliser », bordure error
          * et fond rouge clair pour signaler la sensibilité. */}
         <section className="mt-4 rounded-[var(--radius-xl)] border border-[color:var(--color-error)]/20 bg-[color:var(--color-error-bg)] p-6">
-          <h2 className="type-h3 text-[color:var(--color-error)]">Zone sensible — RGPD</h2>
+          <h2 className="type-h3 text-[color:var(--color-error)]">Zone sensible : RGPD</h2>
           <p className="type-body mt-2 mb-6 text-sm">
             Tes droits sur tes données personnelles. Export et suppression définitive.
           </p>

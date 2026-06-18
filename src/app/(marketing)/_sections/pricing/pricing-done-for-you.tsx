@@ -47,7 +47,7 @@ export function PricingDoneForYou() {
                 ce que les IA te citent.
               </p>
               <p className="type-meta mt-4">
-                Sur devis, engagement trimestriel. {DFY_SLOTS_LEFT} marques maximum par trimestre —
+                Sur devis, engagement trimestriel. {DFY_SLOTS_LEFT} marques maximum par trimestre,
                 je fais le travail moi-même, pas une équipe offshore.
               </p>
               <LinkButton

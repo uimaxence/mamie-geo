@@ -52,7 +52,7 @@ export default function TestVisibiliteIAPage() {
           </h1>
           <p className="type-body-lg mt-6">
             On pose 3 vraies questions de ton secteur à une IA, sous tes yeux. En 15 secondes tu
-            sais si elle te cite — ou si elle recommande tes concurrents à ta place. (Pour vérifier
+            sais si elle te cite, ou si elle recommande tes concurrents à ta place. (Pour vérifier
             ta présence sur les sites sources que les IA consultent, c&apos;est le{" "}
             <a href="/outils/comparateurs" className="underline underline-offset-2">
               scan comparateurs
@@ -82,8 +82,8 @@ export default function TestVisibiliteIAPage() {
             <p className="type-body mt-6 max-w-prose">
               Le scan interroge une IA en direct avec les questions que tes prospects posent
               réellement. Tu vois la réponse telle qu&apos;elle est : qui est cité, dans quel ordre,
-              et si tu en fais partie. Pour les 4 autres IA — où les résultats varient jusqu&apos;à
-              ×8 — c&apos;est le suivi quotidien de l&apos;app qui prend le relais.
+              et si tu en fais partie. Pour les 4 autres IA (où les résultats varient jusqu&apos;à
+              ×8), c&apos;est le suivi quotidien de l&apos;app qui prend le relais.
             </p>
           </div>
 
@@ -107,7 +107,7 @@ export default function TestVisibiliteIAPage() {
           <p className="type-body-lg mt-6 max-w-prose">
             On veut que tu voies le niveau de qualité de Mamie GEO avant de t&apos;abonner. Le scan
             express est limité à 1 par marque et par jour. Pour les 5 IA et le suivi quotidien,
-            l&apos;app démarre à 9,99 €/mois — essai 14 jours, garantie remboursement 14 jours. Et
+            l&apos;app démarre à 9,99 €/mois (essai 14 jours, garantie remboursement 14 jours). Et
             si tu préfères déléguer, Max prend quelques marques par trimestre en accompagnement.
           </p>
         </div>

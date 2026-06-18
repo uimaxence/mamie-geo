@@ -17,7 +17,7 @@ export function TrafficCharts({ data }: { data: AiTrafficData }) {
     data.deltaPct !== null ? { value: data.deltaPct, period: "7j vs 7j préc." } : null;
   const topSourceLabel = data.topSource
     ? (LLM_LABELS[data.topSource.source] ?? data.topSource.source)
-    : "—";
+    : "-";
 
   const segments = SOURCE_ORDER.map((source) => {
     const row = data.bySource.find((s) => s.source === source);

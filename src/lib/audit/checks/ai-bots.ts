@@ -168,8 +168,8 @@ export function runAiBotsChecks(robotsTxt: string | null): CheckResult[] {
       severity: bot.severity,
       status: blocked ? "fail" : "pass",
       label: blocked
-        ? `${bot.label} bloqué par robots.txt — ${bot.product}`
-        : `${bot.label} autorisé — ${bot.product}`,
+        ? `${bot.label} bloqué par robots.txt (${bot.product})`
+        : `${bot.label} autorisé (${bot.product})`,
       found: blocked ? "Disallow: /" : "non bloqué",
       expected: "non bloqué (Allow: / ou pas de règle Disallow)",
     });

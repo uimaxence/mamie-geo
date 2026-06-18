@@ -68,7 +68,7 @@ export function ExpressScanResults({
         <h3 className="type-h3">Et sur les 4 autres IA ?</h3>
         <p className="type-body mt-2">
           C&apos;est là que ça se joue : dans notre étude 50 marques, les scores varient
-          jusqu&apos;à <strong>×8 d&apos;une IA à l&apos;autre</strong> — Société Générale est
+          jusqu&apos;à <strong>×8 d&apos;une IA à l&apos;autre</strong> : Société Générale est
           invisible sur ChatGPT et n°2 sur Claude. Être cité sur une IA ne dit rien des quatre
           autres.
         </p>
@@ -120,12 +120,12 @@ export function ExpressScanResults({
 
 function verdictText(report: ExpressScanReport): string {
   if (report.citedCount === 0) {
-    return "Ta marque n'apparaît dans aucune des 3 réponses. L'IA recommande tes concurrents à ta place — c'est exactement ce que voient tes prospects.";
+    return "Ta marque n'apparaît dans aucune des 3 réponses. L'IA recommande tes concurrents à ta place : c'est exactement ce que voient tes prospects.";
   }
   if (report.citedCount < report.totalPrompts) {
     return "Ta marque apparaît, mais pas systématiquement : selon la question posée, l'IA te cite ou t'oublie.";
   }
-  return "Ta marque est citée sur les 3 questions — reste à savoir si c'est aussi le cas sur les 4 autres IA, et si ça tient dans le temps.";
+  return "Ta marque est citée sur les 3 questions : reste à savoir si c'est aussi le cas sur les 4 autres IA, et si ça tient dans le temps.";
 }
 
 function PromptCard({ result, brand }: { result: ExpressPromptResult; brand: string }) {
@@ -178,7 +178,7 @@ function AccompagnementUpsell() {
       </div>
       <p className="type-body mt-3">
         Moi c&apos;est Max, le fondateur. Je m&apos;occupe personnellement du SEO + GEO de quelques
-        marques par trimestre — de l&apos;audit à l&apos;implémentation, jusqu&apos;à ce que les IA
+        marques par trimestre, de l&apos;audit à l&apos;implémentation, jusqu&apos;à ce que les IA
         te citent. On en parle 30&nbsp;minutes, gratuitement, sans pitch commercial.
       </p>
       <LinkButton

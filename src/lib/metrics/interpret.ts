@@ -25,7 +25,7 @@ export function interpretPartDeVoix(input: {
   if (!topName || topCompetitorCited === 0) {
     return brandCited > 0
       ? { tone: "success", text: "Tu es cité et aucun concurrent suivi ne l'est encore." }
-      : { tone: "neutral", text: "Personne n'est encore cité — ni toi ni tes concurrents suivis." };
+      : { tone: "neutral", text: "Personne n'est encore cité, ni toi ni tes concurrents suivis." };
   }
   if (brandCited > topCompetitorCited) {
     return { tone: "success", text: "Tu es plus cité que tes concurrents suivis." };

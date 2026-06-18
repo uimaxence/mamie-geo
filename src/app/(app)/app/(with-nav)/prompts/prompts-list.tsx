@@ -352,7 +352,7 @@ export function PromptsList({
                       {p.category ? (
                         <Badge tone="neutral">{p.category}</Badge>
                       ) : (
-                        <span className="type-meta">—</span>
+                        <span className="type-meta">-</span>
                       )}
                     </Td>
                     <Td className="hidden md:table-cell">

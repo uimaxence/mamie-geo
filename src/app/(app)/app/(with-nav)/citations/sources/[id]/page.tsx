@@ -144,7 +144,7 @@ export default async function SourceDetailPage({ params, searchParams }: PagePro
           />
         </Card>
         <Card className="p-5">
-          <Stat label="Dernière citation" value={lastCitedAt ? formatRelative(lastCitedAt) : "—"} />
+          <Stat label="Dernière citation" value={lastCitedAt ? formatRelative(lastCitedAt) : "-"} />
         </Card>
       </section>
 
@@ -200,7 +200,7 @@ export default async function SourceDetailPage({ params, searchParams }: PagePro
 function WhyItMatters({ type }: { type: EntityType }) {
   const message =
     type === "you"
-      ? "C'est ton domaine. Les IA te citent déjà comme source sur ton marché — continue à publier pour renforcer cette présence."
+      ? "C'est ton domaine. Les IA te citent déjà comme source sur ton marché ; continue à publier pour renforcer cette présence."
       : type === "competitor"
         ? "C'est un concurrent suivi. Les IA le citent comme référence sur ton marché : regarde quels contenus le font remonter."
         : "Être mentionné sur cette page peut améliorer ta visibilité : c'est une des sources que les IA jugent crédibles sur ton marché.";

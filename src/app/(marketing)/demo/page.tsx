@@ -29,7 +29,7 @@ const LLM_ORDER = ["chatgpt", "claude", "perplexity", "gemini", "lechat"] as con
 export const dynamic = "force-static";
 
 export const metadata: Metadata = {
-  title: "Démo · Mamie GEO — Visibilité IA d'une marque française",
+  title: "Démo · Mamie GEO : visibilité IA d'une marque française",
   description:
     "Aperçu interactif du dashboard Mamie GEO sur une marque française de cosmétiques bio trackée sur ChatGPT, Claude, Perplexity, Gemini et Le Chat.",
   alternates: { canonical: "/demo" },
@@ -128,7 +128,7 @@ export default function DemoPage() {
           <Card className="p-5">
             <Stat
               label="Top concurrent"
-              value={agg.topCompetitor?.name ?? "—"}
+              value={agg.topCompetitor?.name ?? "Aucun"}
               icon={Users}
               iconTone="purple"
               hint={
@@ -191,7 +191,7 @@ export default function DemoPage() {
             batches={dashboard.recentBatches}
             emptyState={{
               title: "Aucun run pour l'instant",
-              description: "Démo — les vrais runs apparaissent ici dès le J1 du tracking.",
+              description: "Démo : les vrais runs apparaissent ici dès le J1 du tracking.",
             }}
           />
         </section>

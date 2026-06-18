@@ -6,7 +6,7 @@ import { MarketingFooter } from "../_sections/marketing-footer";
 import { MarketingHeader } from "../_sections/marketing-header";
 
 export const metadata: Metadata = {
-  title: "Outils gratuits — visibilité IA locale, comparateurs, audit technique",
+  title: "Outils gratuits : visibilité IA locale, comparateurs, audit technique",
   description:
     "Des outils gratuits pour mesurer ta visibilité dans les IA : carte de visibilité IA locale (ville par ville), scan de présence sur les comparateurs, test de visibilité en direct, audit technique SEO + GEO en 10 secondes.",
   alternates: { canonical: "/outils" },
@@ -37,7 +37,7 @@ const TOOLS: Tool[] = [
     bullets: [
       "Site + email, ville et activité détectées automatiquement",
       "Verdict par ville : recommandé, ou concurrent cité à ta place",
-      "Une carte qui s'allume, vert/rouge — le SEO local version IA",
+      "Une carte qui s'allume, vert/rouge : le SEO local version IA",
     ],
     meta: "~30 secondes · IA interrogée ville par ville",
   },
@@ -97,7 +97,7 @@ export default function OutilsPage() {
             .
           </h1>
           <p className="type-body-lg mt-6">
-            Les IA recommandent déjà des marques à tes clients. Ces outils te montrent où tu en es —
+            Les IA recommandent déjà des marques à tes clients. Ces outils te montrent où tu en es,
             avant de décider si tu veux suivre ça tous les jours.
           </p>
         </div>

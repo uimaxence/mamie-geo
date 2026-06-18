@@ -67,7 +67,7 @@ export function RecentMentionsCard({ brandName, prompts }: RecentMentionsCardPro
                   </td>
                   <td className="px-2 py-3 text-right align-middle">
                     {p.rang === null ? (
-                      <span className="type-meta">—</span>
+                      <span className="type-meta">-</span>
                     ) : (
                       <Badge tone={p.rang === 1 ? "success" : p.rang <= 3 ? "accent" : "warning"}>
                         {`#${p.rang}`}
@@ -76,7 +76,7 @@ export function RecentMentionsCard({ brandName, prompts }: RecentMentionsCardPro
                   </td>
                   <td className="hidden px-2 py-3 align-middle sm:table-cell">
                     {p.topCompetitors.length === 0 ? (
-                      <span className="type-meta">—</span>
+                      <span className="type-meta">-</span>
                     ) : (
                       <div className="flex items-center gap-1.5">
                         {p.topCompetitors.map((c) => (
@@ -92,7 +92,7 @@ export function RecentMentionsCard({ brandName, prompts }: RecentMentionsCardPro
                   </td>
                   <td className="hidden px-2 py-3 text-right align-middle md:table-cell">
                     <span className="type-meta">
-                      {p.lastAnalyzedAt ? formatDate(p.lastAnalyzedAt) : "—"}
+                      {p.lastAnalyzedAt ? formatDate(p.lastAnalyzedAt) : "-"}
                     </span>
                   </td>
                 </tr>

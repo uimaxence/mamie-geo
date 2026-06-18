@@ -28,7 +28,7 @@ export function DemoBanner({ brandName, brandDomain }: { brandName: string; bran
           trackEvent="demo_cta_clicked"
           trackProperties={{ cta_label: "Démarrer 9,99 €/mois", section: "banner" }}
         >
-          Démarrer — 9,99&nbsp;€/mois
+          Démarrer à 9,99&nbsp;€/mois
         </TrackedLinkButton>
       </div>
     </div>

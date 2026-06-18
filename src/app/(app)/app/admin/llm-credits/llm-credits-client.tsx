@@ -11,7 +11,7 @@ function money(n: number, currency: string): string {
 }
 
 function formatDate(iso: string | null): string {
-  if (!iso) return "—";
+  if (!iso) return "-";
   return new Date(iso).toLocaleDateString("fr-FR", {
     day: "2-digit",
     month: "short",
@@ -91,8 +91,8 @@ function ProviderCard({ p }: { p: ProviderCredit }) {
       {p.configuredAmount === null ? (
         <p className="mt-3 text-sm text-[color:var(--color-muted)]">
           {isPrepaid
-            ? "Solde inconnu — saisis le montant actuel ci-dessous."
-            : "Plafond non renseigné — saisis ta limite mensuelle ci-dessous."}
+            ? "Solde inconnu : saisis le montant actuel ci-dessous."
+            : "Plafond non renseigné : saisis ta limite mensuelle ci-dessous."}
         </p>
       ) : isPrepaid ? (
         <div className="mt-3">

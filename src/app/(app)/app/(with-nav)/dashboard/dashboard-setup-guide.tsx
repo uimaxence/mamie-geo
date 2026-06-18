@@ -62,7 +62,7 @@ export function DashboardSetupGuide({ promptCount }: { promptCount: number }) {
               <h2 className="type-h3">Configure tes prompts pour démarrer</h2>
               <p className="type-meta mt-1 max-w-xl">
                 Ton dashboard restera vide tant que tu n&apos;as pas de prompts à suivre. Ça prend 2
-                minutes — on peut même te les suggérer à partir de ton site.
+                minutes, on peut même te les suggérer à partir de ton site.
               </p>
             </div>
           </div>

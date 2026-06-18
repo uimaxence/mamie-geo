@@ -65,11 +65,11 @@ export const GEO_TIPS: GeoTip[] = [
       "Une étude Ahrefs sur les sources citées par les IA montre que la grande majorité des réponses s'appuie sur des pages déjà bien classées dans la recherche. Concrètement : si ton SEO Google n'est pas solide, tes chances d'être cité par ChatGPT, Perplexity ou Gemini restent faibles.",
     ],
     bullets: [
-      "search (recherche) — 88 %",
-      "news (actualités) — 12 %",
-      "reddit — 2 %",
-      "youtube — 0,5 %",
-      "académique — 0,4 %",
+      "search (recherche) : 88 %",
+      "news (actualités) : 12 %",
+      "reddit : 2 %",
+      "youtube : 0,5 %",
+      "académique : 0,4 %",
     ],
     takeaway:
       "Le GEO ne remplace pas le SEO, il s'appuie dessus. Un bon référencement Google reste le socle.",
@@ -112,7 +112,7 @@ export const GEO_TIPS: GeoTip[] = [
     summary: "Reddit, Trustpilot, Google My Business… les avis sont des signaux de crédibilité.",
     body: [
       "Reddit, forums, comparateurs, Google My Business, Trustpilot : ces plateformes concentrent des retours d'expérience, des opinions multiples et des signaux de confiance humains.",
-      "Pour une IA, ces avis deviennent des signaux de crédibilité — elle se base sur ce que plusieurs humains valident collectivement.",
+      "Pour une IA, ces avis deviennent des signaux de crédibilité : elle se base sur ce que plusieurs humains valident collectivement.",
     ],
     appHint: { label: "Repère les sources qui te citent", href: "/app/citations?tab=sources" },
   },

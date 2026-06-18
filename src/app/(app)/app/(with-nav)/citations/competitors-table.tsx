@@ -141,7 +141,7 @@ export function CompetitorsTable({
           <EmptyState
             icon={Users}
             title="Aucun concurrent pour l'instant"
-            description="Les concurrents sont détectés dans les réponses IA à tes prompts — aucun run supplémentaire, donc aucun coût en plus. Ajoute-les pour suivre leur citations face à toi."
+            description="Les concurrents sont détectés dans les réponses IA à tes prompts, sans aucun run supplémentaire, donc aucun coût en plus. Ajoute-les pour suivre leur citations face à toi."
             action={
               <Button variant="primary" onClick={() => setCreateOpen(true)}>
                 <Plus size={14} strokeWidth={2.2} />
@@ -470,7 +470,7 @@ function Td({ children, className }: { children?: React.ReactNode; className?: s
 }
 
 function Muted() {
-  return <span className="text-[color:var(--color-faint)]">—</span>;
+  return <span className="text-[color:var(--color-faint)]">-</span>;
 }
 
 function formatRelative(iso: string): string {

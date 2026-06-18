@@ -61,7 +61,7 @@ export const FORMATS = {
 export const VISUALS: VisualMeta[] = [
   {
     slug: "seo-vs-geo-comparatif",
-    title: "SEO vs GEO — Carousel 3 slides",
+    title: "SEO vs GEO : Carousel 3 slides",
     description:
       "Carousel LinkedIn d'amplification de l'article geo-vs-seo : cover hook (40 % des prospects sur IA, fond ink) + table comparée 6 lignes (fond crème) + CTA test gratuit (fond bleu brand).",
     format: FORMATS.linkedinPortrait,
@@ -74,7 +74,7 @@ export const VISUALS: VisualMeta[] = [
   },
   {
     slug: "etre-cite-par-gemini",
-    title: "Être cité par Gemini — Carousel 5 slides",
+    title: "Être cité par Gemini : Carousel 5 slides",
     description:
       "Carousel LinkedIn d'amplification du post Gemini (2026-06-09), DA bleu nuit dédiée (hors persona chaude Mamie) : cover hook + schéma Googlebot ≠ Google-Extended + erreur robots.txt + 3 réflexes d'extraction + CTA guide complet. Accents vert (OK) / orange (attention).",
     format: FORMATS.linkedinPortrait,
@@ -89,7 +89,7 @@ export const VISUALS: VisualMeta[] = [
   },
   {
     slug: "etude-50-marques",
-    title: "Étude 50 marques × 5 IA — Carousel 6 slides",
+    title: "Étude 50 marques × 5 IA : Carousel 6 slides",
     description:
       "Carousel LinkedIn d'amplification du post de lancement de l'étude (2026-06-11), DA Mamie v2 (fond blanc) : cover hook (50 marques × 5 IA, 613 citations) + 3 résultats (géants invisibles, 0 % de sentiment négatif, 2,3 % de sources site de marque) + bonus variance inter-LLM (SocGen 6 vs 53) + CTA article blog (terracotta).",
     format: FORMATS.linkedinPortrait,
@@ -97,18 +97,18 @@ export const VISUALS: VisualMeta[] = [
       { key: "cover", label: "Cover hook (50 × 5)", Component: EtudeCoverSlide },
       {
         key: "invisibles",
-        label: "Résultat 1 — géants invisibles",
+        label: "Résultat 1 : géants invisibles",
         Component: EtudeInvisiblesSlide,
       },
-      { key: "sentiment", label: "Résultat 2 — 0 % négatif", Component: EtudeSentimentSlide },
-      { key: "sources", label: "Résultat 3 — 2,3 % site de marque", Component: EtudeSourcesSlide },
-      { key: "variance", label: "Bonus — variance inter-LLM", Component: EtudeVarianceSlide },
+      { key: "sentiment", label: "Résultat 2 : 0 % négatif", Component: EtudeSentimentSlide },
+      { key: "sources", label: "Résultat 3 : 2,3 % site de marque", Component: EtudeSourcesSlide },
+      { key: "variance", label: "Bonus : variance inter-LLM", Component: EtudeVarianceSlide },
       { key: "cta", label: "CTA étude complète", Component: EtudeCtaSlide },
     ],
   },
   {
     slug: "etude-50-marques-article-cover",
-    title: "Étude 50 marques — Cover article LinkedIn",
+    title: "Étude 50 marques : Cover article LinkedIn",
     description:
       "Image de couverture 1920×1080 (16:9) pour l'article LinkedIn long format de l'étude (texte : geo-project/linkedin-article-etude-50-marques.md). DA Mamie v2 : fond blanc, surligneur miel sur « 5 IA », pills de stats bleu brand.",
     format: FORMATS.linkedinArticleCover,
@@ -116,7 +116,7 @@ export const VISUALS: VisualMeta[] = [
   },
   {
     slug: "critiques-prompt-trackers",
-    title: "Critiques des prompt trackers — Image quote",
+    title: "Critiques des prompt trackers : Image quote",
     description:
       "Image quote mono-slide (post 2026-06-16) d'amplification de l'article « limites des prompt trackers ». DA bleu nuit partagée (hors persona chaude Mamie) : « Les critiques ont raison » (blanc) + « on assume nos marges d'erreur » (vert) + bande basse complémentarité « Analytics référent → voit le clic » + « Prompt tracker → voit la citation » (un « + », pas un « ou »).",
     format: FORMATS.linkedinPortrait,

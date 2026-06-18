@@ -1,13 +1,15 @@
 import Link from "next/link";
 import { ShieldCheck } from "lucide-react";
 import { Logo } from "@/components/marketing/logo";
+import { COMPARISONS } from "../vs/comparisons";
 
 // Footer enrichi PR 8b, 4 colonnes (Mamie GEO / Produit / Ressources
 // / Légal) + barre de copyright en bas avec liens socials.
 //
 // 2026-05-26 (P0.8 plan V0) : retrait lien /docs mort (404) + ajout
-// bloc trust RGPD/EU/DPA au-dessus du copyright. Colonne Comparatifs
-// sera ajoutée quand /vs/profound sera livrée (P0.6).
+// bloc trust RGPD/EU/DPA au-dessus du copyright.
+// 2026-06-18 : colonne Comparatifs alimentée par la liste centralisée
+// `vs/comparisons.ts` (hub /vs + 6 face-à-face concurrents).
 
 const COLUMNS = [
   {
@@ -28,10 +30,11 @@ const COLUMNS = [
     ],
   },
   {
-    // Pages comparatives, P0.6 plan V0 (2026-05-26). /vs/mint et
-    // /vs/peec arriveront en P1.
     title: "Comparatifs",
-    links: [{ label: "vs Profound", href: "/vs/profound" }],
+    links: [
+      { label: "Tous les comparatifs", href: "/vs" },
+      ...COMPARISONS.map((c) => ({ label: c.navLabel, href: `/vs/${c.slug}` })),
+    ],
   },
   {
     title: "Ressources",

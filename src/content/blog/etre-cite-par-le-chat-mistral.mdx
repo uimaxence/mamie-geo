@@ -18,7 +18,7 @@ keywords:
 
 ## Le LLM le plus francophone du marché, et pourquoi ça compte
 
-Quand un dirigeant français demande à un LLM "quel outil pour gérer la paie d'une PME ?", il est de plus en plus probable qu'il pose la question à Le Chat. Pas par patriotisme — par défaut : l'application est mise en avant dans plusieurs canaux français, et elle répond mieux dès qu'on tape en français nuancé.
+Quand un dirigeant français demande à un LLM "quel outil pour gérer la paie d'une PME ?", il est de plus en plus probable qu'il pose la question à Le Chat. Pas par patriotisme, par défaut : l'application est mise en avant dans plusieurs canaux français, et elle répond mieux dès qu'on tape en français nuancé.
 
 Pour une marque française, c'est une porte d'entrée. Le Chat n'est pas la plus grosse audience mondiale, mais c'est celle où la concurrence pour la citation est encore basse, et où les signaux locaux pèsent vraiment.
 
@@ -34,7 +34,7 @@ Travailler la visibilité dans Le Chat n'est pas un sous-cas du "GEO ChatGPT en 
 
 D'abord, Mistral construit ses modèles en France, avec un effort documenté sur la qualité du français écrit. Cela se traduit par une meilleure compréhension des nuances (registres, vocabulaire administratif) et par un biais relatif vers les sources francophones dans les réponses en français.
 
-Ensuite, le module de recherche web de Le Chat s'appuie sur Brave Search — pas Bing comme ChatGPT, pas Google comme Gemini. L'index de Brave est différent : plus européen, moins centré sur les gros agrégateurs anglo-saxons, plus tolérant aux domaines de petite autorité. Cibler Le Chat, c'est donc cibler un autre index, avec ses propres règles.
+Ensuite, le module de recherche web de Le Chat s'appuie sur Brave Search, pas Bing comme ChatGPT, pas Google comme Gemini. L'index de Brave est différent : plus européen, moins centré sur les gros agrégateurs anglo-saxons, plus tolérant aux domaines de petite autorité. Cibler Le Chat, c'est donc cibler un autre index, avec ses propres règles.
 
 ## Comment Le Chat construit une réponse
 
@@ -54,7 +54,7 @@ Le Chat est entraîné sur un corpus à forte densité francophone. Les modèles
 
 ### 2. Apparaître sur Wikipédia francophone
 
-Wikipédia est massivement représentée dans le corpus de tous les LLM, Mistral inclus. Le réflexe de viser la page anglaise est une erreur ici : la version francophone, moins fournie, est citée disproportionnellement dans les réponses françaises du Chat. Une page sur la Wikipédia FR — en respectant strictement les critères d'admissibilité — est l'un des signaux les plus durables qu'on puisse construire. Délai d'effet : 6 à 18 mois.
+Wikipédia est massivement représentée dans le corpus de tous les LLM, Mistral inclus. Le réflexe de viser la page anglaise est une erreur ici : la version francophone, moins fournie, est citée disproportionnellement dans les réponses françaises du Chat. Une page sur la Wikipédia FR (en respectant strictement les critères d'admissibilité) est l'un des signaux les plus durables qu'on puisse construire. Délai d'effet : 6 à 18 mois.
 
 ### 3. Être indexé dans Brave Search
 
@@ -62,7 +62,7 @@ Brave Search n'est pas Google. Son crawler (`Brave-Searchbot`) doit pouvoir acc�
 
 ### 4. Publier sur la presse française à fort signal
 
-Le Chat cite régulièrement des médias français établis : Les Échos, Le Monde, Usine Digitale, BDM, Maddyness pour la tech ; les revues professionnelles pour le B2B sectoriel. Une mention dans un de ces médias vaut plus, pour Le Chat, que dix mentions sur des sites à faible autorité. C'est l'investissement RP francophone qui rentabilise — on observe en pratique de nouvelles citations à 4-12 semaines d'écart d'une bonne mention presse FR.
+Le Chat cite régulièrement des médias français établis : Les Échos, Le Monde, Usine Digitale, BDM, Maddyness pour la tech ; les revues professionnelles pour le B2B sectoriel. Une mention dans un de ces médias vaut plus, pour Le Chat, que dix mentions sur des sites à faible autorité. C'est l'investissement RP francophone qui rentabilise : on observe en pratique de nouvelles citations à 4-12 semaines d'écart d'une bonne mention presse FR.
 
 ### 5. Viser les sources institutionnelles et l'open data
 
@@ -70,11 +70,11 @@ Le Chat est aligné avec l'écosystème institutionnel français : `.gouv.fr`, I
 
 ### 6. Soigner le balisage Schema.org
 
-Le retrieval de Le Chat lit le HTML structuré comme tous les LLM. Le balisage `Article`, `FAQPage` et `BreadcrumbList` accélère le parsing et améliore la précision avec laquelle le modèle isole un fragment citable. La FAQ est particulièrement précieuse : on l'a déjà détaillé dans [notre guide ChatGPT](/blog/etre-cite-par-chatgpt), et le constat est identique pour Le Chat — une FAQ propre génère plus de citations qu'un paragraphe central deux fois plus long.
+Le retrieval de Le Chat lit le HTML structuré comme tous les LLM. Le balisage `Article`, `FAQPage` et `BreadcrumbList` accélère le parsing et améliore la précision avec laquelle le modèle isole un fragment citable. La FAQ est particulièrement précieuse : on l'a déjà détaillé dans [notre guide ChatGPT](/blog/etre-cite-par-chatgpt), et le constat est identique pour Le Chat : une FAQ propre génère plus de citations qu'un paragraphe central deux fois plus long.
 
 ### 7. Publier un `llms.txt` francophone
 
-Le `llms.txt` est un fichier conventionnel à la racine du domaine (proposé par Jeremy Howard, llmstxt.org, septembre 2024). Aucun LLM ne s'engage publiquement à le lire, Le Chat compris. Mais il signale aux outils d'audit GEO que ton site est "AI-aware" et commence à être référencé par des projets de retrieval ouverts. Pour un site francophone, liste les ressources principales en français — détails du format dans [notre définition du GEO](/blog/qu-est-ce-que-le-geo).
+Le `llms.txt` est un fichier conventionnel à la racine du domaine (proposé par Jeremy Howard, llmstxt.org, septembre 2024). Aucun LLM ne s'engage publiquement à le lire, Le Chat compris. Mais il signale aux outils d'audit GEO que ton site est "AI-aware" et commence à être référencé par des projets de retrieval ouverts. Pour un site francophone, liste les ressources principales en français (détails du format dans [notre définition du GEO](/blog/qu-est-ce-que-le-geo)).
 
 ### 8. Documenter des prises de position publiques
 
@@ -171,11 +171,11 @@ La première : **prioriser G2, Capterra ou Product Hunt** comme on le ferait pou
 
 La deuxième : **publier la version anglaise d'abord, traduire ensuite**. Le Chat lit le contenu traduit, mais reconnaît la structure d'une traduction et l'utilise moins comme source primaire. Quand on cible le francophone, on rédige en français d'abord.
 
-La troisième : **mesurer seulement avec ChatGPT et extrapoler**. Une marque peut être très citée dans ChatGPT et invisible dans Le Chat. Deux corpus, deux retrievals, deux audiences — le suivi doit être séparé.
+La troisième : **mesurer seulement avec ChatGPT et extrapoler**. Une marque peut être très citée dans ChatGPT et invisible dans Le Chat. Deux corpus, deux retrievals, deux audiences : le suivi doit être séparé.
 
 ## Le Chat vs les autres LLM : ce qui est spécifique
 
-Quelques différences à garder en tête pour calibrer ses efforts : Le Chat s'appuie sur **Brave Search** côté retrieval, ce qui favorise les domaines bien indexés sur Brave et les sources européennes ouvertes. La **densité francophone** de son corpus est plus élevée que chez OpenAI, Anthropic ou Google : une mention dans Les Échos compte plus pour Le Chat que pour Claude. Enfin, son **audience grand public** française est en croissance mais reste plus petite que celle de ChatGPT — on est sur des prompts plus FR-centriques et plus B2B SMB.
+Quelques différences à garder en tête pour calibrer ses efforts : Le Chat s'appuie sur **Brave Search** côté retrieval, ce qui favorise les domaines bien indexés sur Brave et les sources européennes ouvertes. La **densité francophone** de son corpus est plus élevée que chez OpenAI, Anthropic ou Google : une mention dans Les Échos compte plus pour Le Chat que pour Claude. Enfin, son **audience grand public** française est en croissance mais reste plus petite que celle de ChatGPT : on est sur des prompts plus FR-centriques et plus B2B SMB.
 
 Pour replacer Le Chat dans le paysage GEO global, on a écrit le panorama complet dans [GEO vs SEO : ce qui change vraiment en 2026](/blog/geo-vs-seo) et l'article de fond [Qu'est-ce que le GEO](/blog/qu-est-ce-que-le-geo).
 
@@ -195,7 +195,7 @@ Si tu cibles Le Chat, oui. Brave est moins exigeant que Bing sur la qualité tec
 
 ### Comment savoir si ma marque est citée par Le Chat aujourd'hui ?
 
-Le plus simple : ouvrir Le Chat, poser 10 à 20 prompts représentatifs de tes requêtes commerciales en français, regarder. Pour un suivi régulier et statistiquement valide — variabilité du modèle, modes de réponse différents — il faut un outil de tracking GEO qui automatise l'envoi et agrège les réponses sur plusieurs runs.
+Le plus simple : ouvrir Le Chat, poser 10 à 20 prompts représentatifs de tes requêtes commerciales en français, regarder. Pour un suivi régulier et statistiquement valide (variabilité du modèle, modes de réponse différents), il faut un outil de tracking GEO qui automatise l'envoi et agrège les réponses sur plusieurs runs.
 
 ### Le `llms.txt` est-il lu par Le Chat ?
 
@@ -203,15 +203,15 @@ Mistral n'a pas confirmé publiquement lire le `llms.txt` en 2026. C'est un stan
 
 ### Mistral fait-il payer pour être cité par Le Chat ?
 
-Non. Mistral ne vend pas de placement publicitaire dans les réponses de Le Chat en 2026. Les marques citées le sont sur la base des signaux publics : corpus et retrieval Brave. Toute promesse commerciale du contraire est à considérer avec prudence — il n'existe pas de "Le Chat Ads" à date.
+Non. Mistral ne vend pas de placement publicitaire dans les réponses de Le Chat en 2026. Les marques citées le sont sur la base des signaux publics : corpus et retrieval Brave. Toute promesse commerciale du contraire est à considérer avec prudence : il n'existe pas de "Le Chat Ads" à date.
 
 ### Combien de temps pour voir un effet sur les citations Le Chat ?
 
-Les leviers retrieval — Brave, Schema, FAQ propre, mention presse récente — peuvent bouger la part de citation en 2 à 8 semaines. Les leviers corpus — Wikipédia, presse de fond, prises de position répétées — demandent 6 à 18 mois pour entrer dans un ré-entraînement de modèle. Une stratégie sérieuse joue les deux temporalités en parallèle.
+Les leviers retrieval (Brave, Schema, FAQ propre, mention presse récente) peuvent bouger la part de citation en 2 à 8 semaines. Les leviers corpus (Wikipédia, presse de fond, prises de position répétées) demandent 6 à 18 mois pour entrer dans un ré-entraînement de modèle. Une stratégie sérieuse joue les deux temporalités en parallèle.
 
 ## En résumé
 
-Le Chat est la cible GEO la plus accessible aujourd'hui pour une marque francophone : la concurrence pour la citation y est encore basse, et les signaux locaux — presse FR, Wikipédia FR, institutionnels — y pèsent réellement. Les neuf tactiques ci-dessus se cumulent ; aucune n'est suffisante isolément, et toutes demandent un suivi mesuré pour valider qu'elles bougent l'aiguille.
+Le Chat est la cible GEO la plus accessible aujourd'hui pour une marque francophone : la concurrence pour la citation y est encore basse, et les signaux locaux (presse FR, Wikipédia FR, institutionnels) y pèsent réellement. Les neuf tactiques ci-dessus se cumulent ; aucune n'est suffisante isolément, et toutes demandent un suivi mesuré pour valider qu'elles bougent l'aiguille.
 
 Si tu veux savoir où ta marque en est aujourd'hui sur Le Chat, ChatGPT et les trois autres LLM grand public, on a mis en place un audit gratuit qui te donne ton score de visibilité IA en moins de 60 secondes.
 

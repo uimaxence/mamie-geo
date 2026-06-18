@@ -101,10 +101,10 @@ describe("renderWeeklyRecap", () => {
     expect(text).not.toContain("Top concurrents cités");
   });
 
-  it("affiche `—` quand un delta est null", () => {
+  it("affiche `n/a` quand un delta est null", () => {
     const { html } = renderWeeklyRecap(baseData);
-    // Stat #2 et #4 ont deltaPct: null → ligne "—"
-    expect(html.match(/—/g)?.length ?? 0).toBeGreaterThanOrEqual(2);
+    // Stat #2 et #4 ont deltaPct: null : ligne "n/a"
+    expect(html.match(/n\/a/g)?.length ?? 0).toBeGreaterThanOrEqual(2);
   });
 
   it("snapshot HTML stable pour data canonique", () => {

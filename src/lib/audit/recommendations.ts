@@ -27,7 +27,7 @@ export interface Recommendation {
 const RECOS: Record<string, Recommendation> = {
   // ── SEO classique ─────────────────────────────────────────────────
   "seo.title-missing": {
-    why: "Sans `<title>`, Google et les LLM ne savent pas de quoi parle la page. C'est le signal sémantique #1 — l'omettre revient à publier anonymement.",
+    why: "Sans `<title>`, Google et les LLM ne savent pas de quoi parle la page. C'est le signal sémantique #1 : l'omettre revient à publier anonymement.",
     howToFix:
       "Ajoute dans ton `<head>` :\n\n```html\n<title>Titre clair et descriptif de la page (30-60 caractères)</title>\n```\n\nLe titre doit décrire le contenu de cette page spécifiquement, pas juste répéter le nom de la marque.",
     geoImpact: "high",
@@ -101,7 +101,7 @@ const RECOS: Record<string, Recommendation> = {
 
   // ── GEO-specific (différenciateur Mamie GEO) ──────────────────────
   "geo.article-jsonld-missing": {
-    why: "Sans schéma Article JSON-LD, les LLM ne peuvent pas extraire proprement la date, l'auteur et le sujet — trois signaux qu'ils utilisent pour décider d'une citation. Avec le schéma, tu multiplies tes chances d'être cité par 2-3×.",
+    why: "Sans schéma Article JSON-LD, les LLM ne peuvent pas extraire proprement la date, l'auteur et le sujet, trois signaux qu'ils utilisent pour décider d'une citation. Avec le schéma, tu multiplies tes chances d'être cité par 2-3×.",
     howToFix:
       'Ajoute dans ton `<head>` (ou en fin de `<body>`) :\n\n```html\n<script type="application/ld+json">\n{\n  "@context": "https://schema.org",\n  "@type": "Article",\n  "headline": "Titre de l\'article",\n  "datePublished": "2026-05-16",\n  "author": { "@type": "Person", "name": "Prénom Nom" },\n  "publisher": { "@type": "Organization", "name": "Ton site" }\n}\n</script>\n```',
     geoImpact: "high",
@@ -139,15 +139,15 @@ const RECOS: Record<string, Recommendation> = {
     estimatedEffort: "15min",
   },
   "geo.llms-txt-missing": {
-    why: "`/llms.txt` est le nouveau standard pour donner aux LLM une carte structurée de ton site (titre, description, sections principales, contenu prioritaire). Très peu de sites l'ont — l'opportunité d'avance compétitive est immédiate.",
+    why: "`/llms.txt` est le nouveau standard pour donner aux LLM une carte structurée de ton site (titre, description, sections principales, contenu prioritaire). Très peu de sites l'ont : l'opportunité d'avance compétitive est immédiate.",
     howToFix:
-      "Crée un fichier `llms.txt` à la racine de ton site avec ce contenu minimal :\n\n```\n# Nom de ton site\n\n> Une phrase qui décrit ce que tu fais.\n\n## Pages clés\n- [Accueil](https://ton-site.fr/) — quoi tu fais en 1 phrase\n- [Tarifs](https://ton-site.fr/pricing) — combien ça coûte\n- [À propos](https://ton-site.fr/a-propos) — qui tu es\n\n## Articles importants\n- [Titre de l'article 1](https://ton-site.fr/blog/article-1)\n```\n\nDoc : https://llmstxt.org/",
+      "Crée un fichier `llms.txt` à la racine de ton site avec ce contenu minimal :\n\n```\n# Nom de ton site\n\n> Une phrase qui décrit ce que tu fais.\n\n## Pages clés\n- [Accueil](https://ton-site.fr/) : quoi tu fais en 1 phrase\n- [Tarifs](https://ton-site.fr/pricing) : combien ça coûte\n- [À propos](https://ton-site.fr/a-propos) : qui tu es\n\n## Articles importants\n- [Titre de l'article 1](https://ton-site.fr/blog/article-1)\n```\n\nDoc : https://llmstxt.org/",
     geoImpact: "medium",
     estimatedEffort: "1h",
     externalDoc: "https://llmstxt.org/",
   },
   "geo.eeat-signals-missing": {
-    why: 'Les LLM (et Google E-E-A-T) regardent si ton site a des pages "about", "contact", "author" — c\'est le signal le plus simple que tu es une vraie entité.',
+    why: 'Les LLM (et Google E-E-A-T) regardent si ton site a des pages "about", "contact", "author" : c\'est le signal le plus simple que tu es une vraie entité.',
     howToFix:
       "Crée ces 3 pages minimum, liées depuis ton header ou footer :\n\n- `/a-propos` : qui tu es, depuis quand, ta mission\n- `/contact` : email + formulaire\n- `/auteur/<slug>` : profil par auteur si plusieurs personnes écrivent\n\nLie-les explicitement depuis ton header ou footer (pas juste depuis le contenu).",
     geoImpact: "high",
@@ -211,7 +211,7 @@ const RECOS: Record<string, Recommendation> = {
     externalDoc: "https://developer.mozilla.org/docs/Web/HTTP/Headers/Strict-Transport-Security",
   },
   "security.x-content-type-options-missing": {
-    why: 'Sans X-Content-Type-Options, les navigateurs peuvent "deviner" le type de fichier — vecteur d\'attaque MIME-sniffing.',
+    why: 'Sans X-Content-Type-Options, les navigateurs peuvent "deviner" le type de fichier : vecteur d\'attaque MIME-sniffing.',
     howToFix: "Ajoute le header HTTP :\n\n```\nX-Content-Type-Options: nosniff\n```",
     geoImpact: "low",
     estimatedEffort: "15min",

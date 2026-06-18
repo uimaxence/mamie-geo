@@ -18,15 +18,15 @@ keywords:
 
 ## Le LLM qui répondait de mémoire, et qui vient d'ouvrir le web
 
-Pendant longtemps, Claude a fonctionné comme un bibliothécaire qui répond de mémoire : il puisait presque tout dans son corpus d'entraînement, sans aller chercher la page web du jour. C'était sa signature — des réponses posées, structurées, mais figées à une date de coupure de connaissances.
+Pendant longtemps, Claude a fonctionné comme un bibliothécaire qui répond de mémoire : il puisait presque tout dans son corpus d'entraînement, sans aller chercher la page web du jour. C'était sa signature : des réponses posées, structurées, mais figées à une date de coupure de connaissances.
 
 Depuis mai 2025, ce bibliothécaire a le droit d'aller consulter les rayons. Anthropic a déployé la recherche web pour Claude, d'abord en préversion payante aux États-Unis, puis mondialement sur tous les plans, avec des citations directes affichées dans la réponse ([annonce Anthropic, 27 mai 2025](https://www.anthropic.com/news/web-search)). Pour une marque, cela double le terrain de jeu : il faut désormais exister à la fois dans le corpus que Claude a mémorisé, et dans le web qu'il interroge en temps réel.
 
 ## La règle en une phrase
 
-> Pour être cité par Claude, une marque doit être présente dans les corpus d'entraînement de référence (web public, Wikipédia, sources d'autorité), laisser passer les trois bots d'Anthropic — `ClaudeBot`, `Claude-User`, `Claude-SearchBot` — et produire des pages claires, factuelles et structurées que Claude peut extraire et recouper.
+> Pour être cité par Claude, une marque doit être présente dans les corpus d'entraînement de référence (web public, Wikipédia, sources d'autorité), laisser passer les trois bots d'Anthropic (`ClaudeBot`, `Claude-User`, `Claude-SearchBot`) et produire des pages claires, factuelles et structurées que Claude peut extraire et recouper.
 
-Trois axes structurent tout l'article : **présence dans le corpus**, **accès des bots Anthropic**, et **contenu factuel et recoupable**. Claude pondère l'autorité et la cohérence plus haut que la fraîcheur brute — c'est la nuance qui le distingue de Perplexity.
+Trois axes structurent tout l'article : **présence dans le corpus**, **accès des bots Anthropic**, et **contenu factuel et recoupable**. Claude pondère l'autorité et la cohérence plus haut que la fraîcheur brute : c'est la nuance qui le distingue de Perplexity.
 
 ## Pourquoi Claude mérite son propre playbook
 
@@ -36,9 +36,9 @@ D'abord, Claude est historiquement **plus dépendant de son corpus d'entraîneme
 
 Ensuite, Anthropic a découpé son crawl en **trois bots distincts** aux rôles séparés, avec un contrôle indépendant dans le `robots.txt`. C'est plus granulaire que la plupart des autres acteurs, et cela change la façon dont on arbitre ce qu'on laisse passer.
 
-Enfin, Claude est sur-représenté dans les **usages professionnels et exigeants** : rédaction, analyse de documents, code, droit, conseil. Ses utilisateurs posent des questions longues et nuancées, souvent pour préparer une décision. Les prompts y sont moins « grand public » que sur ChatGPT, et plus proches d'un brief de travail — exactement le type de contexte où une citation pèse lourd.
+Enfin, Claude est sur-représenté dans les **usages professionnels et exigeants** : rédaction, analyse de documents, code, droit, conseil. Ses utilisateurs posent des questions longues et nuancées, souvent pour préparer une décision. Les prompts y sont moins « grand public » que sur ChatGPT, et plus proches d'un brief de travail, exactement le type de contexte où une citation pèse lourd.
 
-Pour le contexte francophone, Anthropic a par ailleurs ouvert un bureau à Paris et livré une version localisée de Claude en français en 2026 — on a détaillé ce que ça change pour la visibilité IA dans [cet article dédié](/blog/anthropic-paris-claude-francais-geo).
+Pour le contexte francophone, Anthropic a par ailleurs ouvert un bureau à Paris et livré une version localisée de Claude en français en 2026 : on a détaillé ce que ça change pour la visibilité IA dans [cet article dédié](/blog/anthropic-paris-claude-francais-geo).
 
 ## Comment Claude construit une réponse
 
@@ -46,7 +46,7 @@ Comme tous les LLM grand public, Claude mobilise plusieurs sources, mais avec un
 
 1. **Le corpus d'entraînement** est le socle. C'est le levier dominant, plus que chez Perplexity. Si ta marque y figure de façon cohérente, Claude peut te citer sans même aller sur le web.
 2. **La recherche web** (depuis mai 2025) s'active sur les requêtes d'actualité, de marché, ou quand l'utilisateur le demande. Elle ajoute des citations directes et cliquables à la réponse.
-3. **Le contexte fourni par l'utilisateur** (documents collés, fichiers joints, Projects) pèse fortement dans la réponse — mais reste hors levier marketing.
+3. **Le contexte fourni par l'utilisateur** (documents collés, fichiers joints, Projects) pèse fortement dans la réponse, mais reste hors levier marketing.
 4. **Le re-ranking** d'Anthropic privilégie les sources fiables, cohérentes et bien structurées. Claude est réputé prudent : il préfère ne pas citer plutôt que citer une source douteuse.
 
 La conséquence est nette : sur Claude, **le travail GEO se joue sur deux temporalités**. Le corpus d'entraînement est un investissement de fond qui se construit sur des mois ; la recherche web est un levier plus rapide, accessible via les bons signaux techniques. Une stratégie sérieuse joue les deux.
@@ -65,7 +65,7 @@ Anthropic opère trois bots aux rôles séparés, et chacun se contrôle indépe
 - `Claude-User` : récupère une page quand un utilisateur pose une question qui nécessite d'y accéder en temps réel.
 - `Claude-SearchBot` : indexe le contenu pour améliorer la qualité des résultats de recherche de Claude.
 
-Les trois honorent le `robots.txt`, y compris `Claude-User`. Point important : bloquer l'un ne bloque pas les autres. Tu peux refuser `ClaudeBot` (l'entraînement) tout en laissant passer `Claude-SearchBot` et `Claude-User` (la citation en temps réel) — un arbitrage utile pour qui veut être cité sans nourrir l'entraînement. À noter : `Claude-Web` et `anthropic-ai` sont des anciens user-agents désormais dépréciés, inutiles à cibler aujourd'hui.
+Les trois honorent le `robots.txt`, y compris `Claude-User`. Point important : bloquer l'un ne bloque pas les autres. Tu peux refuser `ClaudeBot` (l'entraînement) tout en laissant passer `Claude-SearchBot` et `Claude-User` (la citation en temps réel) : un arbitrage utile pour qui veut être cité sans nourrir l'entraînement. À noter : `Claude-Web` et `anthropic-ai` sont des anciens user-agents désormais dépréciés, inutiles à cibler aujourd'hui.
 
 ### 3. Soigner l'autorité et l'E-E-A-T
 
@@ -73,7 +73,7 @@ Claude est prudent par construction : il favorise les sources qui démontrent ex
 
 ### 4. Publier en HTML structuré et extractible
 
-Claude lit le HTML comme les autres LLM, et son extraction favorise les pages dont la structure isole des fragments citables : H2/H3 sémantiquement clairs, paragraphes courts, listes et tableaux natifs (pas en image), Schema.org `Article` et `FAQPage` propres. Ces signaux valent pour tous les moteurs IA — on les a détaillés côté [ChatGPT](/blog/etre-cite-par-chatgpt) et [Perplexity](/blog/etre-cite-par-perplexity), le constat est identique pour Claude.
+Claude lit le HTML comme les autres LLM, et son extraction favorise les pages dont la structure isole des fragments citables : H2/H3 sémantiquement clairs, paragraphes courts, listes et tableaux natifs (pas en image), Schema.org `Article` et `FAQPage` propres. Ces signaux valent pour tous les moteurs IA : on les a détaillés côté [ChatGPT](/blog/etre-cite-par-chatgpt) et [Perplexity](/blog/etre-cite-par-perplexity), le constat est identique pour Claude.
 
 ### 5. Donner la définition en une phrase, nommée
 
@@ -89,7 +89,7 @@ Depuis l'arrivée de la recherche web, Claude va chercher du contenu récent sur
 
 ### 8. Mesurer la part de citation spécifiquement sur Claude
 
-Aucune des sept règles précédentes ne se prouve sans mesure. La métrique de référence en GEO est la **part de citation** : sur un panier de prompts représentatifs, combien de fois ta marque apparaît dans les réponses de Claude, à quel rang, dans quel sentiment, et avec ou sans lien. Claude ajoute une subtilité : il peut te citer « de mémoire » (corpus) sans lien, ou via recherche web avec lien. Les deux comptent, mais ne se travaillent pas avec les mêmes leviers — d'où l'intérêt de distinguer les deux cas dans le suivi. C'est précisément ce que Mamie GEO automatise pour Claude.
+Aucune des sept règles précédentes ne se prouve sans mesure. La métrique de référence en GEO est la **part de citation** : sur un panier de prompts représentatifs, combien de fois ta marque apparaît dans les réponses de Claude, à quel rang, dans quel sentiment, et avec ou sans lien. Claude ajoute une subtilité : il peut te citer « de mémoire » (corpus) sans lien, ou via recherche web avec lien. Les deux comptent, mais ne se travaillent pas avec les mêmes leviers : d'où l'intérêt de distinguer les deux cas dans le suivi. C'est précisément ce que Mamie GEO automatise pour Claude.
 
 ## Tableau récapitulatif des 8 tactiques
 
@@ -173,7 +173,7 @@ La troisième : **négliger la cohérence factuelle entre ses pages**. Claude re
 
 ## Claude vs les autres LLM : ce qui est spécifique
 
-Quelques différences à garder en tête pour calibrer ses efforts. Claude pondère **plus fortement son corpus d'entraînement** que Perplexity, dont le moteur est centré sur le retrieval web — d'où l'importance des leviers de fond (Wikipédia, autorité). Son **découpage en trois bots** offre un contrôle plus fin que la plupart des concurrents, ce qui permet d'autoriser la citation tout en refusant l'entraînement. Sa **recherche web est récente** (mai 2025) et affiche des citations directes, ce qui la rend mesurable, mais elle ne s'active pas aussi systématiquement que chez Perplexity. Enfin, son **audience professionnelle et exigeante** rend chaque citation précieuse en contexte B2B.
+Quelques différences à garder en tête pour calibrer ses efforts. Claude pondère **plus fortement son corpus d'entraînement** que Perplexity, dont le moteur est centré sur le retrieval web, d'où l'importance des leviers de fond (Wikipédia, autorité). Son **découpage en trois bots** offre un contrôle plus fin que la plupart des concurrents, ce qui permet d'autoriser la citation tout en refusant l'entraînement. Sa **recherche web est récente** (mai 2025) et affiche des citations directes, ce qui la rend mesurable, mais elle ne s'active pas aussi systématiquement que chez Perplexity. Enfin, son **audience professionnelle et exigeante** rend chaque citation précieuse en contexte B2B.
 
 Pour replacer Claude dans le paysage GEO global, on a écrit le panorama complet dans [GEO vs SEO : ce qui change vraiment en 2026](/blog/geo-vs-seo) et l'article de fond [Qu'est-ce que le GEO](/blog/qu-est-ce-que-le-geo).
 
@@ -185,7 +185,7 @@ Le test direct est gratuit. Ouvre Claude, pose 10 à 20 prompts représentatifs 
 
 ### Faut-il bloquer ClaudeBot dans le robots.txt ?
 
-C'est un arbitrage, pas une réponse unique — et la bonne nouvelle est qu'Anthropic permet de le faire bot par bot. Bloquer `ClaudeBot` empêche l'usage de ton contenu pour l'entraînement des futurs modèles, sans empêcher la citation en temps réel si tu laisses passer `Claude-SearchBot` et `Claude-User`. Si ta priorité est la visibilité IA, laisse au moins ces deux derniers ouverts.
+C'est un arbitrage, pas une réponse unique, et la bonne nouvelle est qu'Anthropic permet de le faire bot par bot. Bloquer `ClaudeBot` empêche l'usage de ton contenu pour l'entraînement des futurs modèles, sans empêcher la citation en temps réel si tu laisses passer `Claude-SearchBot` et `Claude-User`. Si ta priorité est la visibilité IA, laisse au moins ces deux derniers ouverts.
 
 ### Quelle est la différence entre ClaudeBot, Claude-User et Claude-SearchBot ?
 
@@ -201,7 +201,7 @@ Oui, mais surtout via la recherche web à court terme. Le corpus d'entraînement
 
 ### Combien de temps pour voir un effet sur les citations Claude ?
 
-Les leviers liés à la recherche web — `robots.txt`, Schema, structure, fraîcheur — peuvent bouger la part de citation en 2 à 8 semaines. Les leviers de fond — présence dans le corpus d'entraînement, Wikipédia, autorité sectorielle — demandent 6 à 18 mois. Comme Claude pondère fortement le corpus, la patience paie davantage ici que sur un moteur 100 % retrieval.
+Les leviers liés à la recherche web (`robots.txt`, Schema, structure, fraîcheur) peuvent bouger la part de citation en 2 à 8 semaines. Les leviers de fond (présence dans le corpus d'entraînement, Wikipédia, autorité sectorielle) demandent 6 à 18 mois. Comme Claude pondère fortement le corpus, la patience paie davantage ici que sur un moteur 100 % retrieval.
 
 ### Existe-t-il un moyen de payer pour être cité par Claude ?
 
@@ -277,7 +277,7 @@ SCHEMA.ORG (à injecter dans layout.tsx via <script type="application/ld+json">)
 ]
 }
 
-MAILLAGE INTERNE (vérifié contre \_historique.csv — articles publiés) :
+MAILLAGE INTERNE (vérifié contre \_historique.csv, articles publiés) :
 
 - depuis "Pourquoi Claude mérite son propre playbook" → /blog/anthropic-paris-claude-francais-geo (publié, actu)
 - depuis tactique 4 "HTML structuré" → /blog/etre-cite-par-chatgpt (publié)
@@ -298,7 +298,7 @@ PROMPTS DE VISIBILITÉ À TRACKER (8 semaines) :
 
 SOURCES VÉRIFIÉES (recherche web 2026-06-02) :
 
-- Trois bots Anthropic — ClaudeBot (entraînement), Claude-User (fetch temps réel), Claude-SearchBot (indexation recherche) ; tous honorent robots.txt, contrôle indépendant. Anciens user-agents dépréciés : Claude-Web, anthropic-ai. Source : support.claude.com/en/articles/8896518 + Search Engine Land + Search Engine Journal.
+- Trois bots Anthropic : ClaudeBot (entraînement), Claude-User (fetch temps réel), Claude-SearchBot (indexation recherche) ; tous honorent robots.txt, contrôle indépendant. Anciens user-agents dépréciés : Claude-Web, anthropic-ai. Source : support.claude.com/en/articles/8896518 + Search Engine Land + Search Engine Journal.
 - Recherche web Claude : déployée globalement sur tous les plans le 27 mai 2025, citations directes affichées. Source : anthropic.com/news/web-search + support.claude.com/en/articles/10684626.
 - Recherche web facturée côté API (~$10 / 1000 recherches + tokens). Source : platform.claude.com web search tool docs.
 

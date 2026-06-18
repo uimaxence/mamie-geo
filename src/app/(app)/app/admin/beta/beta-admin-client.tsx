@@ -15,7 +15,7 @@ export interface BetaWorkspaceRow {
 }
 
 function formatDate(iso: string | null): string {
-  if (!iso) return "—";
+  if (!iso) return "-";
   return new Date(iso).toLocaleDateString("fr-FR", {
     day: "2-digit",
     month: "short",
@@ -156,7 +156,7 @@ export function BetaAdminClient({
                     <td className="px-5 py-3 font-medium text-[color:var(--color-ink)]">
                       {r.workspaceName}
                     </td>
-                    <td className="px-5 py-3 text-[color:var(--color-muted)]">{r.email ?? "—"}</td>
+                    <td className="px-5 py-3 text-[color:var(--color-muted)]">{r.email ?? "-"}</td>
                     <td className="px-5 py-3">
                       {formatDate(r.expiresAt)}
                       {left !== null && (

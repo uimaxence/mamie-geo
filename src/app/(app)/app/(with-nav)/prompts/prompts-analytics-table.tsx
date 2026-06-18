@@ -86,7 +86,7 @@ export function PromptsAnalyticsTable({ rows, windowDays }: PromptsAnalyticsTabl
                 {p.category ? (
                   <Badge tone="neutral">{categoryLabel(p.category)}</Badge>
                 ) : (
-                  <span className="type-meta">—</span>
+                  <span className="type-meta">-</span>
                 )}
               </Td>
 
@@ -116,7 +116,7 @@ export function PromptsAnalyticsTable({ rows, windowDays }: PromptsAnalyticsTabl
         Métriques calculées sur les {windowDays} derniers jours. Rang = position de ta marque par
         fréquence de citation parmi les marques citées sur le prompt. Les prompts marqués «&nbsp;marque&nbsp;»
         te nomment explicitement : l&apos;IA répond forcément sur toi, le rang y est donc attendu et
-        n&apos;indique pas ta visibilité organique — privilégie les prompts génériques pour ça.
+        n&apos;indique pas ta visibilité organique : privilégie les prompts génériques pour ça.
       </p>
     </div>
   );
@@ -124,7 +124,7 @@ export function PromptsAnalyticsTable({ rows, windowDays }: PromptsAnalyticsTabl
 
 function RangBadge({ rang, isBranded }: { rang: number | null; isBranded: boolean }) {
   if (rang === null) {
-    return <span className="type-meta">—</span>;
+    return <span className="type-meta">-</span>;
   }
   // Prompt brandé : la marque est nommée dans le prompt, donc être cité
   // (souvent #1) est attendu et ne mesure pas la visibilité organique. On
@@ -151,7 +151,7 @@ function TopCompetitors({
   competitors: PromptWithMetrics["topCompetitors"];
 }) {
   if (competitors.length === 0) {
-    return <span className="type-meta">—</span>;
+    return <span className="type-meta">-</span>;
   }
   return (
     <div className="flex items-center gap-1.5">

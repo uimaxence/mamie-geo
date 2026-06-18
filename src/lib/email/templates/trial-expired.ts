@@ -26,7 +26,7 @@ export function renderTrialExpired(data: TrialExpiredData): RenderedEmail {
   const headline = isFollowUp ? "Ton dashboard est toujours là" : "Ton essai est terminé";
 
   const body = isFollowUp
-    ? `Il y a une semaine, ton essai Mamie GEO s'est terminé. Tes prompts, brand et concurrents sont toujours configurés — il te suffit de réactiver ton plan pour relancer le tracking.`
+    ? `Il y a une semaine, ton essai Mamie GEO s'est terminé. Tes prompts, brand et concurrents sont toujours configurés : il te suffit de réactiver ton plan pour relancer le tracking.`
     : `Ton essai 14 jours sur Mamie GEO est terminé et ton tracking quotidien est suspendu. Pour le reprendre, réactive ton plan en 1 clic. Tes prompts et concurrents sont conservés.`;
 
   const ctaLabel = "Réactiver mon plan";

@@ -72,11 +72,11 @@ export function ComparatorResults({
 
         <p className="type-meta mt-4">
           Vérification par recherche web en direct (requête «&nbsp;site:domaine &quot;{report.brand}
-          &quot;&nbsp;»). Un site marqué absent peut aussi être mal indexé — c&apos;est un signal,
+          &quot;&nbsp;»). Un site marqué absent peut aussi être mal indexé : c&apos;est un signal,
           pas un jugement définitif.
         </p>
         <p className="type-meta mt-2">
-          Ici on vérifie ta présence sur les <strong>sites sources</strong> que les IA consultent —
+          Ici on vérifie ta présence sur les <strong>sites sources</strong> que les IA consultent,
           pas ce que les IA répondent. Pour ça :{" "}
           <a
             href="/outils/test-visibilite-ia"
@@ -97,16 +97,16 @@ export function ComparatorResults({
           </h3>
           <ol className="mt-4 flex flex-col gap-3">
             <ActionStep n={1}>
-              <strong>Repère la bonne page</strong> — celle qui ranke sur «&nbsp;meilleur{" "}
+              <strong>Repère la bonne page</strong> : celle qui ranke sur «&nbsp;meilleur{" "}
               {report.sector}&nbsp;». C&apos;est elle que les IA lisent avant de répondre.
             </ActionStep>
             <ActionStep n={2}>
-              <strong>Demande l&apos;inclusion</strong> — la plupart de ces sites ont une page
+              <strong>Demande l&apos;inclusion</strong> : la plupart de ces sites ont une page
               «&nbsp;ajouter votre entreprise&nbsp;» / «&nbsp;référencer votre produit&nbsp;» ou un
               contact rédaction. Certains sont payants, beaucoup sont gratuits.
             </ActionStep>
             <ActionStep n={3}>
-              <strong>Soigne ta fiche</strong> — nom exact, description claire, avis clients. Les IA
+              <strong>Soigne ta fiche</strong> : nom exact, description claire, avis clients. Les IA
               reprennent l&apos;ordre et le vocabulaire de ces pages dans leurs réponses.
             </ActionStep>
           </ol>
@@ -123,7 +123,7 @@ export function ComparatorResults({
                       key={c.domain}
                       className="text-sm leading-relaxed text-[color:var(--color-ink-soft)]"
                     >
-                      <strong className="text-[color:var(--color-ink)]">{c.label}</strong> —{" "}
+                      <strong className="text-[color:var(--color-ink)]">{c.label}</strong> :{" "}
                       {c.inclusionHint}
                     </li>
                   ))}
@@ -147,7 +147,7 @@ export function ComparatorResults({
           </div>
           <p className="type-body mt-3">
             Ces sites d&apos;entreprises ressortent sur les mêmes recherches que les IA consultent
-            pour ton secteur — ce sont probablement tes concurrents directs.
+            pour ton secteur : ce sont probablement tes concurrents directs.
           </p>
           <div className="mt-4 flex flex-col gap-2">
             {competitors.map((c) => (
@@ -193,7 +193,7 @@ export function ComparatorResults({
         <h3 className="type-h3">Pourquoi c&apos;est décisif</h3>
         <p className="type-body mt-3">
           Sur 722 sources citées dans notre étude (50 marques × 5 IA),{" "}
-          <strong>32&nbsp;% sont des comparateurs ou annuaires</strong> — et seulement 1,7&nbsp;% le
+          <strong>32&nbsp;% sont des comparateurs ou annuaires</strong>, et seulement 1,7&nbsp;% le
           site des marques elles-mêmes. Être présent sur ces sites, c&apos;est la première action
           GEO, avant même de toucher à ton propre site.
         </p>
@@ -230,7 +230,7 @@ export function ComparatorResults({
         </div>
         <p className="type-body mt-3">
           Moi c&apos;est Max, le fondateur. Je m&apos;occupe personnellement du SEO + GEO de
-          quelques marques par trimestre — dont l&apos;inclusion sur ces comparateurs. On en parle
+          quelques marques par trimestre, dont l&apos;inclusion sur ces comparateurs. On en parle
           30&nbsp;minutes, gratuitement.
         </p>
         <LinkButton
@@ -258,7 +258,7 @@ export function ComparatorResults({
 
 function verdictText(present: number, total: number): string {
   if (present === 0) {
-    return "Ta marque est absente des sites que les IA citent sur ton secteur. Quand on leur demande une recommandation, elles citent tes concurrents — pas toi.";
+    return "Ta marque est absente des sites que les IA citent sur ton secteur. Quand on leur demande une recommandation, elles citent tes concurrents, pas toi.";
   }
   if (present < total / 2) {
     return "Présence partielle : les IA peuvent te trouver, mais tes concurrents présents sur plus de sites ont statistiquement plus de chances d'être recommandés.";

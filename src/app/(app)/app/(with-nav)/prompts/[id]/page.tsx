@@ -119,7 +119,7 @@ export default async function PromptDetailPage({ params }: { params: Promise<{ i
             Top concurrent
             <GlossaryInfo term="top-concurrent" ariaLabel="Définition : top concurrent" />
           </p>
-          <p className="type-h3 mt-3">{detail.topCompetitors[0]?.name ?? "—"}</p>
+          <p className="type-h3 mt-3">{detail.topCompetitors[0]?.name ?? "-"}</p>
           <p className="type-meta mt-2">
             {detail.topCompetitors[0]
               ? `${detail.topCompetitors[0].citationCount} mention(s)`

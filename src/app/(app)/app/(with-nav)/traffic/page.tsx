@@ -111,7 +111,7 @@ function buildSummary({
   detected: boolean;
   totalVisits: number;
 }): string {
-  if (!eligible) return "Prouve que ta visibilité IA t'amène de vrais visiteurs — inclus dès Solo";
+  if (!eligible) return "Prouve que ta visibilité IA t'amène de vrais visiteurs (inclus dès Solo)";
   if (!hasKey) return "Active le pixel cookieless pour mesurer le trafic venant des IA";
   if (!detected) return "Pixel posé · en attente de la première visite IA";
   return `${totalVisits.toLocaleString("fr-FR")} visite${totalVisits > 1 ? "s" : ""} IA détectée${totalVisits > 1 ? "s" : ""} sur 30 jours`;

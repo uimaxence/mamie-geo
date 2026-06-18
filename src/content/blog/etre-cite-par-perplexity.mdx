@@ -18,7 +18,7 @@ keywords:
 
 ## Le LLM qui montre ses sources, et pourquoi ça change le jeu
 
-Quand un acheteur B2B veut comparer trois logiciels avant un appel commercial, il pose souvent la question à Perplexity. La raison est simple : chaque réponse est suivie d'une liste de sources cliquables, ce qu'aucun autre LLM grand public ne fait avec autant de constance. Pour un décideur pressé, c'est rassurant — et donc adopté.
+Quand un acheteur B2B veut comparer trois logiciels avant un appel commercial, il pose souvent la question à Perplexity. La raison est simple : chaque réponse est suivie d'une liste de sources cliquables, ce qu'aucun autre LLM grand public ne fait avec autant de constance. Pour un décideur pressé, c'est rassurant, et donc adopté.
 
 Pour une marque, cette transparence change tout. Sur ChatGPT, on devine pourquoi on est cité. Sur Perplexity, on le voit. Cela rend le travail GEO mesurable, mais aussi impitoyable : si ton domaine n'apparaît pas dans la liste des sources, tu n'existes pas pour ce prompt.
 
@@ -34,9 +34,9 @@ Travailler la visibilité dans Perplexity n'est pas un sous-cas du "GEO ChatGPT"
 
 D'abord, Perplexity affiche systématiquement ses sources avec des liens cliquables. Le moteur est conçu autour du retrieval, pas autour du modèle. Une réponse Perplexity sans citation est l'exception, là où c'est encore la règle chez ses concurrents.
 
-Ensuite, Perplexity utilise principalement Bing comme index de retrieval, complété par son propre crawler (`PerplexityBot`). Cela aligne ses choix sur ceux de ChatGPT côté retrieval — mais avec une différence : Perplexity fait remonter plus de domaines secondaires et de sources techniques (GitHub, Stack Overflow, arXiv, Reddit) que ChatGPT, qui filtre plus serré sur l'autorité.
+Ensuite, Perplexity utilise principalement Bing comme index de retrieval, complété par son propre crawler (`PerplexityBot`). Cela aligne ses choix sur ceux de ChatGPT côté retrieval, mais avec une différence : Perplexity fait remonter plus de domaines secondaires et de sources techniques (GitHub, Stack Overflow, arXiv, Reddit) que ChatGPT, qui filtre plus serré sur l'autorité.
 
-Enfin, Perplexity est resté sur un positionnement "moteur de recherche conversationnel" et non "assistant général". Ses utilisateurs viennent pour **se renseigner**, rarement pour rédiger ou bavarder. Les prompts y sont plus commerciaux et plus recherchés que sur ChatGPT — exactement le type de requêtes que tu veux capter quand tu travailles ton GEO.
+Enfin, Perplexity est resté sur un positionnement "moteur de recherche conversationnel" et non "assistant général". Ses utilisateurs viennent pour **se renseigner**, rarement pour rédiger ou bavarder. Les prompts y sont plus commerciaux et plus recherchés que sur ChatGPT, exactement le type de requêtes que tu veux capter quand tu travailles ton GEO.
 
 ## Comment Perplexity construit une réponse
 
@@ -57,7 +57,7 @@ C'est la fondation absolue. Perplexity utilise Bing comme partenaire principal d
 
 ### 2. Laisser passer le crawler PerplexityBot
 
-Perplexity opère ses propres bots, en plus du retrieval Bing. Les principaux à connaître : `PerplexityBot` (crawl général, alimente l'index interne), `Perplexity-User` (fetch en temps réel d'une URL au moment d'une question utilisateur). Bloquer ces user-agents dans le `robots.txt` rend ton contenu inaccessible aux deux mécanismes, même si Bing te connaît parfaitement. Un audit rapide : ouvre ton `robots.txt`, cherche "Perplexity" — si tu trouves un `Disallow`, c'est une perte sèche de visibilité.
+Perplexity opère ses propres bots, en plus du retrieval Bing. Les principaux à connaître : `PerplexityBot` (crawl général, alimente l'index interne), `Perplexity-User` (fetch en temps réel d'une URL au moment d'une question utilisateur). Bloquer ces user-agents dans le `robots.txt` rend ton contenu inaccessible aux deux mécanismes, même si Bing te connaît parfaitement. Un audit rapide : ouvre ton `robots.txt`, cherche "Perplexity" : si tu trouves un `Disallow`, c'est une perte sèche de visibilité.
 
 ### 3. Soigner ses citations internes et sa bibliographie
 
@@ -69,11 +69,11 @@ Perplexity cite Wikipédia de façon récurrente, particulièrement sur les requ
 
 ### 5. Investir Reddit et les communautés citées
 
-Reddit est l'une des sources les plus citées par Perplexity sur les requêtes "avis", "comparatif" et "expérience utilisateur". Sur des prompts du type "meilleur CRM pour PME française avis", il n'est pas rare d'observer 4 à 6 URLs Reddit dans les sources retournées. Cela ne veut pas dire qu'il faut spammer — ça ne marche pas — mais qu'il faut être présent organiquement dans les subreddits pertinents. Côté FR, les équivalents (forums sectoriels, groupes LinkedIn publics indexés) jouent un rôle similaire, plus modeste.
+Reddit est l'une des sources les plus citées par Perplexity sur les requêtes "avis", "comparatif" et "expérience utilisateur". Sur des prompts du type "meilleur CRM pour PME française avis", il n'est pas rare d'observer 4 à 6 URLs Reddit dans les sources retournées. Cela ne veut pas dire qu'il faut spammer (ça ne marche pas) mais qu'il faut être présent organiquement dans les subreddits pertinents. Côté FR, les équivalents (forums sectoriels, groupes LinkedIn publics indexés) jouent un rôle similaire, plus modeste.
 
 ### 6. Publier en HTML structuré et accessible
 
-Perplexity lit le HTML comme tous les LLM, mais son re-ranking favorise les pages dont la structure permet d'extraire des fragments citables. Concrètement : H2/H3 sémantiquement clairs, paragraphes courts, listes structurées, tableaux natifs (pas en image), Schema.org `Article` et `FAQPage` propres. On a détaillé ces signaux côté ChatGPT dans [notre guide ChatGPT](/blog/etre-cite-par-chatgpt) — le constat est identique pour Perplexity. À ajouter spécifiquement pour Perplexity : une bibliographie ou liste de références en bas de page, balisée si possible avec Schema `citation`.
+Perplexity lit le HTML comme tous les LLM, mais son re-ranking favorise les pages dont la structure permet d'extraire des fragments citables. Concrètement : H2/H3 sémantiquement clairs, paragraphes courts, listes structurées, tableaux natifs (pas en image), Schema.org `Article` et `FAQPage` propres. On a détaillé ces signaux côté ChatGPT dans [notre guide ChatGPT](/blog/etre-cite-par-chatgpt) : le constat est identique pour Perplexity. À ajouter spécifiquement pour Perplexity : une bibliographie ou liste de références en bas de page, balisée si possible avec Schema `citation`.
 
 ### 7. Travailler la fraîcheur et les dates explicites
 
@@ -176,7 +176,7 @@ La troisième : **publier sans bibliographie**. Sur Perplexity plus que sur n'im
 
 ## Perplexity vs les autres LLM : ce qui est spécifique
 
-Quelques différences à garder en tête pour calibrer ses efforts : Perplexity affiche **ses sources de façon systématique**, ce qui rend la mesure GEO plus directe mais aussi plus exigeante (si tu n'es pas dans la liste, tu n'existes pas). Son retrieval s'appuie sur **Bing** et son propre index `PerplexityBot`, donc les leviers techniques d'indexation Bing y pèsent davantage que sur Le Chat (qui passe par Brave). Sa pondération forte de **Reddit, GitHub, Stack Overflow, arXiv** le différencie nettement de ChatGPT, qui filtre plus serré sur ces sources. Enfin, son **audience est plus B2B et plus décisionnaire** qu'un ChatGPT grand public — les prompts y sont plus commerciaux et donc plus précieux à capter.
+Quelques différences à garder en tête pour calibrer ses efforts : Perplexity affiche **ses sources de façon systématique**, ce qui rend la mesure GEO plus directe mais aussi plus exigeante (si tu n'es pas dans la liste, tu n'existes pas). Son retrieval s'appuie sur **Bing** et son propre index `PerplexityBot`, donc les leviers techniques d'indexation Bing y pèsent davantage que sur Le Chat (qui passe par Brave). Sa pondération forte de **Reddit, GitHub, Stack Overflow, arXiv** le différencie nettement de ChatGPT, qui filtre plus serré sur ces sources. Enfin, son **audience est plus B2B et plus décisionnaire** qu'un ChatGPT grand public : les prompts y sont plus commerciaux et donc plus précieux à capter.
 
 Pour replacer Perplexity dans le paysage GEO global, on a écrit le panorama complet dans [GEO vs SEO : ce qui change vraiment en 2026](/blog/geo-vs-seo) et l'article de fond [Qu'est-ce que le GEO](/blog/qu-est-ce-que-le-geo).
 
@@ -204,7 +204,7 @@ C'est le cas le plus fréquent. Google et Bing ont des index distincts. Un site 
 
 ### Combien de temps pour voir un effet sur les citations Perplexity ?
 
-Les leviers retrieval les plus rapides — Bing Webmaster Tools, `robots.txt`, Schema, fraîcheur — peuvent bouger la part de citation en 2 à 6 semaines. Les leviers de fond — Wikipédia, présence Reddit organique, livres blancs académiques — demandent 3 à 18 mois selon le canal. Une stratégie sérieuse joue les deux temporalités en parallèle, en commençant par les leviers rapides pour confirmer la mesure.
+Les leviers retrieval les plus rapides (Bing Webmaster Tools, `robots.txt`, Schema, fraîcheur) peuvent bouger la part de citation en 2 à 6 semaines. Les leviers de fond (Wikipédia, présence Reddit organique, livres blancs académiques) demandent 3 à 18 mois selon le canal. Une stratégie sérieuse joue les deux temporalités en parallèle, en commençant par les leviers rapides pour confirmer la mesure.
 
 ### Y a-t-il un "Perplexity Ads" pour payer la citation ?
 
@@ -212,7 +212,7 @@ Non. Perplexity ne vend pas de placement publicitaire qui force la citation dans
 
 ## En résumé
 
-Perplexity est la cible GEO la plus mesurable du marché : ses sources sont affichées, donc on sait exactement si on est cité ou non. Cette transparence est une chance pour les marques qui font le travail, et une sanction immédiate pour celles qui ne le font pas. Les neuf tactiques ci-dessus se cumulent — l'indexation Bing et la libération du crawler sont les deux préalables, le reste est de l'amplification.
+Perplexity est la cible GEO la plus mesurable du marché : ses sources sont affichées, donc on sait exactement si on est cité ou non. Cette transparence est une chance pour les marques qui font le travail, et une sanction immédiate pour celles qui ne le font pas. Les neuf tactiques ci-dessus se cumulent : l'indexation Bing et la libération du crawler sont les deux préalables, le reste est de l'amplification.
 
 Si tu veux savoir où ta marque en est aujourd'hui sur Perplexity, ChatGPT, Le Chat et les autres LLM grand public, on a mis en place un audit gratuit qui te donne ton score de visibilité IA en moins de 60 secondes.
 
@@ -278,7 +278,7 @@ SCHEMA.ORG (à injecter dans layout.tsx via <script type="application/ld+json">)
 ]
 }
 
-MAILLAGE INTERNE (vérifié contre \_historique.csv — articles publiés) :
+MAILLAGE INTERNE (vérifié contre \_historique.csv, articles publiés) :
 
 - depuis tactique 6 "HTML structuré" → /blog/etre-cite-par-chatgpt (publié)
 - depuis section "Perplexity vs autres LLM" → /blog/geo-vs-seo (publié)
@@ -305,7 +305,7 @@ SOURCES À VÉRIFIER AVANT PUBLI :
 
 NOTE RÉDACTION : aucune statistique chiffrée non sourçable n'a été incluse (consigne anti-invention).
 Les délais d'effet cités sont des fourchettes d'observation praticien, pas des stats à sourcer.
-Les observations "3 à 6 URLs Reddit", "8 cas sur 10" sont présentées comme observations praticien et non comme stats sourçables — à reformuler si seo-geo-tech préfère.
+Les observations "3 à 6 URLs Reddit", "8 cas sur 10" sont présentées comme observations praticien et non comme stats sourçables : à reformuler si seo-geo-tech préfère.
 
 SNIPPET POUR articles-registry.ts :
 {

@@ -129,7 +129,7 @@ export async function submitOnboarding(raw: OnboardingInput): Promise<Onboarding
   const brandDescription =
     [data.proposition?.trim(), data.sector?.trim() && `Secteur : ${data.sector.trim()}`]
       .filter(Boolean)
-      .join(" — ") || null;
+      .join(" · ") || null;
   await db.insert(brands).values({
     id: brandId,
     workspaceId,

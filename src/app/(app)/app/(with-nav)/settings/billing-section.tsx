@@ -90,7 +90,7 @@ function BetaAccessCard({
           <span className="text-sm font-semibold text-[color:var(--color-ink)]">Gratuit</span>
         </div>
         <p className="mt-3 text-sm text-[color:var(--color-muted)]">
-          Tu fais partie des beta-testeurs Mamie GEO — merci&nbsp;! Tu as accès au tracking des 5
+          Tu fais partie des beta-testeurs Mamie GEO, merci&nbsp;! Tu as accès au tracking des 5
           IA, gratuitement
           {expiry ? (
             <>
@@ -101,7 +101,7 @@ function BetaAccessCard({
           . Aucune carte requise, aucun prélèvement.
         </p>
         <p className="mt-2 text-sm text-[color:var(--color-muted)]">
-          Tu veux continuer au-delà&nbsp;? Choisis un plan quand tu veux — tes données sont
+          Tu veux continuer au-delà&nbsp;? Choisis un plan quand tu veux, tes données sont
           conservées.
         </p>
       </div>
@@ -125,7 +125,7 @@ function ActiveBillingCard({
         month: "long",
         year: "numeric",
       })
-    : "—";
+    : "-";
 
   function handlePortal() {
     startTransition(async () => {

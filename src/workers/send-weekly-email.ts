@@ -160,19 +160,19 @@ export async function sendWeeklyEmail(
   const stats: WeeklyRecapStat[] = [
     {
       label: "Score de visibilité",
-      value: scoreThis > 0 ? scoreThis.toFixed(1) : "—",
+      value: scoreThis > 0 ? scoreThis.toFixed(1) : "n/a",
       deltaPct: scoreDelta,
       deltaPeriod: "vs semaine dernière",
     },
     {
       label: "Marque citée",
-      value: totalRunsClaudeThis > 0 ? `${brandCitedThis}/${totalRunsClaudeThis}` : "—",
+      value: totalRunsClaudeThis > 0 ? `${brandCitedThis}/${totalRunsClaudeThis}` : "n/a",
       deltaPct: null,
       deltaPeriod: "runs Claude cette semaine",
     },
     {
       label: "Taux citation",
-      value: totalRunsClaudeThis > 0 ? `${citationRateThis.toFixed(0)}%` : "—",
+      value: totalRunsClaudeThis > 0 ? `${citationRateThis.toFixed(0)}%` : "n/a",
       deltaPct: null,
     },
     {

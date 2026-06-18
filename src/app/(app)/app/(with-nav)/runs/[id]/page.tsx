@@ -52,13 +52,13 @@ export default async function RunDetailPage({ params }: { params: Promise<{ id: 
         <dl className="mt-6 grid grid-cols-2 gap-x-8 gap-y-3 sm:grid-cols-3">
           <Meta
             label="Durée"
-            value={run.durationMs !== null ? `${(run.durationMs / 1000).toFixed(1)}s` : "—"}
+            value={run.durationMs !== null ? `${(run.durationMs / 1000).toFixed(1)}s` : "-"}
           />
           <Meta
             label="Exécuté"
             value={run.executedAt ? formatRelative(run.executedAt) : "en attente"}
           />
-          <Meta label="Modèle" value={run.model ?? "—"} />
+          <Meta label="Modèle" value={run.model ?? "-"} />
         </dl>
       </header>
 
