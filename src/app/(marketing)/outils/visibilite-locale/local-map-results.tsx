@@ -34,10 +34,9 @@ export function LocalMapResults({
   onReset: () => void;
   onEdit: () => void;
 }) {
-  const missing = report.cities.filter((c) => !c.recommended);
-  const firstRival = missing.find((c) => c.topRival)?.topRival ?? null;
-  const visibilityPct =
-    report.totalCities > 0 ? (report.recommendedCount / report.totalCities) * 100 : 0;
+  const absent = report.cities.filter((c) => c.status === "absent");
+  const firstRival = report.cities.find((c) => c.status !== "top" && c.topRival)?.topRival ?? null;
+  const absentCount = absent.length;
 
   return (
     <div className="mx-auto max-w-5xl">
@@ -58,14 +57,15 @@ export function LocalMapResults({
           <Card>
             <CardTitle>Score local</CardTitle>
             <div className="mt-3 flex items-center gap-5">
-              <ScoreRing value={visibilityPct} size={104} suffix={null} />
+              <ScoreRing value={report.score} size={104} suffix={null} />
               <div>
                 <p className="text-sm font-medium text-[color:var(--color-ink)]">
-                  Recommandé dans {report.recommendedCount} ville
-                  {report.recommendedCount > 1 ? "s" : ""} sur {report.totalCities}
+                  En tête dans {report.recommendedCount}, cité dans {report.mentionedCount} autre
+                  {report.mentionedCount > 1 ? "s" : ""}, absent dans {absentCount} sur{" "}
+                  {report.totalCities}
                 </p>
                 <p className="type-meta mt-1">
-                  % de villes où l&apos;IA te cite quand on cherche ton activité.
+                  Être cité en tête compte plein ; cité plus bas, à moitié ; absent, zéro.
                 </p>
               </div>
             </div>
@@ -89,7 +89,7 @@ export function LocalMapResults({
               </div>
             ) : (
               <p className="type-meta mt-3">
-                Aucun concurrent clairement identifié — le terrain local est ouvert.
+                Aucun concurrent clairement identifié : le terrain local est ouvert.
               </p>
             )}
           </Card>
@@ -119,7 +119,7 @@ export function LocalMapResults({
         <h3 className="type-h3">Et sur les 4 autres IA, dans tes villes ?</h3>
         <p className="type-body mt-2">
           Tu viens de voir une seule IA en direct. Mais tes prospects demandent aussi à ChatGPT,
-          Claude, Gemini et Le Chat — et d&apos;une IA à l&apos;autre, les recommandations changent
+          Claude, Gemini et Le Chat, et d&apos;une IA à l&apos;autre, les recommandations changent
           du tout au tout. Le suivi de l&apos;app te montre ta carte locale sur les 5 IA, et son
           évolution.
         </p>
@@ -190,35 +190,50 @@ function CardTitle({
 }
 
 function verdictText(report: LocalMapReport, firstRival: string | null): string {
-  const { recommendedCount, totalCities, mainCity } = report;
-  if (recommendedCount === 0) {
+  const { recommendedCount, mentionedCount, totalCities, mainCity } = report;
+  const citedCount = recommendedCount + mentionedCount;
+
+  if (citedCount === 0) {
     return firstRival
-      ? `L'IA ne te recommande dans aucune de ces villes — elle envoie tes clients chez « ${firstRival} » et tes autres concurrents. C'est ce que voient tes prospects… et c'est ta fenêtre.`
-      : "L'IA ne recommande encore personne clairement dans ces villes : le terrain est vide, à toi de l'occuper en premier.";
+      ? `L'IA ne te cite dans aucune de ces villes : elle envoie tes clients chez « ${firstRival} » et tes autres concurrents. C'est ce que voient tes prospects… et c'est ta fenêtre.`
+      : "L'IA ne cite encore personne clairement dans ces villes : le terrain est vide, à toi de l'occuper en premier.";
   }
   if (recommendedCount === totalCities) {
-    return `L'IA te recommande dans les ${totalCities} villes 👏 — reste à savoir si c'est aussi le cas sur les 4 autres IA, et si ça tient dans le temps.`;
+    return `L'IA te cite en tête dans les ${totalCities} villes 👏 : reste à savoir si c'est aussi le cas sur les 4 autres IA, et si ça tient dans le temps.`;
   }
-  const recommended = report.cities.filter((c) => c.recommended).map((c) => c.name);
-  const absent = report.cities.filter((c) => !c.recommended).map((c) => c.name);
-  return `Tu es recommandé à ${formatList(recommended)}, mais invisible à ${formatList(absent)}. À ${mainCity} et autour, l'IA n'envoie pas les mêmes clients chez toi.`;
+
+  const tops = report.cities.filter((c) => c.status === "top").map((c) => c.name);
+  const mentioned = report.cities.filter((c) => c.status === "mentioned").map((c) => c.name);
+  const absent = report.cities.filter((c) => c.status === "absent").map((c) => c.name);
+
+  const parts: string[] = [];
+  if (tops.length > 0) parts.push(`tu sors en tête à ${formatList(tops)}`);
+  if (mentioned.length > 0) parts.push(`tu es cité sans dominer à ${formatList(mentioned)}`);
+  if (absent.length > 0) parts.push(`tu es invisible à ${formatList(absent)}`);
+  return `À ${mainCity} et autour, ${joinClauses(parts)}. D'une ville à l'autre, l'IA n'envoie pas les mêmes clients chez toi.`;
+}
+
+function joinClauses(parts: string[]): string {
+  if (parts.length <= 1) return parts[0] ?? "";
+  return `${parts.slice(0, -1).join(", ")} et ${parts[parts.length - 1]}`;
 }
 
 function formatList(items: string[]): string {
-  if (items.length === 0) return "—";
+  if (items.length === 0) return "aucune ville";
   if (items.length === 1) return items[0]!;
   return `${items.slice(0, -1).join(", ")} et ${items[items.length - 1]}`;
 }
 
+// Couleur de pastille en miroir de la carte (3 états). ★ = ta ville.
+const STATUS_BADGE: Record<CityVisibility["status"], string> = {
+  top: "bg-[color:var(--color-success)] text-white",
+  mentioned: "bg-[color:var(--color-warning)] text-white",
+  absent: "bg-[color:var(--color-error)] text-white",
+};
+
 function CityRow({ city, index }: { city: CityVisibility; index: number }) {
-  // Pastille en miroir de la carte : ★ = ta ville (index 0), n° + couleur
-  // (vert recommandé / rouge concurrent) pour les villes autour.
   const isMain = index === 0;
-  const badgeStyle = isMain
-    ? "bg-[color:var(--color-ink)] text-white"
-    : city.recommended
-      ? "bg-[color:var(--color-success)] text-white"
-      : "bg-[color:var(--color-error)] text-white";
+  const badgeStyle = isMain ? "bg-[color:var(--color-ink)] text-white" : STATUS_BADGE[city.status];
   return (
     <div className="flex flex-wrap items-center justify-between gap-2 rounded-[var(--radius-lg)] border border-[color:var(--color-border)] bg-white px-4 py-2.5">
       <div className="flex items-center gap-2.5">
@@ -229,9 +244,21 @@ function CityRow({ city, index }: { city: CityVisibility; index: number }) {
         </span>
         <span className="text-sm font-medium text-[color:var(--color-ink)]">{city.name}</span>
       </div>
-      {city.recommended ? (
+      {city.status === "top" ? (
         <span className="text-xs font-medium text-[color:var(--color-success)]">
-          l&apos;IA te recommande
+          l&apos;IA te cite en tête
+        </span>
+      ) : city.status === "mentioned" ? (
+        <span className="text-xs text-[color:var(--color-ink-soft)]">
+          cité{city.topRival ? "" : ", mais pas en tête"}
+          {city.topRival ? (
+            <>
+              , derrière{" "}
+              <Badge tone="neutral" className="align-middle">
+                {city.topRival}
+              </Badge>
+            </>
+          ) : null}
         </span>
       ) : city.topRival ? (
         <span className="text-xs text-[color:var(--color-ink-soft)]">
@@ -242,7 +269,7 @@ function CityRow({ city, index }: { city: CityVisibility; index: number }) {
           à ta place
         </span>
       ) : (
-        <span className="text-xs text-[color:var(--color-muted)]">aucune marque recommandée</span>
+        <span className="text-xs text-[color:var(--color-muted)]">l&apos;IA ne te cite pas</span>
       )}
     </div>
   );
@@ -295,7 +322,7 @@ function AccompagnementUpsell() {
       </div>
       <p className="type-body mt-3">
         Moi c&apos;est Max, le fondateur. Je prends quelques marques par trimestre pour les rendre
-        incontournables dans les IA — y compris localement, ville par ville. On en parle
+        incontournables dans les IA, y compris localement, ville par ville. On en parle
         30&nbsp;minutes, gratuitement, sans pitch commercial.
       </p>
       <LinkButton

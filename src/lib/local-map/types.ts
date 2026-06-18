@@ -1,9 +1,15 @@
 // Types de la « Carte de visibilité IA locale » (/outils/visibilite-locale).
 // Le prospect entre site + email : on déduit marque/secteur/ville, on
-// génère 4-5 villes autour, et on demande à Le Chat « meilleur {secteur}
-// à {ville} ? » pour CHAQUE ville. Verdict par ville → carte qui s'allume
-// (recommandé = vert, concurrent à ta place = rouge). Concept GEO local
-// (doc 09 § 2026-06-17) : personne d'autre ne track l'intention locale.
+// génère ~6 villes autour, et on demande à une IA grounded « meilleurs
+// {secteur} à {ville} ? » pour CHAQUE ville. Verdict par ville sur 3 états
+// (retour Max 2026-06-18) → carte qui s'allume :
+//   - top       = l'IA te cite EN TÊTE              → vert
+//   - mentioned = l'IA te cite, mais pas en premier → orange (score partiel)
+//   - absent    = l'IA ne te cite pas du tout       → rouge
+// Concept GEO local (doc 09 § 2026-06-17) : personne d'autre ne track
+// l'intention locale.
+
+export type CityStatus = "top" | "mentioned" | "absent";
 
 export interface CityVisibility {
   /** Ville interrogée (« Tours »). */
@@ -11,11 +17,15 @@ export interface CityVisibility {
   /** Coordonnées pour la carte (null si non géocodée → absente de la carte). */
   lat: number | null;
   lng: number | null;
-  /** La marque est-elle recommandée par l'IA à cette ville ? */
+  /** Statut de la marque à cette ville (3 états, cf. CityStatus). */
+  status: CityStatus;
+  /** Raccourci `status === "top"` — conservé pour l'email lead et la copy. */
   recommended: boolean;
+  /** Contribution au score local : top=1, mentioned=0,45-0,7, absent=0. */
+  score: number;
   /** Marques/concurrents que l'IA cite à cette ville (hors la marque cible). */
   rivals: string[];
-  /** Concurrent n°1 cité « à ta place » (premier rival), null si recommandé/aucun. */
+  /** Concurrent cité devant toi (premier rival), null si tu es en tête / aucun. */
   topRival: string | null;
   /** Les questions exactes posées à l'IA pour cette ville (1 par intention). */
   queries: string[];
@@ -33,15 +43,19 @@ export interface LocalMapReport {
   sector: string;
   /** Ville principale (centre de la carte). */
   mainCity: string;
-  /** LLM interrogé (V0 : Le Chat via mistral-small). */
+  /** Libellé de l'IA interrogée (affiché à l'utilisateur). */
   llmLabel: string;
   /** Ville centrale + villes autour, dans l'ordre d'affichage. */
   cities: CityVisibility[];
   /** Concurrents les plus cités dans la zone, triés (pour le chart). */
   topCompetitors: CompetitorTally[];
-  /** Nombre de villes où la marque est recommandée. */
+  /** Nombre de villes où la marque est citée EN TÊTE (statut top). */
   recommendedCount: number;
+  /** Nombre de villes où la marque est citée mais pas en tête (statut mentioned). */
+  mentionedCount: number;
   totalCities: number;
+  /** Score local 0-100 pondéré (moyenne des contributions par ville). */
+  score: number;
   fetchedAt: string; // ISO
 }
 

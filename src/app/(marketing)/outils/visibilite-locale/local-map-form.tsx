@@ -7,6 +7,7 @@ import type { SiteProfile } from "@/lib/site-profile";
 import type { LocalMapReport } from "@/lib/local-map/types";
 import { detectSiteProfileAction } from "../location-actions";
 import { runLocalMapScanAction } from "./actions";
+import { DEMO_LOCAL_MAP_REPORT } from "./local-map-demo";
 import { LocalMapResults } from "./local-map-results";
 
 // Form de la carte locale : le prospect saisit SITE + EMAIL — marque,
@@ -26,7 +27,13 @@ export function LocalMapForm() {
   const [city, setCity] = useState("");
   const [detected, setDetected] = useState<SiteProfile | null>(null);
   const [hpField, setHpField] = useState("");
-  const [report, setReport] = useState<LocalMapReport | null>(null);
+  // Aperçu démo (capture marketing) si `?demo` est présent dans l'URL.
+  // Lu côté client uniquement, jamais en parcours réel.
+  const [report, setReport] = useState<LocalMapReport | null>(() =>
+    typeof window !== "undefined" && new URLSearchParams(window.location.search).has("demo")
+      ? DEMO_LOCAL_MAP_REPORT
+      : null,
+  );
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
@@ -75,7 +82,7 @@ export function LocalMapForm() {
       if (!profile) {
         setMode("manual");
         setError(
-          "On n'a pas réussi à analyser ton site automatiquement — complète marque, activité et ville, puis relance.",
+          "On n'a pas réussi à analyser ton site automatiquement. Complète marque, activité et ville, puis relance.",
         );
         return;
       }
@@ -93,7 +100,7 @@ export function LocalMapForm() {
       if (!profile.zone) {
         setMode("manual");
         setError(
-          "Ton activité a l'air nationale (ou ta ville n'est pas détectée). Indique ta ville principale pour voir ta carte locale — sinon, le scan express est plus adapté.",
+          "Ton activité a l'air nationale (ou ta ville n'est pas détectée). Indique ta ville principale pour voir ta carte locale ; sinon, le scan express est plus adapté.",
         );
         return;
       }
@@ -292,7 +299,7 @@ function ScanProgress({ domain, detected }: { domain: string; detected: SiteProf
         ))}
       </div>
       <p className="type-meta mt-6">
-        ~30 secondes — on interroge l&apos;IA ville par ville, en direct.
+        ~30 secondes, on interroge l&apos;IA ville par ville, en direct.
       </p>
     </div>
   );

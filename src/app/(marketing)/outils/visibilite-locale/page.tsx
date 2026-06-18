@@ -6,7 +6,7 @@ import { MarketingHeader } from "../../_sections/marketing-header";
 import { LocalMapForm } from "./local-map-form";
 
 export const metadata: Metadata = {
-  title: "Carte de visibilité IA locale — l'IA te recommande-t-elle dans ta ville ?",
+  title: "Carte de visibilité IA locale : l'IA te recommande-t-elle dans ta ville ?",
   description:
     "Entre ton site et ta ville : on demande à l'IA « le meilleur {ton activité} » dans ta ville et les communes autour, et on allume ta carte de visibilité locale. Là où tu es absent, l'IA recommande tes concurrents. Gratuit, sans carte bancaire.",
   alternates: { canonical: "/outils/visibilite-locale" },
@@ -22,9 +22,9 @@ export const maxDuration = 60;
 // est ultra-locale. La carte qui s'allume = visuel partageable + funnel.
 
 const INCLUSIONS = [
-  "Ta ville + 4 communes autour, interrogées à l'IA en direct",
-  "Verdict par ville : l'IA te recommande, ou cite un concurrent à ta place",
-  "Une carte qui s'allume — vert là où tu es cité, rouge là où tu manques",
+  "Ta ville + les communes autour, interrogées à l'IA en direct",
+  "Verdict par ville : cité en tête, cité plus bas, ou absent",
+  "Une carte qui s'allume : vert si tu domines, orange si tu es cité sans dominer, rouge si tu manques",
   "Récap par email + les deux suites : suivi des 5 IA, ou accompagnement",
   "Gratuit, sans carte bancaire",
 ];
@@ -64,7 +64,7 @@ export default function VisibiliteLocalePage() {
             <h2 className="type-h1 mt-3">Le référencement local, version IA.</h2>
             <p className="type-body mt-6 max-w-prose">
               Le SEO local a fait vivre des milliers de commerces sur Google. Aujourd&apos;hui, tes
-              clients posent la question à une IA — et la réponse n&apos;est pas la même d&apos;une
+              clients posent la question à une IA, et la réponse n&apos;est pas la même d&apos;une
               ville à l&apos;autre. Cet outil te montre, ville par ville, si tu existes pour
               l&apos;IA ou si elle recommande quelqu&apos;un d&apos;autre à ta place.
             </p>
@@ -88,10 +88,10 @@ export default function VisibiliteLocalePage() {
           <span className="type-eyebrow">Pourquoi c&apos;est différent</span>
           <h2 className="type-h1 mt-3">Tout le monde regarde le national. Toi, tu vis du local.</h2>
           <p className="type-body-lg mt-6 max-w-prose">
-            Les outils de visibilité IA testent « le meilleur {"{secteur}"} » au niveau national —
+            Les outils de visibilité IA testent « le meilleur {"{secteur}"} » au niveau national,
             inutile pour un commerce ou un service local. Mamie GEO est le seul à interroger les IA
             ville par ville. Le scan local est limité à 1 par marque et par jour ; pour suivre ta
-            carte sur les 5 IA et dans le temps, l&apos;app démarre à 9,99 €/mois — essai 14 jours.
+            carte sur les 5 IA et dans le temps, l&apos;app démarre à 9,99 €/mois (essai 14 jours).
           </p>
         </div>
       </Section>

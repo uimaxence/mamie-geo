@@ -48,7 +48,7 @@ describe("runLocalScan", () => {
     expect(angers.rivals).toEqual(["Menuiserie Bouesnard"]); // pas le nom étendu de la marque
   });
 
-  it("recommandé via l'extraction ; filtre générique « métier ville » ; agrège les concurrents", async () => {
+  it("filtre le générique « métier ville » et agrège les concurrents par ville", async () => {
     const out = await runLocalScan({
       brand: "Fenêtres sur Loir",
       sector: "menuiserie",
@@ -68,6 +68,41 @@ describe("runLocalScan", () => {
     if (!out.ok) return;
     expect(out.report.cities[0]?.rivals).toEqual(["K-LINE"]); // « Menuiserie Cholet » filtré
     expect(out.report.topCompetitors[0]).toEqual({ name: "K-LINE", cityCount: 2 });
+  });
+
+  it("classe top / mentioned / absent et pondère le score local", async () => {
+    const out = await runLocalScan({
+      brand: "Acme",
+      sector: "menuiserie",
+      cities: [city("A"), city("B"), city("C")],
+      execute: vi.fn(async (q: string) =>
+        q.includes("à A ")
+          ? { text: "Acme, Rival Un." } // en tête
+          : q.includes("à B ")
+            ? { text: "Rival Un, Acme, Rival Deux." } // cité, pas en tête
+            : { text: "Rival Un, Rival Deux." },
+      ), // absente
+      extractBrands: fakeExtract({
+        brandsPerResponse: [
+          ["Acme", "Rival Un"],
+          ["Rival Un", "Acme", "Rival Deux"],
+          ["Rival Un", "Rival Deux"],
+        ],
+        targetCitedPerResponse: [true, true, false],
+      }),
+    });
+    expect(out.ok).toBe(true);
+    if (!out.ok) return;
+    const [a, b, c] = out.report.cities;
+    expect(a!.status).toBe("top");
+    expect(a!.recommended).toBe(true);
+    expect(b!.status).toBe("mentioned");
+    expect(b!.topRival).toBe("Rival Un"); // concurrent cité devant
+    expect(c!.status).toBe("absent");
+    expect(out.report.recommendedCount).toBe(1);
+    expect(out.report.mentionedCount).toBe(1);
+    // (1 + 0,7 + 0) / 3 = 0,567 → 57
+    expect(out.report.score).toBe(57);
   });
 
   it("erreur si l'IA échoue", async () => {

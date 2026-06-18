@@ -18,10 +18,17 @@ import type { CityVisibility } from "@/lib/local-map/types";
 // Rendu impératif (dynamic import) pour éviter tout accès `window` en SSR.
 
 const GREEN = "#16a34a";
+const AMBER = "#f59e0b";
 const RED = "#dc2626";
 const INK = "#191919";
 
 type GeoCity = CityVisibility & { lat: number; lng: number };
+
+function statusColor(city: CityVisibility): string {
+  if (city.status === "top") return GREEN;
+  if (city.status === "mentioned") return AMBER;
+  return RED;
+}
 
 function distanceM(a: GeoCity, b: GeoCity): number {
   const R = 6371000;
@@ -53,9 +60,14 @@ function zoneRadiusM(geo: GeoCity[]): number {
 }
 
 function statusLine(city: CityVisibility): string {
-  if (city.recommended) return "L'IA te recommande";
+  if (city.status === "top") return "L'IA te recommande en premier";
+  if (city.status === "mentioned") {
+    return city.topRival
+      ? `L'IA te cite, mais place ${escapeHtml(city.topRival)} devant`
+      : "L'IA te cite, mais pas en tête";
+  }
   if (city.topRival) return `L'IA cite ${escapeHtml(city.topRival)} à ta place`;
-  return "Aucune marque clairement recommandée";
+  return "L'IA ne te cite pas ici";
 }
 
 export function LocalMap({ cities, brand }: { cities: CityVisibility[]; brand: string }) {
@@ -88,7 +100,7 @@ export function LocalMap({ cities, brand }: { cities: CityVisibility[]; brand: s
 
       geo.forEach((city, i) => {
         const isMain = i === 0;
-        const color = city.recommended ? GREEN : RED;
+        const color = statusColor(city);
 
         // Zone : disque doux, fin liseré pour délimiter sans alourdir.
         L.circle([city.lat, city.lng], {
@@ -121,7 +133,7 @@ export function LocalMap({ cities, brand }: { cities: CityVisibility[]; brand: s
         // Nom + statut au survol (un seul label visible à la fois).
         const title = isMain ? `Toi · ${escapeHtml(brand)}` : `${i}. ${escapeHtml(city.name)}`;
         marker.bindTooltip(
-          `<strong>${title}</strong><br><span style="color:${city.recommended ? GREEN : RED}">${statusLine(city)}</span>`,
+          `<strong>${title}</strong><br><span style="color:${color}">${statusLine(city)}</span>`,
           { direction: "top", offset: [0, -size / 2 - 2], opacity: 1 },
         );
       });
@@ -133,7 +145,8 @@ export function LocalMap({ cities, brand }: { cities: CityVisibility[]; brand: s
         div.style.cssText =
           "background:#fff;border:1px solid #e5e5e5;border-radius:8px;padding:7px 9px;font:500 11px/1.5 Inter,system-ui,sans-serif;color:#444;box-shadow:0 1px 4px rgba(0,0,0,.12)";
         div.innerHTML = `
-          <div style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:9999px;background:${GREEN};display:inline-block"></span>L'IA te recommande</div>
+          <div style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:9999px;background:${GREEN};display:inline-block"></span>Cité en tête</div>
+          <div style="display:flex;align-items:center;gap:6px;margin-top:3px"><span style="width:10px;height:10px;border-radius:9999px;background:${AMBER};display:inline-block"></span>Cité, mais pas en tête</div>
           <div style="display:flex;align-items:center;gap:6px;margin-top:3px"><span style="width:10px;height:10px;border-radius:9999px;background:${RED};display:inline-block"></span>Concurrent à ta place</div>
           <div style="display:flex;align-items:center;gap:6px;margin-top:3px"><span style="width:10px;height:10px;border-radius:9999px;background:${INK};color:#fff;font-size:8px;display:inline-flex;align-items:center;justify-content:center">★</span>Ta ville</div>`;
         return div;
@@ -157,7 +170,7 @@ export function LocalMap({ cities, brand }: { cities: CityVisibility[]; brand: s
   if (geo.length === 0) {
     return (
       <div className="rounded-[var(--radius-lg)] border border-dashed border-[color:var(--color-border)] bg-[color:var(--color-gray-50)] px-4 py-6 text-center text-sm text-[color:var(--color-muted)]">
-        On n&apos;a pas pu placer tes villes sur la carte cette fois — le détail par ville reste
+        On n&apos;a pas pu placer tes villes sur la carte cette fois. Le détail par ville reste
         ci-dessous.
       </div>
     );
