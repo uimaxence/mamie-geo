@@ -108,7 +108,7 @@ export async function runLocalMapScanAction(raw: LocalMapScanInput): Promise<Loc
       execute: (prompt) => perplexity.execute({ prompt, language: "fr" }),
       extractBrands: (responseTexts) =>
         extractBrandsCited({ apiKey, targetBrand: brand, responseTexts }),
-      llmLabel: "Perplexity · recherche web en direct",
+      llmLabel: "recherche web en direct",
     });
     if (result.ok) storeLocalMapReport(cacheKey, result.report);
   }

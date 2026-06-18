@@ -15,8 +15,8 @@ import { LocalMap } from "./local-map";
 // composants de l'app (ScoreRing, BreakdownBars) pour la cohérence DA.
 // Cf. concept GEO local (doc 09 § 2026-06-17, itération layout + charts).
 
-// Perplexity est l'IA montrée en clair (grounded web) ; les 4 autres sont
-// verrouillées → trial.
+// On montre 1 IA grounded web (Perplexity côté moteur, non nommée dans
+// l'UI — cf. retour Max) ; les 4 autres sont verrouillées → trial.
 const LOCKED_LLMS = ["ChatGPT", "Claude", "Gemini", "Le Chat"];
 const SIGNUP_HREF = "/login?mode=signup&from=carte-locale";
 const COMP_COLORS = ["#329cff", "#8b5cf6", "#ec4899", "#f59e0b", "#14b8a6", "#64748b"];
@@ -42,8 +42,7 @@ export function LocalMapResults({
   return (
     <div className="mx-auto max-w-5xl">
       <p className="type-eyebrow text-center">
-        {report.brand} · {report.sector} · autour de {report.mainCity} · {report.llmLabel} · en
-        direct
+        {report.brand} · {report.sector} · autour de {report.mainCity} · {report.llmLabel}
       </p>
 
       {/* Ligne 1 : carte (gauche) + score & concurrents (droite) */}
@@ -119,9 +118,10 @@ export function LocalMapResults({
       <div className="mt-8 rounded-[var(--radius-xl)] border-2 border-[color:var(--color-ink)] bg-white p-6 sm:p-8">
         <h3 className="type-h3">Et sur les 4 autres IA, dans tes villes ?</h3>
         <p className="type-body mt-2">
-          Tu viens de voir Perplexity. Mais tes prospects demandent aussi à ChatGPT, Claude, Gemini
-          et Le Chat — et d&apos;une IA à l&apos;autre, les recommandations changent du tout au
-          tout. Le suivi de l&apos;app te montre ta carte locale sur les 5 IA, et son évolution.
+          Tu viens de voir une seule IA en direct. Mais tes prospects demandent aussi à ChatGPT,
+          Claude, Gemini et Le Chat — et d&apos;une IA à l&apos;autre, les recommandations changent
+          du tout au tout. Le suivi de l&apos;app te montre ta carte locale sur les 5 IA, et son
+          évolution.
         </p>
         <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4">
           {LOCKED_LLMS.map((llm) => (
