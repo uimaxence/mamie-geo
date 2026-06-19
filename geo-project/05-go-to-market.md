@@ -259,6 +259,75 @@ captures) pour qu'ils n'aient rien à chercher ; (4) ne jamais dénigrer le
 concurrent qu'ils ont aimé, se positionner en alternative. Mentionner
 l'affiliation seulement en second temps, pas comme appât principal.
 
+### Fiche produit (à joindre aux emails outreach)
+
+> Copier-coller prêt à l'emploi pour les testeurs/médias/comparatifs.
+> Une page, factuel, zéro superlatif creux. Garder à jour si le pricing
+> ou les features bougent (cf. CLAUDE.md § 6).
+
+```
+MAMIE GEO — fiche produit
+
+En une phrase
+Le premier SaaS francophone de Generative Engine Optimization (GEO) :
+il mesure chaque jour la visibilité d'une marque dans les 5 IA grand
+public et livre des recommandations actionnables, en français, hébergé
+en Europe.
+
+Les 5 IA trackées (via API natives officielles, pas de scraping, pas
+d'OpenRouter)
+ChatGPT, Claude, Perplexity, Gemini, Le Chat (Mistral).
+
+Pour qui
+Freelances SEO, équipes marketing PME, agences SEO/marketing francophones.
+
+Pricing (TTC géré par Stripe Tax)
+- Solo : 9,99 €/mois
+- Starter : 49 €/mois (Le Chat inclus dès ce plan)
+- Pro : 149 €/mois
+- Essai gratuit 14 jours, SANS carte. Garantie remboursement 14 jours.
+- Plans annuels -20 %. Agency/Enterprise sur devis.
+
+Ce qui le différencie
+- Le moins cher du marché FR à l'entrée : 9,99 € (vs ~59 € Qwairy,
+  ~75 € Botrank).
+- Claude ET Le Chat (Mistral) inclus dès le plan d'entrée.
+- Mesure via API natives officielles : stable, reproductible
+  (vs scraping d'interface fragile).
+- Hébergement EU (Vercel Paris, Neon Frankfurt), RGPD natif, DPA sur
+  tous les plans.
+- Français de bout en bout : lexique SEO FR, ton direct, support FR.
+
+Fonctionnalités clés
+- Dashboard : score de visibilité, part de voix vs concurrents, funnel
+  sources (apparition / fréquence / citation), classement et évolution
+  du rang.
+- Scoring par réponse : sentiment, position, concurrents cités (même
+  quand ta marque est absente).
+- Audit technique gratuit : 30+ checks SEO/GEO + crawlabilité des bots
+  IA + PageSpeed.
+- Plan d'action GEO priorisé (/conseils).
+- Attribution du trafic IA : pixel cookieless (preuve de ROI).
+- Exports CSV et PNG, email de recap hebdomadaire.
+
+Outils gratuits (sans inscription)
+- Test de visibilité IA express
+- Audit technique du site
+- Scan de présence dans les comparateurs
+- Carte de visibilité IA locale (angle GEO local)
+mamie-geo.fr/outils
+
+Liens
+- Site : https://mamie-geo.fr
+- Tarifs : https://mamie-geo.fr/pricing
+- Outils gratuits : https://mamie-geo.fr/outils
+- Programme d'affiliation (40 % à vie sur Solo) : https://mamie-geo.fr/affiliation
+
+Accès test offert
+Accès complet offert aux testeurs/médias pour un avis indépendant, sans
+contrepartie d'article. Contact : hello@mamie-geo.fr
+```
+
 ### Template message Producthunt
 
 ```
