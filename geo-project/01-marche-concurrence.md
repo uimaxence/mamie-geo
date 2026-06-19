@@ -146,7 +146,7 @@ Page `semrush.com/ai-seo/overview/` au 2026-05-13 — référence pour le refres
 ⚠️ **Mis à jour 2026-06-12** : le trou n'est plus vide. Des SaaS GEO francophones ont émergé entre mai et juin 2026 (cf. doc 09 § Snapshot Juin 2026) :
 
 - **Qwairy** (qwairy.co) — 59 €/mois Starter → 199 € Pro. Présenté comme la suite GEO de référence FR dans plusieurs comparatifs. **Concurrent FR direct n°1.**
-- **Botrank.ai** — 75 €/mois Starter → 245 € Business. Support FR, tracke Mistral via scraping UI, audit GEO technique, agent IA « Bob ».
+- **Botrank.ai** — 75 €/mois Starter (89 € mensuel) → Business (prix non public). Support FR, tracke 5 moteurs (ChatGPT, Perplexity, Gemini, **Mistral**, Google AI Overviews) **par scraping UI** mais **seulement 3 modèles au choix sur Starter**, **pas de Claude ni Grok**. Audit GEO technique (jugé léger), module sentiment avec verbatims, agent IA « Bob », essai 7 j. Avis Nicolas Pérot (alambic.org, 4/5, « outil FR préféré ») → cf. doc 09 § 2026-06-18 pour le plan de contre-positionnement.
 - **Meteoria** — scraping UI (réponses fidèles à ce que voit l'utilisateur) plutôt qu'APIs natives.
 - **Are You Mention** — tracking mentions LLM, gratuit pour l'instant.
 

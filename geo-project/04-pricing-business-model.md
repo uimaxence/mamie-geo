@@ -147,7 +147,8 @@ Pro inclus, point mensuel + rapport d'évolution du rang.
 - **Annuel** : -20 %
 - **Étudiants / étudiantes** : -50 % sur Starter (avec preuve)
 - **OSS / non-profit** : Starter gratuit 12 mois
-- **Affiliation agence partenaire** : 20 % commission récurrente sur clients référés (hors plan Agence lui-même)
+- **Affiliation grand public** (créateurs/audiences, page `/affiliation`, acté 2026-06-19) : **40 % à vie sur Solo, 25 % sur Starter, Pro/Agency exclus**. Borné par les marges : 40 % à plat passerait Starter à −4 % et Pro à −25 % (cf. § Marge brute par plan) ; 40 % ne tient que sur Solo (88 % de marge nette → reste ~48 %).
+- **Affiliation agence partenaire** : 20-25 % commission récurrente sur clients référés (hors plan Agence lui-même). Programme distinct du grand public ci-dessus (contrat + annuaire, doc 06).
 
 ---
 

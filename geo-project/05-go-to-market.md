@@ -204,6 +204,61 @@ d'engagement, juste 30 min de débrief à la fin.
 Ça pourrait t'intéresser ?
 ```
 
+### Outreach sites de classement / comparatifs GEO FR (ajouté 2026-06-19)
+
+Objectif : décrocher une review ou une entrée dans les comparatifs FR
+d'outils GEO, là où Botrank/Qwairy dominent aujourd'hui (cf. doc 09
+§ 2026-06-18). Le levier n°1 pour « prendre la tête du classement » est la
+preuve sociale, pas la feature parity.
+
+**Cibles prioritaires** (blogs/médias/testeurs SEO-marketing FR qui notent
+les outils) :
+
+| Cible | Type | Angle d'accroche |
+|---|---|---|
+| alambic.org (Nicolas Pérot) | Avis outils GEO (a noté Botrank 4/5) | « Tu as testé Botrank, voici l'alternative à 9,99 € avec Claude + Le Chat » |
+| BDM (Blog du Modérateur) | Média marketing/tech FR | News + outil FR souverain, angle RGPD/EU |
+| Abondance (Olivier Andrieu) | Référence SEO FR | GEO = suite du SEO, premier tracker FR-first |
+| WebRankInfo / forum | Communauté SEO FR | Post outil + AMA fondateur |
+| Siècle Digital, Frenchweb, Maddyness | Presse tech FR | Lancement/levée de la catégorie GEO FR |
+| Comparatifs « meilleurs outils GEO 2026 » | Listicles SEO | Demande d'ajout + fiche produit fournie |
+| Newsletters SEO FR (ex. SEO black-out, Mailchimp d'indés) | Sponsoring/mention | Code affilié 40 % |
+
+**Template email — site de classement / testeur** :
+
+```
+Objet : Mamie GEO, l'alternative FR à [Botrank/Qwairy] à 9,99 € (accès offert pour test)
+
+Bonjour [Prénom],
+
+J'ai lu ton [avis/comparatif] sur [outil] : [détail précis qui prouve
+que tu l'as lu, ex. « ton point sur l'absence de Claude est juste »].
+
+Je suis Max, fondateur de Mamie GEO. On joue sur le même terrain (tracking
+de visibilité dans les IA, en français) avec 3 partis pris différents :
+
+- 9,99 €/mois à l'entrée (vs 75 € Botrank), essai 14 j sans carte
+- Claude ET Le Chat inclus dès le plan d'entrée (Botrank ne track pas Claude)
+- Mesure via API natives officielles, pas du scraping d'interface
+- Hébergé en EU, RGPD natif, DPA sur tous les plans
+
+Je t'offre un accès complet illimité pour tester et te faire ton avis, sans
+contrepartie d'article. Si ça te semble utile à ton audience, on peut aussi
+parler du programme d'affiliation (40 % à vie).
+
+Tu veux que je t'ouvre un accès ?
+
+Max
+[lien mamie-geo.fr]
+```
+
+**Règles** : (1) toujours prouver qu'on a lu le contenu ; (2) offrir
+l'accès SANS exiger d'article (un test honnête vaut mieux qu'un publi
+forcé) ; (3) fournir une fiche produit prête (pricing, 5 IA, différenciateurs,
+captures) pour qu'ils n'aient rien à chercher ; (4) ne jamais dénigrer le
+concurrent qu'ils ont aimé, se positionner en alternative. Mentionner
+l'affiliation seulement en second temps, pas comme appât principal.
+
 ### Template message Producthunt
 
 ```
@@ -257,7 +312,22 @@ Contenu : pourquoi les agences SEO doivent pivoter + positionner une offre GEO (
 
 ### Affiliations
 
-20% commission récurrente. Cibles : consultants SEO indés, blogueurs marketing FR, formateurs IA.
+Programme d'affiliation grand public (créateurs/audiences), distinct du
+programme partenaire agence (doc 06). **Modèle acté 2026-06-19 (doc 09)** :
+**40 % à vie sur Solo, 25 % sur Starter, Pro/Agency exclus** (ceux-là
+passent par le partenaire agence avec contrat). Les marges l'imposent :
+40 % à plat tuerait Starter (−4 %) et Pro (−25 %), cf. doc 04. Cibles :
+consultants SEO indés, blogueurs/newsletters marketing FR, formateurs IA,
+créateurs LinkedIn/YouTube.
+
+Page publique **`/affiliation`** livrée 2026-06-19 (design inspiré de
+taap.it/fr/affiliate, en DA Mamie GEO) : hero « 40 % à vie » + calculateur
+de gains (slider parrainages → € mensuels) + « Comment ça marche » + FAQ +
+CTA candidature. **Pas de back-office affilié en V0** : le CTA ouvre un
+email de candidature (`mailto:hello@`), validation à la main. Le tracking
+Stripe (lien/code unique, attribution, versement auto) reste **V1**
+(doc 02 § Programme partenaire). Liens : footer (colonne Produit) + nav
+mobile.
 
 ### Co-marketing
 

@@ -246,6 +246,40 @@ Une fois que le Tracker tourne et que les clients comprennent leur position, ils
 | **Strongest / Weakest model par marque** | Max/min `visibilityScore` par LLM sur 30 j, en pill sur la card brand. Utile en debrief commercial agence. | 2 champs sur `getDashboardData`. Pills dans `<AppTopBar>` ou sub-line stat Visibility. |
 | **Rankings Table avec sélecteur de dimension** | « By AI Model / By Topic / By Tag » pivote la même table. Pattern Peec Brand Insights. | `<RankingsTable dimension={...}>`. Dépend de Topics + Tags. **→ Analyse ci-dessous (2026-06-10).** |
 
+### Volume de recherche par prompt IA — réalité technique et proxies (2026-06-18, question Max)
+
+Question Max : « y a-t-il un moyen technique de connaître le volume de
+recherche sur un prompt IA, pour savoir sur quoi essayer de scorer ? »
+
+**Réponse honnête : non, pas de volume direct par prompt.** Les LLM
+(OpenAI, Anthropic, Google, Mistral, Perplexity) ne publient pas les
+requêtes de leurs utilisateurs. Aucune API ne donne « combien de fois on
+a demandé X à ChatGPT ». Tout outil qui prétend afficher un volume IA
+exact extrapole ou bluffe : à ne pas vendre comme une vérité. C'est
+pour ça que la feature « Volume estimé par prompt » ci-dessus est
+cadrée en **fourchette relative 5 niveaux, sans chiffre absolu** + un
+disclaimer « proxy basé sur la recherche web ».
+
+Proxies exploitables, par fiabilité décroissante :
+
+| Proxy | Ce que ça donne | Accès |
+|---|---|---|
+| **Google Keyword Planner / Ads** | Volumes FR réels sur le mot-clé le plus proche du prompt | Gratuit (compte Ads actif), quotas |
+| **Search Console du client** | Vraies requêtes en langage naturel qui amènent déjà du trafic (onglet Requêtes, filtre « comment/quel/meilleur ») | First-party client, V2.5 GA4/GSC |
+| **DataForSEO / Semrush / Ahrefs API** | Volume + variantes de questions, FR couvert | Payant (~30 €/mois DataForSEO pour ~100 prompts) |
+| **People Also Ask / Trends / AnswerThePublic / AlsoAsked** | Formulations en question proches des prompts | Gratuit / scraping |
+| **Bing Webmaster Tools** | Proxy direct pour ChatGPT search + Copilot (adossés à Bing) | Gratuit |
+| **Autocomplétion Perplexity / moteurs** | Suggestions de prompts émergents | Scraping, partiel |
+| **Notre pixel de trafic IA (déjà livré)** | Signal first-party : pages d'atterrissage IA → croiser avec les prompts trackés. À terme, un proxy que personne d'autre n'a | Interne, à brancher |
+
+**Implication produit** : la feature « Volume estimé par prompt » se
+branche sur **Google volume (Keyword Planner gratuit, ou DataForSEO
+payant)**, rattache chaque prompt suggéré à son keyword Google le plus
+proche, et affiche une fourchette de priorité dans `suggestPrompts` /
+l'onglet Prompts. Pas avant la phase distribution stabilisée. Faisabilité
+technique (coût, quota, point d'insertion dans le pipeline
+`suggestPrompts`) à chiffrer quand on priorise la feature.
+
 ### Ranking concurrentiel — analyse de faisabilité (2026-06-10, demandé par Max)
 
 Objectif : classement marque vs concurrents (« qui est le plus visible dans les IA sur tes prompts »), rang #1..N + évolution. Constat clé : **l'essentiel des données existe déjà** dans `runs.parsedBrands.scoring` (`brandMentioned` / `brandPosition` / `brandSentiment` + `competitorsMentioned[{name, sentiment}]`).

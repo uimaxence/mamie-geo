@@ -161,6 +161,184 @@ haut et l'entrée "2026-05-05 — Réponses aux 10 questions de bootstrap".
 
 ### Décisions enregistrées
 
+#### 2026-06-19 — Dispatch queue réduit */5 → 1 h + drain à l'enqueue (économie compute Neon)
+
+**Contexte** : site tombé en prod le 2026-06-19 — Neon free tier renvoie
+HTTP 402 « exceeded the compute time quota ». Toutes les requêtes DB
+échouent → Better Auth ne lit plus les sessions → 500 partout. Cause
+racine : le cron dispatch `*/5` réveille Neon toutes les 5 min, ce qui
+**empêche le scale-to-zero** (suspension après 5 min d'inactivité) → la
+base tourne ~24/7 et brûle le quota d'heures de compute. Sur le plan
+Launch payant (usage-based, 0,106 $/CU-h, pas de scale-to-zero respecté),
+ça représenterait ~20-35 $/mois au lieu de ~5-12 $/mois.
+
+**Contrainte Max** : réduire la fréquence le plus possible **sans dégrader
+l'UX**. Or « Lancer maintenant » (dashboard) et la promesse « 1er rapport
+en 10 min » dépendent du dispatch : l'action n'**enqueue** que les jobs,
+c'est le cron qui les **exécute**. Espacer le cron sans rien d'autre =
+régression directe.
+
+**Choix** : découpler la latence du tick de cron.
+- Cœur de traitement extrait dans **`src/workers/drain-queue.ts`** :
+  `drainQueue({ batchSize, maxMs })` boucle (claim → run → complete/fail)
+  jusqu'à queue vide ou budget temps (250 s), nécessaire car
+  `execute_prompt` enchaîne un `score_response`. `claim` reste en
+  FOR UPDATE SKIP LOCKED → drains concurrents (cron + after()) safe.
+- **Drain immédiat à l'enqueue user** : `triggerRunNow` appelle
+  `after(() => drainQueue())` après la réponse → le run part tout de suite,
+  indépendamment du cron. `maxDuration = 300` sur la page dashboard et la
+  route dispatch.
+- **Cron dispatch `*/5` → `0 * * * *` (1 h)** : devient un FILET DE
+  SÉCURITÉ (retries à h+1, jobs non drainés). Le cron draine désormais en
+  boucle (pas 1 seul batch de 25) à chaque tick. Choix 1 h (vs */30)
+  confirmé par Max pour minimiser le compute ; coût heartbeat ~1,6 $/mois
+  (vs ~3,2 $ en */30). Contrepartie assumée : un job en échec reprogrammé à
+  h+1 peut attendre jusqu'à ~2 h avant rejouage.
+- Runs quotidiens (schedule-runs 06:00) : drainés au tick horaire suivant
+  (≤ 1 h, personne ne regarde à 06:00 UTC). Schedulers non modifiés.
+
+**Garde-fou (pourquoi c'est safe)** : `after()` est best-effort ; s'il est
+coupé par Vercel ou échoue, le cron horaire rattrape les jobs (rien n'est
+perdu, juste retardé). Le pire cas dégrade vers « cron 1 h », fonctionnel.
+
+**Conséquences attendues** : Neon dort réellement → compute ~5-12 $/mois
+sur Launch au lieu de ~20-35 $. Latence « Lancer maintenant » inchangée
+(voire meilleure pour les gros plans, le drain vide tout en un passage au
+lieu de 25 jobs/5 min). `tsc` + `eslint` + tests queue/workers (24) OK.
+
+**À revisiter** : remettre le site debout = **upgrade Neon Launch**
+(la réduction de cron ne ressuscite pas le quota épuisé du mois). Vérifier
+en prod que `after()` draine bien (logs `cron_dispatch`/`jobs_claimed`
+hors fenêtres de cron). Si la charge monte, envisager un drain auto-chaîné
+ou Inngest (seuil 100K runs/mois, doc 03).
+
+#### 2026-06-19 — Programme d'affiliation grand public + page `/affiliation` + barème de commission borné par les marges
+
+**Contexte** : Max veut lancer une affiliation façon taap.it/fr/affiliate
+(hero « 40 % à vie » + calculateur de gains), en parallèle de l'outreach
+vers les sites de classement (cf. § 2026-06-18). taap.it affiche 40 % à
+vie à plat, mais taap.it tourne à ~99 % de marge brute. Nous avons un coût
+LLM réel par run qui écrase les marges des plans hauts.
+
+**Options considérées (barème de commission)** :
+- A : 40 % à vie à plat sur tous les plans (copie taap.it).
+- B : 40 % Solo / 25 % Starter / Pro+Agency exclus de l'affiliation grand
+  public.
+- C : 20-25 % à vie à plat (taux partenaire agence déjà documenté).
+
+**Choix** : **B** (tranché par Max). Confronté aux marges nettes (doc 04 :
+Solo ~88 %, Starter ~36 %, Pro ~15 %) :
+- A est éliminé : 40 % rendrait Starter à −4 % et Pro à −25 % (perte sèche
+  par client référé).
+- B garde le headline « 40 % à vie » (vrai sur Solo, le plan que les
+  audiences poussent le plus) sans saigner : Solo reste ~48 % net après
+  commission. Starter à 25 % reste ~11 %. Pro/Agency renvoyés au programme
+  partenaire agence (contrat, 20-25 %, doc 06).
+
+**Livré** :
+- Page **`/affiliation`** (route `(marketing)`), 4 sections en DA Mamie GEO
+  (Inter, accent bleu brand `--color-accent`, CTA noir pill, watermark en
+  barres) : `AffiliateHero` (client, titre « 40 % à vie » + calculateur
+  slider parrainages → € mensuels, basé Solo), `AffiliateHow` (3 étapes),
+  `AffiliateFAQ` (`<details>` natif, 6 Q), `AffiliateFinalCTA` (fond noir).
+  Constantes centralisées (`_sections/affiliation/constants.ts` :
+  `SOLO_RATE`, `STARTER_RATE`, `COMMISSION_PER_SOLO`, `AFFILIATE_CONTACT_HREF`).
+- **Pas de back-office affilié en V0** : le CTA ouvre un email de
+  candidature (`mailto:hello@`), validation manuelle. Le tracking Stripe
+  (lien/code unique, attribution, versement) reste **V1** (doc 02).
+- Liens : footer (colonne Produit) + nav mobile. Pas ajouté à la nav
+  desktop (déjà 6 items, éviter le crowding).
+- Events PostHog : `affiliate_cta_clicked` (sections hero/final).
+- Docs : doc 04 (barème + garde-fou marges), doc 05 (§ Affiliations + kit
+  outreach sites de classement).
+- `tsc --noEmit` + `eslint` OK.
+
+**Conséquences attendues** : canal d'acquisition créateur activable
+manuellement tout de suite, sans dette technique majeure ; headline
+agressif mais honnête. Levier complémentaire de l'outreach review.
+
+**À revisiter** : brancher le tracking affilié (V1) si le canal génère
+des leads ; surveiller que les parrainages Starter ne dépassent pas un
+volume où 25 % devient lourd ; aligner le barème si les marges Pro
+bougent (bascule Sonnet 4.6).
+
+#### 2026-06-18 — Analyse avis concurrent Botrank (alambic.org) + plan « prendre la tête du classement »
+
+**Contexte** : Max signale l'avis de Nicolas Pérot sur Botrank
+(`alambic.org/avis-botrank`, note 4/5, « mon outil préféré en français »).
+Botrank est notre concurrent FR direct n°2 (cf. doc 01). L'objectif n'est
+pas un duel de features mais d'être **l'outil GEO FR recommandé** par ce
+type de testeur/journaliste influent (le « classement » = les comparatifs
+FR où Botrank domine aujourd'hui).
+
+**Ce que dit l'avis (factuel, daté 2026-06)** :
+- Botrank : SaaS GEO FR lancé 2025. Tracke 5 moteurs (ChatGPT, Perplexity,
+  Gemini, **Mistral**, Google AI Overviews) **par scraping d'interfaces**.
+- Plans : Starter 75 €/an-mensualisé (89 € au mois) = 25 prompts, **3
+  modèles au choix** ; Business (prix non public) = 100 prompts, scan
+  technique étendu, support tél. Essai **7 jours**.
+- Forces saluées : UI claire/pédagogique, **module sentiment avec
+  verbatims**, **agent IA conversationnel « Bob »**, traçabilité des
+  sources par moteur, **Made in France**, équipe réactive.
+- Faiblesses pointées par le testeur : **pas de Claude ni Grok**,
+  fan-out queries invisibles, **audits techniques jugés légers**, **pas
+  de bibliothèque/aide à la création de prompts** (l'utilisateur construit
+  sa stratégie seul), **pas d'export PDF/image**, flou sur la version de
+  ChatGPT, et caveat général « mesure encore expérimentale ».
+
+**Lecture stratégique — nos angles déjà gagnants** (à mettre en avant,
+pas à construire) :
+1. **Prix** : 9,99 € vs 75 € à l'entrée (7,5× moins cher), 14 j sans
+   carte vs 7 j.
+2. **Claude inclus dès l'entrée** (Botrank : absent, pointé comme manque
+   n°1 par le testeur) + Le Chat dès Starter.
+3. **API natives vs scraping** : reproductibilité, le testeur lui-même
+   doute de la fiabilité de la mesure Botrank.
+4. **Bibliothèque de prompts** : `suggestPrompts` + régénération depuis
+   profil = exactement le manque n°4 reproché à Botrank.
+5. **Export PNG des charts** : on l'a (dashboard, ranking) = manque n°5
+   reproché à Botrank. (Reste à ajouter un **export PDF/rapport** propre.)
+6. **Audit technique** : 30+ checks + crawlabilité bots IA + PSI = plus
+   costaud que « léger ».
+
+**Où Botrank nous bat aujourd'hui (gaps à combler pour gagner le test)** :
+- ❌ **Agent IA conversationnel « Bob »** — on a `/conseils` (plan
+  d'action priorisé) mais pas de chat. Décision V0 assumée (cf. vs/botrank
+  FAQ). À reconsidérer si les comparatifs en font un critère bloquant.
+- ❌ **Sentiment avec verbatims augmentés** — on score le sentiment mais
+  on n'expose pas les **citations textuelles** (« voici la phrase où l'IA
+  te recommande/te descend »). Quick win fort : la donnée est déjà dans
+  `runs.responseText`, manque l'extraction + l'affichage.
+- ❌ **Export PDF/rapport client** — on a le PNG par chart, pas un rapport
+  consolidé exportable (manque commun aux deux, levier agence).
+- ⚠️ **Notoriété/preuve sociale FR** — Botrank a déjà l'avis Pérot.
+  Action = outreach testeurs/médias SEO FR (alambic.org, BDM, abondance,
+  WebRankInfo), pas du code.
+
+**Choix (plan d'action, par priorité)** :
+1. **Distribution éditoriale** : page `/vs/botrank` existe déjà et est
+   honnête → la pousser ; viser une review indépendante (outreach Nicolas
+   Pérot / alambic.org et consorts avec accès gratuit prolongé). C'est le
+   vrai levier « prendre la tête du classement ».
+2. **Verbatims de sentiment** (quick win produit) : extraire et afficher
+   la phrase source de chaque mention scorée. Comble le seul vrai avantage
+   produit perçu de Botrank côté analyse, data déjà en base.
+3. **Export rapport (PDF)** : consolidé multi-charts, white-label léger →
+   sert aussi l'angle agence/marque blanche.
+4. **« Bob »** : NON priorisé. Un chat sur ses propres données est lourd
+   et notre parti pris (dashboard lisible + plan d'action) est défendable.
+   À revisiter seulement si plusieurs comparatifs le posent en critère
+   éliminatoire.
+
+**Conséquences attendues** : positionnement « moins cher + Claude + API
+natives + bibliothèque de prompts + audit sérieux » déjà supérieur sur le
+papier ; les 2 quick wins (verbatims, export PDF) ferment les derniers
+reproches transférables. Le nerf de la guerre reste la **preuve sociale**
+(reviews FR), pas la feature parity.
+
+**À revisiter** : après obtention (ou refus) d'une review indépendante FR ;
+re-snapshot Botrank pricing/moteurs au prochain passage veille (doc 01).
+
 #### 2026-06-17 — Vue « Prompts + analytics » + widget « Top Sources »
 
 **Contexte** : la page `/app/prompts` ne montrait que de l'opérationnel (catégorie, cadence, runs success, dernier run) ; pour voir ce qu'un prompt « donne » il fallait ouvrir chaque détail un par un. Demande Max : une vue d'ensemble croisant prompt ↔ analytics, plus un classement des domaines cités comme sources par les IA.

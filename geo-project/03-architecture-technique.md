@@ -105,10 +105,11 @@ mamie-geo/
                     └─────────────────────────────────────┘
                                           ▲
 ┌─────────────────────────────────────────┼───────────────────────┐
-│  Vercel Cron 5 min → /api/cron/dispatch (queue Postgres)        │
-│  Workers : execute-prompt (1 prompt × 1 LLM = 1 job),           │
-│  score-response, recompute_metrics, send-weekly-email,          │
-│  audit_workspace_url                                            │
+│  Drain queue Postgres : after() à l'enqueue (chaud) +           │
+│  Vercel Cron 1 h → /api/cron/dispatch (filet de sécurité)       │
+│  Workers (src/workers/drain-queue.ts) : execute-prompt          │
+│  (1 prompt × 1 LLM = 1 job), score-response, recompute_metrics, │
+│  send-weekly-email, audit_workspace_url                         │
 └───────────────┼──────────────────────────────────────────────────┘
                 ▼
    APIs externes natives (pas OpenRouter) : OpenAI (web_search),
@@ -159,7 +160,7 @@ réécriture, (3) testabilité native. Détail des justifications : doc 09 §
 | Composant         | Choix V0                                          | Migration scale |
 | ----------------- | ------------------------------------------------- | --------------- |
 | Queue             | **Postgres-based custom** (~150 lignes helpers)   | Inngest si > 100K runs/mois |
-| Cron              | **Vercel Cron** (dispatch toutes les 5 min)       | idem |
+| Cron              | **Vercel Cron** (dispatch 1 h = filet ; drain à l'enqueue via after()) | idem |
 | Long-running jobs | découpés en jobs idempotents (1 prompt × 1 LLM = 1 job) | OK timeouts Vercel (Hobby 10s / Pro 60s) |
 
 > Pourquoi pas Inngest en V0 : free tier 50K steps/mois ; 1 Pro = 15K
