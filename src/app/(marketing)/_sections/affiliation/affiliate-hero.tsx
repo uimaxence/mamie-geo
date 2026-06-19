@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { capture } from "@/lib/posthog-client";
 import { LinkButton } from "@/components/ui";
 import { AFFILIATE_CONTACT_HREF, COMMISSION_PER_SOLO } from "./constants";
@@ -19,10 +19,14 @@ import { AFFILIATE_CONTACT_HREF, COMMISSION_PER_SOLO } from "./constants";
 const MIN_REFERRALS = 1;
 const MAX_REFERRALS = 200;
 const DEFAULT_REFERRALS = 100;
+// Largeur du thumb (px), sert à recaler la bulle pile au-dessus du curseur.
+const THUMB_PX = 20;
 
 export function AffiliateHero() {
   const [referrals, setReferrals] = useState(DEFAULT_REFERRALS);
   const monthly = Math.round(referrals * COMMISSION_PER_SOLO);
+  const animatedMonthly = Math.round(useAnimatedNumber(monthly));
+  const pct = ((referrals - MIN_REFERRALS) / (MAX_REFERRALS - MIN_REFERRALS)) * 100;
 
   return (
     <section className="relative overflow-hidden bg-[color:var(--color-gray-50)] pt-16 pb-12 sm:pt-20">
@@ -57,13 +61,16 @@ export function AffiliateHero() {
 
         {/* Calculateur de gains : slider → montant mensuel récurrent */}
         <div className="mt-6 grid items-center gap-8 rounded-[var(--radius-xl)] border border-[color:var(--color-border)] bg-white px-6 py-10 sm:px-10 lg:grid-cols-[1fr_auto]">
-          <div>
-            <label
-              htmlFor="affiliate-referrals"
-              className="type-eyebrow text-[color:var(--color-ink-soft)]"
+          <div className="relative pt-12">
+            {/* Bulle qui suit le curseur. Le décalage `(0.5 - pct/100)*THUMB`
+             * recentre la bulle pile sur le thumb (qui ne va pas bord à
+             * bord). transition-[left] pour un suivi fluide. */}
+            <div
+              className="pointer-events-none absolute top-0 z-10 -translate-x-1/2 whitespace-nowrap rounded-[var(--radius-pill)] border border-[color:var(--color-border)] bg-white px-3 py-1 text-sm font-medium text-[color:var(--color-ink)] shadow-[var(--shadow-md)] transition-[left] duration-75 ease-out"
+              style={{ left: `calc(${pct}% + ${(0.5 - pct / 100) * THUMB_PX}px)` }}
             >
-              Combien tu peux gagner
-            </label>
+              {referrals} {referrals > 1 ? "parrainages" : "parrainage"} Solo
+            </div>
             <input
               id="affiliate-referrals"
               type="range"
@@ -71,33 +78,55 @@ export function AffiliateHero() {
               max={MAX_REFERRALS}
               value={referrals}
               onChange={(e) => setReferrals(Number(e.target.value))}
-              className="mt-5 w-full accent-[color:var(--color-accent)]"
               aria-describedby="affiliate-referrals-value"
+              aria-label="Nombre de parrainages Solo"
+              style={{
+                background: `linear-gradient(to right, var(--color-accent) ${pct}%, var(--color-gray-100) ${pct}%)`,
+              }}
+              className="h-2.5 w-full cursor-pointer appearance-none rounded-full outline-none [&::-moz-range-thumb]:size-5 [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-[color:var(--color-accent)] [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:shadow-[var(--shadow-md)] [&::-webkit-slider-thumb]:size-5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-[color:var(--color-accent)] [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow-[var(--shadow-md)] [&::-webkit-slider-thumb]:transition-transform [&::-webkit-slider-thumb]:hover:scale-110"
             />
-            <div className="mt-3 inline-flex items-center gap-1.5 rounded-[var(--radius-pill)] border border-[color:var(--color-border)] bg-white px-3 py-1 text-sm font-medium text-[color:var(--color-ink)]">
-              {referrals} {referrals > 1 ? "parrainages" : "parrainage"} Solo
-            </div>
           </div>
 
           <div className="text-center lg:text-right">
             <div
               id="affiliate-referrals-value"
-              className="text-5xl font-bold tracking-tight text-[color:var(--color-accent)] sm:text-6xl"
+              className="text-5xl font-bold tracking-tight text-[color:var(--color-accent)] tabular-nums sm:text-6xl"
             >
-              {monthly.toLocaleString("fr-FR")}&nbsp;€
+              {animatedMonthly.toLocaleString("fr-FR")}&nbsp;€
             </div>
             <p className="type-meta mt-1">par mois, à vie</p>
           </div>
         </div>
-
-        <p className="type-meta mt-4 text-center">
-          Estimation sur le plan Solo (9,99 €, commission 40 %). Un parrainage Starter (49 €) te
-          rapporte 25 %, soit 12,25 € par mois. Les plans Pro et Agency passent par le programme
-          partenaire agence.
-        </p>
       </div>
     </section>
   );
+}
+
+// Tween d'un nombre vers sa cible (easeOutCubic, rAF) pour animer le
+// compteur de gains quand on bouge le slider. SSR-safe : la valeur
+// initiale = la cible, l'animation ne démarre qu'au montage client.
+function useAnimatedNumber(target: number, duration = 350): number {
+  const [display, setDisplay] = useState(target);
+  const displayRef = useRef(target);
+  const rafRef = useRef(0);
+
+  useEffect(() => {
+    cancelAnimationFrame(rafRef.current);
+    const from = displayRef.current;
+    const start = performance.now();
+    const step = (now: number) => {
+      const t = Math.min(1, (now - start) / duration);
+      const eased = 1 - Math.pow(1 - t, 3);
+      const value = from + (target - from) * eased;
+      displayRef.current = value;
+      setDisplay(value);
+      if (t < 1) rafRef.current = requestAnimationFrame(step);
+    };
+    rafRef.current = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(rafRef.current);
+  }, [target, duration]);
+
+  return display;
 }
 
 // Watermark décoratif : barres verticales bleu brand très diffuses,
