@@ -35,6 +35,10 @@ import { TrendSection } from "./trend-section";
 // Le coût LLM USD a été retiré (donnée technique sans valeur pour le client).
 
 export const dynamic = "force-dynamic";
+// L'action "Lancer maintenant" (./actions.ts) draine la queue en tâche de
+// fond via after() après la réponse : il faut un budget d'exécution large
+// (cf. doc 09 § 2026-06-19, réduction du cron dispatch */5 → 1 h).
+export const maxDuration = 300;
 
 const LLM_ORDER = ["chatgpt", "claude", "perplexity", "gemini", "lechat"] as const;
 

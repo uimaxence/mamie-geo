@@ -4,12 +4,14 @@ import { randomUUID } from "node:crypto";
 import { and, eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { db } from "@/db/client";
 import { brands, prompts, runs, workspaceMembers, workspaces } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { getConfiguredLLMs } from "@/lib/llm";
 import { captureServerEvent } from "@/lib/posthog-server";
 import { enqueue } from "@/lib/queue";
+import { drainQueue } from "@/workers/drain-queue";
 
 // Server Action pour le bouton "Lancer maintenant" du dashboard. Même
 // logique que /api/runs/trigger mais auth via session Better Auth (et pas
@@ -99,6 +101,21 @@ export async function triggerRunNow(): Promise<TriggerResult> {
 
   // Force le re-render du dashboard côté client après l'action
   revalidatePath("/app/dashboard");
+
+  // Draine la queue immédiatement en tâche de fond (après la réponse user)
+  // pour que le run parte tout de suite, sans attendre le cron dispatch
+  // (passé à 1 h pour laisser Neon scale-to-zero, cf. doc 09 § 2026-06-19).
+  // Best-effort : si le drain échoue ou est coupé, le cron rattrape. La
+  // page expose maxDuration=300 pour laisser le temps au drain.
+  if (jobsEnqueued > 0) {
+    after(async () => {
+      try {
+        await drainQueue();
+      } catch {
+        // silencieux : le cron filet de sécurité reprendra les jobs restants
+      }
+    });
+  }
 
   return { ok: true, jobsEnqueued, runsCreated, skipped };
 }

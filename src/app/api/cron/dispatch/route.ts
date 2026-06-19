@@ -4,37 +4,33 @@ import { db } from "@/db/client";
 import { queueJobs } from "@/db/schema";
 import { logCronEvent } from "@/lib/cron-logger";
 import { env } from "@/lib/env";
-import { claim, complete, fail } from "@/lib/queue";
-import {
-  parseRecomputeMetricsPayload,
-  recomputeMetricsForBrandLLMDate,
-} from "@/lib/metrics/recompute";
-import { auditWorkspaceUrl, parseAuditWorkspaceUrlPayload } from "@/workers/audit-workspace-url";
-import { executePrompt, parseExecutePromptPayload } from "@/workers/execute-prompt";
-import { scoreResponse, parseScoreResponsePayload } from "@/workers/score-response";
-import { parseSendWeeklyEmailPayload, sendWeeklyEmail } from "@/workers/send-weekly-email";
+import { drainQueue } from "@/workers/drain-queue";
 
-// Endpoint déclenché par Vercel Cron toutes les 5 minutes (cf. vercel.json).
-// Pull jusqu'à BATCH_SIZE jobs et les exécute.
+// Endpoint déclenché par Vercel Cron (cf. vercel.json). Depuis 2026-06-19
+// le cron tourne toutes les heures en FILET DE SÉCURITÉ (retries + jobs
+// non drainés) : le chemin chaud est le drain immédiat via `after()` après
+// un enqueue (cf. src/workers/drain-queue.ts + doc 09 § 2026-06-19). Motif :
+// un cron trop fréquent réveillait Neon en continu (pas de scale-to-zero)
+// → compute facturé 24/7.
+//
+// Le handler draine la queue en boucle (time-budgeted) à chaque tick, pas
+// un seul batch, pour vider ce qui s'est accumulé entre deux passages.
 //
 // IMPORTANT (cf. doc 09 § 2026-05-13) : Vercel Cron envoie des **GET**
-// avec `Authorization: Bearer ${CRON_SECRET}`. C'est la cause racine du
-// blocker prod précédent (la route n'exportait que POST → cron tirait
-// dans le vide via le healthcheck GET). GET et POST pointent maintenant
-// sur le même handler.
+// avec `Authorization: Bearer ${CRON_SECRET}`. GET et POST pointent sur le
+// même handler.
 //
 // Modes :
-//   - GET/POST authentifié → exécute le dispatch
-//   - GET/POST ?inspect=1 authentifié → retourne l'état de la queue
-//     sans rien exécuter (debug visibility)
+//   - GET/POST authentifié → draine la queue
+//   - GET/POST ?inspect=1 authentifié → état de la queue sans rien exécuter
 //   - GET sans auth → healthcheck léger (sans body sensible)
 //
 // cf. geo-project/03-architecture-technique.md § Workers et orchestration
 
-const BATCH_SIZE = 25;
-
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
+// Laisse au drain le temps de vider la queue accumulée en un seul tick.
+export const maxDuration = 300;
 
 export async function GET(request: NextRequest) {
   return handle(request);
@@ -65,7 +61,6 @@ async function handle(request: NextRequest): Promise<NextResponse> {
 }
 
 async function runDispatch(request: NextRequest): Promise<NextResponse> {
-  const startedAt = Date.now();
   logCronEvent({
     event: "cron_dispatch_start",
     method: request.method,
@@ -73,90 +68,10 @@ async function runDispatch(request: NextRequest): Promise<NextResponse> {
     userAgent: request.headers.get("user-agent") ?? null,
   });
 
-  const jobs = await claim(BATCH_SIZE);
-  logCronEvent({ event: "jobs_claimed", count: jobs.length });
-
-  let succeeded = 0;
-  const failures: { id: string; kind: string; error: string }[] = [];
-
-  for (const job of jobs) {
-    const jobStartedAt = Date.now();
-    try {
-      await runWorker(job);
-      await complete(job.id);
-      succeeded += 1;
-      logCronEvent({
-        event: "job_succeeded",
-        jobId: job.id,
-        kind: job.kind,
-        durationMs: Date.now() - jobStartedAt,
-      });
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      await fail(job.id, message);
-      failures.push({ id: job.id, kind: job.kind, error: message });
-      logCronEvent({
-        level: "error",
-        event: "job_failed",
-        jobId: job.id,
-        kind: job.kind,
-        durationMs: Date.now() - jobStartedAt,
-        error: message,
-      });
-    }
-  }
-
-  const summary = {
-    claimed: jobs.length,
-    succeeded,
-    failed: failures.length,
-    totalDurationMs: Date.now() - startedAt,
-  };
+  const summary = await drainQueue();
   logCronEvent({ event: "cron_dispatch_end", ...summary });
 
-  return NextResponse.json({ ...summary, failures });
-}
-
-interface ClaimedJob {
-  id: string;
-  kind: string;
-  payload: unknown;
-}
-
-async function runWorker(job: ClaimedJob): Promise<void> {
-  switch (job.kind) {
-    case "execute_prompt": {
-      const payload = parseExecutePromptPayload(job.payload);
-      await executePrompt(payload);
-      return;
-    }
-    case "score_response": {
-      const payload = parseScoreResponsePayload(job.payload);
-      await scoreResponse(payload);
-      return;
-    }
-    case "recompute_metrics": {
-      // En Phase A le recompute est appelé inline depuis score_response,
-      // donc rien n'enqueue ce kind par défaut. La route de dispatch
-      // reste branchée pour les ré-agrégations manuelles ou un cron de
-      // safety à venir en Phase B.
-      const payload = parseRecomputeMetricsPayload(job.payload);
-      await recomputeMetricsForBrandLLMDate(payload);
-      return;
-    }
-    case "send_weekly_email": {
-      const payload = parseSendWeeklyEmailPayload(job.payload);
-      await sendWeeklyEmail(payload);
-      return;
-    }
-    case "audit_workspace_url": {
-      const payload = parseAuditWorkspaceUrlPayload(job.payload);
-      await auditWorkspaceUrl(payload);
-      return;
-    }
-    default:
-      throw new Error(`Job kind inconnu : ${job.kind}`);
-  }
+  return NextResponse.json(summary);
 }
 
 // ─────────────────────────────────────────────────────────────────────
