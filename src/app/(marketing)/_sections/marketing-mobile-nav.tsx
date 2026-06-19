@@ -17,6 +17,7 @@ const NAV_LINKS: { href: string; label: string; isNew?: boolean }[] = [
   // comparateurs (2026-06-12), comme côté desktop.
   { href: "/outils", label: "Outils gratuits", isNew: true },
   { href: "/pricing", label: "Tarif" },
+  { href: "/affiliation", label: "Affiliation" },
   { href: "/blog", label: "Blog" },
   { href: "/#faq", label: "FAQ" },
 ];

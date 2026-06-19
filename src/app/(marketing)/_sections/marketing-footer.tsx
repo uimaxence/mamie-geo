@@ -17,6 +17,7 @@ const COLUMNS = [
     links: [
       { label: "Fonctionnalités", href: "/#how-it-works" },
       { label: "Tarif", href: "/pricing" },
+      { label: "Affiliation", href: "/affiliation" },
       { label: "Blog", href: "/blog" },
     ],
   },
