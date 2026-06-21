@@ -328,6 +328,28 @@ export const aiTrafficDaily = pgTable(
   ],
 );
 
+// Trafic TOTAL du site (toutes origines), agrégé en quotidien par le même
+// pixel cookieless. Le snippet beacon désormais à CHAQUE pageview en
+// transmettant la source IA détectée (ou null) : `ai_traffic_daily` garde la
+// ventilation par IA, et cette table compte le total → on dérive le ratio
+// « % du trafic venu des IA ». Reste cookieless, IP jamais stockée (cf. doc 09
+// § 2026-06-21). 1 ligne / jour / marque. On compte des PAGES VUES (pas des
+// visiteurs uniques : sans cookie, pas de session fiable), disclaimer UI.
+export const siteTrafficDaily = pgTable(
+  "site_traffic_daily",
+  {
+    brandId: uuid()
+      .notNull()
+      .references(() => brands.id, { onDelete: "cascade" }),
+    date: date().notNull(),
+    visits: integer().notNull().default(0),
+  },
+  (t) => [
+    primaryKey({ columns: [t.brandId, t.date] }),
+    index("idx_site_traffic_daily_date").on(t.date),
+  ],
+);
+
 // Rate-limit / dédup de l'endpoint public d'ingestion du pixel, en Postgres
 // (pas d'Upstash Redis en V1 — cf. doc 09 § 2026-06-15, à revisiter selon
 // volume). `bucketKey` = compteur d'une fenêtre : `global:{date}` (cap
@@ -615,6 +637,47 @@ export const comparatorScans = pgTable(
     index("idx_comparator_scans_sector").on(t.sectorNormalized),
     index("idx_comparator_scans_created").on(t.createdAt),
     index("idx_comparator_scans_email").on(t.email),
+  ],
+);
+
+// ──────────────────────────────────────────────────────────────────────
+// Actions de la semaine : décisions utilisateur (cf. doc 09 § 2026-06-21)
+// Le dashboard génère 1-2 actions priorisées À LA VOLÉE depuis les métriques
+// (src/lib/weekly-actions) : zéro texte persisté ici. Cette table stocke
+// UNIQUEMENT ce que l'utilisateur a décidé d'une action (fait / reporté /
+// ignoré), par semaine ISO. Absence de ligne = action active. Une action
+// done/dismissed cette semaine ne réapparaît pas ; `scope = permanent` masque
+// pour toujours les gestes one-shot (1er prompt, 1er audit).
+// ──────────────────────────────────────────────────────────────────────
+
+export const WEEKLY_ACTION_STATUS = ["done", "dismissed", "snoozed"] as const;
+export const WEEKLY_ACTION_SCOPE = ["week", "permanent"] as const;
+
+export const weeklyActionStates = pgTable(
+  "weekly_action_states",
+  {
+    brandId: uuid()
+      .notNull()
+      .references(() => brands.id, { onDelete: "cascade" }),
+    /** Slug du catalogue (src/lib/weekly-actions/catalog.ts), clé éditoriale stable. */
+    actionSlug: text("action_slug").notNull(),
+    /** Semaine ISO 8601 `YYYY-Www` de la décision (isoWeekFromDate). */
+    isoWeek: text("iso_week").notNull(),
+    status: text().notNull(),
+    /** Si snoozed : tant que now < snoozeUntil, l'action reste masquée. */
+    snoozeUntil: timestamp({ withTimezone: true }),
+    scope: text().notNull().default("week"),
+    createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    // Idempotence : 1 décision par (marque, action, semaine). L'upsert
+    // ON CONFLICT met à jour le statut.
+    primaryKey({ columns: [t.brandId, t.actionSlug, t.isoWeek] }),
+    // Lecture dashboard : tous les statuts d'une marque pour la semaine.
+    index("idx_weekly_action_states_brand_week").on(t.brandId, t.isoWeek),
+    check("weekly_action_status_check", sql`${t.status} IN ('done','dismissed','snoozed')`),
+    check("weekly_action_scope_check", sql`${t.scope} IN ('week','permanent')`),
   ],
 );
 

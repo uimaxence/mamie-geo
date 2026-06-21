@@ -22,11 +22,17 @@ import { bestWorstLlm, interpretPartDeVoix } from "@/lib/metrics/interpret";
 import { quotasFor } from "@/lib/plans/quotas";
 import { nextScheduledRunAt } from "@/lib/scheduler/next-run";
 import { getRankSummary } from "@/lib/competitors/queries";
+import {
+  buildActionContext,
+  loadAuditSignal,
+  selectActionsForBrand,
+} from "@/lib/weekly-actions/queries";
 import { loadSidebarData } from "@/app/(app)/app-sidebar-data";
 import { DashboardSetupGuide } from "./dashboard-setup-guide";
 import { DashboardTracker } from "./dashboard-tracker";
 import { NextRunBar } from "./next-run-bar";
 import { RankSummaryCard } from "./rank-summary-card";
+import { WeeklyActionsCard } from "./weekly-actions-card";
 import { TrendSection } from "./trend-section";
 
 // Dashboard data dynamique. Direction Airbnb-like (pivot 2026-05-07).
@@ -144,6 +150,25 @@ export default async function DashboardPage() {
         ? "warning"
         : "default";
 
+  // Actions de la semaine : 1-2 gestes priorisés dérivés des données DÉJÀ
+  // chargées (agg, rankSummary, llmReading) + un signal audit. Zéro appel LLM,
+  // zéro re-fetch des métriques. Seulement quand des prompts existent, sinon
+  // le DashboardSetupGuide gère l'amorçage (pas deux CTA empilés).
+  const weeklyActions =
+    promptCount > 0
+      ? await selectActionsForBrand(
+          data.brand.id,
+          buildActionContext({
+            promptsCount: data.promptsCount,
+            competitorsCount: data.competitorsCount,
+            agg,
+            llmReading,
+            rankSummary,
+            audit: await loadAuditSignal(data.workspace.id),
+          }),
+        )
+      : [];
+
   return (
     <PageContainer>
       <DashboardTracker
@@ -171,6 +196,10 @@ export default async function DashboardPage() {
       {/* Compte à rebours du prochain run + « Lancer maintenant ». Caché
        * tant qu'aucun prompt (le guide d'activation prend le relais). */}
       {promptCount > 0 && <NextRunBar nextRunISO={nextRunISO} cadence={planCadence} />}
+
+      {/* Actions de la semaine : data → gestes concrets, en haut car c'est
+       * l'élément le plus actionnable du dashboard. */}
+      {weeklyActions.length > 0 && <WeeklyActionsCard actions={weeklyActions} />}
 
       {/* 4 Stats, agrégées tous-LLMs (cf. PR6 2026-05-18). */}
       <section className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">

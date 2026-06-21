@@ -1,9 +1,9 @@
 import { eq, sql } from "drizzle-orm";
 import { db } from "@/db/client";
-import { aiTrafficDaily, brands, workspaces } from "@/db/schema";
+import { aiTrafficDaily, brands, siteTrafficDaily, workspaces } from "@/db/schema";
 import { isAllowedOrigin } from "@/lib/ai-traffic/detect";
 import { hashIp } from "@/lib/ai-traffic/keys";
-import { allowHit } from "@/lib/ai-traffic/rate-limit";
+import { allowAiHit, allowSiteHit } from "@/lib/ai-traffic/rate-limit";
 import { collectPayloadSchema } from "@/lib/ai-traffic/schemas";
 import { quotasFor } from "@/lib/plans/quotas";
 
@@ -88,16 +88,29 @@ export async function POST(request: Request): Promise<Response> {
   // 4. Rate-limit / dédup (Postgres). IP jamais stockée en clair.
   const date = todayUTC();
   const ipHash = hashIp(clientIp(request), date);
-  if (!(await allowHit(ipHash, s, date))) return ok();
 
-  // 5. Upsert de l'agrégat quotidien.
+  // 5. Trafic TOTAL : chaque pageview compte (cap large par IP/jour). Si
+  //    throttlé, on s'arrête là (pas non plus de comptage IA).
+  if (!(await allowSiteHit(ipHash, date))) return ok();
   await db
-    .insert(aiTrafficDaily)
-    .values({ brandId: row.brandId, source: s, date, visits: 1 })
+    .insert(siteTrafficDaily)
+    .values({ brandId: row.brandId, date, visits: 1 })
     .onConflictDoUpdate({
-      target: [aiTrafficDaily.brandId, aiTrafficDaily.source, aiTrafficDaily.date],
-      set: { visits: sql`${aiTrafficDaily.visits} + 1` },
+      target: [siteTrafficDaily.brandId, siteTrafficDaily.date],
+      set: { visits: sql`${siteTrafficDaily.visits} + 1` },
     });
+
+  // 6. Sous-ensemble IA : seulement si une origine a été détectée, avec son
+  //    propre cap par (IP × source). Le total est déjà compté ci-dessus.
+  if (s !== null && (await allowAiHit(ipHash, s, date))) {
+    await db
+      .insert(aiTrafficDaily)
+      .values({ brandId: row.brandId, source: s, date, visits: 1 })
+      .onConflictDoUpdate({
+        target: [aiTrafficDaily.brandId, aiTrafficDaily.source, aiTrafficDaily.date],
+        set: { visits: sql`${aiTrafficDaily.visits} + 1` },
+      });
+  }
 
   return ok();
 }

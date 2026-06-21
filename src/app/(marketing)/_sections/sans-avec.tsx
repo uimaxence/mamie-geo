@@ -1,4 +1,15 @@
-import { Bot, Cat, Globe2, MessageCircle, Search, Sparkles, type LucideIcon } from "lucide-react";
+import {
+  ArrowRight,
+  Bot,
+  Cat,
+  Check,
+  Globe2,
+  ListChecks,
+  MessageCircle,
+  Search,
+  Sparkles,
+  type LucideIcon,
+} from "lucide-react";
 import { Section } from "@/components/ui";
 import { MockupCompetitors } from "./mockups/mockup-competitors";
 
@@ -22,6 +33,12 @@ export function SansAvec() {
       </div>
 
       <div className="mt-14 grid grid-cols-1 gap-5 md:grid-cols-2">
+        <BentoCard
+          className="md:col-span-2"
+          title="Tu ne regardes pas des courbes, tu sais quoi faire."
+          description="Chaque semaine, Mamie GEO transforme tes données, tes concurrents et ton marché en 1 à 2 actions concrètes, avec le résultat attendu. Tu fais, tu valides, tu progresses. Les autres outils s'arrêtent au constat."
+          illustration={<MockupActions />}
+        />
         <BentoCard
           title="Les 5 IA grand public, sous contrôle."
           description="ChatGPT, Claude, Perplexity, Gemini et Le Chat, interrogées chaque jour avec tes prompts, sans que tu lèves le petit doigt."
@@ -51,11 +68,14 @@ interface BentoCardProps {
   title: string;
   description: string;
   illustration: React.ReactNode;
+  className?: string;
 }
 
-function BentoCard({ title, description, illustration }: BentoCardProps) {
+function BentoCard({ title, description, illustration, className = "" }: BentoCardProps) {
   return (
-    <article className="card-hover-warm flex flex-col overflow-hidden rounded-[var(--radius-xl)] border border-[color:var(--color-border)] bg-white">
+    <article
+      className={`card-hover-warm flex flex-col overflow-hidden rounded-[var(--radius-xl)] border border-[color:var(--color-border)] bg-white ${className}`}
+    >
       <div className="relative h-44 overflow-hidden">{illustration}</div>
       <div className="p-6">
         <h3 className="type-h3">{title}</h3>
@@ -68,6 +88,64 @@ function BentoCard({ title, description, illustration }: BentoCardProps) {
 // ─────────────────────────────────────────────────────────────────────
 // Mini-mockups, 4 illustrations 100 % CSS/JSX
 // ─────────────────────────────────────────────────────────────────────
+
+// Card featured : 2 "actions de la semaine" miniaturisées (titre + résultat
+// attendu + CTA), reproduit la card du dashboard. Une cochée (faite).
+function MockupActions() {
+  return (
+    <div className="absolute inset-0 flex items-center justify-center bg-[color:var(--color-gray-50)] px-6">
+      <div className="w-full max-w-[420px] rounded-[var(--radius-lg)] border border-[color:var(--color-border)] bg-white p-4 shadow-[var(--shadow-md)]">
+        <div className="flex items-center gap-2">
+          <span className="flex size-6 items-center justify-center rounded-[var(--radius-sm)] bg-[color:var(--color-gray-50)]">
+            <ListChecks size={13} style={{ color: "var(--color-blue)" }} />
+          </span>
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-[color:var(--color-muted)]">
+            Actions de la semaine
+          </span>
+        </div>
+        <MockActionRow
+          title="Repasse devant Concurrent A"
+          outcome="Il est cité 4 fois de plus que toi"
+          done={false}
+        />
+        <MockActionRow
+          title="Comble ton angle mort sur Gemini"
+          outcome="Cette IA te cite bien moins que Claude"
+          done
+        />
+      </div>
+    </div>
+  );
+}
+
+function MockActionRow({
+  title,
+  outcome,
+  done,
+}: {
+  title: string;
+  outcome: string;
+  done: boolean;
+}) {
+  return (
+    <div className="mt-2.5 rounded-[var(--radius-md)] border border-[color:var(--color-border)] p-2.5 first:mt-3">
+      <div className="flex items-start gap-1.5">
+        <Sparkles size={11} className="mt-0.5 shrink-0" style={{ color: "var(--color-blue)" }} />
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-[11px] font-semibold text-[color:var(--color-ink)]">{title}</p>
+          <p className="truncate text-[10px] text-[color:var(--color-ink-soft)]">{outcome}</p>
+        </div>
+        {done ? (
+          <span className="flex items-center gap-0.5 text-[10px] font-medium text-[color:var(--color-success)]">
+            <Check size={11} /> Fait
+          </span>
+        ) : (
+          <ArrowRight size={12} className="mt-0.5 shrink-0 text-[color:var(--color-muted)]" />
+        )}
+      </div>
+    </div>
+  );
+}
 
 // Card 1 : 5 LLM badges flottants disposés en cluster, fond gris-50
 function MockupLLMs() {

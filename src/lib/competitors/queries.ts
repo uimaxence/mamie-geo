@@ -317,6 +317,11 @@ export interface RankSummary {
   reliable: boolean;
   windowDays: number;
   deltaDays: number;
+  /** Nom de l'entité juste au-dessus de toi (rang - 1), null si tu es n°1 ou
+   *  pas encore classé. Sert au moteur d'actions (« viser une place »). */
+  aheadName: string | null;
+  /** Écart de citations avec l'entité juste au-dessus, null si non applicable. */
+  gapToAhead: number | null;
 }
 
 /**
@@ -331,6 +336,13 @@ export async function getRankSummary(
 ): Promise<RankSummary | null> {
   const data = await getRankingData(userId, windowDays, deltaDays);
   if (!data) return null;
+
+  // Entité juste au-dessus de toi dans le classement tous-LLMs : sert au
+  // moteur d'actions (« passer n°X → n°X-1 ») et reste cohérent avec la phrase.
+  const you = data.all.find((e) => e.type === "you");
+  const ahead =
+    you && you.rank > 1 ? (data.all.find((e) => e.rank === you.rank - 1) ?? null) : null;
+
   return {
     status: buildRankStatus(data.all, "tous LLMs confondus"),
     totalRuns: data.totalRuns,
@@ -338,5 +350,7 @@ export async function getRankSummary(
     reliable: data.dataDays >= RANKING_RELIABLE_AFTER_DAYS,
     windowDays: data.windowDays,
     deltaDays: data.deltaDays,
+    aheadName: ahead?.name ?? null,
+    gapToAhead: ahead && you ? ahead.mentions - you.mentions : null,
   };
 }

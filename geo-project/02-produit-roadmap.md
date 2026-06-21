@@ -216,9 +216,9 @@ Une fois que le Tracker tourne et que les clients comprennent leur position, ils
 | **Score AI-readiness** | 0-100 sur 5 axes : Structure, Données structurées, Crawlabilité IA, Q&A density, Autorité externe |
 | **Recommandations actionnables** | Liste priorisée de 10-30 actions concrètes (ex: "ajouter une FAQPage schema sur /pricing") |
 | **Audit concurrents** | Même scan sur les 3-5 concurrents trackés, comparaison côte à côte |
-| **Suivi des recommandations** | Checklist persistante : ce qui a été fait, ce qui reste |
+| **Actions de la semaine** ✅ livré 2026-06-21 (doc 09) | Card dashboard : 1-2 gestes priorisés DÉRIVÉS des données réelles (concurrent devant, IA à la traîne, rang qui recule, apparais mais pas cité, audit jamais lancé…), résultat attendu relatif/nominatif, boutons Fait/Reporter/Ignorer, rappel dans l'email hebdo. Moteur déterministe `src/lib/weekly-actions/` (zéro appel LLM), table `weekly_action_states` (décisions seulement, génération à la volée). Validation manuelle V0 (auto-détection reportée). |
 | **Recrawl hebdomadaire** | Re-mesure automatique du score |
-| **Attribution trafic IA** | Pixel first-party cookieless (un `<script>` à coller) : compte les visites venant des moteurs IA et les superpose au score de visibilité au dashboard (« preuve de ROI »). Livré 2026-06-15 — cf. doc 09. NB : distinct de l'intégration GA4/Search Console qui reste en V2.5 (sert les clients déjà équipés ; le pixel marche pour tous) |
+| **Attribution trafic IA** | Pixel first-party cookieless (un `<script>` à coller). Livré 2026-06-15, **étendu 2026-06-21** : beacon chaque pageview → compte le trafic TOTAL (`site_traffic_daily`) ET la ventilation par moteur IA (`ai_traffic_daily`), d'où le ratio « % du trafic venu des IA » + évolution du trafic global, superposés au score de visibilité (« preuve de ROI »). cf. doc 09. NB : distinct de l'intégration GA4/Search Console qui reste en V2.5 (sert les clients déjà équipés ; le pixel marche pour tous) |
 
 ### Stack additionnelle V1
 

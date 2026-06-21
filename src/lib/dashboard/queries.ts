@@ -7,6 +7,7 @@ import {
   competitors,
   prompts,
   runs,
+  siteTrafficDaily,
   usageCounters,
   workspaceMembers,
   workspaces,
@@ -403,6 +404,12 @@ export interface AiTrafficData {
   bySource: Array<{ source: string; visits: number }>;
   /** Série corrélée trafic × visibilité (graphe double-axe). */
   proof: AiTrafficProofPoint[];
+  /** Trafic TOTAL du site sur la fenêtre (toutes origines, pages vues). */
+  totalSiteVisits: number;
+  /** Variation du trafic total 7j vs 7j préc. (%). */
+  siteDeltaPct: number | null;
+  /** Part du trafic venue des IA (IA / total × 100), null si total nul. */
+  aiSharePct: number | null;
 }
 
 /**
@@ -424,6 +431,9 @@ export async function getAiTrafficData(
       topSource: null,
       bySource: [],
       proof: [],
+      totalSiteVisits: 0,
+      siteDeltaPct: null,
+      aiSharePct: null,
     };
   }
 
@@ -483,7 +493,37 @@ export async function getAiTrafficData(
     visibility: visibilityByDate.get(date) ?? 0,
   }));
 
-  return { hasPixel: true, totalVisits, deltaPct, topSource, bySource, proof };
+  // Trafic TOTAL (toutes origines) sur la même fenêtre : preuve de l'évolution
+  // globale et dénominateur du ratio « % venu des IA ».
+  const siteRows = await db
+    .select({ date: siteTrafficDaily.date, visits: siteTrafficDaily.visits })
+    .from(siteTrafficDaily)
+    .where(and(eq(siteTrafficDaily.brandId, brandId), gte(siteTrafficDaily.date, startStr)))
+    .orderBy(siteTrafficDaily.date);
+
+  const siteByDate = new Map<string, number>();
+  let totalSiteVisits = 0;
+  for (const r of siteRows) {
+    siteByDate.set(r.date, (siteByDate.get(r.date) ?? 0) + r.visits);
+    totalSiteVisits += r.visits;
+  }
+  const siteLast7 = sumVisitsSince(siteByDate, daysAgoIso(6));
+  const sitePrev7 = sumVisitsBetween(siteByDate, daysAgoIso(13), daysAgoIso(7));
+  const siteDeltaPct = computeDelta(siteLast7, sitePrev7);
+  const aiSharePct =
+    totalSiteVisits > 0 ? Math.round((totalVisits / totalSiteVisits) * 1000) / 10 : null;
+
+  return {
+    hasPixel: true,
+    totalVisits,
+    deltaPct,
+    topSource,
+    bySource,
+    proof,
+    totalSiteVisits,
+    siteDeltaPct,
+    aiSharePct,
+  };
 }
 
 function daysAgoIso(n: number): string {

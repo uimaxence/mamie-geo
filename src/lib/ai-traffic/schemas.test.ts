@@ -16,6 +16,11 @@ describe("collectPayloadSchema", () => {
     expect(r.success).toBe(true);
   });
 
+  it("accepte s=null (visite sans origine IA, comptée dans le trafic total)", () => {
+    const r = collectPayloadSchema.safeParse({ k: "mgpx_abcdef0123456789abcdef01", s: null });
+    expect(r.success).toBe(true);
+  });
+
   it("rejette une clé malformée", () => {
     expect(collectPayloadSchema.safeParse({ k: "nope", s: "chatgpt" }).success).toBe(false);
     expect(collectPayloadSchema.safeParse({ k: "mgpx_TOOSHORT", s: "chatgpt" }).success).toBe(

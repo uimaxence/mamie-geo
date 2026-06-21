@@ -22,8 +22,8 @@ export function Hero() {
             Sache enfin si <HeroLLMRotator /> parle de toi.
           </h1>
           <p className="type-body-lg mt-6 max-w-2xl">
-            Mamie GEO mesure quotidiennement la visibilité de ta marque dans les 5 IA grand public.
-            En français, hébergé en Europe.
+            Mamie GEO mesure quotidiennement ta visibilité dans les 5 IA grand public, puis te dit
+            quoi faire chaque semaine pour y entrer. En français, hébergé en Europe.
           </p>
           {/* CTA primaire avec prix dans le bouton (pattern Linear/Vercel) :
            * anti-friction maximum, lève l'objection "combien ça coûte vraiment".

@@ -15,9 +15,11 @@ import {
   renderWeeklyRecap,
   type WeeklyRecapData,
   type WeeklyRecapStat,
+  type WeeklyRecapTopAction,
 } from "@/lib/email/templates/weekly-recap";
 import { sendWeeklyRecapEmail } from "@/lib/email";
 import { captureServerEvent } from "@/lib/posthog-server";
+import { getWeeklyActions } from "@/lib/weekly-actions/queries";
 import type { SendWeeklyEmailPayload } from "./send-weekly-email-payload";
 
 export {
@@ -157,6 +159,22 @@ export async function sendWeeklyEmail(
 
   // 8. Render
   const baseUrl = env.NEXT_PUBLIC_APP_URL;
+
+  // Action de la semaine : même moteur que le dashboard (zéro appel LLM),
+  // calculée pour la marque via un membre du workspace. La validation reste
+  // dans l'app, le mail ne fait que rappeler le geste prioritaire.
+  let topAction: WeeklyRecapTopAction | undefined;
+  const weeklyActions = await getWeeklyActions(members[0]!.userId, 1);
+  const firstAction = weeklyActions[0];
+  if (firstAction) {
+    topAction = {
+      title: firstAction.title,
+      expectedOutcome: firstAction.expectedOutcome,
+      ctaUrl: `${baseUrl}${firstAction.cta.href}`,
+      ctaLabel: firstAction.cta.label,
+    };
+  }
+
   const stats: WeeklyRecapStat[] = [
     {
       label: "Score de visibilité",
@@ -190,6 +208,7 @@ export async function sendWeeklyEmail(
     isoWeek,
     stats,
     topCompetitors,
+    topAction,
     dashboardUrl: `${baseUrl}/app/dashboard`,
     settingsUrl: `${baseUrl}/app/settings`,
   };

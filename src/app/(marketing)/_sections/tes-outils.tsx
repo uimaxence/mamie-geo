@@ -1,4 +1,12 @@
-import { Activity, Mail, MessageCircle, PieChart, Users, type LucideIcon } from "lucide-react";
+import {
+  Activity,
+  ListChecks,
+  Mail,
+  MessageCircle,
+  PieChart,
+  Users,
+  type LucideIcon,
+} from "lucide-react";
 import { Section } from "@/components/ui";
 
 // "Tes outils", 5 features nommées (cf. doc 09 § 2026-05-13). Refresh
@@ -21,10 +29,10 @@ interface Feature {
 
 const FEATURES: Feature[] = [
   {
-    name: "Score de visibilité IA",
+    name: "Actions de la semaine",
     pitch:
-      "Une note 0-100 par LLM, calculée chaque jour à partir des prompts trackés. Combine taux de citation, position dans la réponse, sentiment.",
-    Icon: Activity,
+      "1 à 2 gestes priorisés à partir de tes données, de tes concurrents et de ton marché, avec le résultat attendu. Tu valides, tu recommences.",
+    Icon: ListChecks,
     tone: "orange",
   },
   {
@@ -51,9 +59,16 @@ const FEATURES: Feature[] = [
   {
     name: "Rapport hebdo",
     pitch:
-      "Email tous les lundis matin avec le delta vs semaine précédente. Dashboard accessible à tout moment.",
+      "Email tous les lundis matin avec le delta vs semaine précédente et ton action prioritaire. Dashboard accessible à tout moment.",
     Icon: Mail,
     tone: "pink",
+  },
+  {
+    name: "Score de visibilité IA",
+    pitch:
+      "Une note 0-100 par LLM, calculée chaque jour à partir des prompts trackés. Combine taux de citation, position dans la réponse, sentiment.",
+    Icon: Activity,
+    tone: "orange",
   },
 ];
 
@@ -84,9 +99,9 @@ export function TesOutils() {
 
       <div className="relative mx-auto max-w-3xl text-center">
         <span className="type-eyebrow">Ce que tu as dans le compte</span>
-        <h2 className="type-h1 mt-3">Cinq outils dans le même compte.</h2>
+        <h2 className="type-h1 mt-3">Six outils dans le même compte.</h2>
         <p className="type-body-lg mt-4 text-[color:var(--color-ink-soft)]">
-          Pas un Frankenstein. Tout est connecté, tout parle au dashboard.
+          Pas un Frankenstein. Tout est connecté, tout parle au dashboard, tout finit en actions.
         </p>
       </div>
 

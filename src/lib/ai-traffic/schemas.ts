@@ -12,8 +12,10 @@ export const collectPayloadSchema = z.object({
   /** Clé publique du pixel (= brands.ai_pixel_key). */
   k: z.string().regex(PIXEL_KEY_REGEX),
   /** Source IA détectée côté client — revalidée contre LLM_VALUES (jamais de
-   *  confiance aveugle au client). */
-  s: z.enum(LLM_VALUES),
+   *  confiance aveugle au client). `null` quand la visite n'a pas d'origine IA :
+   *  le snippet beacon désormais CHAQUE pageview pour mesurer le trafic total
+   *  (cf. doc 09 § 2026-06-21), seules les origines IA renseignent `s`. */
+  s: z.enum(LLM_VALUES).nullable(),
   /** Pathname de la page visitée (optionnel, non stocké en V1 — réservé pour
    *  une future ventilation par page). Borné pour éviter un payload abusif. */
   p: z.string().max(512).optional(),

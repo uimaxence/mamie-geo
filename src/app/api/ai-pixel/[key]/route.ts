@@ -14,6 +14,9 @@ function buildSnippet(key: string, collectUrl: string): string {
   const hostRules = JSON.stringify(HOST_RULES.map((r) => ({ s: r.source, h: r.hosts })));
   const utmRules = JSON.stringify(UTM_RULES.map((r) => ({ s: r.source, v: r.values })));
   // Cookieless : aucune lecture/écriture de cookie ou localStorage, aucun ID.
+  // Beacon à CHAQUE pageview (mesure du trafic total) ; `s` porte la source IA
+  // détectée ou null (cf. doc 09 § 2026-06-21). Le serveur ventile : total +
+  // sous-ensemble IA.
   return `(function(){try{
 var K=${JSON.stringify(key)},U=${JSON.stringify(collectUrl)};
 var H=${hostRules},M=${utmRules};
@@ -25,8 +28,7 @@ var h=host(ref);
 if(h){for(var j=0;j<H.length;j++){var hs=H[j].h;for(var k=0;k<hs.length;k++){if(h===hs[k]||h.slice(-(hs[k].length+1))==="."+hs[k])return H[j].s}}}
 return null}
 var s=detect(document.referrer,new URLSearchParams(location.search));
-if(!s)return;
-var b=JSON.stringify({k:K,s:s,p:location.pathname});
+var b=JSON.stringify({k:K,s:s||null,p:location.pathname});
 if(navigator.sendBeacon){navigator.sendBeacon(U,b)}
 else{fetch(U,{method:"POST",body:b,keepalive:true,headers:{"Content-Type":"application/json"}})}
 }catch(e){}})();`;

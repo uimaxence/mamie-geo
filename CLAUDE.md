@@ -270,7 +270,7 @@ la doc devient un cimetière.
 
 ---
 
-## 9. État du projet (snapshot — 2026-06-17)
+## 9. État du projet (snapshot — 2026-06-21)
 
 > Ce snapshot décrit l'état **courant** uniquement. L'historique détaillé
 > de chaque évolution (le « comment on en est arrivé là ») vit dans
@@ -315,7 +315,15 @@ plan dans `src/lib/plans/quotas.ts`) :
   source unique partagée avec l'onglet Classement, zéro appel LLM), Part de
   voix teintée vs concurrents, lecture « meilleure/plus faible IA », note
   « comment lire » du funnel. **Pas de seuil absolu** sur le score 0-100
-  (les seuils 80/60 restent à l'audit) — `src/lib/metrics/interpret.ts`
+  (les seuils 80/60 restent à l'audit) — `src/lib/metrics/interpret.ts`.
+  **Actions de la semaine (2026-06-21, doc 09)** : carte en haut du dashboard
+  avec 1-2 gestes priorisés DÉRIVÉS des données (concurrent devant, IA à la
+  traîne, rang qui recule, apparais mais pas cité, audit jamais lancé…),
+  résultat attendu formulé en relatif/nominatif, boutons Fait/Reporter/Ignorer.
+  Moteur déterministe `src/lib/weekly-actions/` (catalogue + sélection impact ×
+  applicabilité + dédup famille, zéro appel LLM), table `weekly_action_states`
+  qui ne stocke que les décisions par semaine ISO (génération à la volée).
+  L'action n°1 est aussi injectée dans l'email hebdo. Validation manuelle (V0)
 - `prompts` (+`[id]`) — CRUD, suggestion IA, régénération depuis profil,
   cadence per-prompt
 - `citations` — table concurrents + onglet « Classement » (`?tab=ranking`,
@@ -349,6 +357,10 @@ Badge plan sidebar en FR (« trialing » → « Essai gratuit »). Fermeture du
 PlanPicker sans choix → `TrialExplainerModal` (essai 14 j expliqué).
 
 **Marketing/blog** : home, pricing, 4 pages légales, **4 lead magnets**.
+Angle **« actionnable »** tissé dans la home (2026-06-21) : hero (« te dit quoi
+faire chaque semaine »), « comment ça marche » étape 3, « tes outils » 6e
+feature « Actions de la semaine », bento sans/avec card featured « Tu ne
+regardes pas des courbes, tu sais quoi faire ».
 **`/outils/visibilite-locale`** « Carte de visibilité IA locale » (2026-06-17,
 angle différenciateur GEO local, doc 09) : site + email → ville détectée +
 ~6 communes géocodées autour (`buildCityCluster`, coords exactes
@@ -467,22 +479,25 @@ LLM n'exposent pas le solde prépayé → saisie manuelle des recharges
 Scoring Anthropic non ventilé par run (disclosure dans l'UI).
 
 **Attribution trafic IA** (2026-06-15, doc 09 + doc 02/03/04) : pixel
-first-party **cookieless** (un `<script>` à coller) qui ne compte QUE les
-visites d'origine IA (referrers ChatGPT/Perplexity/Gemini/Le Chat, UTM).
+first-party **cookieless** (un `<script>` à coller). **Depuis 2026-06-21
+(doc 09)** il beacon CHAQUE pageview (source IA détectée ou `null`) et compte
+les DEUX : trafic total (`site_traffic_daily`) ET ventilation par IA
+(`ai_traffic_daily`), d'où le ratio « % du trafic venu des IA ».
 Endpoints publics `/api/ai-pixel/[key].js` (snippet, règles partagées
 `src/lib/ai-traffic/detect.ts`) + `/api/ai-pixel/collect` (ingestion : zod,
 filtre bot, gate plan `aiTrafficTracking`, rate-limit Postgres
-`ai_pixel_throttle` — **pas d'Upstash**, IP jamais stockée). Upsert agrégat
-`ai_traffic_daily`. Section dashboard « Trafic IA — preuve de ROI » (chart
-double-axe visites × visibilité, export PNG) + activation dans Réglages.
+`ai_pixel_throttle` — **pas d'Upstash**, IP jamais stockée ; cap par IP/jour
+large pour le total, cap par IP × source pour l'IA). Section dashboard
+« Trafic IA — preuve de ROI » (chart double-axe visites × visibilité, stats
+Visites totales / Part venue des IA, export PNG) + activation dans Réglages.
 Inclus **dès Solo**. Copilot fusionné sur `chatgpt`. Web analytics
-générique et GA4/GSC écartés (GA4/GSC reste V2.5). Disclaimer UI « plancher
-détecté ».
+générique et GA4/GSC écartés (GA4/GSC reste V2.5). Mesure d'audience anonyme
+(pages vues, pas visiteurs uniques), disclaimer UI.
 
 **Tests** : Vitest colocation (100+ tests, dont quotas/hard-cap `beta` +
-detect/schemas pixel IA + ranking/interpret) + 13 E2E Playwright flows
-publics. DB Neon : 23 tables + migrations 0000-0012 (0012 =
-`stripe_processed_events`, idempotence webhook insert-first, 2026-06-17).
+detect/schemas pixel IA + ranking/interpret + weekly-actions catalog/select)
++ 13 E2E Playwright flows publics. DB Neon : 25 tables + migrations 0000-0013
+(0013 = `site_traffic_daily` + `weekly_action_states`, 2026-06-21).
 
 ### Reste à faire (post-lancement — site EN PROD ET EN LIGNE depuis 2026-06)
 

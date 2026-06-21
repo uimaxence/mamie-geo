@@ -161,6 +161,61 @@ haut et l'entrée "2026-05-05 — Réponses aux 10 questions de bootstrap".
 
 ### Décisions enregistrées
 
+#### 2026-06-21 — Angle « actionnable » : actions de la semaine au dashboard + trafic total au pixel + copy
+
+**Contexte** : le produit mesure beaucoup (visibilité, concurrents, rang,
+funnel, audit) mais expose surtout des constats. Max veut faire de
+l'actionnable le fil rouge : transformer la donnée en 1-2 gestes concrets par
+semaine, prouver l'évolution du trafic (pas que la part IA), et le dire sur le
+site. Trois chantiers livrés ensemble.
+
+**Options considérées** :
+- A (génération des actions) : moteur de règles déterministe sur les métriques
+  déjà calculées / LLM qui rédige des recos / liste statique de conseils.
+- B (persistance) : snapshot hebdo figé par un cron / table légère qui ne
+  stocke que les décisions utilisateur, génération à la volée.
+- C (validation) : manuelle (bouton « Fait ») / auto-détectée à l'amélioration
+  des métriques.
+- D (pixel total) : compter tout le trafic OU garder « IA only ». Max a tranché
+  « les deux » : on récupère le total ET la ventilation IA.
+
+**Choix** :
+- Actions : **moteur de règles déterministe** (`src/lib/weekly-actions/`,
+  catalogue de ~10 actions, sélection impact × applicabilité, dédup par
+  famille), zéro appel LLM. Déclencheurs **relatifs** (vs concurrent, vs J-7,
+  entre IA), jamais de seuil absolu sur 0-100 (cohérent § 2026-06-17). Résultat
+  attendu nominatif (« repasser devant X », « n°3 → n°2 »).
+- Persistance : **génération à la volée + table `weekly_action_states`** qui ne
+  stocke que `done`/`dismissed`/`snoozed` par semaine ISO (PK
+  `(brand_id, action_slug, iso_week)`, upsert idempotent, `scope=permanent`
+  pour les gestes one-shot). Pas de cron, pas de backfill, table minuscule,
+  texte régénéré (pas de cimetière). Migration `0013`.
+- Validation : **manuelle** (card dashboard ✓ Fait / ⏰ Reporter 7 j / ✕ Ignorer,
+  retrait optimiste + server action) + rappel de l'action n°1 dans l'**email
+  hebdo** existant. L'auto-détection est reportée (bruit run-à-run = faux
+  positifs).
+- Pixel : le snippet beacon désormais **chaque pageview** (source IA ou `null`),
+  le collect compte toujours le total (`site_traffic_daily`, migration `0013`)
+  ET la ventilation IA quand la source existe. Nouveau cap rate-limit par
+  IP/jour plus large (200) pour ne pas bloquer une navigation normale. Dashboard
+  trafic : « Visites totales », « Part venue des IA », évolution. Reste
+  cookieless, IP jamais stockée : le cadrage passe de « tracking IA » à
+  « mesure d'audience anonyme ».
+- Copy : angle actionnable tissé dans le hero, « comment ça marche » (étape 3),
+  « tes outils » (6e feature « Actions de la semaine ») et le bento sans/avec
+  (card featured « Tu ne regardes pas des courbes, tu sais quoi faire »).
+
+**Conséquences attendues** : +2 tables (→ 25), `RankSummary` enrichie
+(`aheadName`/`gapToAhead`, profite aussi à la RankSummaryCard). Tests Vitest
+colocation (catalog/select). Aucun coût LLM ajouté. Volume de requêtes sur
+`/api/ai-pixel/collect` qui croît (1 par pageview au lieu d'1 par visite IA) :
+acceptable au stade actuel.
+
+**À revisiter** : (1) auto-validation V1 des actions une fois qu'on saura
+relier une amélioration à un geste ; (2) surveiller le volume collect + le cap
+global quotidien (100k) si un site client devient gros ; (3) suivre la
+conversion « action vue → action faite » (event `weekly_action_status_set`).
+
 #### 2026-06-19 — Dispatch queue réduit */5 → 1 h + drain à l'enqueue (économie compute Neon)
 
 **Contexte** : site tombé en prod le 2026-06-19 — Neon free tier renvoie

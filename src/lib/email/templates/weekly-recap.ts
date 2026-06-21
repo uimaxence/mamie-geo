@@ -23,6 +23,15 @@ export interface WeeklyRecapTopCompetitor {
   citationCount: number;
 }
 
+export interface WeeklyRecapTopAction {
+  title: string;
+  /** Résultat attendu, formulé en relatif (la promesse de l'action). */
+  expectedOutcome: string;
+  /** URL absolue du CTA (deep-link app, validation côté dashboard). */
+  ctaUrl: string;
+  ctaLabel: string;
+}
+
 export interface WeeklyRecapData {
   workspaceName: string;
   brandName: string;
@@ -32,6 +41,8 @@ export interface WeeklyRecapData {
   stats: WeeklyRecapStat[];
   /** Top concurrents cités cette semaine (max 3) */
   topCompetitors: WeeklyRecapTopCompetitor[];
+  /** Action prioritaire de la semaine (data → geste). Optionnel. */
+  topAction?: WeeklyRecapTopAction;
   /** URL absolue vers le dashboard (CTA), typiquement `${NEXT_PUBLIC_APP_URL}/app/dashboard` */
   dashboardUrl: string;
   /** URL absolue vers settings (lien désinscription footer) */
@@ -102,6 +113,9 @@ function renderHtml(data: WeeklyRecapData): string {
 
   <!-- Top concurrents -->
   ${data.topCompetitors.length > 0 ? renderCompetitorsBlock(data.topCompetitors) : ""}
+
+  <!-- Action de la semaine -->
+  ${data.topAction ? renderTopActionBlock(data.topAction) : ""}
 
   <!-- CTA -->
   <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin-top: 32px;">
@@ -189,6 +203,19 @@ function renderCompetitorsBlock(competitors: WeeklyRecapTopCompetitor[]): string
   </table>`;
 }
 
+function renderTopActionBlock(action: WeeklyRecapTopAction): string {
+  return `<table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin-top: 24px;">
+    <tr><td>
+      <div class="card" style="border-color: #cfe4ff; background: #f5faff;">
+        <p class="stat-label" style="color: #329CFF; margin-bottom: 8px;">Ton action de la semaine</p>
+        <p style="font-size: 16px; font-weight: 600; color: #0a0a0a; margin: 0;">${escapeHtml(action.title)}</p>
+        <p style="font-size: 14px; color: #404040; margin: 6px 0 16px 0; line-height: 1.5;">${escapeHtml(action.expectedOutcome)}</p>
+        <a href="${escapeHtmlAttr(action.ctaUrl)}" class="btn">${escapeHtml(action.ctaLabel)} →</a>
+      </div>
+    </td></tr>
+  </table>`;
+}
+
 function renderText(data: WeeklyRecapData): string {
   const lines: string[] = [];
   lines.push(`${data.brandName}, récap visibilité IA (semaine ${data.isoWeek})`);
@@ -207,6 +234,13 @@ function renderText(data: WeeklyRecapData): string {
         `  #${i + 1} ${c.name} (${c.citationCount} mention${c.citationCount > 1 ? "s" : ""})`,
       );
     });
+  }
+  if (data.topAction) {
+    lines.push("");
+    lines.push("Ton action de la semaine");
+    lines.push(`  ${data.topAction.title}`);
+    lines.push(`  ${data.topAction.expectedOutcome}`);
+    lines.push(`  ${data.topAction.ctaLabel} → ${data.topAction.ctaUrl}`);
   }
   lines.push("");
   lines.push(`Voir le dashboard complet → ${data.dashboardUrl}`);

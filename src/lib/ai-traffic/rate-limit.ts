@@ -4,15 +4,18 @@ import { aiPixelThrottle } from "@/db/schema";
 import type { AiSource } from "./detect";
 
 // Rate-limit / dédup de l'endpoint public d'ingestion, en Postgres (pas
-// d'Upstash Redis en V1 — cf. doc 09 § 2026-06-15). Deux garde-fous :
+// d'Upstash Redis en V1, cf. doc 09 § 2026-06-15). Garde-fous :
 //   1. cap GLOBAL quotidien : borne le coût d'un flood (writes Postgres).
-//   2. cap par (IP hashée × source × jour) : empêche un visiteur/bot de
-//      gonfler le compteur d'une marque (sert aussi de dédup grossier — un
-//      rafraîchissement en boucle ne compte pas indéfiniment).
+//   2. cap par (IP hashée × source × jour) pour le trafic IA : empêche un
+//      visiteur/bot de gonfler le compteur d'une marque (dédup grossier).
+//   3. cap par (IP hashée × "all" × jour) pour le trafic TOTAL : plus haut,
+//      car un visiteur réel enchaîne beaucoup de pages dans la journée (le cap
+//      IA à 30 bloquerait une navigation normale). cf. doc 09 § 2026-06-21.
 // La granularité jour suffit : on agrège de toute façon en quotidien.
 
 const GLOBAL_DAILY_CAP = 100_000;
 const PER_IP_SOURCE_DAILY_CAP = 30;
+const PER_IP_TOTAL_DAILY_CAP = 200;
 // Purge opportuniste des fenêtres périmées, déclenchée tous les N hits globaux.
 const PURGE_EVERY = 1_000;
 const PURGE_OLDER_THAN_DAYS = 2;
@@ -34,14 +37,11 @@ async function bump(bucketKey: string): Promise<number> {
 }
 
 /**
- * Retourne `true` si le hit doit être compté, `false` s'il est throttlé. Ne
- * lève jamais (un échec base → on laisse passer, l'endpoint reste best-effort).
+ * Trafic TOTAL (chaque pageview). Bump le compteur GLOBAL (anti-flood, une
+ * fois par collect) puis le cap par IP/jour plus large. `false` si throttlé.
+ * Ne lève jamais (échec base → on laisse passer, endpoint best-effort).
  */
-export async function allowHit(
-  ipHash: string,
-  source: AiSource,
-  dateIso: string,
-): Promise<boolean> {
+export async function allowSiteHit(ipHash: string, dateIso: string): Promise<boolean> {
   try {
     const globalCount = await bump(`global:${dateIso}`);
     if (globalCount % PURGE_EVERY === 0) {
@@ -50,6 +50,24 @@ export async function allowHit(
     }
     if (globalCount > GLOBAL_DAILY_CAP) return false;
 
+    const ipCount = await bump(`ip:${ipHash}:all:${dateIso}`);
+    return ipCount <= PER_IP_TOTAL_DAILY_CAP;
+  } catch {
+    return true;
+  }
+}
+
+/**
+ * Trafic IA (sous-ensemble : pageview d'origine IA détectée). Cap par
+ * (IP × source × jour), sans rebump le global (déjà fait par allowSiteHit
+ * dans le même collect). `false` si throttlé.
+ */
+export async function allowAiHit(
+  ipHash: string,
+  source: AiSource,
+  dateIso: string,
+): Promise<boolean> {
+  try {
     const ipCount = await bump(`ip:${ipHash}:${source}:${dateIso}`);
     return ipCount <= PER_IP_SOURCE_DAILY_CAP;
   } catch {

@@ -236,10 +236,10 @@ provider actif si env var présente **et** `IMPLEMENTED_LLMS[llm] === true`.
 
 ### Vue d'ensemble
 
-19 tables dans `src/db/schema.ts`, 3 groupes :
+21 tables dans `src/db/schema.ts`, 3 groupes :
 
 1. **Auth** (Better Auth CLI) : `user`, `session`, `account`, `verification`
-2. **Métier** : `workspaces`, `workspace_members`, `brands` (dont `ai_pixel_key`, clé publique du pixel trafic IA), `competitors`, `prompts`, `runs`, `citation_metrics_daily`, `ai_traffic_daily` (agrégat quotidien des visites d'origine IA, cf. doc 09 § 2026-06-15), `prompt_cache`, `technical_audits`, `audit_counters`, `comparator_scans`
+2. **Métier** : `workspaces`, `workspace_members`, `brands` (dont `ai_pixel_key`, clé publique du pixel trafic IA), `competitors`, `prompts`, `runs`, `citation_metrics_daily`, `ai_traffic_daily` (agrégat quotidien des visites d'origine IA, cf. doc 09 § 2026-06-15), `site_traffic_daily` (trafic TOTAL du site, toutes origines, même pixel cookieless, cf. doc 09 § 2026-06-21), `weekly_action_states` (décisions utilisateur sur les actions de la semaine, cf. doc 09 § 2026-06-21), `prompt_cache`, `technical_audits`, `audit_counters`, `comparator_scans`
 3. **Plomberie** : `queue_jobs`, `events`, `subscription_events`, `usage_counters`, `llm_credit_topups` (recharges crédits LLM saisies à la main, cf. doc 09 § 2026-06-15 — panneau `/app/admin/llm-credits`), `ai_pixel_throttle` (rate-limit Postgres de l'endpoint public d'ingestion du pixel, sans Upstash — cf. doc 09 § 2026-06-15)
 
 Migrations versionnées : `0000_many_human_torch` (schéma initial),
@@ -252,15 +252,21 @@ Migrations versionnées : `0000_many_human_torch` (schéma initial),
 (`comparator_scans.location`, 2026-06-12), `0008_complete_wild_child`
 (`comparator_scans.competitors_spotted`, 2026-06-12), `0009`/`0010`
 (programme beta + `llm_credit_topups`, 2026-06-15), `0011_mushy_puck`
-(`ai_traffic_daily` + `ai_pixel_throttle` + `brands.ai_pixel_key`, 2026-06-15).
+(`ai_traffic_daily` + `ai_pixel_throttle` + `brands.ai_pixel_key`, 2026-06-15),
+`0012` (`stripe_processed_events`, idempotence webhook, 2026-06-17),
+`0013_bent_random` (`site_traffic_daily` + `weekly_action_states`, 2026-06-21).
 
-**Endpoints publics du pixel trafic IA** (cf. doc 09 § 2026-06-15) :
+**Endpoints publics du pixel trafic** (cf. doc 09 § 2026-06-15 et § 2026-06-21) :
 `GET /api/ai-pixel/[key].js` sert le snippet first-party cookieless (réutilise
-les règles de détection `src/lib/ai-traffic/detect.ts`) ; `POST /api/ai-pixel/collect`
-ingère les beacons (validation zod, filtrage bot UA, lookup brand par
-`ai_pixel_key`, gate plan `aiTrafficTracking`, rate-limit Postgres, upsert
-`ai_traffic_daily`). RGPD : aucun cookie, IP jamais stockée (hash salé éphémère
-pour le rate-limit uniquement).
+les règles de détection `src/lib/ai-traffic/detect.ts`). Depuis le 2026-06-21
+le snippet beacon **chaque pageview** (source IA détectée ou `null`) au lieu des
+seules visites IA. `POST /api/ai-pixel/collect` ingère les beacons (validation
+zod, filtrage bot UA, lookup brand par `ai_pixel_key`, gate plan
+`aiTrafficTracking`, rate-limit Postgres) : upsert **toujours** `site_traffic_daily`
+(total, cap large par IP/jour) et **en plus** `ai_traffic_daily` quand une source
+IA est présente (cap par IP × source). On en dérive le ratio « % du trafic venu
+des IA ». RGPD : aucun cookie, IP jamais stockée (hash salé éphémère pour le
+rate-limit uniquement). On compte des pages vues, pas des visiteurs uniques.
 
 ### Tables Better Auth
 

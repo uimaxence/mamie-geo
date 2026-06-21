@@ -16,7 +16,7 @@ export function HowItWorks() {
     <Section variant="tinted" pad="xl" id="how-it-works">
       <div className="mx-auto max-w-3xl text-center">
         <span className="type-eyebrow">Comment ça marche</span>
-        <h2 className="type-h1 mt-3">Trois étapes pour mesurer ta visibilité IA.</h2>
+        <h2 className="type-h1 mt-3">Trois étapes pour mesurer ta visibilité IA, et savoir quoi faire.</h2>
       </div>
 
       <ol className="mt-14 grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -37,8 +37,8 @@ export function HowItWorks() {
         <StepCard
           eyebrow="Étape 03"
           tone="green"
-          title="Reçois ton premier rapport en 10 minutes"
-          description="Et ensuite chaque jour. Dashboard, email hebdo, comparatif concurrents, recommandations actionnables."
+          title="Reçois ton rapport et tes actions de la semaine"
+          description="En 10 minutes, puis chaque semaine : dashboard, comparatif concurrents, et 1 à 2 actions concrètes priorisées avec le résultat attendu pour grimper dans les réponses IA."
           illustration={<MockupReport />}
         />
       </ol>
