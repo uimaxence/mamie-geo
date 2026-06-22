@@ -263,7 +263,7 @@ export const WEEKLY_ACTIONS: WeeklyActionDef[] = [
         ? {
             applicability: 0.7,
             expectedOutcome:
-              "Poser le socle SEO/GEO que les IA exploitent avant de te citer (30+ checks, 0 € LLM).",
+              "Poser le socle SEO/GEO que les IA exploitent avant de te citer (30+ checks).",
             why: "Aucun audit technique lancé : tu ne sais pas encore quels signaux te bloquent.",
           }
         : null,

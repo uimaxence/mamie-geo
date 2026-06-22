@@ -129,30 +129,30 @@ export function WeeklyActionsCard({ actions }: { actions: SelectedAction[] }) {
             </div>
 
             {/* Micro-actions de validation. */}
-            <div className="mt-3 flex items-center gap-3 border-t border-[color:var(--color-border)] pt-3">
+            <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-[color:var(--color-border)] pt-3">
               <button
                 type="button"
                 onClick={() => act(action.slug, "done")}
                 disabled={pending && busySlug === action.slug}
-                className="inline-flex items-center gap-1 text-xs font-medium text-[color:var(--color-success)] disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 rounded-full border border-[color:var(--color-border)] bg-white px-3 py-1.5 text-xs font-medium text-[color:var(--color-success)] transition-colors hover:border-[color:var(--color-success)] hover:bg-[color:var(--color-success)]/5 disabled:opacity-50"
               >
-                <Check size={13} /> Fait
+                <Check size={14} /> Fait
               </button>
               <button
                 type="button"
                 onClick={() => act(action.slug, "snoozed")}
                 disabled={pending && busySlug === action.slug}
-                className="inline-flex items-center gap-1 text-xs font-medium text-[color:var(--color-muted)] hover:text-[color:var(--color-ink)] disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 rounded-full border border-[color:var(--color-border)] bg-white px-3 py-1.5 text-xs font-medium text-[color:var(--color-ink-soft)] transition-colors hover:border-[color:var(--color-ink-soft)] hover:bg-[color:var(--color-gray-50)] disabled:opacity-50"
               >
-                <Clock size={13} /> Reporter
+                <Clock size={14} /> Reporter
               </button>
               <button
                 type="button"
                 onClick={() => act(action.slug, "dismissed")}
                 disabled={pending && busySlug === action.slug}
-                className="inline-flex items-center gap-1 text-xs font-medium text-[color:var(--color-muted)] hover:text-[color:var(--color-ink)] disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 rounded-full border border-[color:var(--color-border)] bg-white px-3 py-1.5 text-xs font-medium text-[color:var(--color-muted)] transition-colors hover:border-[color:var(--color-ink-soft)] hover:bg-[color:var(--color-gray-50)] disabled:opacity-50"
               >
-                <X size={13} /> Ignorer
+                <X size={14} /> Ignorer
               </button>
             </div>
           </li>
