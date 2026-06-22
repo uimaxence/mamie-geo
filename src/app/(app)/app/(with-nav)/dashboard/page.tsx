@@ -199,7 +199,7 @@ export default async function DashboardPage() {
 
       {/* Actions de la semaine : data → gestes concrets, en haut car c'est
        * l'élément le plus actionnable du dashboard. */}
-      {weeklyActions.length > 0 && <WeeklyActionsCard actions={weeklyActions} />}
+      {promptCount > 0 && <WeeklyActionsCard actions={weeklyActions} />}
 
       {/* 4 Stats, agrégées tous-LLMs (cf. PR6 2026-05-18). */}
       <section className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">

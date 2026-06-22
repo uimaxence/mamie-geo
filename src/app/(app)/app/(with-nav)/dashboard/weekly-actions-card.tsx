@@ -56,8 +56,11 @@ export function WeeklyActionsCard({ actions }: { actions: SelectedAction[] }) {
           </span>
           <div>
             <p className="type-eyebrow">Actions de la semaine</p>
-            <p className="mt-1 text-sm text-[color:var(--color-ink-soft)]">
-              Tout est traité pour cette semaine. Reviens lundi pour les prochaines.
+            <p className="mt-1 text-sm text-[color:var(--color-ink)]">
+              Bravo, tout est traité pour cette semaine.
+            </p>
+            <p className="mt-0.5 text-[0.8125rem] text-[color:var(--color-muted)]">
+              Reviens lundi pour les prochaines.
             </p>
           </div>
         </div>
