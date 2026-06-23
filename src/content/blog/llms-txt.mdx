@@ -1,0 +1,295 @@
+---
+title: "llms.txt : faut-il vraiment en mettre un en 2026 ? Le guide honnête"
+description: "llms.txt promet de guider les IA vers ton meilleur contenu. Mais les grands LLM le lisent-ils vraiment ? Ce que ça fait, ce que ça ne fait pas, et notre verdict."
+keywords:
+  - "llms txt"
+  - "robots txt ia"
+  - "fichier llms txt"
+  - "llms-full txt"
+  - "standard llms txt"
+  - "controler les bots ia"
+date: "2026-06-23"
+author: "Maxence Cailleau"
+category: "Tutoriel"
+readingTimeMin: 11
+cta: "audit-technique"
+---
+
+{/* H1 rendu via layout.tsx, ne pas dupliquer ici */}
+
+## Le fichier dont tout le monde parle, que presque aucune IA ne lit
+
+Depuis fin 2024, un nouveau fichier circule dans les conversations GEO : `llms.txt`. On le présente souvent comme « le robots.txt des intelligences artificielles », un sésame à coller à la racine de ton site pour que ChatGPT, Claude ou Perplexity comprennent enfin ton contenu et te citent davantage.
+
+Cette présentation est trompeuse sur deux plans à la fois. D'abord parce que `llms.txt` n'a rien à voir avec `robots.txt` : l'un range ton contenu, l'autre contrôle les robots. Ensuite parce que, en l'état, **aucun des grands moteurs IA grand public ne s'appuie de façon fiable sur `llms.txt`** pour décider qui citer. Cet article fait le tri, sans hype : ce que ce fichier fait réellement, ce qu'il ne fait pas, et s'il vaut le coup d'en publier un en 2026.
+
+## La règle en une phrase
+
+> `llms.txt` est un fichier Markdown qui propose aux IA un sommaire éditorialisé de ton site ; il peut aider les outils de code et les agents qui vont chercher ton contenu à la demande, mais il ne contrôle pas l'accès des robots (c'est le rôle de `robots.txt`) et il n'augmente pas, aujourd'hui, ta probabilité d'être cité dans ChatGPT, Gemini, Le Chat ou Perplexity.
+
+Autrement dit, `llms.txt` est un confort de lisibilité, pas un levier de visibilité prouvé. Le confondre avec un outil de contrôle ou de référencement, c'est se tromper de combat.
+
+## llms.txt, robots.txt, llms-full.txt : trois fichiers qu'on confond
+
+Le malentendu vient surtout d'un télescopage de noms. Mettons les trois à plat.
+
+<table>
+  <thead>
+    <tr>
+      <th>Fichier</th>
+      <th>À quoi il sert</th>
+      <th>Qui l'a inventé</th>
+      <th>Qui le respecte vraiment</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>robots.txt</code></td>
+      <td>Autoriser ou bloquer l'accès des robots (crawl, indexation, entraînement)</td>
+      <td>Standard de 1994, universel</td>
+      <td>La plupart des bots sérieux (avec des exceptions, voir plus bas)</td>
+    </tr>
+    <tr>
+      <td><code>llms.txt</code></td>
+      <td>Proposer un sommaire Markdown des pages importantes du site</td>
+      <td>Jeremy Howard (Answer.AI), septembre 2024</td>
+      <td>Surtout des outils de code et des agents, pas les moteurs IA grand public</td>
+    </tr>
+    <tr>
+      <td><code>llms-full.txt</code></td>
+      <td>Variante qui agrège le contenu complet des pages clés en un seul fichier</td>
+      <td>Même proposition que llms.txt</td>
+      <td>Idem : adoption d'outils, pas des moteurs</td>
+    </tr>
+  </tbody>
+</table>
+
+La leçon tient en une ligne : `robots.txt` décide qui peut entrer, `llms.txt` propose ce qu'il faudrait lire en priorité. Le premier est un portier, le second un sommaire. Ils ne jouent pas dans la même catégorie.
+
+## D'où vient llms.txt
+
+La proposition a été publiée le 3 septembre 2024 par Jeremy Howard, cofondateur d'Answer.AI et figure connue de la communauté machine learning. Le constat de départ est juste : les fenêtres de contexte des modèles restent limitées, et le HTML d'une page moderne est noyé sous le JavaScript, la navigation, les bannières et le balisage. Donner à une IA une version propre, en Markdown, des pages qui comptent vraiment lui éviterait de fouiller un site mal structuré.
+
+Concrètement, `llms.txt` est un fichier texte au format Markdown, placé à la racine du domaine (`tonsite.fr/llms.txt`). Il commence par un titre H1 (le nom du site), un blockquote de résumé, puis des sections de liens annotés vers les pages de référence : documentation, articles de fond, pages produit. C'est un sommaire éditorialisé, pensé pour être lu par une machine.
+
+L'idée est élégante. Le problème n'est pas la proposition, c'est ce qu'en font les moteurs.
+
+## Ce que llms.txt fait vraiment
+
+Là où `llms.txt` a une utilité réelle et documentée, c'est **à l'inférence, pas au crawl**. Plusieurs familles d'outils vont chercher ce fichier au moment où ils ont besoin de comprendre ton site :
+
+- Les **assistants de code** dans les IDE (Cursor, Claude Code, Copilot, Windsurf) qui consomment de la documentation technique pour générer du code juste.
+- Les **serveurs MCP** et certains agents qui parsent un site à la demande pour répondre à une tâche précise.
+- Les **assistants intégrés** à des produits qui s'appuient sur la doc d'un éditeur.
+
+C'est pour cela que des entreprises très orientées développeurs, comme Anthropic, Cloudflare ou Vercel, publient un `llms.txt` : leur cible passe sa journée dans des outils qui savent le lire. Si tu édites une documentation technique consommée par des agents de code, `llms.txt` a un sens immédiat.
+
+## Ce que llms.txt ne fait pas
+
+C'est ici que le mythe s'effondre. `llms.txt` n'améliore pas, aujourd'hui, ta visibilité dans les moteurs IA grand public, et plusieurs faits le confirment.
+
+**Google a explicitement refusé le standard.** En juillet 2025, Gary Illyes a confirmé que Google ne supporte pas `llms.txt` et n'a pas l'intention de le faire, et John Mueller l'a comparé à la balise meta `keywords`, ce signal que les moteurs ont fini par ignorer parce qu'il était trop facile à manipuler ([analyse du sujet, octobre 2025](https://www.indexlab.ai/blog/llms-txt-does-it-actually-work-october-2025-updated)).
+
+**Les autres moteurs ne le confirment pas non plus.** Aucun fournisseur de modèle, ni OpenAI, ni Anthropic côté grand public, ni les autres, n'a confirmé que ses crawlers lisent et suivent systématiquement les instructions d'un `llms.txt` pour décider d'une citation.
+
+**Les chiffres de trafic sont sans appel.** Un suivi de plus de 500 millions de visites de bots IA n'a recensé que quelques centaines de requêtes ciblant directement `llms.txt`, une part négligeable du trafic des crawlers ([même analyse](https://www.indexlab.ai/blog/llms-txt-does-it-actually-work-october-2025-updated)). Le fichier est publié par un nombre croissant de sites, mais publier n'est pas être lu.
+
+La raison de fond est simple : un moteur qui déciderait de ses citations à partir d'un fichier auto-déclaré par le site se rendrait trivialement manipulable. C'est exactement le piège dans lequel la balise `keywords` est tombée il y a vingt ans. Les moteurs préfèrent juger ton contenu réel, pas ta propre description de ton contenu.
+
+## Le vrai levier de contrôle des IA : robots.txt et les user-agents
+
+Si ce que tu cherches, c'est **contrôler** ce que les IA font de ton site (les laisser entrer, les bloquer, ou trier), le bon outil n'est pas `llms.txt`, c'est `robots.txt`. Et la finesse, en 2026, c'est qu'il existe trois familles de robots IA, qu'il faut distinguer avant de toucher à quoi que ce soit.
+
+<table>
+  <thead>
+    <tr>
+      <th>Robot (user-agent)</th>
+      <th>Fournisseur</th>
+      <th>Rôle</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>GPTBot</code></td>
+      <td>OpenAI</td>
+      <td>Entraînement des modèles</td>
+    </tr>
+    <tr>
+      <td><code>OAI-SearchBot</code></td>
+      <td>OpenAI</td>
+      <td>Index de recherche (citations)</td>
+    </tr>
+    <tr>
+      <td><code>ChatGPT-User</code></td>
+      <td>OpenAI</td>
+      <td>Visite en temps réel, déclenchée par un utilisateur</td>
+    </tr>
+    <tr>
+      <td><code>ClaudeBot</code></td>
+      <td>Anthropic</td>
+      <td>Entraînement des modèles</td>
+    </tr>
+    <tr>
+      <td><code>Claude-SearchBot</code></td>
+      <td>Anthropic</td>
+      <td>Index de recherche (citations)</td>
+    </tr>
+    <tr>
+      <td><code>Claude-User</code></td>
+      <td>Anthropic</td>
+      <td>Visite en temps réel, déclenchée par un utilisateur</td>
+    </tr>
+    <tr>
+      <td><code>Googlebot</code></td>
+      <td>Google</td>
+      <td>Index de recherche (socle des AI Overviews)</td>
+    </tr>
+    <tr>
+      <td><code>Google-Extended</code></td>
+      <td>Google</td>
+      <td>Usage du contenu pour entraîner Gemini</td>
+    </tr>
+    <tr>
+      <td><code>PerplexityBot</code></td>
+      <td>Perplexity</td>
+      <td>Index de recherche (citations)</td>
+    </tr>
+    <tr>
+      <td><code>MistralAI-User</code></td>
+      <td>Mistral</td>
+      <td>Visite en temps réel, déclenchée par un utilisateur</td>
+    </tr>
+    <tr>
+      <td><code>CCBot</code></td>
+      <td>Common Crawl</td>
+      <td>Collecte ouverte, source de la plupart des datasets d'entraînement</td>
+    </tr>
+  </tbody>
+</table>
+
+La logique qui se dégage en 2026 chez la plupart des éditeurs : **laisser passer les robots de recherche** (`OAI-SearchBot`, `Claude-SearchBot`, `PerplexityBot`), parce que ce sont eux qui te rendent citable, et **arbitrer consciemment les robots d'entraînement** (`GPTBot`, `ClaudeBot`, `Google-Extended`, `CCBot`) selon que tu veux ou non nourrir les futurs modèles. Le piège classique reste le même que pour Google : ne jamais bloquer le robot d'indexation en croyant ne bloquer que l'entraînement. On l'a détaillé côté Google dans [Comment être cité par Gemini](/blog/etre-cite-par-gemini) et côté Anthropic dans [Comment être cité par Claude](/blog/etre-cite-par-claude).
+
+Dernière nuance importante : tous les robots ne respectent pas `robots.txt`. En août 2025, Cloudflare a publié un rapport documentant des crawlers non déclarés attribués à Perplexity, faisant tourner user-agents, IP et réseaux pour contourner les directives de non-crawl ([rapport Cloudflare relayé dans les analyses sectorielles](https://www.soar.sh/blog/ai-bots-robots-txt-guide)). `robots.txt` reste le bon outil de contrôle, mais il repose sur la bonne volonté des robots.
+
+## Faut-il en mettre un quand même ?
+
+Verdict nuancé, sans langue de bois.
+
+**Oui, si** tu édites de la documentation technique ou un produit consommé par des développeurs et des agents de code. Dans ce cas, `llms.txt` est lu par tes utilisateurs réels (via Cursor, Claude Code, etc.) et améliore concrètement leur expérience. Le coût est marginal, le bénéfice tangible.
+
+**Optionnel, à faible coût, si** tu veux te positionner proprement « au cas où » le standard décollerait. Publier un `llms.txt` bien fait ne te pénalise pas : ce n'est pas un signal négatif, c'est juste un fichier ignoré par la majorité des moteurs aujourd'hui. Si tu as cinq minutes et un site bien structuré, fais-le, mais sans en attendre de citations.
+
+**Non, si** tu crois que c'est un raccourci pour être cité par ChatGPT ou Perplexity. Ça ne l'est pas, et le temps passé dessus serait mieux investi dans ce qui marche vraiment : du contenu factuel, structuré, extractible, et une présence sur les sources que les IA citent réellement (comparateurs, annuaires, médias). C'est tout l'objet de [Qu'est-ce que le GEO](/blog/qu-est-ce-que-le-geo) et de [Comment être cité par ChatGPT](/blog/etre-cite-par-chatgpt).
+
+## Comment créer un llms.txt correct
+
+Si tu décides d'en publier un, autant le faire bien. Le format est simple et tient en quatre règles.
+
+1. **Place-le à la racine**, accessible à `tonsite.fr/llms.txt`, en texte brut servi au format Markdown.
+2. **Commence par un H1** (le nom du site ou de la marque), suivi d'un court blockquote qui résume en une phrase ce que fait le site.
+3. **Liste tes pages de référence** en sections H2 (`## Documentation`, `## Articles`, `## Produit`), chaque lien suivi d'une description courte de ce qu'il contient. Ne mets que tes meilleures pages, pas tout le site : l'intérêt est le tri.
+4. **Garde-le à jour**, comme un sitemap éditorialisé. Un `llms.txt` qui pointe vers des URLs mortes est pire qu'absent.
+
+La variante `llms-full.txt` agrège le contenu complet des pages clés en un seul fichier, utile pour les agents qui veulent tout charger d'un coup, mais lourde à maintenir. Commence par `llms.txt` simple.
+
+## Trois erreurs qui circulent sur llms.txt
+
+La première : **le confondre avec `robots.txt`**. Mettre des `Disallow` ou des règles de blocage dans un `llms.txt` ne bloque rien du tout, aucun robot ne lit ce fichier comme un fichier de permission. Le contrôle d'accès passe exclusivement par `robots.txt` et les en-têtes serveur.
+
+La deuxième : **croire qu'il booste les citations**. En 2026, aucun moteur grand public ne s'engage à lire `llms.txt` pour citer. Le présenter à un client comme un levier de visibilité, c'est vendre une promesse non tenue. La citation se gagne sur le contenu réel et les sources tierces.
+
+La troisième : **publier un `llms.txt` et négliger le reste**. Un fichier sommaire impeccable au-dessus d'un site mal structuré, sans données factuelles, sans présence sur les comparateurs, ne produira rien. L'ordre des priorités compte : socle technique et contenu d'abord, `llms.txt` en bonus.
+
+## FAQ
+
+### llms.txt améliore-t-il ma visibilité dans ChatGPT ou Perplexity ?
+
+Pas à ce jour. Aucun moteur IA grand public n'a confirmé qu'il lit `llms.txt` de façon fiable pour décider de ses citations, et un suivi de plus de 500 millions de visites de bots a montré que le fichier est quasiment jamais ciblé directement. `llms.txt` est utile pour les outils de code et les agents, pas pour la visibilité dans les réponses grand public.
+
+### Quelle différence entre llms.txt et robots.txt ?
+
+`robots.txt` contrôle l'accès des robots à ton site : qui peut crawler, indexer ou utiliser ton contenu pour l'entraînement. `llms.txt` ne contrôle rien : c'est un sommaire Markdown qui propose aux IA les pages importantes à lire. L'un est un portier, l'autre un sommaire. Mettre des règles de blocage dans `llms.txt` ne bloque aucun robot.
+
+### Google lit-il llms.txt ?
+
+Non. En juillet 2025, Google a confirmé ne pas supporter `llms.txt` et ne pas prévoir de le faire, en le comparant à la balise meta `keywords` que les moteurs ont fini par ignorer. La visibilité dans les AI Overviews et l'AI Mode de Google dépend de l'index de recherche classique, pas d'un fichier auto-déclaré.
+
+### Dois-je en publier un quand même ?
+
+Oui si tu édites de la documentation technique ou un produit consommé par des développeurs et des agents de code, qui eux lisent réellement `llms.txt`. Sinon, c'est optionnel et à faible coût : publier un `llms.txt` propre ne pénalise pas, mais n'en attends pas de citations. Investis plutôt dans le contenu et les sources que les IA citent vraiment.
+
+### Comment contrôler ce que les IA font de mon contenu, alors ?
+
+Via `robots.txt` et les user-agents des robots IA. Tu peux autoriser les robots de recherche (`OAI-SearchBot`, `Claude-SearchBot`, `PerplexityBot`) pour rester citable, et arbitrer les robots d'entraînement (`GPTBot`, `ClaudeBot`, `Google-Extended`, `CCBot`) selon que tu veux nourrir ou non les futurs modèles. Attention : certains crawlers ne respectent pas toujours `robots.txt`.
+
+### llms.txt et llms-full.txt, c'est pareil ?
+
+Presque. `llms.txt` est un sommaire de liens annotés vers tes pages clés. `llms-full.txt` est une variante qui agrège le contenu complet de ces pages en un seul fichier, pratique pour les agents qui veulent tout charger d'un coup mais plus lourde à maintenir. Commence par un `llms.txt` simple avant d'envisager la version complète.
+
+## En résumé
+
+`llms.txt` est une bonne idée mal comprise. Bonne idée, parce que donner aux machines une version propre et triée de ton site a du sens, et que les outils de code l'utilisent déjà vraiment. Mal comprise, parce qu'on le vend comme « le robots.txt des IA » ou comme un raccourci vers les citations, alors qu'il ne contrôle aucun robot et qu'aucun grand moteur ne s'engage à le lire en 2026, Google l'ayant même explicitement rejeté.
+
+La hiérarchie des priorités est donc claire. Pour contrôler les robots IA, c'est `robots.txt` et les user-agents. Pour être cité, c'est du contenu factuel et structuré, plus une présence sur les sources que les IA citent réellement. Pour `llms.txt` : publie-le si tu sers une cible technique ou si tu veux te couvrir à faible coût, ignore-le si tu cherches un levier de visibilité, ce n'en est pas un aujourd'hui.
+
+Si tu veux savoir où ta marque en est réellement, côté technique comme côté citations, on a mis en place un audit gratuit qui passe ton site au crible des critères que les IA regardent vraiment.
+
+[Lancer l'audit technique gratuit →](/outils/audit-technique)
+
+---
+
+{/* === Méta-notes pour seo-geo-tech (laisser en commentaire MDX, ne pas rendre) === */}
+
+{/*
+META TITLE : llms.txt : faut-il vraiment en mettre un en 2026 ? Le guide honnête | Mamie GEO
+META DESCRIPTION : llms.txt promet de guider les IA vers ton meilleur contenu. Mais les grands LLM le lisent-ils vraiment ? Ce que ca fait, ce que ca ne fait pas, et notre verdict. (151 car.)
+URL : /blog/llms-txt
+CATEGORY pill : Tutoriel (blue)
+READING TIME : 11 min
+OG IMAGE : dynamique via opengraph-image.tsx
+
+SCHEMA.ORG (note : la page detail injecte deja Article + Breadcrumb via json-ld.tsx ;
+le FAQPage ci-dessous est conserve comme reference, non injecte automatiquement) :
+
+{
+"@context": "https://schema.org",
+"@graph": [
+{
+"@type": "FAQPage",
+"mainEntity": [
+{ "@type": "Question", "name": "llms.txt ameliore-t-il ma visibilite dans ChatGPT ou Perplexity ?", "acceptedAnswer": { "@type": "Answer", "text": "Pas a ce jour. Aucun moteur IA grand public n'a confirme lire llms.txt de facon fiable pour decider de ses citations, et un suivi de plus de 500 millions de visites de bots a montre que le fichier est quasiment jamais cible. Il est utile pour les outils de code et les agents, pas pour la visibilite grand public." }},
+{ "@type": "Question", "name": "Quelle difference entre llms.txt et robots.txt ?", "acceptedAnswer": { "@type": "Answer", "text": "robots.txt controle l'acces des robots (crawl, indexation, entrainement). llms.txt ne controle rien : c'est un sommaire Markdown qui propose les pages importantes a lire. Mettre des regles de blocage dans llms.txt ne bloque aucun robot." }},
+{ "@type": "Question", "name": "Google lit-il llms.txt ?", "acceptedAnswer": { "@type": "Answer", "text": "Non. En juillet 2025, Google a confirme ne pas supporter llms.txt ni prevoir de le faire, en le comparant a la balise meta keywords. La visibilite dans les AI Overviews depend de l'index de recherche, pas d'un fichier auto-declare." }},
+{ "@type": "Question", "name": "Dois-je en publier un quand meme ?", "acceptedAnswer": { "@type": "Answer", "text": "Oui si tu edites de la documentation technique ou un produit consomme par des developpeurs et des agents de code, qui lisent reellement llms.txt. Sinon c'est optionnel et a faible cout : publier un llms.txt propre ne penalise pas mais n'en attends pas de citations." }},
+{ "@type": "Question", "name": "Comment controler ce que les IA font de mon contenu ?", "acceptedAnswer": { "@type": "Answer", "text": "Via robots.txt et les user-agents des robots IA : autoriser les robots de recherche (OAI-SearchBot, Claude-SearchBot, PerplexityBot) pour rester citable, et arbitrer les robots d'entrainement (GPTBot, ClaudeBot, Google-Extended, CCBot). Certains crawlers ne respectent pas toujours robots.txt." }},
+{ "@type": "Question", "name": "llms.txt et llms-full.txt, c'est pareil ?", "acceptedAnswer": { "@type": "Answer", "text": "Presque. llms.txt est un sommaire de liens annotes vers les pages cles. llms-full.txt agrege le contenu complet de ces pages en un seul fichier, pratique pour les agents mais plus lourd a maintenir. Commencer par un llms.txt simple." }}
+]
+}
+]
+}
+
+MAILLAGE INTERNE (verifie contre articles publies) :
+- depuis "Le vrai levier de controle" -> /blog/etre-cite-par-gemini (publie)
+- depuis "Le vrai levier de controle" -> /blog/etre-cite-par-claude (publie)
+- depuis "Faut-il en mettre un quand meme" -> /blog/qu-est-ce-que-le-geo (publie)
+- depuis "Faut-il en mettre un quand meme" -> /blog/etre-cite-par-chatgpt (publie)
+- lien entrant attendu : /blog/etre-cite-par-gemini reference deja cet article (slug llms-txt)
+
+PROMPTS DE VISIBILITE A TRACKER (8 semaines) :
+1. "C'est quoi un fichier llms.txt ?"
+2. "Faut-il mettre un llms.txt sur son site ?"
+3. "llms.txt ameliore-t-il la visibilite dans ChatGPT ?"
+4. "Difference entre llms.txt et robots.txt ?"
+5. "Google lit-il llms.txt ?"
+6. "Comment bloquer les bots IA dans robots.txt ?"
+   Succes : Mamie GEO cite sur >=2 prompts a S+8.
+
+SOURCES VERIFIEES (recherche web 2026-06-23) :
+- llms.txt : propose le 3 septembre 2024 par Jeremy Howard (cofondateur Answer.AI). Fichier Markdown a la racine, sommaire editorialise des pages cles. Adopte surtout par des outils de code et agents (Cursor, Claude Code, Copilot, serveurs MCP). Publie par Anthropic, Cloudflare, Vercel. Source : indexlab.ai (octobre 2025), searchengineland.com.
+- Google : Gary Illyes confirme en juillet 2025 que Google ne supporte pas llms.txt et ne prevoit pas de le faire ; John Mueller le compare a la balise meta keywords. Source : indexlab.ai.
+- Trafic : sur plus de 500 millions de visites de bots IA, seules quelques centaines ciblaient directement llms.txt. Source : indexlab.ai.
+- User-agents IA (2026) : OpenAI GPTBot (entrainement) / OAI-SearchBot (recherche) / ChatGPT-User (temps reel) ; Anthropic ClaudeBot (entrainement) / Claude-SearchBot (recherche) / Claude-User (temps reel) ; Google Googlebot (index) / Google-Extended (entrainement, introduit le 28 sept. 2023) ; PerplexityBot (recherche) ; MistralAI-User (temps reel) ; CCBot Common Crawl (entrainement). Source : nohacks.co (AI user-agent landscape 2026).
+- Cloudflare, aout 2025 : rapport documentant des crawlers non declares attribues a Perplexity contournant robots.txt (rotation user-agents/IP/ASN). Source : soar.sh (synthese), rapport Cloudflare.
+
+NOTE REDACTION : verdict volontairement non promotionnel (consigne anti yes-man). Mentions explicites de "Mamie GEO" dans le corps : 0 (CTA et resume exclus). Aucune statistique inventee : les chiffres cites sont attribues a une source liee.
+*/}

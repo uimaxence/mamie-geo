@@ -57,7 +57,7 @@ Cadence ajustable. Premier rapport annuel « État du GEO en France ».
 
 ## Plan de contenu — 30 articles GEO premium en 6 mois
 
-> État 2026-06-11 : 17 articles publiés (`src/content/blog/`). ✅ = fichier réel (8/9/10 décochés, jamais écrits). Hors plan : 4 articles d'actu (Anthropic Paris, Google I/O 2026, Le Chat→Vibe, Peec 10 M$ ARR), « Pourquoi tracker sa visibilité IA », 3 comparatifs (voir plus bas).
+> État 2026-06-23 : 20 articles publiés (`src/content/blog/`). ✅ = fichier réel. Les 3 P0 « category-defining » (#8 Gemini, #9 futur du SEO, #10 llms.txt) sont désormais tous écrits. Hors plan : 5 articles d'actu (Anthropic Paris, Google I/O 2026, Le Chat→Vibe, Peec 10 M$ ARR, AI Commerce / ChatGPT Shopping), « Pourquoi tracker sa visibilité IA », 3 comparatifs (voir plus bas).
 
 ### Articles "category-defining" (P0, à publier dans les 60 premiers jours)
 
@@ -70,9 +70,9 @@ Objectif : devenir LA source FR sur le GEO, citée par les LLM.
 5. ✅ "Comment être cité par Le Chat de Mistral : guide francophone exclusif"
 6. ✅ "Comment être cité par Perplexity"
 7. ✅ "Comment être cité par Claude (Anthropic)"
-8. "Comment être cité par Gemini (Google)" — à écrire
-9. "Le futur du SEO en 2026 : devenir une source citable par l'IA" — à écrire
-10. "llms.txt : tout savoir sur le robots.txt des IA" — à écrire
+8. ✅ "Comment être cité par Gemini (Google) : guide GEO 2026" (`etre-cite-par-gemini`)
+9. ✅ "Le futur du SEO en 2026 : devenir une source citable par l'IA" (`futur-du-seo-source-citable-ia`, 2026-06-23)
+10. ✅ "llms.txt : faut-il vraiment en mettre un en 2026 ? Le guide honnête" (`llms-txt`, 2026-06-23)
 
 ### Articles "tactiques actionnables" (P1, mois 2-4)
 
