@@ -1,7 +1,8 @@
-import { TrendingDown, TrendingUp, type LucideIcon } from "lucide-react";
+import { type LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { GlossaryInfo } from "./glossary-info";
+import { TrendPill } from "./trend-pill";
 import type { GlossaryTerm } from "@/lib/glossary";
 
 // Stat enrichie, pattern inspiré des dashboards modernes :
@@ -106,33 +107,10 @@ export function Stat({
       </div>
       <span className={`type-stat ${valueToneClass[tone]}`}>{value}</span>
       {delta ? (
-        <DeltaLine delta={delta} />
+        <TrendPill value={delta.value} period={delta.period} size="sm" className="self-start" />
       ) : hint ? (
         <span className="type-meta">{hint}</span>
       ) : null}
     </div>
-  );
-}
-
-function DeltaLine({ delta }: { delta: StatDelta }) {
-  const positive = delta.value > 0;
-  const negative = delta.value < 0;
-  const Arrow = positive ? TrendingUp : negative ? TrendingDown : null;
-  const colorClass = positive
-    ? "text-[color:var(--color-success)]"
-    : negative
-      ? "text-[color:var(--color-error)]"
-      : "text-[color:var(--color-muted)]";
-  // Affichage compact : ±X.X% (1 décimale, sauf si entier)
-  const formatted = Number.isInteger(delta.value)
-    ? `${positive ? "+" : ""}${delta.value}%`
-    : `${positive ? "+" : ""}${delta.value.toFixed(1)}%`;
-
-  return (
-    <span className="flex items-center gap-1.5 text-xs">
-      {Arrow && <Arrow size={13} strokeWidth={2.25} className={colorClass} />}
-      <span className={cn("font-semibold", colorClass)}>{formatted}</span>
-      <span className="type-meta uppercase tracking-wider text-[10px]">{delta.period}</span>
-    </span>
   );
 }

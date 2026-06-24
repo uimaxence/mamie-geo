@@ -149,7 +149,11 @@ export function PlanPickerModalTrigger({ plan, trialEndsAt }: Props) {
         trialEndsAt={trialEndsAt}
         trigger={state.trigger}
       />
-      <TrialExplainerModal open={explainerOpen} onClose={() => setExplainerOpen(false)} />
+      <TrialExplainerModal
+        open={explainerOpen}
+        onClose={() => setExplainerOpen(false)}
+        trialEndsAt={trialEndsAt}
+      />
     </>
   );
 }

@@ -3,11 +3,15 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { ArrowRight, Check, ChevronRight, Clock, ListChecks, Sparkles, X } from "lucide-react";
+import { SuccessCheck } from "@/components/ui";
 import type { SelectedAction } from "@/lib/weekly-actions/select";
 import {
   setWeeklyActionStatus,
   type WeeklyActionStatusInput,
 } from "./weekly-actions-actions";
+
+// Durée de la coche de confirmation "Fait" avant retrait de la ligne.
+const DONE_CELEBRATION_MS = 750;
 
 // Card « Actions de la semaine » du dashboard. 1-2 gestes priorisés, dérivés
 // des données réelles de la marque (cf. src/lib/weekly-actions). Boutons
@@ -26,6 +30,24 @@ export function WeeklyActionsCard({ actions }: { actions: SelectedAction[] }) {
   const [items, setItems] = useState(actions);
   const [pending, startTransition] = useTransition();
   const [busySlug, setBusySlug] = useState<string | null>(null);
+  // Slug en cours de "célébration" : la ligne montre la coche animée avant
+  // de quitter la liste, pour que la complétion se sente méritée.
+  const [celebratingSlug, setCelebratingSlug] = useState<string | null>(null);
+
+  function markDone(slug: string) {
+    setCelebratingSlug(slug);
+    startTransition(async () => {
+      try {
+        await setWeeklyActionStatus({ slug, status: "done" });
+      } catch {
+        // Échec silencieux : la ligne réapparaîtra au prochain rendu serveur.
+      }
+    });
+    setTimeout(() => {
+      setItems((prev) => prev.filter((a) => a.slug !== slug));
+      setCelebratingSlug((cur) => (cur === slug ? null : cur));
+    }, DONE_CELEBRATION_MS);
+  }
 
   function act(slug: string, status: WeeklyActionStatusInput) {
     setBusySlug(slug);
@@ -83,7 +105,21 @@ export function WeeklyActionsCard({ actions }: { actions: SelectedAction[] }) {
       </div>
 
       <ul className="mt-4 flex flex-col gap-3">
-        {items.map((action) => (
+        {items.map((action) => {
+          if (celebratingSlug === action.slug) {
+            return (
+              <li
+                key={action.slug}
+                className="flex items-center gap-2.5 rounded-[var(--radius-md)] border border-[color:var(--color-success)]/40 bg-[color:var(--color-success)]/5 p-4"
+              >
+                <SuccessCheck active size={22} className="text-[color:var(--color-success)]" />
+                <span className="text-sm font-medium text-[color:var(--color-success)]">
+                  Fait, bien joué.
+                </span>
+              </li>
+            );
+          }
+          return (
           <li
             key={action.slug}
             className="rounded-[var(--radius-md)] border border-[color:var(--color-border)] p-4"
@@ -135,8 +171,8 @@ export function WeeklyActionsCard({ actions }: { actions: SelectedAction[] }) {
             <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-[color:var(--color-border)] pt-3">
               <button
                 type="button"
-                onClick={() => act(action.slug, "done")}
-                disabled={pending && busySlug === action.slug}
+                onClick={() => markDone(action.slug)}
+                disabled={(pending && busySlug === action.slug) || celebratingSlug === action.slug}
                 className="inline-flex items-center gap-1.5 rounded-full border border-[color:var(--color-border)] bg-white px-3 py-1.5 text-xs font-medium text-[color:var(--color-success)] transition-colors hover:border-[color:var(--color-success)] hover:bg-[color:var(--color-success)]/5 disabled:opacity-50"
               >
                 <Check size={14} /> Fait
@@ -159,7 +195,8 @@ export function WeeklyActionsCard({ actions }: { actions: SelectedAction[] }) {
               </button>
             </div>
           </li>
-        ))}
+          );
+        })}
       </ul>
     </section>
   );

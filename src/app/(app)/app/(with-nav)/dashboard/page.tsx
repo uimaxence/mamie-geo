@@ -7,7 +7,7 @@ import { db } from "@/db/client";
 import { prompts } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { computeDelta, getDashboardData, getVisibilityTrend } from "@/lib/dashboard/queries";
-import { Card, PageContainer, PageHeader, Stat } from "@/components/ui";
+import { AnimatedNumber, Card, PageContainer, PageHeader, Stat } from "@/components/ui";
 import { BreakdownBars } from "@/components/charts/breakdown-bars";
 import { DownloadableChart } from "@/components/charts/downloadable-chart";
 import { LLM_COLORS, LLM_LABELS } from "@/components/charts/llm-colors";
@@ -207,7 +207,7 @@ export default async function DashboardPage() {
           <Stat
             label="Score de visibilité"
             glossaryTerm="visibility-score"
-            value={hasRunsToday ? visibilityScore.toFixed(1) : "-"}
+            value={hasRunsToday ? <AnimatedNumber value={visibilityScore.toFixed(1)} /> : "-"}
             icon={Flame}
             iconTone="orange"
             delta={scoreDelta !== null ? { value: scoreDelta, period: "vs J-7" } : null}
@@ -222,7 +222,13 @@ export default async function DashboardPage() {
           <Stat
             label="Marque citée"
             glossaryTerm="marque-citee"
-            value={hasRunsToday ? `${agg.brandCitedCount}/${agg.totalRuns}` : "-"}
+            value={
+              hasRunsToday ? (
+                <AnimatedNumber value={`${agg.brandCitedCount}/${agg.totalRuns}`} />
+              ) : (
+                "-"
+              )
+            }
             icon={Activity}
             iconTone="green"
             hint="runs tous LLMs aujourd'hui"
@@ -244,7 +250,9 @@ export default async function DashboardPage() {
           <Stat
             label="Part de voix"
             glossaryTerm="part-de-voix"
-            value={hasRunsToday ? `${agg.partDeVoix.toFixed(1)}%` : "-"}
+            value={
+              hasRunsToday ? <AnimatedNumber value={`${agg.partDeVoix.toFixed(1)}%`} /> : "-"
+            }
             // Teinte relative : vert si tu mènes tes concurrents, ambre sinon
             // (jamais de seuil absolu — cf. doc 09 § 2026-06-17).
             tone={hasRunsToday ? partDeVoixStatTone : "default"}
@@ -426,7 +434,7 @@ function FunnelSourcesSection({
           <Stat
             label="Apparition"
             glossaryTerm="apparition"
-            value={hasData ? `${ratios.apparitionPct.toFixed(1)}%` : "-"}
+            value={hasData ? <AnimatedNumber value={`${ratios.apparitionPct.toFixed(1)}%`} /> : "-"}
             icon={Eye}
             iconTone="blue"
             hint={hasData ? `${retrievedCount}/${totalRuns} réponses` : "en attente de données"}
@@ -436,7 +444,7 @@ function FunnelSourcesSection({
           <Stat
             label="Fréquence"
             glossaryTerm="frequence"
-            value={hasData ? ratios.frequence.toFixed(2) : "-"}
+            value={hasData ? <AnimatedNumber value={ratios.frequence.toFixed(2)} /> : "-"}
             icon={Layers}
             iconTone="purple"
             hint={
@@ -450,7 +458,7 @@ function FunnelSourcesSection({
           <Stat
             label="Citation"
             glossaryTerm="citation"
-            value={hasData ? `${ratios.citationPct.toFixed(1)}%` : "-"}
+            value={hasData ? <AnimatedNumber value={`${ratios.citationPct.toFixed(1)}%`} /> : "-"}
             icon={Quote}
             iconTone="green"
             hint={

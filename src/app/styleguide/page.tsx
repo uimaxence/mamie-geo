@@ -24,6 +24,7 @@ import {
   Skeleton,
   Stat,
   StatusDot,
+  TrendPill,
   Tabs,
   TabsContent,
   TabsList,
@@ -233,6 +234,26 @@ export default function StyleguidePage() {
             <RunStatusBadge status="success" />
             <RunStatusBadge status="failed" />
             <RunStatusBadge status="skipped" />
+          </Row>
+        </SubSection>
+
+        {/* ── TREND PILLS ──────────────────────────────────────────── */}
+        <SubSection
+          title="Trend pills"
+          subtitle="Pilule de variation : flèche + valeur signée + période, couleur dérivée du signe"
+        >
+          <Row label="md (défaut)">
+            <TrendPill value={7.2} period="vs 12 derniers mois" />
+            <TrendPill value={-3.1} period="vs J-7" />
+            <TrendPill value={0} period="stable" />
+          </Row>
+          <Row label="sm (dans une Stat / une ligne)">
+            <TrendPill value={12.4} period="vs J-7" size="sm" />
+            <TrendPill value={-8} period="vs mois dernier" size="sm" />
+          </Row>
+          <Row label="invert (baisser = bon : refus, coût)">
+            <TrendPill value={-15} period="vs J-7" invert />
+            <TrendPill value={5.5} period="vs J-7" invert />
           </Row>
         </SubSection>
 
