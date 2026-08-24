@@ -1,34 +1,4 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "regions": ["cdg1"],
-  "crons": [
-    {
-      "path": "/api/cron/dispatch",
-      "schedule": "0 * * * *"
-    },
-    {
-      "path": "/api/cron/schedule-runs",
-      "schedule": "0 6 * * *"
-    },
-    {
-      "path": "/api/cron/schedule-weekly-emails",
-      "schedule": "0 9 * * 1"
-    },
-    {
-      "path": "/api/cron/expire-past-due",
-      "schedule": "0 3 * * *"
-    },
-    {
-      "path": "/api/cron/schedule-audits",
-      "schedule": "0 5 * * 1"
-    },
-    {
-      "path": "/api/cron/trial-emails",
-      "schedule": "0 8 * * *"
-    },
-    {
-      "path": "/api/cron/expire-comp",
-      "schedule": "0 4 * * *"
-    }
-  ]
+  "regions": ["cdg1"]
 }
